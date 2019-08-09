@@ -7,8 +7,8 @@ void NoOperation();
 
 void LoadRegister(GameBoy::Byte& destination, const GameBoy::Byte source);
 
-GameBoy::Byte AddRegisters(const GameBoy::Byte lhs, const GameBoy::Byte& rhs, std::bitset<8>& flags);
-GameBoy::Byte SubtractRegisters(const GameBoy::Byte& lhs, const GameBoy::Byte& rhs, std::bitset<8>& flags);
+void AddRegisters(GameBoy::Byte& to, const GameBoy::Byte& from, std::bitset<8>& flags);
+void SubtractRegisters(GameBoy::Byte& to, const GameBoy::Byte& from, std::bitset<8>& flags);
 
 uint16_t CombineRegisters(const GameBoy::Byte high, const GameBoy::Byte low);
 
