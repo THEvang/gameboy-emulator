@@ -1,10 +1,17 @@
 #include <Cartridge.h>
 #include <GameBoy.h>
 
+#include <iostream>
+
 int main() {
 
-    Cartridge pokemonBlue("pokemonBlue.gb");
-    pokemonBlue.Meta();
+
+    try {
+        Cartridge pokemonBlue("pokemonBlue.gb");
+    } catch (const InsertCartrigdeException& insertCartrigdeException) {
+        std::cerr << insertCartrigdeException.what();
+        return -1;
+    }
 
     return 1;
 }

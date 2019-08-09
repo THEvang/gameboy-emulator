@@ -3,6 +3,10 @@
 #include<iostream>
 #include <fstream>
 
+InsertCartrigdeException::InsertCartrigdeException(const std::string& message)
+    : runtime_error(message)
+{}
+
 Cartridge::Cartridge(const std::string& path) {
 
     std::ifstream src(path, std::ios::in | std::ios::binary | std::ios::ate);
@@ -19,7 +23,7 @@ Cartridge::Cartridge(const std::string& path) {
             }
 
         } else {
-            std::cout << "Failed to open file \n";
+            throw InsertCartrigdeException("Failed to load cartridge: " + path + "\n");
         }
 }
 

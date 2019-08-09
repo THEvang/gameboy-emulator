@@ -26,5 +26,5 @@ uint16_t CombineRegisters(const GameBoy::Byte high, const GameBoy::Byte low) {
 }
 
 void LoadRegister(GameBoy::Byte& destination, const GameBoy::Byte source) {
-    
+    destination = source;
 }

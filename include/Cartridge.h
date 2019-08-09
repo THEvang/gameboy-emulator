@@ -4,6 +4,14 @@
 #include <bitset>
 #include <vector>
 
+#include <stdexcept>
+
+class InsertCartrigdeException : public std::runtime_error {
+public:
+    InsertCartrigdeException(const std::string& message);
+};
+
+
 class Cartridge
 {
 public:
