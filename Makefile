@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wextra -I./include
+CXXFLAGS = -Wextra -Wall -I./include
 
 TARGET = gameboy.out
 
