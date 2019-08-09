@@ -19,5 +19,12 @@ GameBoy::Byte AddRegisters(const GameBoy::Byte& rhs, const GameBoy::Byte& lhs, s
 }
 
 uint16_t CombineRegisters(const GameBoy::Byte high, const GameBoy::Byte low) {
-    return 0;
+
+    uint16_t combinedRegister = (high << 8) | low;
+
+    return combinedRegister;
+}
+
+void LoadRegister(GameBoy::Byte& destination, const GameBoy::Byte source) {
+    
 }

@@ -3,7 +3,7 @@
 #include <GameBoy.h>
 #include <string>
 
-inline void NoOperation();
+void NoOperation();
 
 void LoadRegister(GameBoy::Byte& destination, const GameBoy::Byte source);
 

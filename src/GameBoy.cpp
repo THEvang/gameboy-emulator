@@ -1,7 +1,6 @@
 #include <GameBoy.h>
 #include <Opcodes.h>
 
-
 GameBoy::GameBoy()
     : m_mainMemory(0xFFFF) {
         m_programCounter = 0x0100;
@@ -54,12 +53,13 @@ void GameBoy::Emulate() {
             break;
 
         case 0x09:
+        {
             auto bc = CombineRegisters(m_regB, m_regC);
             auto hl = CombineRegisters(m_regH, m_regL);
             auto sum = hl + bc;
             UnimplementedOperation("ADD HL, BC");
             break;
-
+        }
         case 0x0A:
             UnimplementedOperation("LD A, (BC)");
             break;
