@@ -2,8 +2,10 @@
 
 #include <bitset>
 #include <vector>
+#include <memory>
 
 #include <Cartridge.h>
+#include <Cpu.h>
 
 class GameBoy {
 public:
@@ -13,7 +15,7 @@ public:
 
     GameBoy();
 
-    void InsertCartridge(const Cartridge&);
+    void InsertCartridge(std::unique_ptr<Cartridge>);
     void RemoveCartridge();
 
     void PowerOn();
@@ -21,25 +23,12 @@ public:
     void PowerOff();
 
 private:
-    
-    void Emulate();
 
-    using StackPointer = uint16_t;
-    using ProgramCounter = uint16_t;
+    std::unique_ptr<Cartridge> m_cartridge;
 
-    Byte m_regA;
-    Byte m_regB;
-    Byte m_regC;
-    Byte m_regD;
-    Byte m_regE;
-    std::bitset<8> m_regF;
-    Byte m_regH;
-    Byte m_regL; 
+    std::shared_ptr<std::vector<Byte>> m_mainMemory;
 
-    StackPointer m_stackpointer;
-    ProgramCounter m_programCounter;
-
-    std::vector<Byte> m_mainMemory;
+    Cpu m_cpu;
 };
 
 
