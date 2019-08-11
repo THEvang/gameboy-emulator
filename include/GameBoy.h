@@ -6,6 +6,7 @@
 
 #include <Cartridge.h>
 #include <Cpu.h>
+#include <MemoryMap.h>
 
 class GameBoy {
 public:
@@ -26,7 +27,7 @@ private:
 
     std::unique_ptr<Cartridge> m_cartridge;
 
-    std::shared_ptr<std::vector<Byte>> m_mainMemory;
+    std::shared_ptr<MemoryMap> m_mainMemory;
 
     Cpu m_cpu;
 };
