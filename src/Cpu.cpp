@@ -17,7 +17,6 @@ void Cpu::Execute() {
     
     switch(opcode) {
         case 0x00:
-            std::cout << "NoOperation\n";
             NoOperation();
             m_programCounter++;
             break;
@@ -70,9 +69,12 @@ void Cpu::Execute() {
             break;
 
         case 0x0A:
-            UnimplementedOperation("LD A, (BC)");
+            {
+            auto address = CombineRegisters(m_regB, m_regC);
+            LoadRegister(m_regA, m_mainMemory->Read(address));            
             m_programCounter++;
             break;
+            }
 
         case 0x0B:
             UnimplementedOperation("DEC BC");
@@ -90,8 +92,8 @@ void Cpu::Execute() {
             break;
         
         case 0x0E:
-            UnimplementedOperation("LD C, d8");
-            m_programCounter++;
+            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter +1));
+            m_programCounter += 2;
             break;
         
         case 0x0F:
@@ -110,9 +112,12 @@ void Cpu::Execute() {
             break;
         
         case 0x12:
-            UnimplementedOperation("LD (DE), A");
+            {
+            auto address = CombineRegisters(m_regD, m_regE);
+            m_mainMemory->Write(address, m_regA);
             m_programCounter++;
             break;
+            }
         
         case 0x13:
             UnimplementedOperation("INC DE");
@@ -130,8 +135,8 @@ void Cpu::Execute() {
             break;
         
         case 0x16:
-            UnimplementedOperation("LD D, d8");
-            m_programCounter++;
+            LoadRegister(m_regD, m_mainMemory->Read(m_programCounter +1));
+            m_programCounter += 2;
             break;
         
         case 0x17:
@@ -150,9 +155,12 @@ void Cpu::Execute() {
             break;
         
         case 0x1A:
-            UnimplementedOperation("LD A, (DE)");
+            {
+            auto address = CombineRegisters(m_regD, m_regE);
+            LoadRegister(m_regA, m_mainMemory->Read(address));
             m_programCounter++;
             break;
+            }
         
         case 0x1B:
             UnimplementedOperation("DEC DE");
@@ -170,8 +178,8 @@ void Cpu::Execute() {
             break;
         
         case 0x1E:
-            UnimplementedOperation("LD E, d8");
-            m_programCounter++;
+            LoadRegister(m_regE, m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
         
         case 0x1F:
@@ -180,12 +188,12 @@ void Cpu::Execute() {
             break;
 
         case 0x20:
-            UnimplementedOperation("JR NZ,r8");
+            UnimplementedOperation("JR NZ, r8");
             m_programCounter++;
             break;
         
         case 0x21:
-            UnimplementedOperation("LD HL,d16");
+            UnimplementedOperation("LD HL, d16");
             m_programCounter++;
             break;
         
@@ -279,7 +287,7 @@ void Cpu::Execute() {
             break;
         
         case 0x33:
-            UnimplementedOperation("INC SP");
+            m_stackPtr++;
             m_programCounter++;
             break;
         
@@ -318,7 +326,8 @@ void Cpu::Execute() {
             break;
         
         case 0x3B:
-            UnimplementedOperation("DEC SP");
+            m_stackPtr--;
+            m_programCounter++;
             break;
         
         case 0x3C:
@@ -1039,7 +1048,8 @@ void Cpu::Execute() {
             break;
         
         case 0xC6:
-            UnimplementedOperation("ADD A, d8");
+            AddRegisters(m_regA, m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
         
         case 0xC7:
@@ -1167,7 +1177,8 @@ void Cpu::Execute() {
             break;
         
         case 0xE6:
-            UnimplementedOperation("AND d8");
+            AndWithA(m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
         
         case 0xE7:
@@ -1199,7 +1210,8 @@ void Cpu::Execute() {
             break;
         
         case 0xEE:
-            UnimplementedOperation("XOR d8");
+            XorWithA(m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
         
         case 0xEF:
@@ -1231,7 +1243,8 @@ void Cpu::Execute() {
             break;
         
         case 0xF6:
-            UnimplementedOperation("OR d8");
+            OrWithA(m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
         
         case 0xF7:
