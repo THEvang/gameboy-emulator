@@ -210,8 +210,8 @@ void Cpu::Execute() {
             break;
         
         case 0x26:
-            UnimplementedOperation("LD H, d8");
-            m_programCounter++;
+            LoadRegister(m_regH, m_mainMemory->Read(m_programCounter+1));
+            m_programCounter += 2;
             break;
         
         case 0x27:
@@ -254,8 +254,8 @@ void Cpu::Execute() {
             break;
         
         case 0x2E:
-            UnimplementedOperation("LD L, d8");
-            m_programCounter++;
+            LoadRegister(m_regL, m_mainMemory->Read(m_programCounter += 1));
+            m_programCounter += 2;
             break;
         
         case 0x2F:
@@ -294,8 +294,12 @@ void Cpu::Execute() {
             break;
         
         case 0x36:
-            UnimplementedOperation("LD (HL), d8");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
+            }
         
         case 0x37:
             UnimplementedOperation("SCF");
@@ -328,7 +332,8 @@ void Cpu::Execute() {
             break;
         
         case 0x3E: 
-            UnimplementedOperation("LD A, d8");
+            LoadRegister(m_regA, m_mainMemory->Read(m_programCounter + 1));
+            m_programCounter += 2;
             break;
 
         case 0x3F:
@@ -366,8 +371,12 @@ void Cpu::Execute() {
             break;
         
         case 0x46:
-            UnimplementedOperation("LD B, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regB, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
         
         case 0x47:
             LoadRegister(m_regB, m_regA);
@@ -405,8 +414,12 @@ void Cpu::Execute() {
             break;
         
         case 0x4E:
-            UnimplementedOperation("LOAD C, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regC, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
         
         case 0x4F:
             LoadRegister(m_regC, m_regA);
@@ -444,8 +457,12 @@ void Cpu::Execute() {
             break;
 
         case 0x56:
-            UnimplementedOperation("LD D, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regD, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
 
         case 0x57:
             LoadRegister(m_regD, m_regA);
@@ -483,8 +500,12 @@ void Cpu::Execute() {
             break;
 
         case 0x5E:
-            UnimplementedOperation("LD, E, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regE, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
 
         case 0x5F:
             LoadRegister(m_regE, m_regA);
@@ -522,8 +543,12 @@ void Cpu::Execute() {
             break;
 
         case 0x66:
-            UnimplementedOperation("LD H, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regH, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
 
         case 0x67:
             LoadRegister(m_regH, m_regA);
@@ -561,8 +586,12 @@ void Cpu::Execute() {
             break;
         
         case 0x6E:
-            UnimplementedOperation("LD L, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regL, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
         
         case 0x6F:
             LoadRegister(m_regL, m_regA);
@@ -570,34 +599,52 @@ void Cpu::Execute() {
             break;
         
         case 0x70:
-            UnimplementedOperation("LD (HL), B");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regB);
             m_programCounter++;
             break;
-        
+            }
+
         case 0x71:
-            UnimplementedOperation("LD (HL), C");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regC);
             m_programCounter++;
             break;
-        
+            }
+
         case 0x72:
-            UnimplementedOperation("LD (HL), D");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regD);            
             m_programCounter++;
             break;
+            }
         
         case 0x73: 
-            UnimplementedOperation("LD, (HL), E");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regE);
             m_programCounter++;
             break;
+            }
         
         case 0x74:
-            UnimplementedOperation("LD (HL), H");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regH);
             m_programCounter++;
             break;
+            }
         
         case 0x75:
-            UnimplementedOperation("LD (HL), L");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regL);
             m_programCounter++;
             break;
+            }
         
         case 0x76:
             UnimplementedOperation("HALT");
@@ -606,9 +653,13 @@ void Cpu::Execute() {
         
 
         case 0x77:
-            UnimplementedOperation("LD (HL), A");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            m_mainMemory->Write(address, m_regL);
+            m_programCounter++;
             break;
-        
+            }
+
         case 0x78:
             LoadRegister(m_regA, m_regB);
             m_programCounter++;
@@ -640,9 +691,12 @@ void Cpu::Execute() {
             break;
         
         case 0x7E:
-            UnimplementedOperation("LD A, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            LoadRegister(m_regA, m_mainMemory->Read(address));
             m_programCounter++;
             break;
+            }
         
         case 0x7F:
             LoadRegister(m_regA, m_regA);
@@ -680,8 +734,12 @@ void Cpu::Execute() {
             break;
         
         case 0x86:
-            UnimplementedOperation("ADD A, (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            AddRegisters(m_regA, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
 
         case 0x87:
             AddRegisters(m_regA, m_regA);
@@ -816,9 +874,13 @@ void Cpu::Execute() {
             break;
         
         case 0xA6:
-            UnimplementedOperation("AND (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            AndWithA(m_mainMemory->Read(address));
+            m_programCounter++;
             break;
-        
+            }
+
         case 0xA7:
             AndWithA(m_regA);
             m_programCounter++;
@@ -855,8 +917,12 @@ void Cpu::Execute() {
             break;
         
         case 0xAE:
-            UnimplementedOperation("XOR (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            XorWithA(m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
         
         case 0xAF:
             XorWithA(m_regA);
@@ -894,9 +960,13 @@ void Cpu::Execute() {
             break;
         
         case 0xB6:
-            UnimplementedOperation("OR (HL)");
+            {
+            auto address = CombineRegisters(m_regH, m_regL);
+            OrWithA(m_mainMemory->Read(address));
+            m_programCounter++;
             break;
-        
+            }
+
         case 0xB7:
             OrWithA(m_regA);
             m_programCounter++;

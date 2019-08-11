@@ -6,20 +6,21 @@
 #include <memory>
 #include <bitset>
 
-class MainMemory;
+#include <MemoryMap.h>
 
 class Cpu {
 public:
 
     using Byte = uint8_t;
 
-    explicit Cpu(std::shared_ptr<std::vector<uint8_t>> MainMemory);
+    explicit Cpu(std::shared_ptr<MemoryMap> mainMemory);
 
     void Execute();
 
 private:
 
     void LoadRegister(Byte& to, const Byte& from);
+    
     void Increment(Byte& reg);
     void Decrement(Byte& reg);
 
@@ -32,6 +33,8 @@ private:
     void AndWithA(const Byte& reg);
     void OrWithA(const Byte& reg);
     void XorWithA(const Byte& reg);
+
+    void CompareWithA(const Byte& reg);
 
 
     void UnimplementedOperation(const std::string& message);
@@ -51,5 +54,5 @@ private:
     StackPointer m_stackPtr;
     ProgramCounter m_programCounter;
 
-    std::shared_ptr<std::vector<uint8_t>> m_mainMemory;
+    std::shared_ptr<MemoryMap> m_mainMemory;
 };
