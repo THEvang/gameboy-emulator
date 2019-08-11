@@ -16,7 +16,7 @@ public:
 
     GameBoy();
 
-    void InsertCartridge(std::unique_ptr<Cartridge>);
+    void InsertCartridge(std::shared_ptr<Cartridge>);
     void RemoveCartridge();
 
     void PowerOn();
@@ -25,11 +25,11 @@ public:
 
 private:
 
-    std::unique_ptr<Cartridge> m_cartridge;
+    std::shared_ptr<Cartridge> m_cartridge;
 
     std::shared_ptr<MemoryMap> m_mainMemory;
 
-    Cpu m_cpu;
+    std::unique_ptr<Cpu> m_cpu;
 };
 
 

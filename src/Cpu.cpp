@@ -10,10 +10,11 @@ Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
 
 void Cpu::Execute() {
 
+
     Byte opcode = m_mainMemory->Read(m_programCounter);
 
-    std::cout << "Program counter: " << m_programCounter << "\n";
-    std::cout << "Opcode: " << opcode << "\n";
+    std::cout << std::hex << "Program counter: " << m_programCounter << "\n";
+    std::cout << std::hex << "Opcode: " << static_cast<int>(opcode) << "\n";
     
     switch(opcode) {
         case 0x00:
@@ -22,20 +23,27 @@ void Cpu::Execute() {
             break;
 
         case 0x01:
-            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter+1));
-            LoadRegister(m_regB, m_mainMemory->Read(m_programCounter+2));
+            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter + 1));
+            LoadRegister(m_regB, m_mainMemory->Read(m_programCounter + 2));
             m_programCounter += 3;
             break;
 
         case 0x02:
-            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter+1));
-            LoadRegister(m_regB, m_mainMemory->Read(m_programCounter+2));
-            m_programCounter += 3;
+            {
+            auto address = CombineRegisters(m_regB, m_regC);
+            LoadRegister(m_regA, m_mainMemory->Read(address));
+            m_programCounter++;
             break;
+            }
 
         case 0x03:
-            UnimplementedOperation("INC BC");
+            {
+            auto bc = CombineRegisters(m_regB, m_regC);
+            bc++;
+            LoadRegister(m_regB, (bc >> 8) & 0xFFFF);
+            LoadRegister(m_regC, bc & 0xFFFF);
             m_programCounter++;
+            }
             break;
         
         case 0x04:
@@ -145,8 +153,10 @@ void Cpu::Execute() {
             break;
 
         case 0x18:
-            UnimplementedOperation("JR r8");
-            m_programCounter++;
+            {
+                auto r8 = m_mainMemory->Read(m_programCounter + 1);
+                m_programCounter += r8;
+            }
             break;
         
         case 0x19:
@@ -229,10 +239,14 @@ void Cpu::Execute() {
         
         case 0x28:
             {
-            int8_t r8 = m_mainMemory->Read(m_programCounter + 1);
-            std::cout << "Jump relative:" << (int) r8 << "\n";
-            std::cout << "Address: " << m_programCounter << "\n";
-            m_programCounter += r8;
+            if (m_regF.test(7)) {
+                int8_t r8 = m_mainMemory->Read(m_programCounter + 1);
+                std::cout << "Jump relative:" << (int) r8 << "\n";
+                std::cout << "Address: " << m_programCounter << "\n";
+                m_programCounter += r8;
+            } else {
+                m_programCounter++;
+            }
             break;
             }
 
@@ -1153,7 +1167,11 @@ void Cpu::Execute() {
             break;
         
         case 0xE0:
-            UnimplementedOperation("LDH (a8), A");
+            {
+                uint16_t address = 0xFF00 + m_mainMemory->Read(m_programCounter + 1);
+                m_mainMemory->Write(address, m_regA);
+                m_programCounter += 2;
+            }
             break;
         
         case 0xE1:
@@ -1194,9 +1212,13 @@ void Cpu::Execute() {
             break;
         
         case 0xEA:
-            UnimplementedOperation("LD (a16), A");
+            {
+            auto address = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter +1));
+            m_mainMemory->Write(address, m_regA);
+            m_programCounter += 3;
             break;
-        
+            }
+
         case 0xEB:
             UnimplementedOperation("Unsupported opcode");
             break;
@@ -1231,7 +1253,8 @@ void Cpu::Execute() {
             break;
         
         case 0xF3:
-            UnimplementedOperation("DI");
+            DisableInterrupts();
+            m_programCounter++;
             break;
         
         case 0xF4:
@@ -1394,4 +1417,8 @@ void Cpu::CompareWithA(const Byte& reg) {
     if(m_regA < reg) {
         m_regF.set(4);
     }
+}
+
+void Cpu::DisableInterrupts() {
+
 }

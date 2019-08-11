@@ -36,6 +36,8 @@ private:
 
     void CompareWithA(const Byte& reg);
 
+    void DisableInterrupts();
+
 
     void UnimplementedOperation(const std::string& message);
 
