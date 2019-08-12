@@ -6,10 +6,10 @@ Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     : m_mainMemory(mainMemory) 
 {
     m_programCounter = 0x0100;
+    m_stackPtr = 0xFFFE;
 }
 
 void Cpu::Execute() {
-
 
     Byte opcode = m_mainMemory->Read(m_programCounter);
 
@@ -128,8 +128,13 @@ void Cpu::Execute() {
             }
         
         case 0x13:
-            UnimplementedOperation("INC DE");
-            m_programCounter++;
+            {
+                auto de = CombineRegisters(m_regD, m_regE);
+                de++;
+                LoadRegister(m_regD, (de >> 8) & 0xFFFF);
+                LoadRegister(m_regE, de & 0xFFFF);
+                m_programCounter++;
+            }
             break;
         
         case 0x14:
@@ -173,8 +178,13 @@ void Cpu::Execute() {
             }
         
         case 0x1B:
-            UnimplementedOperation("DEC DE");
-            m_programCounter++;
+            {
+                auto de = CombineRegisters(m_regD, m_regE);
+                de--;
+                LoadRegister(m_regD, (de >> 8) & 0xFFFF);
+                LoadRegister(m_regE, de & 0xFFFF);
+                m_programCounter++;
+            }
             break;
         
         case 0x1C:
@@ -198,8 +208,7 @@ void Cpu::Execute() {
             break;
 
         case 0x20:
-            UnimplementedOperation("JR NZ, r8");
-            m_programCounter++;
+            JumpRelativeNZ();
             break;
         
         case 0x21:
@@ -281,13 +290,12 @@ void Cpu::Execute() {
             break;
         
         case 0x2F:
-            UnimplementedOperation("CPL");
+            ComplementA();
             m_programCounter++;
             break;
         
         case 0x30:
-            UnimplementedOperation("JR NZ, r8");
-            m_programCounter++;
+            JumpRelativeNC();
             break;
         
         case 0x31:
@@ -324,11 +332,12 @@ void Cpu::Execute() {
             }
         
         case 0x37:
-            UnimplementedOperation("SCF");
+            SetCarryFlag();
+            m_programCounter++;
             break;
         
         case 0x38:
-            UnimplementedOperation("JR C, r8");
+            JumpRelativeC();
             break;
         
         case 0x39:
@@ -360,7 +369,8 @@ void Cpu::Execute() {
             break;
 
         case 0x3F:
-            UnimplementedOperation("CCF");
+            ComplementCarryFlag();
+            m_programCounter++;
             break;
         
         case 0x40:
@@ -1038,7 +1048,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC1:
-            UnimplementedOperation("POP BC");
+            Pop(m_regB, m_regC);
             break;
         
         case 0xC2:
@@ -1067,7 +1077,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC7:
-            UnimplementedOperation("RST 00H");
+            Restart(0x00);
             break;
         
         case 0xC8:
@@ -1075,7 +1085,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC9:
-            UnimplementedOperation("RET");
+            Ret();
             break;
         
         case 0xCA:
@@ -1083,7 +1093,8 @@ void Cpu::Execute() {
             break;
         
         case 0xCB:
-            UnimplementedOperation("PREFIX CB");
+            m_programCounter++;
+            ExecuteCB();
             break;
         
         case 0xCC: 
@@ -1091,7 +1102,7 @@ void Cpu::Execute() {
             break;
         
         case 0xCD:
-            UnimplementedOperation("CALL a16");
+            Call();
             break;
         
         case 0xCE:
@@ -1099,7 +1110,7 @@ void Cpu::Execute() {
             break;
         
         case 0xCF:
-            UnimplementedOperation("RST 08H");
+            Restart(0x08);
             break;
         
         case 0xD0:
@@ -1107,7 +1118,7 @@ void Cpu::Execute() {
             break;
         
         case 0xD1:
-            UnimplementedOperation("POP DE");
+            Pop(m_regD, m_regE);
             break;
         
         case 0xD2:
@@ -1131,7 +1142,7 @@ void Cpu::Execute() {
             break;
         
         case 0xD7:
-            UnimplementedOperation("RST 10H");
+            Restart(0x10);
             break;
         
         case 0xD8:
@@ -1163,7 +1174,7 @@ void Cpu::Execute() {
             break;
         
         case 0xDF:
-            UnimplementedOperation("RST 18H");
+            Restart(0x18);
             break;
         
         case 0xE0:
@@ -1175,7 +1186,7 @@ void Cpu::Execute() {
             break;
         
         case 0xE1:
-            UnimplementedOperation("POP HL");
+            Pop(m_regH, m_regL);
             break;
         
         case 0xE2:
@@ -1200,7 +1211,7 @@ void Cpu::Execute() {
             break;
         
         case 0xE7:
-            UnimplementedOperation("RST 20H");
+            Restart(0x20);
             break;
         
         case 0xE8:
@@ -1237,11 +1248,12 @@ void Cpu::Execute() {
             break;
         
         case 0xEF:
-            UnimplementedOperation("RST 28H");
+            Restart(0x28);
             break;
         
         case 0xF0:
-            UnimplementedOperation("LDH A, (a8)");
+            LDHAN();
+            m_programCounter++;
             break;
         
         case 0xF1:
@@ -1271,7 +1283,7 @@ void Cpu::Execute() {
             break;
         
         case 0xF7:
-            UnimplementedOperation("RST 30H");
+            Restart(0x30);
             break;
         
         case 0xF8:
@@ -1283,7 +1295,11 @@ void Cpu::Execute() {
             break;
         
         case 0xFA:
-            UnimplementedOperation("LD A, (a16)");
+            {
+            auto address = CombineRegisters(m_programCounter + 2, m_programCounter + 1);
+            m_regA = m_mainMemory->Read(address);
+            m_programCounter += 3;
+            }
             break;
         
         case 0xFB:
@@ -1304,7 +1320,7 @@ void Cpu::Execute() {
             break;
         
         case 0xFF:
-            UnimplementedOperation("RST 38H");
+            Restart(0x38);
             break;
 
         default:
@@ -1422,3 +1438,134 @@ void Cpu::CompareWithA(const Byte& reg) {
 void Cpu::DisableInterrupts() {
 
 }
+
+ 
+ void Cpu::ComplementA() {
+
+    m_regA = ~m_regA;
+
+    m_regF.set(6);
+    m_regF.set(5);
+ }
+
+ void Cpu::ComplementCarryFlag() {
+
+    m_regF.flip(4);
+
+    m_regF.reset(6);
+    m_regF.reset(5);
+ }
+
+ void Cpu::SetCarryFlag() {
+     
+     m_regF.set(4);
+     m_regF.reset(6);
+     m_regF.reset(5);
+
+ }
+
+ void Cpu::Call() {
+    auto address = m_programCounter + 1;
+
+    m_mainMemory->Write(m_stackPtr, address);
+    m_mainMemory->Write(m_stackPtr - 1, (address >> 8));
+    m_stackPtr -= 2;
+
+    m_programCounter = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_programCounter + 1);
+ }
+
+
+ void Cpu::Ret() {
+     auto address = CombineRegisters(m_mainMemory->Read(m_stackPtr + 2), m_mainMemory->Read(m_stackPtr + 1));
+     m_stackPtr += 2;
+
+     m_programCounter = address;
+ }
+
+ void Cpu::ExecuteCB() {
+
+     auto opcode = m_mainMemory->Read(m_programCounter);
+
+     std::cout << std::hex << "Program counter: " << m_programCounter << "\n";
+     std::cout << std::hex << "Opcode: " << static_cast<int>(opcode) << "\n";
+
+     switch (opcode) {
+         case 0x00:
+            UnimplementedOperation("RLC B");
+            break;
+        
+        case 0x01:
+            UnimplementedOperation("RLC C");
+            break;
+        
+        case 0x02:
+            UnimplementedOperation("RLC D");
+            break;
+        
+        case 0x03:
+            UnimplementedOperation("RLC E");
+            break;
+        
+        case 0x04:
+            UnimplementedOperation("RLC H");
+            break;
+        
+        case 0x05:
+            UnimplementedOperation("RLC L");
+            break;
+        
+        case 0x06:
+            UnimplementedOperation("RLC (HL)");
+            break;
+        
+        case 0x07:
+            UnimplementedOperation("RLC A");
+            break;
+        
+        case 0x08:
+            UnimplementedOperation("RRC B");
+            break;
+        
+        case 0x09:
+            UnimplementedOperation("RRC C");
+            break;
+        
+        case 0x0A:
+            UnimplementedOperation("RRC D");
+            break;
+        
+        case 0x0B:
+            UnimplementedOperation("RRC E");
+            break;
+        
+        case 0x0C:
+            UnimplementedOperation("RRC H");
+            break;
+        
+        case 0x0D:
+            UnimplementedOperation("RRC L");
+            break;
+        
+        case 0x0E:
+            UnimplementedOperation("RRC (HL");
+            break;
+        
+        case 0x0F:
+            UnimplementedOperation("RRC A");
+            break;
+
+
+        
+        case 0xB7:
+            UnimplementedOperation("Res 6, A");
+            m_regA &= ~(1ul << 6);
+            m_programCounter++;
+
+            break;
+        
+        default:
+            UnimplementedOperation("Unavailable Opcode");
+            break;
+     }
+
+ }

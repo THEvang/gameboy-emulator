@@ -16,6 +16,7 @@ public:
     explicit Cpu(std::shared_ptr<MemoryMap> mainMemory);
 
     void Execute();
+    void ExecuteCB();
 
 private:
 
@@ -35,6 +36,66 @@ private:
     void XorWithA(const Byte& reg);
 
     void CompareWithA(const Byte& reg);
+
+    void RotateRightThroughCarryFlag();
+    void RotateLeftThroughCarryFlag();
+
+    void ComplementA();
+    void ComplementCarryFlag();
+    void SetCarryFlag();
+
+    void LDHNA();
+    void LDHAN() {
+        auto address = +0xFF00 + m_mainMemory->Read(m_programCounter + 1);
+
+        m_regA = m_mainMemory->Read(address);
+
+        m_programCounter++;
+    };
+
+    void Call();
+    void Ret();
+
+    void JumpRelativeNZ() {
+        if (!m_regF.test(7)) {
+            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+        } else {
+            m_programCounter += 2;
+        }
+    };
+
+    void JumpRelativeNC() {
+       if (!m_regF.test(4)) {
+            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+       } else {
+           m_programCounter += 2;
+       }
+    }
+
+    void JumpRelativeC() {
+        if (m_regF.test(4)) {
+            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+       } else {
+           m_programCounter += 2;
+       }
+    }
+
+    void Pop(uint8_t& high, uint8_t& low) {
+        high = m_mainMemory->Read(m_stackPtr + 1);
+        low = m_mainMemory->Read(m_stackPtr);
+
+        m_stackPtr += 2;
+        m_programCounter++;
+    };
+
+    void Restart(uint8_t address) {
+        m_mainMemory->Write(m_stackPtr, m_programCounter);
+        m_stackPtr--;
+
+        m_programCounter += 0x000 + address;
+    };
+
+    void RRA();
 
     void DisableInterrupts();
 
