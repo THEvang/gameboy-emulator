@@ -63,6 +63,8 @@ private:
 
     void CompareWithA(const Byte& reg);
 
+    void RLCA();
+
     void RR(uint8_t reg) {
         
         uint8_t msb = 0;
@@ -169,11 +171,14 @@ private:
     void Call();
     void Ret();
 
+    void JumpRelative();
+    void JumpRelativeZ();
     void JumpRelativeNZ();
     void JumpRelativeNC();
     void JumpRelativeC();
 
     void Push(uint8_t high, uint8_t low);
+    void Push(uint8_t high, std::bitset<8> low);
     void Pop(uint8_t& high, uint8_t& low);
     void Pop(uint8_t& high, std::bitset<8>& low)
     {

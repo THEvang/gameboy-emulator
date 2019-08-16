@@ -105,8 +105,7 @@ void Cpu::Execute() {
             break;
         
         case 0x07:
-            UnimplementedOperation("RLCA");
-            m_programCounter++;
+            RLCA();
             break;
 
         case 0x08:
@@ -179,10 +178,7 @@ void Cpu::Execute() {
             break;
 
         case 0x18:
-            {
-                auto r8 = m_mainMemory->Read(m_programCounter + 1);
-                m_programCounter += r8;
-            }
+            JumpRelative();
             break;
         
         case 0x19:
@@ -248,17 +244,8 @@ void Cpu::Execute() {
             break;
         
         case 0x28:
-            {
-            if (m_regF.test(7)) {
-                int8_t r8 = m_mainMemory->Read(m_programCounter + 1);
-                std::cout << "Jump relative:" << (int) r8 << "\n";
-                std::cout << "Address: " << m_programCounter << "\n";
-                m_programCounter += r8;
-            } else {
-                m_programCounter++;
-            }
+            JumpRelativeZ();
             break;
-            }
 
         case 0x29:
             UnimplementedOperation("ADD HL, HL");
@@ -288,7 +275,6 @@ void Cpu::Execute() {
         
         case 0x2F:
             ComplementA();
-            m_programCounter++;
             break;
         
         case 0x30:
@@ -326,7 +312,6 @@ void Cpu::Execute() {
         
         case 0x37:
             SetCarryFlag();
-            m_programCounter++;
             break;
         
         case 0x38:
@@ -359,7 +344,6 @@ void Cpu::Execute() {
 
         case 0x3F:
             ComplementCarryFlag();
-            m_programCounter++;
             break;
         
         case 0x40:
@@ -621,45 +605,34 @@ void Cpu::Execute() {
         
         case 0x80:
             AddRegisters(m_regA, m_regB);
-            m_programCounter++;
             break;
         
         case 0x81:
             AddRegisters(m_regA, m_regC);
-            m_programCounter++;
             break;
         
         case 0x82:
             AddRegisters(m_regA, m_regD);
-            m_programCounter++;
             break;
 
         case 0x83:
             AddRegisters(m_regA, m_regE);
-            m_programCounter++;
             break;
         
         case 0x84:
             AddRegisters(m_regA, m_regH);
-            m_programCounter++;
             break;
         
         case 0x85:
             AddRegisters(m_regA, m_regL);
-            m_programCounter++;
             break;
         
         case 0x86:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            AddRegisters(m_regA, m_mainMemory->Read(address));
-            m_programCounter++;
+            UnimplementedOperation("ADD A, (HL)");
             break;
-            }
-
+            
         case 0x87:
             AddRegisters(m_regA, m_regA);
-            m_programCounter++;
             break;
 
         case 0x88:
@@ -956,8 +929,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC6:
-            AddRegisters(m_regA, m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            UnimplementedOperation("ADD A, n");
             break;
         
         case 0xC7:
@@ -1157,7 +1129,7 @@ void Cpu::Execute() {
             break;
         
         case 0xF5:
-            UnimplementedOperation("PUSH AF");
+            Push(m_regA, m_regF);
             break;
         
         case 0xF6:
@@ -1275,6 +1247,9 @@ void Cpu::AddRegisters(Byte& to, const Byte& from) {
     //Set if carry from bit 7
 
     to += from;
+
+    m_programCounter++;
+    m_cycles += 4;
 }
 
 void Cpu::SubtractRegister(Byte& to, const Byte& from) {
@@ -1350,6 +1325,9 @@ void Cpu::DisableInterrupts() {
 
     m_regF.set(6);
     m_regF.set(5);
+
+    m_programCounter++;
+    m_cycles += 4;
  }
 
  void Cpu::ComplementCarryFlag() {
@@ -1358,6 +1336,9 @@ void Cpu::DisableInterrupts() {
 
     m_regF.reset(6);
     m_regF.reset(5);
+
+    m_programCounter++;
+    m_cycles += 4;
  }
 
  void Cpu::SetCarryFlag() {
@@ -1366,24 +1347,31 @@ void Cpu::DisableInterrupts() {
      m_regF.reset(6);
      m_regF.reset(5);
 
+     m_programCounter++;
+     m_cycles += 4;
  }
 
  void Cpu::Call() {
-    auto address = m_programCounter + 1;
+
+    auto address = m_programCounter + 3;
 
     m_mainMemory->Write(m_stackPtr, address);
     m_mainMemory->Write(m_stackPtr - 1, (address >> 8));
     m_stackPtr -= 2;
 
-    m_programCounter = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_programCounter + 1);
+    m_programCounter = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
+    
+    m_cycles += 12;
+
  }
 
 
  void Cpu::Ret() {
-     auto address = CombineRegisters(m_mainMemory->Read(m_stackPtr + 2), m_mainMemory->Read(m_stackPtr + 1));
+     auto address = CombineRegisters(m_mainMemory->Read(m_stackPtr + 1), m_mainMemory->Read(m_stackPtr));
      m_stackPtr += 2;
 
      m_programCounter = address;
+     m_cycles += 12;
  }
 
  void Cpu::ExecuteCB() {
@@ -1489,6 +1477,8 @@ void Cpu::JumpRelativeNZ() {
     } else {
         m_programCounter += 2;
     }
+
+    m_cycles += 8;
 }
 
 void Cpu::JumpRelativeNC() {
@@ -1497,6 +1487,8 @@ void Cpu::JumpRelativeNC() {
     } else {
         m_programCounter += 2;
     }
+
+    m_cycles += 8;
 }
 
 void Cpu::JumpRelativeC() {
@@ -1505,6 +1497,8 @@ void Cpu::JumpRelativeC() {
     } else {
         m_programCounter += 2;
     }
+
+    m_cycles += 8;
 }
 
 void Cpu::Pop(uint8_t& high, uint8_t& low) {
@@ -1538,6 +1532,12 @@ void Cpu::Push(uint8_t high, uint8_t low) {
     m_stackPtr--;
 
     m_programCounter++;
+}
+
+void Cpu::Push(uint8_t high, std::bitset<8> low) {
+
+    uint8_t lowBit = low.to_ulong();
+    Push(high, lowBit);
 }
 
 void Cpu::LoadFromImmediateByte(uint8_t& to) {
@@ -1660,4 +1660,44 @@ void Cpu::DecrementAtAddress(uint16_t address) {
 
     m_programCounter++;
     m_cycles += 12;
+}
+
+
+void Cpu::RLCA() {
+
+    if ( (m_regA & 0b10000000) == 0b10000000) {
+        m_regF.set(4);
+    } else {
+        m_regF.reset(4);
+    }
+
+    m_regA = m_regA << 1;
+
+    if (m_regA == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.reset(6);
+    m_regF.reset(5);
+
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+void Cpu::JumpRelative() {
+
+    auto r8 = m_mainMemory->Read(m_programCounter + 1);
+    m_programCounter += static_cast<int8_t>(r8);
+    m_cycles += 8;
+}
+
+void Cpu::JumpRelativeZ() {
+
+    if(m_regF.test(7)) {
+        m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+    } else {
+        m_programCounter += 2;
+    }
+
+    m_cycles += 8;
 }
