@@ -20,10 +20,9 @@ void GameBoy::RemoveCartridge() {
 
 void GameBoy::PowerOn() {
 
-    std::string a;
     while(true) {
 
-        std::cin.get();
+        //std::cin.get();
         m_cpu->Execute();
     }
 }

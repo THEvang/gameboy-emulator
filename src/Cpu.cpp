@@ -5,8 +5,59 @@
 Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     : m_mainMemory(mainMemory) 
 {
+    SetInitialState();
+}
+
+void Cpu::SetInitialState() {
     m_programCounter = 0x0100;
     m_stackPtr = 0xFFFE;
+
+    m_regA = 0x01;
+    m_regF = std::bitset<8>(0xB0);
+    m_regB = 0x00;
+    m_regC = 0x13;
+    m_regD = 0x00;
+    m_regE = 0xD8;
+    m_regH = 0x01;
+    m_regL = 0x4D;
+
+    m_mainMemory->Write(0xFF05, 0x00);
+    m_mainMemory->Write(0xFF06, 0x00);
+    m_mainMemory->Write(0xFF07, 0x00);
+
+    m_mainMemory->Write(0xFF10, 0x80);
+    m_mainMemory->Write(0xFF11, 0xBF);
+    m_mainMemory->Write(0xFF12, 0xF3);
+
+    m_mainMemory->Write(0xFF14, 0xBF);
+
+    m_mainMemory->Write(0xFF16, 0x3F);
+    m_mainMemory->Write(0xFF17, 0x00);
+    
+    m_mainMemory->Write(0xFF19, 0xBF);
+    m_mainMemory->Write(0xFF1A, 0x7F);
+    m_mainMemory->Write(0xFF1B, 0xFF);
+    m_mainMemory->Write(0xFF1C, 0x9F);
+    m_mainMemory->Write(0xFF1E, 0xBF);
+    m_mainMemory->Write(0xFF20, 0xFF);
+    m_mainMemory->Write(0xFF21, 0x00);
+    m_mainMemory->Write(0xFF22, 0x00);
+
+    m_mainMemory->Write(0xFF23, 0xBF);
+    m_mainMemory->Write(0xFF24, 0x77);
+    m_mainMemory->Write(0xFF25, 0xF3);
+    m_mainMemory->Write(0xFF26, 0xF1);
+    m_mainMemory->Write(0xFF40, 0x91);
+    m_mainMemory->Write(0xFF42, 0x00);
+    m_mainMemory->Write(0xFF43, 0x00);
+
+    m_mainMemory->Write(0xFF45, 0x00);
+    m_mainMemory->Write(0xFF47, 0xFC);
+    m_mainMemory->Write(0xFF48, 0xFF);
+    m_mainMemory->Write(0xFF49, 0xFF);
+    m_mainMemory->Write(0xFF4A, 0x00);
+    m_mainMemory->Write(0xFF4B, 0x00);
+    m_mainMemory->Write(0xFFFF, 0x00);
 }
 
 void Cpu::Execute() {
@@ -15,50 +66,42 @@ void Cpu::Execute() {
 
     std::cout << std::hex << "Program counter: " << m_programCounter << "\n";
     std::cout << std::hex << "Opcode: " << static_cast<int>(opcode) << "\n";
+
+    std::cout << std::hex << "Register A: \t" << static_cast<int>(m_regA) << "\n";
+    std::cout << std::hex << "Register B: \t" << static_cast<int>(m_regB) << "\n";
+    std::cout << std::hex << "Register C: \t" << static_cast<int>(m_regC) << "\n";
+    std::cout << std::hex << "Register D: \t" << static_cast<int>(m_regD) << "\n";
+    std::cout << std::hex << "Register E: \t" << static_cast<int>(m_regE) << "\n";
+    std::cout << std::hex << "Register H: \t" << static_cast<int>(m_regH) << "\n";
+    std::cout << std::hex << "Register L: \t" << static_cast<int>(m_regL) << "\n";
     
     switch(opcode) {
         case 0x00:
             NoOperation();
-            m_programCounter++;
             break;
 
         case 0x01:
-            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter + 1));
-            LoadRegister(m_regB, m_mainMemory->Read(m_programCounter + 2));
-            m_programCounter += 3;
+            LoadImmediate16BitValue(m_regB, m_regC);
             break;
 
         case 0x02:
-            {
-            auto address = CombineRegisters(m_regB, m_regC);
-            LoadRegister(m_regA, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regB, m_regC), m_regA);
             break;
-            }
 
         case 0x03:
-            {
-            auto bc = CombineRegisters(m_regB, m_regC);
-            bc++;
-            LoadRegister(m_regB, (bc >> 8) & 0xFFFF);
-            LoadRegister(m_regC, bc & 0xFFFF);
-            m_programCounter++;
-            }
+            IncrementRegisterPair(m_regB, m_regC);
             break;
         
         case 0x04:
-            Increment(m_regB);
-            m_programCounter++;
+            IncrementRegister(m_regB);
             break;
         
         case 0x05:
-            Decrement(m_regB);
-            m_programCounter++;
+            DecrementRegister(m_regB);
             break;
 
         case 0x06:
-            LoadRegister(m_regB, m_mainMemory->Read(m_programCounter+1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regB);
             break;
         
         case 0x07:
@@ -68,7 +111,7 @@ void Cpu::Execute() {
 
         case 0x08:
             UnimplementedOperation("LD (a16), SP");
-            m_programCounter++;
+            m_programCounter += 3;
             break;
 
         case 0x09:
@@ -77,31 +120,23 @@ void Cpu::Execute() {
             break;
 
         case 0x0A:
-            {
-            auto address = CombineRegisters(m_regB, m_regC);
-            LoadRegister(m_regA, m_mainMemory->Read(address));            
-            m_programCounter++;
+            LoadFromAddress(m_regA, CombineRegisters(m_regB, m_regC));
             break;
-            }
 
         case 0x0B:
-            UnimplementedOperation("DEC BC");
-            m_programCounter++;
+            DecrementRegisterPair(m_regB, m_regC);
             break;
         
         case 0x0C:
-            Increment(m_regC);
-            m_programCounter++;
+            IncrementRegister(m_regC);
             break;
         
         case 0x0D:
-            Decrement(m_regC);
-            m_programCounter++;
+            DecrementRegister(m_regC);
             break;
         
         case 0x0E:
-            LoadRegister(m_regC, m_mainMemory->Read(m_programCounter +1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regC);
             break;
         
         case 0x0F:
@@ -115,41 +150,27 @@ void Cpu::Execute() {
             break;
 
         case 0x11:
-            UnimplementedOperation("LD DE, d16");
-            m_programCounter++;
+            LoadImmediate16BitValue(m_regD, m_regE);
             break;
         
         case 0x12:
-            {
-            auto address = CombineRegisters(m_regD, m_regE);
-            m_mainMemory->Write(address, m_regA);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regD, m_regE), m_regA);
             break;
-            }
         
         case 0x13:
-            {
-                auto de = CombineRegisters(m_regD, m_regE);
-                de++;
-                LoadRegister(m_regD, (de >> 8) & 0xFFFF);
-                LoadRegister(m_regE, de & 0xFFFF);
-                m_programCounter++;
-            }
+            IncrementRegisterPair(m_regD, m_regE);
             break;
         
         case 0x14:
-            Increment(m_regD);
-            m_programCounter++;
+            IncrementRegister(m_regD);
             break;
         
         case 0x15:
-            Decrement(m_regD);
-            m_programCounter++;
+            DecrementRegister(m_regD);
             break;
         
         case 0x16:
-            LoadRegister(m_regD, m_mainMemory->Read(m_programCounter +1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regD);
             break;
         
         case 0x17:
@@ -170,41 +191,27 @@ void Cpu::Execute() {
             break;
         
         case 0x1A:
-            {
-            auto address = CombineRegisters(m_regD, m_regE);
-            LoadRegister(m_regA, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regA, CombineRegisters(m_regD, m_regE));
             break;
-            }
         
         case 0x1B:
-            {
-                auto de = CombineRegisters(m_regD, m_regE);
-                de--;
-                LoadRegister(m_regD, (de >> 8) & 0xFFFF);
-                LoadRegister(m_regE, de & 0xFFFF);
-                m_programCounter++;
-            }
+            DecrementRegisterPair(m_regD, m_regE);
             break;
         
         case 0x1C:
-            Increment(m_regE);
-            m_programCounter++;
+            IncrementRegister(m_regE);
             break;
 
         case 0x1D:
-            Decrement(m_regE);
-            m_programCounter++;
+            DecrementRegister(m_regE);
             break;
         
         case 0x1E:
-            LoadRegister(m_regE, m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regE);
             break;
         
         case 0x1F:
-            UnimplementedOperation("RRA");
-            m_programCounter++;
+            RR(m_regA);
             break;
 
         case 0x20:
@@ -212,33 +219,27 @@ void Cpu::Execute() {
             break;
         
         case 0x21:
-            UnimplementedOperation("LD HL, d16");
-            m_programCounter++;
+            LoadImmediate16BitValue(m_regH, m_regL);
             break;
         
         case 0x22:
-            UnimplementedOperation("LD (HL+), A");
-            m_programCounter++;
+            LDIHL();
             break;
         
         case 0x23:
-            UnimplementedOperation("INC HL");
-            m_programCounter++;
+            IncrementRegisterPair(m_regH, m_regL);
             break;
 
         case 0x24:
-            Increment(m_regH);
-            m_programCounter++;
+            IncrementRegister(m_regH);
             break;
         
         case 0x25:
-            Decrement(m_regH);
-            m_programCounter++;
+            DecrementRegister(m_regH);
             break;
         
         case 0x26:
-            LoadRegister(m_regH, m_mainMemory->Read(m_programCounter+1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regH);
             break;
         
         case 0x27:
@@ -270,23 +271,19 @@ void Cpu::Execute() {
             break;
         
         case 0x2B:
-            UnimplementedOperation("DEC HL");
-            m_programCounter++;
+            DecrementRegisterPair(m_regH, m_regL);
             break;
         
         case 0x2C:
-            Increment(m_regL);
-            m_programCounter++;
+            IncrementRegister(m_regL);
             break;
         
         case 0x2D:
-            Decrement(m_regL);
-            m_programCounter++;
+            DecrementRegister(m_regL);
             break;
         
         case 0x2E:
-            LoadRegister(m_regL, m_mainMemory->Read(m_programCounter += 1));
-            m_programCounter += 2;
+            LoadFromImmediateByte(m_regL);
             break;
         
         case 0x2F:
@@ -299,8 +296,7 @@ void Cpu::Execute() {
             break;
         
         case 0x31:
-            UnimplementedOperation("LD SP, d16");
-            m_programCounter++;
+            LoadImmediate16BitValue(m_stackPtr);
             break;
         
         case 0x32:
@@ -309,18 +305,15 @@ void Cpu::Execute() {
             break;
         
         case 0x33:
-            m_stackPtr++;
-            m_programCounter++;
+            IncrementStackpointer();
             break;
         
         case 0x34:
-            UnimplementedOperation("INC HL");
-            m_programCounter++;
+            IncrementAtAddress(CombineRegisters(m_regH, m_regL));
             break;
         
         case 0x35:
-            UnimplementedOperation("DEC HL");
-            m_programCounter++;
+            DecrementAtAddress(CombineRegisters(m_regH, m_regL));
             break;
         
         case 0x36:
@@ -349,23 +342,19 @@ void Cpu::Execute() {
             break;
         
         case 0x3B:
-            m_stackPtr--;
-            m_programCounter++;
+            DecrementStackPointer();
             break;
         
         case 0x3C:
-            Increment(m_regA);
-            m_programCounter++;
+            IncrementRegister(m_regA);
             break;
         
         case 0x3D:
-            Decrement(m_regA);
-            m_programCounter++;
+            DecrementRegister(m_regA);
             break;
         
-        case 0x3E: 
-            LoadRegister(m_regA, m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+        case 0x3E:
+            LoadFromImmediateByte(m_regA);
             break;
 
         case 0x3F:
@@ -374,366 +363,260 @@ void Cpu::Execute() {
             break;
         
         case 0x40:
-            LoadRegister(m_regB, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regB);
             break;
         
         case 0x41:
-            LoadRegister(m_regB, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regC);
             break;
         
         case 0x42:
-            LoadRegister(m_regB, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regD);
             break;
         
         case 0x43:
-            LoadRegister(m_regB, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regE);
             break;
         
         case 0x44:
-            LoadRegister(m_regB, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regH);
             break;
         
         case 0x45:
-            LoadRegister(m_regB, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regL);
             break;
         
         case 0x46:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regB, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regB, CombineRegisters(m_regH, m_regL));
             break;
-            }
         
         case 0x47:
-            LoadRegister(m_regB, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regB, m_regA);
             break;
         
         case 0x48:
-            LoadRegister(m_regC, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regB);
             break;
         
         case 0x49:
-            LoadRegister(m_regC, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regC);
             break;
         
         case 0x4A:
-            LoadRegister(m_regC, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regD);
             break;
         
         case 0x4B:
-            LoadRegister(m_regC, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regE);
             break;
         
         case 0x4C:
-            LoadRegister(m_regC, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regH);
             break;
         
         case 0x4D:
-            LoadRegister(m_regC, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regL);
             break;
         
         case 0x4E:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regC, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regC, CombineRegisters(m_regH, m_regL));
             break;
-            }
         
         case 0x4F:
-            LoadRegister(m_regC, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regC, m_regA);
             break;
 
         case 0x50:
-            LoadRegister(m_regD, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regB);
             break;
 
         case 0x51:
-            LoadRegister(m_regD, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regC);
             break;
 
         case 0x52:
-            LoadRegister(m_regD, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regD);
             break;
 
         case 0x53:
-            LoadRegister(m_regD, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regE);
             break;
 
         case 0x54:
-            LoadRegister(m_regD, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regH);
             break;
 
         case 0x55:
-            LoadRegister(m_regD, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regL);
             break;
 
         case 0x56:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regD, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regD, CombineRegisters(m_regH, m_regL));
             break;
-            }
 
         case 0x57:
-            LoadRegister(m_regD, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regD, m_regA);
             break;
 
         case 0x58:
-            LoadRegister(m_regE, m_regB);
-            m_programCounter++;
+            LoadFromAddress(m_regE, m_regB);
             break;
 
         case 0x59:
-            LoadRegister(m_regE, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regC);
             break;
 
         case 0x5A:
-            LoadRegister(m_regE, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regD);
             break;
 
         case 0x5B:
-            LoadRegister(m_regE, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regE);
             break;
 
         case 0x5C:
-            LoadRegister(m_regE, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regH);
             break;
 
         case 0x5D:
-            LoadRegister(m_regE, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regL);
             break;
 
         case 0x5E:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regE, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regE, CombineRegisters(m_regH, m_regL));
             break;
-            }
 
         case 0x5F:
-            LoadRegister(m_regE, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regE, m_regA);
             break;
 
         case 0x60:
-            LoadRegister(m_regH, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regB);
             break;
 
         case 0x61:
-            LoadRegister(m_regH, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regC);
             break;
 
         case 0x62:
-            LoadRegister(m_regH, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regD);
             break;
 
         case 0x63:
-            LoadRegister(m_regH, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regE);
             break;
 
         case 0x64:
-            LoadRegister(m_regH, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regH);
             break;
 
         case 0x65:
-            LoadRegister(m_regH, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regL);
             break;
 
         case 0x66:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regH, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regH, CombineRegisters(m_regH, m_regL));
             break;
-            }
 
         case 0x67:
-            LoadRegister(m_regH, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regH, m_regA);
             break;
 
         case 0x68: 
-            LoadRegister(m_regL, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regB);
             break;
         
         case 0x69:
-            LoadRegister(m_regL, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regC);
             break;
         
         case 0x6A:
-            LoadRegister(m_regL, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regD);
             break;
         
         case 0x6B:
-            LoadRegister(m_regL, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regE);
             break;
         
         case 0x6C:
-            LoadRegister(m_regL, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regH);
             break;
         
         case 0x6D:
-            LoadRegister(m_regL, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regL);
             break;
         
         case 0x6E:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regL, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regL, CombineRegisters(m_regH, m_regL));
             break;
-            }
         
         case 0x6F:
-            LoadRegister(m_regL, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regL, m_regA);
             break;
         
         case 0x70:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regB);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regB);
             break;
-            }
 
         case 0x71:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regC);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regC);
             break;
-            }
 
         case 0x72:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regD);            
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regD);
             break;
-            }
         
-        case 0x73: 
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regE);
-            m_programCounter++;
+        case 0x73:
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regE); 
             break;
-            }
         
         case 0x74:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regH);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regH);
             break;
-            }
         
         case 0x75:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regL);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regL);
             break;
-            }
         
         case 0x76:
             UnimplementedOperation("HALT");
             m_programCounter++;
             break;
         
-
         case 0x77:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_regL);
-            m_programCounter++;
+            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regA);
             break;
-            }
 
         case 0x78:
-            LoadRegister(m_regA, m_regB);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regB);
             break;
         
         case 0x79:
-            LoadRegister(m_regA, m_regC);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regC);
             break;
         
         case 0x7A:
-            LoadRegister(m_regA, m_regD);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regD);
             break;
         
         case 0x7B:
-            LoadRegister(m_regA, m_regE);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regE);
             break;
         
         case 0x7C:
-            LoadRegister(m_regA, m_regH);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regH);
             break;
         
         case 0x7D:
-            LoadRegister(m_regA, m_regL);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regL);
             break;
         
         case 0x7E:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            LoadRegister(m_regA, m_mainMemory->Read(address));
-            m_programCounter++;
+            LoadFromAddress(m_regA, CombineRegisters(m_regH, m_regL));
             break;
-            }
         
         case 0x7F:
-            LoadRegister(m_regA, m_regA);
-            m_programCounter++;
+            LoadFromRegister(m_regA, m_regA);
             break;
         
         case 0x80:
@@ -1040,7 +923,8 @@ void Cpu::Execute() {
             break;
         
         case 0xBF:
-            UnimplementedOperation("CP A");
+            CompareWithA(m_regA);
+            m_programCounter++;
             break;
         
         case 0xC0:
@@ -1068,7 +952,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC5:
-            UnimplementedOperation("PUSH BC");
+            Push(m_regB, m_regC);
             break;
         
         case 0xC6:
@@ -1134,7 +1018,7 @@ void Cpu::Execute() {
             break;
         
         case 0xD5:
-            UnimplementedOperation("PUSH DE");
+            Push(m_regD, m_regE);
             break;
         
         case 0xD6:
@@ -1202,7 +1086,7 @@ void Cpu::Execute() {
             break;
         
         case 0xE5:
-            UnimplementedOperation("PUSH HL");
+            Push(m_regH, m_regL);
             break;
         
         case 0xE6:
@@ -1257,7 +1141,7 @@ void Cpu::Execute() {
             break;
         
         case 0xF1:
-            UnimplementedOperation("POP AF");
+            Pop(m_regA, m_regF);
             break;
         
         case 0xF2:
@@ -1266,7 +1150,6 @@ void Cpu::Execute() {
         
         case 0xF3:
             DisableInterrupts();
-            m_programCounter++;
             break;
         
         case 0xF4:
@@ -1291,7 +1174,7 @@ void Cpu::Execute() {
             break;
         
         case 0xF9:
-            UnimplementedOperation("LD SP, HL");
+            LoadStackPointerFromHL();
             break;
         
         case 0xFA:
@@ -1330,14 +1213,15 @@ void Cpu::Execute() {
 }
 
 void Cpu::NoOperation() {
+    m_programCounter++;
     return;
 }
 
-void Cpu::LoadRegister(Byte& to, const Byte& from) {
+void Cpu::LoadToRegister(Byte& to, const Byte& from) {
     to = from;
 }
 
-void Cpu::Increment(Byte& reg) {
+void Cpu::IncrementRegister(Byte& reg) {
     reg++;
 
     if (reg == 0) {
@@ -1345,11 +1229,16 @@ void Cpu::Increment(Byte& reg) {
     }
 
     m_regF.reset(6);
+
+    if ( (((reg & 0xf) + ( (reg +1) &0xf)) & 0x10) == 0x10) {
+        m_regF.set(5);
+    } 
     
-    //Set H if carry from bit 3
+    m_programCounter++;
+    m_cycles += 4;
 }
 
-void Cpu::Decrement(Byte& reg) {
+void Cpu::DecrementRegister(Byte& reg) {
     reg--;
 
     if (reg == 0) {
@@ -1359,6 +1248,8 @@ void Cpu::Decrement(Byte& reg) {
     m_regF.set(6);
     // Set if no borrow from bit 4
 
+    m_programCounter++;
+    m_cycles += 4;
 }
 
 uint16_t Cpu::CombineRegisters(const Byte& high, const Byte& low) const {
@@ -1370,9 +1261,20 @@ uint16_t Cpu::CombineRegisters(const Byte& high, const Byte& low) const {
 
 void Cpu::AddRegisters(Byte& to, const Byte& from) {
 
-    to += from;
 
-    //flags;
+    if ( (((to & 0xf) + ( (from +1) &0xf)) & 0x10) == 0x10) {
+        m_regF.set(5);
+    } 
+
+    if(to == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.reset(6);
+
+    //Set if carry from bit 7
+
+    to += from;
 }
 
 void Cpu::SubtractRegister(Byte& to, const Byte& from) {
@@ -1382,6 +1284,7 @@ void Cpu::SubtractRegister(Byte& to, const Byte& from) {
 
 void Cpu::UnimplementedOperation(const std::string& operation) {
     std::cerr << "Unimplemented operation: \t" << operation << "\n";
+    std::cin.get();
 }
 
 void Cpu::AndWithA(const Byte& reg) {
@@ -1436,7 +1339,8 @@ void Cpu::CompareWithA(const Byte& reg) {
 }
 
 void Cpu::DisableInterrupts() {
-
+    
+    m_programCounter++;
 }
 
  
@@ -1553,19 +1457,207 @@ void Cpu::DisableInterrupts() {
         case 0x0F:
             UnimplementedOperation("RRC A");
             break;
+        
+        case 0x19:
+            RR(m_regC);
+            break;
+        
+        case 0x1A:
+            RR(m_regD);
+            break;
 
+        case 0x38:
+            SRL(m_regB);
+            break;
 
         
         case 0xB7:
-            UnimplementedOperation("Res 6, A");
             m_regA &= ~(1ul << 6);
             m_programCounter++;
-
             break;
         
         default:
-            UnimplementedOperation("Unavailable Opcode");
+            UnimplementedOperation("Unavailable Opcode\n");
             break;
      }
 
  }
+
+void Cpu::JumpRelativeNZ() {
+    if (!m_regF.test(7)) {
+        m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+    } else {
+        m_programCounter += 2;
+    }
+}
+
+void Cpu::JumpRelativeNC() {
+    if (!m_regF.test(4)) {
+        m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+    } else {
+        m_programCounter += 2;
+    }
+}
+
+void Cpu::JumpRelativeC() {
+    if (m_regF.test(4)) {
+        m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+    } else {
+        m_programCounter += 2;
+    }
+}
+
+void Cpu::Pop(uint8_t& high, uint8_t& low) {
+    high = m_mainMemory->Read(m_stackPtr + 1);
+    low = m_mainMemory->Read(m_stackPtr);
+
+    m_stackPtr += 2;
+    m_programCounter++;
+}
+
+void Cpu::Restart(uint8_t address) {
+    m_mainMemory->Write(m_stackPtr, m_programCounter);
+    m_stackPtr--;
+
+    m_programCounter += 0x000 + address;
+}
+
+void Cpu::LDHAN() {
+    auto address = +0xFF00 + m_mainMemory->Read(m_programCounter + 1);
+
+    m_regA = m_mainMemory->Read(address);
+
+    m_programCounter++;
+}
+
+void Cpu::Push(uint8_t high, uint8_t low) {
+    m_mainMemory->Write(m_stackPtr, high);
+    m_stackPtr--;
+
+    m_mainMemory->Write(m_stackPtr, low);
+    m_stackPtr--;
+
+    m_programCounter++;
+}
+
+void Cpu::LoadFromImmediateByte(uint8_t& to) {
+    to = m_mainMemory->Read(m_programCounter + 1);
+
+    m_programCounter += 2;
+    m_cycles += 8;
+}
+
+void Cpu::LoadFromRegister(uint8_t& to, uint8_t from) {
+    to = from;
+
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+
+void Cpu::LoadFromAddress(Byte& to, uint16_t address) {
+    to = m_mainMemory->Read(address);
+    
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::LoadToAddress(uint16_t address, uint8_t value) {
+    m_mainMemory->Write(address, value);
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::LoadImmediate16BitValue(uint8_t& high, uint8_t& low) {
+    high = m_mainMemory->Read(m_programCounter + 2);
+    low = m_mainMemory->Read(m_programCounter + 1);
+
+    m_programCounter += 3;
+    m_cycles += 12;
+}
+
+void Cpu::LoadImmediate16BitValue(uint16_t& to) {
+    auto value = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
+    to = value;
+
+    m_programCounter += 3;
+    m_cycles += 12;
+}
+
+void Cpu::LoadStackPointerFromHL() {
+    auto value = CombineRegisters(m_regH, m_regL);
+    m_stackPtr = value;
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+    
+
+void Cpu::IncrementAtAddress(uint16_t address) {
+    uint8_t value = m_mainMemory->Read(address);
+
+    if ( (((value & 0xf) + ( (value +1) &0xf)) & 0x10) == 0x10) {
+        m_regF.set(5);
+    } 
+
+    value++;
+
+    if(value == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.reset(6);
+
+    m_mainMemory->Write(address, value);
+
+    m_programCounter++;
+    m_cycles += 12;
+}
+
+void Cpu::IncrementRegisterPair(uint8_t& high, uint8_t& low) {
+    uint16_t value = CombineRegisters(high, low);
+    value++;
+
+    high = value >> 8;
+    low = value;
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::IncrementStackpointer() {
+        m_stackPtr++;
+
+        m_programCounter++;
+        m_cycles += 8;
+}
+
+void Cpu::DecrementRegisterPair(uint8_t& high, uint8_t& low) {
+        uint16_t value = CombineRegisters(high, low);
+        value--;
+
+        high = value >> 8;
+        low = value;
+
+        m_programCounter++;
+        m_cycles+= 8;
+}
+
+void Cpu::DecrementStackPointer() {
+    m_stackPtr--;
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::DecrementAtAddress(uint16_t address) {
+    
+    auto value = m_mainMemory->Read(address);
+    value--;
+
+    m_mainMemory->Write(address, value);
+
+    m_programCounter++;
+    m_cycles += 12;
+}

@@ -1,8 +1,11 @@
 #include <Cartridge.h>
 #include <GameBoy.h>
+#include <Ppu.h>
 
 #include <iostream>
 #include <memory>
+
+#include <SDL2/SDL.h>
 
 int main() {
 
@@ -10,7 +13,7 @@ int main() {
 
     try {
         
-        auto pokemonBlue = std::make_shared<Cartridge>("pokemonBlue.gb");
+        auto pokemonBlue = std::make_shared<Cartridge>("rom/cpu_instrs.gb");
         gameboy.InsertCartridge(pokemonBlue);
 
     } catch (const InsertCartrigdeException& insertCartrigdeException) {

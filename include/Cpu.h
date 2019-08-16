@@ -20,10 +20,36 @@ public:
 
 private:
 
-    void LoadRegister(Byte& to, const Byte& from);
+    void SetInitialState();
+
+    void LoadToRegister(Byte& to, const Byte& from);
+
+    void LoadFromImmediateByte(uint8_t& to);
+
+    void LoadFromRegister(uint8_t& to, uint8_t from);
+
+
+    void LoadFromAddress(Byte& to, uint16_t address);
+
+    void LoadToAddress(uint16_t address, uint8_t value);
+    void LoadImmediate16BitValue(uint8_t& high, uint8_t& low);
+
+    void LoadImmediate16BitValue(uint16_t& to);
+
+    void LoadStackPointerFromHL();
     
-    void Increment(Byte& reg);
-    void Decrement(Byte& reg);
+    void IncrementRegister(Byte& reg);
+
+    void IncrementAtAddress(uint16_t address);
+
+    void IncrementRegisterPair(uint8_t& high, uint8_t& low);
+    void IncrementStackpointer();
+
+    void DecrementRegisterPair(uint8_t& high, uint8_t& low);
+    void DecrementStackPointer();
+
+    void DecrementRegister(Byte& reg);
+    void DecrementAtAddress(uint16_t address);
 
     uint16_t CombineRegisters(const Byte& high, const Byte& low) const;
     
@@ -37,63 +63,129 @@ private:
 
     void CompareWithA(const Byte& reg);
 
-    void RotateRightThroughCarryFlag();
-    void RotateLeftThroughCarryFlag();
+    void RR(uint8_t reg) {
+        
+        uint8_t msb = 0;
+        if(m_regF.test(4)) {
+            msb = 0b10000000;
+        }
+
+        if( (reg & 0b00000001) == 1) { 
+            m_regF.set(4);
+        } else {
+            m_regF.reset(4);
+        }
+
+        reg = reg >> 1;
+
+        reg |= msb;
+        
+        if (reg == 0) {
+            m_regF.set(7);
+        }
+
+        m_regF.reset(6);
+        m_regF.reset(5);
+
+        m_programCounter++;
+    }
+
+    void RotateLeftThroughCarryFlag() {
+
+        m_programCounter++;
+    }
+
+    void LDIA() {
+        uint16_t address = CombineRegisters(m_regH, m_regL);
+
+        m_regA = m_mainMemory->Read(address);
+
+        address++;
+
+        m_regH = (address >> 8);
+        m_regL = address;
+
+        m_programCounter++; 
+    }
+
+    void LDIHL() {
+        uint16_t address = CombineRegisters(m_regH, m_regL);
+        m_mainMemory->Write(address, m_regA);
+
+        address++;
+        m_regH = (address >> 8);
+        m_regL = address;
+
+        m_programCounter++;
+    }
+
+    void SRA(uint8_t& reg) {
+
+        if( (reg & 0x0001) == 1) {
+            m_regF.set(4);
+        } else {
+            m_regF.reset(4);
+        }
+
+        reg = reg >> 1;
+
+        if(reg == 0) {
+            m_regF.set(7);
+        }
+        m_regF.reset(6);
+        m_regF.reset(5);
+
+        m_programCounter++;
+    }
+
+    void SRL(uint8_t& reg) {
+        
+        if ((reg & 0x0001) == 1) {
+            m_regF.set(4);
+        } else {
+            m_regF.reset(4);
+        }
+
+        reg = reg >> 1;
+        reg = reg & 0b01111111;
+
+        if(reg == 0) {
+            m_regF.set(7);
+        }
+
+        m_regF.reset(6);
+        m_regF.reset(5);
+
+        m_programCounter++;
+    }
 
     void ComplementA();
     void ComplementCarryFlag();
     void SetCarryFlag();
 
     void LDHNA();
-    void LDHAN() {
-        auto address = +0xFF00 + m_mainMemory->Read(m_programCounter + 1);
-
-        m_regA = m_mainMemory->Read(address);
-
-        m_programCounter++;
-    };
+    void LDHAN();
 
     void Call();
     void Ret();
 
-    void JumpRelativeNZ() {
-        if (!m_regF.test(7)) {
-            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-        } else {
-            m_programCounter += 2;
-        }
-    };
+    void JumpRelativeNZ();
+    void JumpRelativeNC();
+    void JumpRelativeC();
 
-    void JumpRelativeNC() {
-       if (!m_regF.test(4)) {
-            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-       } else {
-           m_programCounter += 2;
-       }
+    void Push(uint8_t high, uint8_t low);
+    void Pop(uint8_t& high, uint8_t& low);
+    void Pop(uint8_t& high, std::bitset<8>& low)
+    {
+        uint8_t highByte = 0;
+        uint8_t lowByte = 0;
+        Pop(highByte, lowByte);
+
+        high = highByte;
+        low = std::bitset<8>(lowByte);
     }
 
-    void JumpRelativeC() {
-        if (m_regF.test(4)) {
-            m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-       } else {
-           m_programCounter += 2;
-       }
-    }
-
-    void Pop(uint8_t& high, uint8_t& low) {
-        high = m_mainMemory->Read(m_stackPtr + 1);
-        low = m_mainMemory->Read(m_stackPtr);
-
-        m_stackPtr += 2;
-        m_programCounter++;
-    };
-
-    void Restart(uint8_t address) {
-        m_mainMemory->Write(m_stackPtr, m_programCounter);
-        m_stackPtr--;
-
-        m_programCounter += 0x000 + address;
-    };
+    void Restart(uint8_t address);
 
     void RRA();
 
@@ -118,4 +210,6 @@ private:
     ProgramCounter m_programCounter;
 
     std::shared_ptr<MemoryMap> m_mainMemory;
+
+    int m_cycles;
 };
