@@ -22,18 +22,13 @@ private:
 
     void SetInitialState();
 
-    void LoadToRegister(Byte& to, const Byte& from);
-
     void LoadFromImmediateByte(uint8_t& to);
-
     void LoadFromRegister(uint8_t& to, uint8_t from);
-
-
     void LoadFromAddress(Byte& to, uint16_t address);
-
+    
+    void LoadToRegister(Byte& to, const Byte& from);
     void LoadToAddress(uint16_t address, uint8_t value);
     void LoadImmediate16BitValue(uint8_t& high, uint8_t& low);
-
     void LoadImmediate16BitValue(uint16_t& to);
 
     void LoadStackPointerFromHL();
@@ -54,7 +49,10 @@ private:
     uint16_t CombineRegisters(const Byte& high, const Byte& low) const;
     
     void AddRegisters(Byte& to, const Byte& from);
-    void SubtractRegister(Byte& to, const Byte& from);
+    void SubtractFromA(uint8_t value);
+    void SubtractImmediateByte();
+    void SubtractFromAddress(uint16_t address);
+
     void NoOperation();
 
     void AndWithA(const Byte& reg);
@@ -108,6 +106,7 @@ private:
         m_regL = address;
 
         m_programCounter++; 
+        m_cycles += 8;
     }
 
     void LDIHL() {
@@ -170,7 +169,12 @@ private:
 
     void Call();
     void Ret();
+    void RetNZ();
+    void RetZ();
+    void RetNC();
+    void RetC();
 
+    void Jump();
     void JumpRelative();
     void JumpRelativeZ();
     void JumpRelativeNZ();

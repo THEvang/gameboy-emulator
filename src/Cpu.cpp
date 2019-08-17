@@ -74,6 +74,14 @@ void Cpu::Execute() {
     std::cout << std::hex << "Register E: \t" << static_cast<int>(m_regE) << "\n";
     std::cout << std::hex << "Register H: \t" << static_cast<int>(m_regH) << "\n";
     std::cout << std::hex << "Register L: \t" << static_cast<int>(m_regL) << "\n";
+
+    std::cout << "\n";
+    std::cout << std::hex << "SC: " << static_cast<int>(m_mainMemory->Read(0xFF02)) << "\n";
+
+    //if(m_mainMemory->Read(0xFF02) == 0x81) {
+        std::cout << "SB: ";
+        std::cout  <<  static_cast<int>(m_mainMemory->Read(0xFF01)) << "\n";
+    //}
     
     switch(opcode) {
         case 0x00:
@@ -253,8 +261,7 @@ void Cpu::Execute() {
             break;
         
         case 0x2A:
-            UnimplementedOperation("LD A, (HL+)");
-            m_programCounter++;
+            LDIA();
             break;
         
         case 0x2B:
@@ -669,27 +676,27 @@ void Cpu::Execute() {
             break;
         
         case 0x90:
-            UnimplementedOperation("SUB B");
+            SubtractFromA(m_regB);
             break;
         
         case 0x91:
-            UnimplementedOperation("SUB C");
+            SubtractFromA(m_regC);
             break;
         
         case 0x92:
-            UnimplementedOperation("SUB D");
+            SubtractFromA(m_regD);
             break;
         
         case 0x93:
-            UnimplementedOperation("SUB E");
+            SubtractFromA(m_regE);
             break;
         
         case 0x94:
-            UnimplementedOperation("SUB H");
+            SubtractFromA(m_regH);
             break;
         
         case 0x95:
-            UnimplementedOperation("SUB L");
+            SubtractFromA(m_regL);
             break;
         
         case 0x96:
@@ -697,7 +704,7 @@ void Cpu::Execute() {
             break;
         
         case 0x97:
-            UnimplementedOperation("SUB A");
+            SubtractFromA(m_regA);
             break;
         
         case 0x98:
@@ -901,7 +908,7 @@ void Cpu::Execute() {
             break;
         
         case 0xC0:
-            UnimplementedOperation("RET NZ");
+            RetNZ();
             break;
         
         case 0xC1:
@@ -913,12 +920,8 @@ void Cpu::Execute() {
             break;
         
         case 0xC3:
-            {
-            auto address = CombineRegisters(m_mainMemory->Read(m_programCounter+2), m_mainMemory->Read(m_programCounter+1));
-            std::cout << "Address: " << address << "\n";
-            m_programCounter = address;
+            Jump();
             break;
-            }
         
         case 0xC4:
             UnimplementedOperation("CALL NZ, a16");
@@ -994,7 +997,7 @@ void Cpu::Execute() {
             break;
         
         case 0xD6:
-            UnimplementedOperation("SUB d8");
+            SubtractImmediateByte();
             break;
         
         case 0xD7:
@@ -1083,6 +1086,7 @@ void Cpu::Execute() {
             auto address = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter +1));
             m_mainMemory->Write(address, m_regA);
             m_programCounter += 3;
+            m_cycles += 16;
             break;
             }
 
@@ -1194,6 +1198,11 @@ void Cpu::LoadToRegister(Byte& to, const Byte& from) {
 }
 
 void Cpu::IncrementRegister(Byte& reg) {
+
+    if ( (((reg & 0xf) + ( (reg + 1) &0xf)) & 0x10) == 0x10) {
+        m_regF.set(5);
+    }
+
     reg++;
 
     if (reg == 0) {
@@ -1201,11 +1210,7 @@ void Cpu::IncrementRegister(Byte& reg) {
     }
 
     m_regF.reset(6);
-
-    if ( (((reg & 0xf) + ( (reg +1) &0xf)) & 0x10) == 0x10) {
-        m_regF.set(5);
-    } 
-    
+ 
     m_programCounter++;
     m_cycles += 4;
 }
@@ -1233,10 +1238,13 @@ uint16_t Cpu::CombineRegisters(const Byte& high, const Byte& low) const {
 
 void Cpu::AddRegisters(Byte& to, const Byte& from) {
 
-
     if ( (((to & 0xf) + ( (from +1) &0xf)) & 0x10) == 0x10) {
         m_regF.set(5);
     } 
+
+    if( (static_cast<int>(to) + static_cast<int>(from)) > 0xFF) {
+        m_regF.set(4);
+    }
 
     if(to == 0) {
         m_regF.set(7);
@@ -1244,17 +1252,67 @@ void Cpu::AddRegisters(Byte& to, const Byte& from) {
 
     m_regF.reset(6);
 
-    //Set if carry from bit 7
-
     to += from;
 
     m_programCounter++;
     m_cycles += 4;
 }
 
-void Cpu::SubtractRegister(Byte& to, const Byte& from) {
+void Cpu::SubtractFromA(uint8_t value) {
 
-    to -= from;
+    if (value > m_regA) {
+        m_regF.set(4);
+    }
+
+    m_regA -= value;
+
+    if(m_regA == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.set(6);
+
+    m_programCounter++;
+    m_cycles += 8;
+    //Check borrow from 4 bit
+
+}
+
+void Cpu::SubtractFromAddress(uint16_t address) {
+
+    auto value = m_mainMemory->Read(address);    
+
+    m_regA -= value;
+
+    if(m_regA == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.set(6);
+
+
+    //H - set if no borrow from bit 4
+    //C - set if no borrow
+
+    m_cycles += 8;
+    m_programCounter++;
+}
+
+void Cpu::SubtractImmediateByte() {
+    auto value = m_mainMemory->Read(m_programCounter + 1);
+    m_regA -= value;
+
+    if(m_regA == 0) {
+        m_regF.set(7);
+    }
+
+    m_regF.set(6);
+
+    //H - set if no borrow from bit 4
+    //C - set if no borrow
+
+    m_programCounter += 2;
+    m_cycles += 8;
 }
 
 void Cpu::UnimplementedOperation(const std::string& operation) {
@@ -1362,7 +1420,6 @@ void Cpu::DisableInterrupts() {
     m_programCounter = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
     
     m_cycles += 12;
-
  }
 
 
@@ -1514,6 +1571,7 @@ void Cpu::Restart(uint8_t address) {
     m_stackPtr--;
 
     m_programCounter += 0x000 + address;
+    m_cycles += 32;
 }
 
 void Cpu::LDHAN() {
@@ -1595,6 +1653,7 @@ void Cpu::LoadStackPointerFromHL() {
     
 
 void Cpu::IncrementAtAddress(uint16_t address) {
+    
     uint8_t value = m_mainMemory->Read(address);
 
     if ( (((value & 0xf) + ( (value +1) &0xf)) & 0x10) == 0x10) {
@@ -1616,6 +1675,7 @@ void Cpu::IncrementAtAddress(uint16_t address) {
 }
 
 void Cpu::IncrementRegisterPair(uint8_t& high, uint8_t& low) {
+    
     uint16_t value = CombineRegisters(high, low);
     value++;
 
@@ -1627,10 +1687,10 @@ void Cpu::IncrementRegisterPair(uint8_t& high, uint8_t& low) {
 }
 
 void Cpu::IncrementStackpointer() {
-        m_stackPtr++;
+    m_stackPtr++;
 
-        m_programCounter++;
-        m_cycles += 8;
+    m_programCounter++;
+    m_cycles += 8;
 }
 
 void Cpu::DecrementRegisterPair(uint8_t& high, uint8_t& low) {
@@ -1687,17 +1747,33 @@ void Cpu::RLCA() {
 void Cpu::JumpRelative() {
 
     auto r8 = m_mainMemory->Read(m_programCounter + 1);
-    m_programCounter += static_cast<int8_t>(r8);
+    m_programCounter += static_cast<int16_t>(r8);
     m_cycles += 8;
 }
 
 void Cpu::JumpRelativeZ() {
 
     if(m_regF.test(7)) {
-        m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
+        m_programCounter += static_cast<int16_t>(m_mainMemory->Read(m_programCounter + 1));
     } else {
-        m_programCounter += 2;
+        m_programCounter++;
     }
 
     m_cycles += 8;
+}
+
+void Cpu::RetNZ() {
+    if(!m_regF.test(7)) {
+        Ret();
+    } else {
+        m_programCounter++;
+        m_cycles += 8;
+    }
+}
+
+void Cpu::Jump() {
+    auto address = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
+    
+    m_programCounter = address;
+    m_cycles += 12;
 }

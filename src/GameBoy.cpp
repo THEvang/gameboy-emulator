@@ -22,7 +22,7 @@ void GameBoy::PowerOn() {
 
     while(true) {
 
-        //std::cin.get();
+        std::cin.get();
         m_cpu->Execute();
     }
 }

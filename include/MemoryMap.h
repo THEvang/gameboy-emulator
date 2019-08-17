@@ -5,6 +5,16 @@
 
 #include <Cartridge.h>
 
+enum class BankingMode {
+    RomBanking,
+    RamBanking,
+};
+
+enum class ExternalRam {
+    Enabled,
+    Disabled
+};
+
 class MemoryMap {
 public:
 
@@ -20,4 +30,7 @@ private:
 
     std::vector<uint8_t> m_memory;
     std::shared_ptr<Cartridge> m_cartridge;
+
+    ExternalRam m_externalRam = ExternalRam::Disabled;
+    BankingMode m_bankingMode = BankingMode::RomBanking;
 };
