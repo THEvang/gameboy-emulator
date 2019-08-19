@@ -1,6 +1,7 @@
 #include <Cpu.h>
 
 #include <iostream>
+#include <Logger.h>
 
 Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     : m_mainMemory(mainMemory) 
@@ -64,24 +65,17 @@ void Cpu::Execute() {
 
     Byte opcode = m_mainMemory->Read(m_programCounter);
 
-    std::cout << std::hex << "Program counter: " << m_programCounter << "\n";
-    std::cout << std::hex << "Opcode: " << static_cast<int>(opcode) << "\n";
 
-    std::cout << std::hex << "Register A: \t" << static_cast<int>(m_regA) << "\n";
-    std::cout << std::hex << "Register B: \t" << static_cast<int>(m_regB) << "\n";
-    std::cout << std::hex << "Register C: \t" << static_cast<int>(m_regC) << "\n";
-    std::cout << std::hex << "Register D: \t" << static_cast<int>(m_regD) << "\n";
-    std::cout << std::hex << "Register E: \t" << static_cast<int>(m_regE) << "\n";
-    std::cout << std::hex << "Register H: \t" << static_cast<int>(m_regH) << "\n";
-    std::cout << std::hex << "Register L: \t" << static_cast<int>(m_regL) << "\n";
-
-    std::cout << "\n";
-    std::cout << std::hex << "SC: " << static_cast<int>(m_mainMemory->Read(0xFF02)) << "\n";
-
-    //if(m_mainMemory->Read(0xFF02) == 0x81) {
-        std::cout << "SB: ";
-        std::cout  <<  static_cast<int>(m_mainMemory->Read(0xFF01)) << "\n";
-    //}
+    Logger::Log(LogLevel::Debug, "Program counter: \t" + std::to_string(m_programCounter));
+    Logger::Log(LogLevel::Debug, "Opcode: \t" + std::to_string(opcode));
+    
+    Logger::Log(LogLevel::Debug, "Register A: \t" + std::to_string(m_regA));
+    Logger::Log(LogLevel::Debug, "Register B: \t" + std::to_string(m_regB));
+    Logger::Log(LogLevel::Debug, "Register C: \t" + std::to_string(m_regC));
+    Logger::Log(LogLevel::Debug, "Register D: \t" + std::to_string(m_regD));
+    Logger::Log(LogLevel::Debug, "Register E: \t" + std::to_string(m_regE));
+    Logger::Log(LogLevel::Debug, "Register H: \t" + std::to_string(m_regH));
+    Logger::Log(LogLevel::Debug, "Register L: \t" + std::to_string(m_regL));
     
     switch(opcode) {
         case 0x00:
@@ -1316,7 +1310,8 @@ void Cpu::SubtractImmediateByte() {
 }
 
 void Cpu::UnimplementedOperation(const std::string& operation) {
-    std::cerr << "Unimplemented operation: \t" << operation << "\n";
+
+    Logger::Log(LogLevel::Error, "Unimplemented operation: \t" + operation);
     std::cin.get();
 }
 
@@ -1435,8 +1430,8 @@ void Cpu::DisableInterrupts() {
 
      auto opcode = m_mainMemory->Read(m_programCounter);
 
-     std::cout << std::hex << "Program counter: " << m_programCounter << "\n";
-     std::cout << std::hex << "Opcode: " << static_cast<int>(opcode) << "\n";
+    Logger::Log(LogLevel::Debug, "Program counter: \t" + std::to_string(m_programCounter));
+    Logger::Log(LogLevel::Debug, "Opcode: \t" + std::to_string(opcode));
 
      switch (opcode) {
          case 0x00:

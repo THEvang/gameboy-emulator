@@ -5,10 +5,13 @@
 #include <iostream>
 #include <memory>
 
+#include<Logger.h>
+
 #include <SDL2/SDL.h>
 
 int main() {
 
+    Logger::logging = Logging::On;
     GameBoy gameboy;
 
     try {

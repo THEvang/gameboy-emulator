@@ -11,17 +11,16 @@ MemoryMap::MemoryMap(const std::shared_ptr<Cartridge> cartridge)
 }
 
 void MemoryMap::Write(const uint16_t address, const uint8_t value)
-    {if (address <= 0x1FFF) {
+    {
+        if (address <= 0x1FFF) {
             
             switch(value) {
-                case 0x00:
-                    m_externalRam = ExternalRam::Disabled;
-                    break;
                 case 0x0A:
                     m_externalRam = ExternalRam::Enabled;
                     break;
                 default:
                     m_externalRam = ExternalRam::Disabled;
+                    break;
             }
 
         } else if (address >= 0x2000 && address <= 0x3FFF) {
@@ -31,7 +30,19 @@ void MemoryMap::Write(const uint16_t address, const uint8_t value)
             //Select either ram bank 0x00-0x03
             //Or specify upper two bits (5 - 6) of ROM Bank number
             //Dependent upon ROM/RAM mode
-        } else {
+
+        } else if (address >= 0x6000 && address <= 0x7FFF) {
+            switch(value) {
+                case 0x00:
+                    m_bankingMode = BankingMode::RomBanking;
+                    break;
+                case 0x01:
+                    m_bankingMode = BankingMode::RamBanking;
+                    break;
+            }
+        } 
+        
+        else {
             m_memory[address] = value;
         }
     }
