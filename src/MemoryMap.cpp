@@ -4,8 +4,6 @@
 MemoryMap::MemoryMap(std::shared_ptr<Cartridge> const cartridge) 
     : m_memory(0xFFFF) 
     , m_cartridge(std::move(cartridge))
-    , m_currentRamBank(0)
-    , m_currentRomBank(0) 
 {
 
     auto cartridgeRom = m_cartridge->GetMemory();

@@ -10,6 +10,7 @@ set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
 
 add_executable(Gameboy.out main.cpp src/Cartridge.cpp src/GameBoy.cpp src/Logger.cpp src/MemoryMap.cpp)
+target_compile_options(Gameboy.out PRIVATE -Wall -Wextra -Werror)
 add_subdirectory(cpu)
 
 target_include_directories(Gameboy.out PUBLIC include)
