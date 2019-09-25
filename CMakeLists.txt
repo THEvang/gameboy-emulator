@@ -7,10 +7,12 @@ project(Gameboy
 
 set(CXX_STANDARD 17)
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy-8" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
 
-add_executable(Gameboy.out main.cpp src/Cartridge.cpp src/Cpu.cpp src/GameBoy.cpp src/Logger.cpp src/MemoryMap.cpp)
+add_executable(Gameboy.out main.cpp src/Cartridge.cpp src/GameBoy.cpp src/Logger.cpp src/MemoryMap.cpp)
+add_subdirectory(cpu)
 
 target_include_directories(Gameboy.out PUBLIC include)
+target_link_libraries(Gameboy.out PRIVATE cpu)
 
 
