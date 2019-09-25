@@ -3,6 +3,7 @@
 #include <iostream>
 #include <Logger.h>
 #include <Opcodes.h>
+#include <CBCode.h>
 
 Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     : m_regA(0x01)
@@ -1414,85 +1415,84 @@ void Cpu::DisableInterrupts() {
     Logger::Log(LogLevel::Debug, "Program counter: \t" + std::to_string(m_programCounter));
     Logger::Log(LogLevel::Debug, "Opcode: \t" + std::to_string(opcode));
 
-     switch (opcode) {
-         case 0x00:
+     switch (static_cast<CBCode>(opcode)) {
+         case CBCode::RLC_B:
             UnimplementedOperation("RLC B");
             break;
         
-        case 0x01:
+        case CBCode::RLC_C :
             UnimplementedOperation("RLC C");
             break;
         
-        case 0x02:
+        case CBCode::RLC_D:
             UnimplementedOperation("RLC D");
             break;
         
-        case 0x03:
+        case CBCode::RLC_E:
             UnimplementedOperation("RLC E");
             break;
         
-        case 0x04:
+        case CBCode::RLC_H:
             UnimplementedOperation("RLC H");
             break;
         
-        case 0x05:
+        case CBCode::RLC_L:
             UnimplementedOperation("RLC L");
             break;
         
-        case 0x06:
+        case CBCode::RLC_ADDR_HL:
             UnimplementedOperation("RLC (HL)");
             break;
         
-        case 0x07:
+        case CBCode::RLC_A:
             UnimplementedOperation("RLC A");
             break;
         
-        case 0x08:
+        case CBCode::RRC_B:
             UnimplementedOperation("RRC B");
             break;
         
-        case 0x09:
+        case CBCode::RRC_C:
             UnimplementedOperation("RRC C");
             break;
         
-        case 0x0A:
+        case CBCode::RRC_D:
             UnimplementedOperation("RRC D");
             break;
         
-        case 0x0B:
+        case CBCode::RRC_E:
             UnimplementedOperation("RRC E");
             break;
         
-        case 0x0C:
+        case CBCode::RRC_H:
             UnimplementedOperation("RRC H");
             break;
         
-        case 0x0D:
+        case CBCode::RRC_L:
             UnimplementedOperation("RRC L");
             break;
         
-        case 0x0E:
+        case CBCode::RRC_ADDR_HL:
             UnimplementedOperation("RRC (HL");
             break;
         
-        case 0x0F:
+        case CBCode::RRC_A:
             UnimplementedOperation("RRC A");
             break;
         
-        case 0x19:
+        case CBCode::RR_C:
             RR(m_regC);
             break;
         
-        case 0x1A:
+        case CBCode::RR_D:
             RR(m_regD);
             break;
 
-        case 0x38:
+        case CBCode::SRL_B:
             SRL(m_regB);
             break;
 
-        
-        case 0xB7:
+        case CBCode::RES_6_A:
             m_regA &= ~(1ul << 6);
             m_programCounter++;
             break;
