@@ -18,7 +18,7 @@ enum class ExternalRam {
 class MemoryMap {
 public:
 
-    MemoryMap(std::shared_ptr<Cartridge> const cartridge);
+    MemoryMap(std::shared_ptr<Cartridge> const & cartridge);
 
     void Write(uint16_t const address, uint8_t const value);
 
@@ -26,8 +26,8 @@ public:
 
 private:
 
-    void LoadRomBank(int nr);
-    void LoadRamBank(int nr);
+    void LoadRomBank(int const nr);
+    void LoadRamBank(int const nr);
 
     std::vector<uint8_t> m_memory;
     std::shared_ptr<Cartridge> m_cartridge;

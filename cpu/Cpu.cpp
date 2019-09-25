@@ -15,7 +15,8 @@ Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     , m_regL(0x4D)
     , m_stackPtr(0xFFFE)
     , m_programCounter(0x0100)
-    , m_mainMemory(mainMemory) 
+    , m_mainMemory(mainMemory)
+    , m_cycles(0)
 
 {
     SetInitialState();
@@ -1144,7 +1145,6 @@ void Cpu::Execute() {
 
 void Cpu::NoOperation() {
     m_programCounter++;
-    return;
 }
 
 void Cpu::LoadToRegister(Byte& to, const Byte& from) {
@@ -1288,9 +1288,9 @@ void Cpu::SubtractImmediateByte() {
     m_cycles += 8;
 }
 
-void Cpu::UnimplementedOperation(const std::string& operation) {
+void Cpu::UnimplementedOperation(std::string const & message) const {
 
-    Logger::Log(LogLevel::Error, "Unimplemented operation: \t" + operation);
+    Logger::Log(LogLevel::Error, "Unimplemented operation: \t" + message);
     std::cin.get();
 }
 

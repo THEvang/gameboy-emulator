@@ -194,14 +194,13 @@ private:
         low = std::bitset<8>(lowByte);
     }
 
-    void Restart(uint8_t address);
+    void Restart(uint8_t const address);
 
     void RRA();
 
     void DisableInterrupts();
 
-
-    void UnimplementedOperation(const std::string& message);
+    void UnimplementedOperation(std::string const & message) const;
 
     Byte m_regA;
     Byte m_regB;

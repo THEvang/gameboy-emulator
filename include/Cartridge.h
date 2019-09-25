@@ -8,14 +8,14 @@
 
 class InsertCartrigdeException : public std::runtime_error {
 public:
-    InsertCartrigdeException(const std::string& message);
+    InsertCartrigdeException(std::string const & message);
 };
 
 
 class Cartridge
 {
 public:
-    Cartridge(const std::string& path);
+    Cartridge(std::string const & path);
 
     std::vector<uint8_t> GetMemory() const;
 

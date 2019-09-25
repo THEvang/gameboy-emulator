@@ -1,19 +1,19 @@
 #include <Cartridge.h>
 
-#include<iostream>
+#include <iostream>
 #include <fstream>
 
 InsertCartrigdeException::InsertCartrigdeException(const std::string& message)
     : runtime_error(message)
 {}
 
-Cartridge::Cartridge(const std::string& path) {
+Cartridge::Cartridge(std::string const & path) {
 
     std::ifstream src(path, std::ios::in | std::ios::binary | std::ios::ate);
 
         if(src.is_open())
         {
-            auto size = src.tellg();
+            auto const size = src.tellg();
             src.seekg(0, std::ios::beg);
             
             auto memory = new char [size];
@@ -32,7 +32,7 @@ Cartridge::Cartridge(const std::string& path) {
 
 
 std::vector<uint8_t> Cartridge::GetMemory() const {
-        return m_memory;
+    return m_memory;
 }
 
 
