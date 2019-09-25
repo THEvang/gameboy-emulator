@@ -14,7 +14,7 @@ public:
     using Byte = uint8_t;
 
 
-    GameBoy();
+    GameBoy() = default;
 
     void InsertCartridge(std::shared_ptr<Cartridge>);
     void RemoveCartridge();

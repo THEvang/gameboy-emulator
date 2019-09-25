@@ -18,18 +18,22 @@ enum class ExternalRam {
 class MemoryMap {
 public:
 
-    MemoryMap(const std::shared_ptr<Cartridge> cartridge);
+    MemoryMap(std::shared_ptr<Cartridge> const cartridge);
 
-    void Write(const uint16_t address, const uint8_t value);
+    void Write(uint16_t const address, uint8_t const value);
 
-    uint8_t Read(const uint16_t address) const;
+    uint8_t Read(uint16_t const address) const;
 
 private:
 
     void LoadRomBank(int nr);
+    void LoadRamBank(int nr);
 
     std::vector<uint8_t> m_memory;
     std::shared_ptr<Cartridge> m_cartridge;
+
+    uint8_t m_currentRomBank;
+    uint8_t m_currentRamBank;
 
     ExternalRam m_externalRam = ExternalRam::Disabled;
     BankingMode m_bankingMode = BankingMode::RomBanking;

@@ -6,23 +6,21 @@
 
 Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     : m_mainMemory(mainMemory) 
+    , m_programCounter(0x0100)
+    , m_stackPtr(0xFFFE)
+    , m_regA(0x01)
+    , m_regF(std::bitset<8>(0xB0))
+    , m_regB(0x00)
+    , m_regC(0x13)
+    , m_regD(0x00)
+    , m_regE(0xD8)
+    , m_regH(0x01)
+    , m_regL(0x4D)
 {
     SetInitialState();
 }
 
 void Cpu::SetInitialState() {
-
-    m_programCounter = 0x0100;
-    m_stackPtr = 0xFFFE;
-
-    m_regA = 0x01;
-    m_regF = std::bitset<8>(0xB0);
-    m_regB = 0x00;
-    m_regC = 0x13;
-    m_regD = 0x00;
-    m_regE = 0xD8;
-    m_regH = 0x01;
-    m_regL = 0x4D;
 
     m_mainMemory->Write(0xFF05, 0x00);
     m_mainMemory->Write(0xFF06, 0x00);
@@ -61,6 +59,7 @@ void Cpu::SetInitialState() {
     m_mainMemory->Write(0xFF4A, 0x00);
     m_mainMemory->Write(0xFF4B, 0x00);
     m_mainMemory->Write(0xFFFF, 0x00);
+    
 }
 
 void Cpu::Execute() {

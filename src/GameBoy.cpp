@@ -2,9 +2,6 @@
 
 #include <iostream>
 
-GameBoy::GameBoy() {}
-
-
 void GameBoy::InsertCartridge(std::shared_ptr<Cartridge> cartridge) {
     
     m_cartridge = cartridge;
