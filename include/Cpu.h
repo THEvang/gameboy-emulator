@@ -7,6 +7,7 @@
 #include <bitset>
 
 #include <MemoryMap.h>
+#include <FlagRegister.h>
 
 class Cpu {
 public:
@@ -65,15 +66,18 @@ private:
 
     void RR(uint8_t reg) {
         
+        m_flags.resetSubtract();
+        m_flags.resetHalfCarry();
+
         uint8_t msb = 0;
-        if(m_regF.test(4)) {
+        if(m_flags.carryFlag() == FlagState::Set) {
             msb = 0b10000000;
         }
 
         if( (reg & 0b00000001) == 1) { 
-            m_regF.set(4);
+            m_flags.setCarry();
         } else {
-            m_regF.reset(4);
+            m_flags.resetCarry();
         }
 
         reg = reg >> 1;
@@ -81,11 +85,9 @@ private:
         reg |= msb;
         
         if (reg == 0) {
-            m_regF.set(7);
+            m_flags.setZero();
         }
 
-        m_regF.reset(6);
-        m_regF.reset(5);
 
         m_programCounter++;
     }
@@ -122,40 +124,41 @@ private:
 
     void SRA(uint8_t& reg) {
 
+        m_flags.resetSubtract();
+        m_flags.resetHalfCarry();
+
         if( (reg & 0x0001) == 1) {
-            m_regF.set(4);
+            m_flags.setCarry();
         } else {
-            m_regF.reset(4);
+            m_flags.resetCarry();
         }
 
         reg = reg >> 1;
 
         if(reg == 0) {
-            m_regF.set(7);
+            m_flags.setZero();
         }
-        m_regF.reset(6);
-        m_regF.reset(5);
-
+        
         m_programCounter++;
     }
 
     void SRL(uint8_t& reg) {
         
+        m_flags.resetSubtract();
+        m_flags.resetHalfCarry();
+
         if ((reg & 0x0001) == 1) {
-            m_regF.set(4);
+            m_flags.setCarry();
         } else {
-            m_regF.reset(4);
+            m_flags.resetCarry();
         }
 
         reg = reg >> 1;
         reg = reg & 0b01111111;
 
         if(reg == 0) {
-            m_regF.set(7);
+            m_flags.setZero();
         }
-
-        m_regF.reset(6);
-        m_regF.reset(5);
 
         m_programCounter++;
     }
@@ -182,17 +185,7 @@ private:
     void JumpRelativeC();
 
     void Push(uint8_t high, uint8_t low);
-    void Push(uint8_t high, std::bitset<8> low);
     void Pop(uint8_t& high, uint8_t& low);
-    void Pop(uint8_t& high, std::bitset<8>& low)
-    {
-        uint8_t highByte = 0;
-        uint8_t lowByte = 0;
-        Pop(highByte, lowByte);
-
-        high = highByte;
-        low = std::bitset<8>(lowByte);
-    }
 
     void Restart(uint8_t const address);
 
@@ -207,9 +200,10 @@ private:
     Byte m_regC;
     Byte m_regD;
     Byte m_regE;
-    std::bitset<8> m_regF;
     Byte m_regH;
     Byte m_regL;
+
+    FlagRegister m_flags;
 
     using StackPointer = uint16_t;
     using ProgramCounter = uint16_t;

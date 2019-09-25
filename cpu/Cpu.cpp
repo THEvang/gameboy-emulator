@@ -11,7 +11,6 @@ Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
     , m_regC(0x13)
     , m_regD(0x00)
     , m_regE(0xD8)
-    , m_regF(std::bitset<8>(0xB0))
     , m_regH(0x01)
     , m_regL(0x4D)
     , m_stackPtr(0xFFFE)
@@ -1085,7 +1084,8 @@ void Cpu::Execute() {
             break;
         
         case Opcode::POP_AF:
-            Pop(m_regA, m_regF);
+            UnimplementedOperation("POP AF");
+            //Pop(m_regA, m_flags.asByte());
             break;
         
         case Opcode::LD_A_ADDR_C:
@@ -1097,7 +1097,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::PUSH_AF:
-            Push(m_regA, m_regF);
+            Push(m_regA, m_flags.asByte());
             break;
         
         case Opcode::OR_D8:
@@ -1154,18 +1154,18 @@ void Cpu::LoadToRegister(Byte& to, const Byte& from) {
 
 void Cpu::IncrementRegister(Byte& reg) {
 
+    m_flags.resetSubtract();
+
     if ( (((reg & 0xf) + (1 & 0xf)) & 0x10) == 0x10) {
-        m_regF.set(5);
+        m_flags.setHalfCarry();
     }
 
     reg++;
 
     if (reg == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-
-    m_regF.reset(6);
  
     m_programCounter++;
     m_cycles += 4;
@@ -1175,17 +1175,18 @@ void Cpu::DecrementRegister(Byte& reg) {
     
     Logger::Log(LogLevel::Debug, "Decrement register");
 
+    m_flags.resetSubtract();
+
     if((((reg  & 0x0f) - (1 & 0x0f)) & 0x10) == 0x10) {
-        m_regF.set(5);
+        m_flags.setHalfCarry();
     } 
 
     reg--;
 
     if (reg == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.set(6);
     
     // Set if no borrow from bit 4
 
@@ -1202,19 +1203,20 @@ uint16_t Cpu::CombineRegisters(const Byte& high, const Byte& low) const {
 
 void Cpu::AddRegisters(Byte& to, const Byte& from) {
 
+    m_flags.resetSubtract();
+
     if ( (((to & 0xf) + ( (from +1) &0xf)) & 0x10) == 0x10) {
-        m_regF.set(5);
+        m_flags.setHalfCarry();
     } 
 
     if( (static_cast<int>(to) + static_cast<int>(from)) > 0xFF) {
-        m_regF.set(4);
+        m_flags.setCarry();
     }
 
     if(to == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.reset(6);
 
     to += from;
 
@@ -1225,17 +1227,19 @@ void Cpu::AddRegisters(Byte& to, const Byte& from) {
 void Cpu::SubtractFromA(uint8_t value) {
 
     Logger::Log(LogLevel::Debug, "Subtract Register from A");
+
+    m_flags.setSubtract();
+
     if (value > m_regA) {
-        m_regF.set(4);
+        m_flags.setCarry();
     }
 
     m_regA -= value;
 
     if(m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.set(6);
 
     m_programCounter++;
     m_cycles += 8;
@@ -1247,19 +1251,20 @@ void Cpu::SubtractFromAddress(uint16_t address) {
 
     Logger::Log(LogLevel::Debug, "Subtract address from A");
 
+    m_flags.setSubtract();
+
     auto value = m_mainMemory->Read(address);    
 
     if (value > m_regA) {
-        m_regF.set(4);
+        m_flags.setCarry();
     }
 
     m_regA -= value;
 
     if(m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.set(6);
 
 
     //H - set if no borrow from bit 4
@@ -1273,14 +1278,14 @@ void Cpu::SubtractImmediateByte() {
 
     Logger::Log(LogLevel::Debug, "Subtract n From A");
 
+    m_flags.setSubtract();
+
     auto value = m_mainMemory->Read(m_programCounter + 1);
     m_regA -= value;
 
     if(m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
-
-    m_regF.set(6);
 
     //H - set if no borrow from bit 4
     //C - set if no borrow
@@ -1299,36 +1304,36 @@ void Cpu::AndWithA(const Byte& reg) {
     m_regA &= reg;
 
     if (m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.reset(6);
-    m_regF.set(5);
-    m_regF.reset(4);
+    m_flags.resetSubtract();
+    m_flags.setHalfCarry();
+    m_flags.resetCarry();
 }
 
 void Cpu::OrWithA(const Byte& reg) {
     m_regA |= reg;
 
     if (m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();;
     }
 
-    m_regF.reset(6);
-    m_regF.reset(5);
-    m_regF.reset(4);
+    m_flags.resetSubtract();
+    m_flags.resetHalfCarry();
+    m_flags.resetCarry();
 }
 
 void Cpu::XorWithA(const Byte& reg) {
     m_regA ^= reg;
 
     if (m_regA == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.reset(6);
-    m_regF.reset(5);
-    m_regF.reset(4);
+    m_flags.resetSubtract();
+    m_flags.resetHalfCarry();
+    m_flags.resetCarry();
 }
 
 void Cpu::CompareWithA(const Byte& reg) {
@@ -1336,15 +1341,15 @@ void Cpu::CompareWithA(const Byte& reg) {
     Logger::Log(LogLevel::Debug, "Compare register with A");
 
     if(m_regA == reg) {
-        m_regF.set(7);
+       m_flags.setZero();
     }
 
-    m_regF.set(6);
+    m_flags.setSubtract();
 
     //Set H if no borrow from bit 4
 
     if(m_regA < reg) {
-        m_regF.set(4);
+        m_flags.setCarry();
     }
 }
 
@@ -1358,8 +1363,8 @@ void Cpu::DisableInterrupts() {
 
     m_regA = ~m_regA;
 
-    m_regF.set(6);
-    m_regF.set(5);
+    m_flags.setSubtract();
+    m_flags.setHalfCarry();
 
     m_programCounter++;
     m_cycles += 4;
@@ -1367,23 +1372,23 @@ void Cpu::DisableInterrupts() {
 
  void Cpu::ComplementCarryFlag() {
 
-    m_regF.flip(4);
+    m_flags.flipCarry();
 
-    m_regF.reset(6);
-    m_regF.reset(5);
+    m_flags.resetSubtract();
+    m_flags.resetHalfCarry();
 
     m_programCounter++;
     m_cycles += 4;
  }
 
  void Cpu::SetCarryFlag() {
-     
-     m_regF.set(4);
-     m_regF.reset(6);
-     m_regF.reset(5);
 
-     m_programCounter++;
-     m_cycles += 4;
+    m_flags.setCarry();
+    m_flags.resetSubtract();
+    m_flags.resetHalfCarry();
+
+    m_programCounter++;
+    m_cycles += 4;
  }
 
  void Cpu::Call() {
@@ -1505,7 +1510,8 @@ void Cpu::DisableInterrupts() {
  }
 
 void Cpu::JumpRelativeNZ() {
-    if (!m_regF.test(7)) {
+
+    if (m_flags.zeroFlag() == FlagState::Reset) {
         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
     } else {
         m_programCounter += 2;
@@ -1515,7 +1521,8 @@ void Cpu::JumpRelativeNZ() {
 }
 
 void Cpu::JumpRelativeNC() {
-    if (!m_regF.test(4)) {
+
+    if (m_flags.carryFlag() == FlagState::Reset) {
         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
     } else {
         m_programCounter += 2;
@@ -1525,7 +1532,8 @@ void Cpu::JumpRelativeNC() {
 }
 
 void Cpu::JumpRelativeC() {
-    if (m_regF.test(4)) {
+
+    if (m_flags.carryFlag() == FlagState::Set) {
         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
     } else {
         m_programCounter += 2;
@@ -1568,12 +1576,6 @@ void Cpu::Push(uint8_t high, uint8_t low) {
     m_programCounter++;
 }
 
-void Cpu::Push(uint8_t high, std::bitset<8> low) {
-
-    uint8_t lowBit = low.to_ulong();
-    Push(high, lowBit);
-}
-
 void Cpu::LoadFromImmediateByte(uint8_t& to) {
     to = m_mainMemory->Read(m_programCounter + 1);
 
@@ -1597,6 +1599,7 @@ void Cpu::LoadFromAddress(Byte& to, uint16_t address) {
 }
 
 void Cpu::LoadToAddress(uint16_t address, uint8_t value) {
+    
     m_mainMemory->Write(address, value);
 
     m_programCounter++;
@@ -1604,6 +1607,7 @@ void Cpu::LoadToAddress(uint16_t address, uint8_t value) {
 }
 
 void Cpu::LoadImmediate16BitValue(uint8_t& high, uint8_t& low) {
+
     high = m_mainMemory->Read(m_programCounter + 2);
     low = m_mainMemory->Read(m_programCounter + 1);
 
@@ -1633,16 +1637,16 @@ void Cpu::IncrementAtAddress(uint16_t address) {
     uint8_t value = m_mainMemory->Read(address);
 
     if ( (((value & 0xf) + ( (value +1) &0xf)) & 0x10) == 0x10) {
-        m_regF.set(5);
+        m_flags.setHalfCarry();
     } 
 
     value++;
 
     if(value == 0) {
-        m_regF.set(7);
+        m_flags.setZero();
     }
 
-    m_regF.reset(6);
+    m_flags.resetSubtract();
 
     m_mainMemory->Write(address, value);
 
@@ -1652,7 +1656,7 @@ void Cpu::IncrementAtAddress(uint16_t address) {
 
 void Cpu::IncrementRegisterPair(uint8_t& high, uint8_t& low) {
     
-    uint16_t value = CombineRegisters(high, low);
+    auto value = CombineRegisters(high, low);
     value++;
 
     high = value >> 8;
@@ -1702,19 +1706,19 @@ void Cpu::DecrementAtAddress(uint16_t address) {
 void Cpu::RLCA() {
 
     if ( (m_regA & 0b10000000) == 0b10000000) {
-        m_regF.set(4);
+        m_flags.setCarry();
     } else {
-        m_regF.reset(4);
+        m_flags.resetCarry();
     }
 
     m_regA = m_regA << 1;
 
     if (m_regA == 0) {
-        m_regF.set(7);
+        m_flags.zeroFlag();
     }
 
-    m_regF.reset(6);
-    m_regF.reset(5);
+    m_flags.resetSubtract();
+    m_flags.resetHalfCarry();
 
     m_programCounter++;
     m_cycles += 4;
@@ -1729,7 +1733,8 @@ void Cpu::JumpRelative() {
 
 void Cpu::JumpRelativeZ() {
 
-    if(m_regF.test(7)) {
+    if(m_flags.zeroFlag() == FlagState::Set)
+    {
         m_programCounter += static_cast<int16_t>(m_mainMemory->Read(m_programCounter + 1));
     } else {
         m_programCounter++;
@@ -1739,7 +1744,8 @@ void Cpu::JumpRelativeZ() {
 }
 
 void Cpu::RetNZ() {
-    if(!m_regF.test(7)) {
+
+    if(m_flags.zeroFlag() == FlagState::Reset) {
         Ret();
     } else {
         m_programCounter++;

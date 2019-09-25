@@ -1,3 +1,5 @@
+#pragma once 
+
 enum class CBCode {
     RLC_B = 0x00,
     RLC_C,
