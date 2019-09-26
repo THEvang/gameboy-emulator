@@ -23,12 +23,38 @@ private:
 
     void SetInitialState();
 
-    void LoadFromImmediateByte(uint8_t& to);
-    void LoadFromRegister(uint8_t& to, uint8_t from);
-    void LoadFromAddress(Byte& to, uint16_t address);
+    void Add(uint8_t const value);
+    void Add(uint16_t const address);
+
+    void Load(uint8_t & reg); //Load from immediate value
+    void Load(uint8_t & reg, uint8_t value); //Load from register
+    void Load(uint8_t & reg, uint16_t address); //Load from address
+    void Load(uint16_t const address, uint8_t const value); //Load to address
+    void Load(std::pair<uint8_t&, uint8_t> registerPair); //Load immediate 16 bits to register pair
+
+    void Or(); //Or with immediate byte 
+    void Or(uint8_t const value); //Or with value
+    void Or(uint16_t const addres); //Or with value at address
+    void SetOrFlags(uint8_t const result);
+
+    void Xor(); //Xor with immediate byte
+    void Xor(uint8_t const value); //Xor with value
+    void Xor(uint16_t const address); //Xor with value at address
+
+    void And();
+    void And(uint8_t const value);
+    void And(uint16_t const address);
+    void SetAndFlags(uint8_t const result);
+
+    void Increment(uint8_t & value);
+    void Increment(uint8_t & high, uint8_t & low);
+    void SetIncrementFlags();
+
+    void Decrement(uint8_t & value);
+    void Decrement(uint8_t const address);
+    void SetDecrementFlags();
+
     
-    void LoadToRegister(Byte& to, const Byte& from);
-    void LoadToAddress(uint16_t address, uint8_t value);
     void LoadImmediate16BitValue(uint8_t& high, uint8_t& low);
     void LoadImmediate16BitValue(uint16_t& to);
 
@@ -56,9 +82,6 @@ private:
 
     void NoOperation();
 
-    void AndWithA(const Byte& reg);
-    void OrWithA(const Byte& reg);
-    void XorWithA(const Byte& reg);
 
     void CompareWithA(const Byte& reg);
 
