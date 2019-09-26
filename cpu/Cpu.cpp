@@ -91,7 +91,7 @@ void Cpu::Execute() {
             break;
 
         case Opcode::LD_ADDR_BC_A:
-            LoadToAddress(CombineRegisters(m_regB, m_regC), m_regA);
+            Load(CombineRegisters(m_regB, m_regC), m_regA);
             break;
 
         case Opcode::INC_BC:
@@ -107,7 +107,7 @@ void Cpu::Execute() {
             break;
 
         case Opcode::LD_B_D8:
-            LoadFromImmediateByte(m_regB);
+            Load(m_regB);
             break;
         
         case Opcode::RLCA:
@@ -125,7 +125,7 @@ void Cpu::Execute() {
             break;
 
         case Opcode::LD_A_ADDR_BC:
-            LoadFromAddress(m_regA, CombineRegisters(m_regB, m_regC));
+            Load(m_regA, CombineRegisters(m_regB, m_regC));
             break;
 
         case Opcode::DEC_BC:
@@ -141,7 +141,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_C_D8:
-            LoadFromImmediateByte(m_regC);
+            Load(m_regC);
             break;
         
         case Opcode::RRCA:
@@ -159,7 +159,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_ADDR_DE_A:
-            LoadToAddress(CombineRegisters(m_regD, m_regE), m_regA);
+            Load(CombineRegisters(m_regD, m_regE), m_regA);
             break;
         
         case Opcode::INC_DE:
@@ -175,7 +175,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_D_D8:
-            LoadFromImmediateByte(m_regD);
+            Load(m_regD);
             break;
         
         case Opcode::RLA:
@@ -193,7 +193,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_A_ADDR_DE:
-            LoadFromAddress(m_regA, CombineRegisters(m_regD, m_regE));
+            Load(m_regA, CombineRegisters(m_regD, m_regE));
             break;
         
         case Opcode::DEC_DE:
@@ -209,7 +209,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_E_D8:
-            LoadFromImmediateByte(m_regE);
+            Load(m_regE);
             break;
         
         case Opcode::RRA:
@@ -241,7 +241,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_H_D8:
-            LoadFromImmediateByte(m_regH);
+            Load(m_regH);
             break;
         
         case Opcode::DAA:
@@ -275,7 +275,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_L_D8:
-            LoadFromImmediateByte(m_regL);
+            Load(m_regL);
             break;
         
         case Opcode::CPL:
@@ -344,7 +344,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_A_D8:
-            LoadFromImmediateByte(m_regA);
+            Load(m_regA);
             break;
 
         case Opcode::CCF:
@@ -352,219 +352,219 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_B_B:
-            LoadFromRegister(m_regB, m_regB);
+            Load(m_regB, m_regB);
             break;
         
         case Opcode::LD_B_C:
-            LoadFromRegister(m_regB, m_regC);
+            Load(m_regB, m_regC);
             break;
         
         case Opcode::LD_B_D:
-            LoadFromRegister(m_regB, m_regD);
+            Load(m_regB, m_regD);
             break;
         
         case Opcode::LD_B_E:
-            LoadFromRegister(m_regB, m_regE);
+            Load(m_regB, m_regE);
             break;
         
         case Opcode::LD_B_H:
-            LoadFromRegister(m_regB, m_regH);
+            Load(m_regB, m_regH);
             break;
         
         case Opcode::LD_B_L:
-            LoadFromRegister(m_regB, m_regL);
+            Load(m_regB, m_regL);
             break;
         
         case Opcode::LD_B_ADDR_HL:
-            LoadFromAddress(m_regB, CombineRegisters(m_regH, m_regL));
+            Load(m_regB, CombineRegisters(m_regH, m_regL));
             break;
         
         case Opcode::LD_B_A:
-            LoadFromRegister(m_regB, m_regA);
+            Load(m_regB, m_regA);
             break;
         
         case Opcode::LD_C_B:
-            LoadFromRegister(m_regC, m_regB);
+            Load(m_regC, m_regB);
             break;
         
         case Opcode::LD_C_C:
-            LoadFromRegister(m_regC, m_regC);
+            Load(m_regC, m_regC);
             break;
         
         case Opcode::LD_C_D:
-            LoadFromRegister(m_regC, m_regD);
+            Load(m_regC, m_regD);
             break;
         
         case Opcode::LD_C_E:
-            LoadFromRegister(m_regC, m_regE);
+            Load(m_regC, m_regE);
             break;
         
         case Opcode::LD_C_H:
-            LoadFromRegister(m_regC, m_regH);
+            Load(m_regC, m_regH);
             break;
         
         case Opcode::LD_C_L:
-            LoadFromRegister(m_regC, m_regL);
+            Load(m_regC, m_regL);
             break;
         
         case Opcode::LD_C_ADDR_HL:
-            LoadFromAddress(m_regC, CombineRegisters(m_regH, m_regL));
+            Load(m_regC, CombineRegisters(m_regH, m_regL));
             break;
         
         case Opcode::LD_C_A:
-            LoadFromRegister(m_regC, m_regA);
+            Load(m_regC, m_regA);
             break;
 
         case Opcode::LD_D_B:
-            LoadFromRegister(m_regD, m_regB);
+            Load(m_regD, m_regB);
             break;
 
         case Opcode::LD_D_C:
-            LoadFromRegister(m_regD, m_regC);
+            Load(m_regD, m_regC);
             break;
 
         case Opcode::LD_D_D:
-            LoadFromRegister(m_regD, m_regD);
+            Load(m_regD, m_regD);
             break;
 
         case Opcode::LD_D_E:
-            LoadFromRegister(m_regD, m_regE);
+            Load(m_regD, m_regE);
             break;
 
         case Opcode::LD_D_H:
-            LoadFromRegister(m_regD, m_regH);
+            Load(m_regD, m_regH);
             break;
 
         case Opcode::LD_D_L:
-            LoadFromRegister(m_regD, m_regL);
+            Load(m_regD, m_regL);
             break;
 
         case Opcode::LD_D_ADDR_HL:
-            LoadFromAddress(m_regD, CombineRegisters(m_regH, m_regL));
+            Load(m_regD, CombineRegisters(m_regH, m_regL));
             break;
 
         case Opcode::LD_D_A:
-            LoadFromRegister(m_regD, m_regA);
+            Load(m_regD, m_regA);
             break;
 
         case Opcode::LD_E_B:
-            LoadFromAddress(m_regE, m_regB);
+            Load(m_regE, m_regB);
             break;
 
         case Opcode::LD_E_C:
-            LoadFromRegister(m_regE, m_regC);
+            Load(m_regE, m_regC);
             break;
 
         case Opcode::LD_E_D:
-            LoadFromRegister(m_regE, m_regD);
+            Load(m_regE, m_regD);
             break;
 
         case Opcode::LD_E_E:
-            LoadFromRegister(m_regE, m_regE);
+            Load(m_regE, m_regE);
             break;
 
         case Opcode::LD_E_H:
-            LoadFromRegister(m_regE, m_regH);
+            Load(m_regE, m_regH);
             break;
 
         case Opcode::LD_E_L:
-            LoadFromRegister(m_regE, m_regL);
+            Load(m_regE, m_regL);
             break;
 
         case Opcode::LD_E_ADDR_HL:
-            LoadFromAddress(m_regE, CombineRegisters(m_regH, m_regL));
+            Load(m_regE, CombineRegisters(m_regH, m_regL));
             break;
 
         case Opcode::LD_E_A:
-            LoadFromRegister(m_regE, m_regA);
+            Load(m_regE, m_regA);
             break;
 
         case Opcode::LD_H_B:
-            LoadFromRegister(m_regH, m_regB);
+            Load(m_regH, m_regB);
             break;
 
         case Opcode::LD_H_C:
-            LoadFromRegister(m_regH, m_regC);
+            Load(m_regH, m_regC);
             break;
 
         case Opcode::LD_H_D:
-            LoadFromRegister(m_regH, m_regD);
+            Load(m_regH, m_regD);
             break;
 
         case Opcode::LD_H_E:
-            LoadFromRegister(m_regH, m_regE);
+            Load(m_regH, m_regE);
             break;
 
         case Opcode::LD_H_H:
-            LoadFromRegister(m_regH, m_regH);
+            Load(m_regH, m_regH);
             break;
 
         case Opcode::LD_H_L:
-            LoadFromRegister(m_regH, m_regL);
+            Load(m_regH, m_regL);
             break;
 
         case Opcode::LD_H_ADDR_HL:
-            LoadFromAddress(m_regH, CombineRegisters(m_regH, m_regL));
+            Load(m_regH, CombineRegisters(m_regH, m_regL));
             break;
 
         case Opcode::LD_H_A:
-            LoadFromRegister(m_regH, m_regA);
+            Load(m_regH, m_regA);
             break;
 
         case Opcode::LD_L_B: 
-            LoadFromRegister(m_regL, m_regB);
+            Load(m_regL, m_regB);
             break;
         
         case Opcode::LD_L_C:
-            LoadFromRegister(m_regL, m_regC);
+            Load(m_regL, m_regC);
             break;
         
         case Opcode::LD_L_D:
-            LoadFromRegister(m_regL, m_regD);
+            Load(m_regL, m_regD);
             break;
         
         case Opcode::LD_L_E:
-            LoadFromRegister(m_regL, m_regE);
+            Load(m_regL, m_regE);
             break;
         
         case Opcode::LD_L_H:
-            LoadFromRegister(m_regL, m_regH);
+            Load(m_regL, m_regH);
             break;
         
         case Opcode::LD_L_L:
-            LoadFromRegister(m_regL, m_regL);
+            Load(m_regL, m_regL);
             break;
         
         case Opcode::LD_L_ADDR_HL:
-            LoadFromAddress(m_regL, CombineRegisters(m_regH, m_regL));
+            Load(m_regL, CombineRegisters(m_regH, m_regL));
             break;
         
         case Opcode::LD_L_A:
-            LoadFromRegister(m_regL, m_regA);
+            Load(m_regL, m_regA);
             break;
         
         case Opcode::LD_ADDR_HL_B:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regB);
+            Load(CombineRegisters(m_regH, m_regL), m_regB);
             break;
 
         case Opcode::LD_ADDR_HL_C:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regC);
+            Load(CombineRegisters(m_regH, m_regL), m_regC);
             break;
 
         case Opcode::LD_ADDR_HL_D:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regD);
+            Load(CombineRegisters(m_regH, m_regL), m_regD);
             break;
         
         case Opcode::LD_ADDR_HL_E:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regE); 
+            Load(CombineRegisters(m_regH, m_regL), m_regE); 
             break;
         
         case Opcode::LD_ADDR_HL_H:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regH);
+            Load(CombineRegisters(m_regH, m_regL), m_regH);
             break;
         
         case Opcode::LD_ADDR_HL_L:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regL);
+            Load(CombineRegisters(m_regH, m_regL), m_regL);
             break;
         
         case Opcode::HALT:
@@ -573,39 +573,39 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_ADDR_HL_A:
-            LoadToAddress(CombineRegisters(m_regH, m_regL), m_regA);
+            Load(CombineRegisters(m_regH, m_regL), m_regA);
             break;
 
         case Opcode::LD_A_B:
-            LoadFromRegister(m_regA, m_regB);
+            Load(m_regA, m_regB);
             break;
         
         case Opcode::LD_A_C:
-            LoadFromRegister(m_regA, m_regC);
+            Load(m_regA, m_regC);
             break;
         
         case Opcode::LD_A_D:
-            LoadFromRegister(m_regA, m_regD);
+            Load(m_regA, m_regD);
             break;
         
         case Opcode::LD_A_E:
-            LoadFromRegister(m_regA, m_regE);
+            Load(m_regA, m_regE);
             break;
         
         case Opcode::LD_A_H:
-            LoadFromRegister(m_regA, m_regH);
+            Load(m_regA, m_regH);
             break;
         
         case Opcode::LD_A_L:
-            LoadFromRegister(m_regA, m_regL);
+            Load(m_regA, m_regL);
             break;
         
         case Opcode::LD_A_ADDR_HL:
-            LoadFromAddress(m_regA, CombineRegisters(m_regH, m_regL));
+            Load(m_regA, CombineRegisters(m_regH, m_regL));
             break;
         
         case Opcode::LD_A_A:
-            LoadFromRegister(m_regA, m_regA);
+            Load(m_regA, m_regA);
             break;
         
         case Opcode::ADD_A_B:
@@ -738,132 +738,99 @@ void Cpu::Execute() {
             break;
         
         case Opcode::AND_B:
-            AndWithA(m_regB);
-            m_programCounter++;
+            And(m_regB);
             break;
         
         case Opcode::AND_C:
-            AndWithA(m_regC);
-            m_programCounter++;
+            And(m_regC);
             break;
         
         case Opcode::AND_D:
-            AndWithA(m_regD);
-            m_programCounter++;
+            And(m_regD);
             break;
         
         case Opcode::AND_E:
-            AndWithA(m_regE);
-            m_programCounter++;
+            And(m_regE);
             break;
         
         case Opcode::AND_H:
-            AndWithA(m_regH);
-            m_programCounter++;
+            And(m_regH);
             break;
         
         case Opcode::AND_L:
-            AndWithA(m_regL);
-            m_programCounter++;
+            And(m_regL);
             break;
         
         case Opcode::AND_ADDR_HL:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            AndWithA(m_mainMemory->Read(address));
-            m_programCounter++;
+            And(CombineRegisters(m_regH, m_regL));
             break;
-            }
 
         case Opcode::AND_A:
-            AndWithA(m_regA);
-            m_programCounter++;
+            And(m_regA);
             break;
         
         case Opcode::XOR_B:
-            XorWithA(m_regB);
-            m_programCounter++;
+            Xor(m_regB);
             break;
         
         case Opcode::XOR_C:
-            XorWithA(m_regC);
-            m_programCounter++;
+            Xor(m_regC);
             break;
         
         case Opcode::XOR_D:
-            XorWithA(m_regD);
-            m_programCounter++;
+            Xor(m_regD);
             break;
         
         case Opcode::XOR_E:
-            XorWithA(m_regE);
-            m_programCounter++;
+            Xor(m_regE);
             break;
         
         case Opcode::XOR_H:
-            XorWithA(m_regH);
-            m_programCounter++;
+            Xor(m_regH);
             break;
         
         case Opcode::XOR_L:
-            XorWithA(m_regL);
-            m_programCounter++;
+            Xor(m_regL);
             break;
         
         case Opcode::XOR_ADDR_HL:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            XorWithA(m_mainMemory->Read(address));
-            m_programCounter++;
+            Xor(CombineRegisters(m_regH, m_regL)); 
             break;
-            }
         
         case Opcode::XOR_A:
-            XorWithA(m_regA);
-            m_programCounter++;
+            Xor(m_regA);
             break;
         
         case Opcode::OR_B:
-            OrWithA(m_regB);
-            m_programCounter++;
+            Or(m_regB);
             break;
         
         case Opcode::OR_C:
-            OrWithA(m_regC);
-            m_programCounter++;
+            Or(m_regC);
             break;
         
         case Opcode::OR_D:
-            OrWithA(m_regD);
-            m_programCounter++;
+            Or(m_regD);
             break;
         
         case Opcode::OR_E:
-            OrWithA(m_regE);
-            m_programCounter++;
+            Or(m_regE);
             break;
         
         case Opcode::OR_H:
-            OrWithA(m_regH);
-            m_programCounter++;
+            Or(m_regH);
             break;
         
         case Opcode::OR_L:
-            OrWithA(m_regL);
-            m_programCounter++;
+            Or(m_regL);
             break;
         
         case Opcode::OR_ADDR_HL:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            OrWithA(m_mainMemory->Read(address));
-            m_programCounter++;
+            Or(CombineRegisters(m_regH, m_regL));
             break;
-            }
-
+            
         case Opcode::OR_A:
-            OrWithA(m_regA);
-            m_programCounter++;
+            Or(m_regA);
             break;
         
         case Opcode::CP_B:
@@ -1044,8 +1011,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::AND_D8:
-            AndWithA(m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            And();
             break;
         
         case Opcode::RST_20H:
@@ -1070,8 +1036,7 @@ void Cpu::Execute() {
             }
 
         case Opcode::XOR_D8:
-            XorWithA(m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            Xor();
             break;
         
         case Opcode::RST_28H:
@@ -1101,8 +1066,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::OR_D8:
-            OrWithA(m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            Or();
             break;
         
         case Opcode::RST_30H:
@@ -1146,10 +1110,31 @@ void Cpu::Execute() {
 
 void Cpu::NoOperation() {
     m_programCounter++;
+    m_cycles += 4;
 }
 
-void Cpu::LoadToRegister(Byte& to, const Byte& from) {
-    to = from;
+void Cpu::Load(uint8_t & reg) {
+    reg = m_mainMemory->Read(m_programCounter + 1);
+    m_programCounter += 2;
+    m_cycles += 8;
+}
+
+void Cpu::Load(uint8_t & reg, uint8_t value) {
+    reg = value;
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+void Cpu::Load(uint8_t & reg, uint16_t const addr) {
+    reg = m_mainMemory->Read(addr);
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::Load(uint16_t const address, uint8_t const value) {
+    m_mainMemory->Write(address, value);
+    m_programCounter++;
+    m_cycles += 8;
 }
 
 void Cpu::IncrementRegister(Byte& reg) {
@@ -1300,10 +1285,38 @@ void Cpu::UnimplementedOperation(std::string const & message) const {
     std::cin.get();
 }
 
-void Cpu::AndWithA(const Byte& reg) {
-    m_regA &= reg;
+void Cpu::And() {
+    auto value = m_mainMemory->Read(m_programCounter + 1);
 
-    if (m_regA == 0) {
+    m_regA &= value;
+    SetAndFlags(m_regA);
+
+    m_programCounter +=2;
+    m_cycles += 8;
+}
+
+void Cpu::And(uint8_t const value) {
+    
+    m_regA &= value;
+    SetAndFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+void Cpu::And(uint16_t const address) {
+    auto value = m_mainMemory->Read(address);
+
+    m_regA &= value;
+    SetAndFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::SetAndFlags(uint8_t const value) {
+    
+    if (value == 0) {
         m_flags.setZero();
     }
 
@@ -1312,11 +1325,42 @@ void Cpu::AndWithA(const Byte& reg) {
     m_flags.resetCarry();
 }
 
-void Cpu::OrWithA(const Byte& reg) {
-    m_regA |= reg;
+void Cpu::Or() {
 
-    if (m_regA == 0) {
-        m_flags.setZero();;
+    auto value = m_mainMemory->Read(m_programCounter + 1);
+    
+    m_regA |= value;
+    SetOrFlags(m_regA);
+
+    m_programCounter += 2;
+    m_cycles += 8;
+}
+
+void Cpu::Or(uint8_t const value) {
+
+    m_regA |= value;
+    SetOrFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+void Cpu::Or(uint16_t const address) {
+
+    auto value = m_mainMemory->Read(address);
+
+    m_regA |= value;
+
+    SetOrFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 8;
+}
+
+void Cpu::SetOrFlags(uint8_t const result) {
+    
+    if (result == 0) {
+        m_flags.setZero();
     }
 
     m_flags.resetSubtract();
@@ -1324,16 +1368,33 @@ void Cpu::OrWithA(const Byte& reg) {
     m_flags.resetCarry();
 }
 
-void Cpu::XorWithA(const Byte& reg) {
-    m_regA ^= reg;
+void Cpu::Xor() {
+    auto value = m_mainMemory->Read(m_programCounter + 1);
 
-    if (m_regA == 0) {
-        m_flags.setZero();
-    }
+    m_regA ^= value;
+    SetOrFlags(m_regA);
 
-    m_flags.resetSubtract();
-    m_flags.resetHalfCarry();
-    m_flags.resetCarry();
+    m_programCounter += 2;
+    m_cycles += 8;
+}
+
+void Cpu::Xor(uint8_t const value) {
+    
+    m_regA ^= value;
+    SetOrFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 4;
+}
+
+void Cpu::Xor(uint16_t const address) {
+    auto value = m_mainMemory->Read(address);
+
+    m_regA ^= value;
+    SetOrFlags(m_regA);
+
+    m_programCounter++;
+    m_cycles += 8;
 }
 
 void Cpu::CompareWithA(const Byte& reg) {
@@ -1574,36 +1635,6 @@ void Cpu::Push(uint8_t high, uint8_t low) {
     m_stackPtr--;
 
     m_programCounter++;
-}
-
-void Cpu::LoadFromImmediateByte(uint8_t& to) {
-    to = m_mainMemory->Read(m_programCounter + 1);
-
-    m_programCounter += 2;
-    m_cycles += 8;
-}
-
-void Cpu::LoadFromRegister(uint8_t& to, uint8_t from) {
-    to = from;
-
-    m_programCounter++;
-    m_cycles += 4;
-}
-
-
-void Cpu::LoadFromAddress(Byte& to, uint16_t address) {
-    to = m_mainMemory->Read(address);
-    
-    m_programCounter++;
-    m_cycles += 8;
-}
-
-void Cpu::LoadToAddress(uint16_t address, uint8_t value) {
-    
-    m_mainMemory->Write(address, value);
-
-    m_programCounter++;
-    m_cycles += 8;
 }
 
 void Cpu::LoadImmediate16BitValue(uint8_t& high, uint8_t& low) {
