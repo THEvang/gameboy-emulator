@@ -1,47 +1,7 @@
-#include <Cpu.h>
-
+#include <cpu/Cpu.h>
+#include <cpu/Operations.h>
 #include <Opcodes.h>
 #include <CBCode.h>
-
-void NOP(Cpu& cpu) {
-    return;
-}
-
-void LDB(Cpu& cpu) {
-    cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
-
-void LDC(Cpu& cpu) {
-    cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
-
-void LDD(Cpu& cpu) {
-    cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
-
-void LDE(Cpu& cpu) {
-    cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
-
-void LDH(Cpu& cpu) {
-    cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
-
-void LDL(Cpu& cpu) {
-    cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_program_counter+1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter += 2;
-}
 
 void step(Cpu& cpu) {
 
@@ -49,7 +9,7 @@ void step(Cpu& cpu) {
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
-            NOP(cpu);
+            NOP();
             break;
 
         case Opcode::LD_BC_D16:
@@ -61,15 +21,15 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::INC_BC:
-            IncrementRegisterPair(m_regB, m_regC);
+            INCBC(cpu);
             break;
         
         case Opcode::INC_B:
-            IncrementRegister(m_regB);
+            INCB(cpu);
             break;
         
         case Opcode::DEC_B:
-            DecrementRegister(m_regB);
+            DECB(cpu);
             break;
 
         case Opcode::LD_B_D8:
@@ -77,7 +37,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RLCA:
-            RLCA();
+            RLCA(cpu);
             break;
 
         case Opcode::LD_ADDR_A16_SP:
@@ -95,15 +55,15 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::DEC_BC:
-            DecrementRegisterPair(m_regB, m_regC);
+            DECBC(cpu);
             break;
         
         case Opcode::INC_C:
-            IncrementRegister(m_regC);
+            INCC(cpu);
             break;
         
         case Opcode::DEC_C:
-            DecrementRegister(m_regC);
+            DECC(cpu);
             break;
         
         case Opcode::LD_C_D8:
@@ -116,8 +76,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::STOP:
-            UnimplementedOperation("STOP");
-            m_programCounter++;
+            STOP();
             break;
 
         case Opcode::LD_DE_D16:
@@ -133,11 +92,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::INC_D:
-            IncrementRegister(m_regD);
+            INCD(cpu);
             break;
         
         case Opcode::DEC_D:
-            DecrementRegister(m_regD);
+            DECD(cpu);
             break;
         
         case Opcode::LD_D_D8:
@@ -163,11 +122,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DEC_DE:
-            DecrementRegisterPair(m_regD, m_regE);
+            DECDE(cpu);
             break;
         
         case Opcode::INC_E:
-            IncrementRegister(m_regE);
+            INCE(cpu);
             break;
 
         case Opcode::DEC_E:
@@ -199,11 +158,11 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::INC_H:
-            IncrementRegister(m_regH);
+            INCH(cpu);
             break;
         
         case Opcode::DEC_H:
-            DecrementRegister(m_regH);
+            DECH(cpu);
             break;
         
         case Opcode::LD_H_D8:
@@ -229,11 +188,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DEC_HL:
-            DecrementRegisterPair(m_regH, m_regL);
+            DECHL(cpu);
             break;
         
         case Opcode::INC_L:
-            IncrementRegister(m_regL);
+            INCL(cpu);
             break;
         
         case Opcode::DEC_L:
@@ -282,7 +241,7 @@ void step(Cpu& cpu) {
             }
         
         case Opcode::SCF:
-            SetCarryFlag();
+            SCF(cpu);
             break;
         
         case Opcode::JR_C_R8:
@@ -298,15 +257,15 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DEC_SP:
-            DecrementStackPointer();
+            DECSP(cpu);
             break;
         
         case Opcode::INC_A:
-            IncrementRegister(m_regA);
+            INCA(cpu);
             break;
         
         case Opcode::DEC_A:
-            DecrementRegister(m_regA);
+            DECA(cpu);
             break;
         
         case Opcode::LD_A_D8:
@@ -314,7 +273,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::CCF:
-            ComplementCarryFlag();
+            CCF(cpu);
             break;
         
         case Opcode::LD_B_B:
@@ -534,8 +493,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::HALT:
-            UnimplementedOperation("HALT");
-            m_programCounter++;
+            HALT();
             break;
         
         case Opcode::LD_ADDR_HL_A:
@@ -1072,11 +1030,6 @@ void step(Cpu& cpu) {
             UnimplementedOperation("Invalid Opcode");
     }
 
-}
-
-void Cpu::NoOperation() {
-    m_programCounter++;
-    m_cycles += 4;
 }
 
 void Cpu::Load(uint8_t & reg) {
