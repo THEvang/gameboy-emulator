@@ -24,6 +24,3 @@ struct Cpu {
 };
 
 void step(Cpu& cpu);
-
-void NOP(Cpu& cpu);
-void LDBC(Cpu& cpu);
