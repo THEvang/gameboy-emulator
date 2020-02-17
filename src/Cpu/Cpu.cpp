@@ -1,97 +1,63 @@
 #include <Cpu.h>
 
-#include <iostream>
-#include <Logger.h>
 #include <Opcodes.h>
 #include <CBCode.h>
 
-Cpu::Cpu(std::shared_ptr<MemoryMap> mainMemory)
-    : m_regA(0x01)
-    , m_regB(0x00)
-    , m_regC(0x13)
-    , m_regD(0x00)
-    , m_regE(0xD8)
-    , m_regH(0x01)
-    , m_regL(0x4D)
-    , m_stackPtr(0xFFFE)
-    , m_programCounter(0x0100)
-    , m_mainMemory(mainMemory)
-    , m_cycles(0)
-
-{
-    SetInitialState();
+void NOP(Cpu& cpu) {
+    return;
 }
 
-void Cpu::SetInitialState() {
-
-    m_mainMemory->Write(0xFF05, 0x00);
-    m_mainMemory->Write(0xFF06, 0x00);
-    m_mainMemory->Write(0xFF07, 0x00);
-
-    m_mainMemory->Write(0xFF10, 0x80);
-    m_mainMemory->Write(0xFF11, 0xBF);
-    m_mainMemory->Write(0xFF12, 0xF3);
-
-    m_mainMemory->Write(0xFF14, 0xBF);
-
-    m_mainMemory->Write(0xFF16, 0x3F);
-    m_mainMemory->Write(0xFF17, 0x00);
-    
-    m_mainMemory->Write(0xFF19, 0xBF);
-    m_mainMemory->Write(0xFF1A, 0x7F);
-    m_mainMemory->Write(0xFF1B, 0xFF);
-    m_mainMemory->Write(0xFF1C, 0x9F);
-    m_mainMemory->Write(0xFF1E, 0xBF);
-    m_mainMemory->Write(0xFF20, 0xFF);
-    m_mainMemory->Write(0xFF21, 0x00);
-    m_mainMemory->Write(0xFF22, 0x00);
-
-    m_mainMemory->Write(0xFF23, 0xBF);
-    m_mainMemory->Write(0xFF24, 0x77);
-    m_mainMemory->Write(0xFF25, 0xF3);
-    m_mainMemory->Write(0xFF26, 0xF1);
-    m_mainMemory->Write(0xFF40, 0x91);
-    m_mainMemory->Write(0xFF42, 0x00);
-    m_mainMemory->Write(0xFF43, 0x00);
-
-    m_mainMemory->Write(0xFF45, 0x00);
-    m_mainMemory->Write(0xFF47, 0xFC);
-    m_mainMemory->Write(0xFF48, 0xFF);
-    m_mainMemory->Write(0xFF49, 0xFF);
-    m_mainMemory->Write(0xFF4A, 0x00);
-    m_mainMemory->Write(0xFF4B, 0x00);
-    m_mainMemory->Write(0xFFFF, 0x00);
-    
+void LDB(Cpu& cpu) {
+    cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
 }
 
-void Cpu::Execute() {
+void LDC(Cpu& cpu) {
+    cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
+}
 
-    Byte opcode = m_mainMemory->Read(m_programCounter);
+void LDD(Cpu& cpu) {
+    cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
+}
 
-    Logger::Log(LogLevel::Debug, "Program counter: \t" + std::to_string(m_programCounter));
-    Logger::Log(LogLevel::Debug, "Opcode: \t" + std::to_string(opcode));
-    
-    Logger::Log(LogLevel::Debug, "Register A: \t" + std::to_string(m_regA));
-    Logger::Log(LogLevel::Debug, "Register B: \t" + std::to_string(m_regB));
-    Logger::Log(LogLevel::Debug, "Register C: \t" + std::to_string(m_regC));
-    Logger::Log(LogLevel::Debug, "Register D: \t" + std::to_string(m_regD));
-    Logger::Log(LogLevel::Debug, "Register E: \t" + std::to_string(m_regE));
-    Logger::Log(LogLevel::Debug, "Register H: \t" + std::to_string(m_regH));
-    Logger::Log(LogLevel::Debug, "Register L: \t" + std::to_string(m_regL));
+void LDE(Cpu& cpu) {
+    cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
+}
 
-    Logger::Log(LogLevel::Debug, std::to_string(m_mainMemory->Read(0xFF01)));
+void LDH(Cpu& cpu) {
+    cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
+}
+
+void LDL(Cpu& cpu) {
+    cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
+}
+
+void step(Cpu& cpu) {
+
+    const auto opcode = cpu.m_memory_controller->read(m_programCounter);
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
-            NoOperation();
+            NOP(cpu);
             break;
 
         case Opcode::LD_BC_D16:
-            LoadImmediate16BitValue(m_regB, m_regC);
+            // LoadImmediate16BitValue(m_regB, m_regC);
             break;
 
         case Opcode::LD_ADDR_BC_A:
-            Load(CombineRegisters(m_regB, m_regC), m_regA);
+            // Load(CombineRegisters(m_regB, m_regC), m_regA);
             break;
 
         case Opcode::INC_BC:
@@ -107,7 +73,7 @@ void Cpu::Execute() {
             break;
 
         case Opcode::LD_B_D8:
-            Load(m_regB);
+            LDB(cpu);
             break;
         
         case Opcode::RLCA:
@@ -141,7 +107,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_C_D8:
-            Load(m_regC);
+            LDC(cpu);
             break;
         
         case Opcode::RRCA:
@@ -175,7 +141,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_D_D8:
-            Load(m_regD);
+            LDD(cpu);
             break;
         
         case Opcode::RLA:
@@ -209,7 +175,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_E_D8:
-            Load(m_regE);
+            LDE(cpu);
             break;
         
         case Opcode::RRA:
@@ -241,7 +207,7 @@ void Cpu::Execute() {
             break;
         
         case Opcode::LD_H_D8:
-            Load(m_regH);
+            LDH(cpu);
             break;
         
         case Opcode::DAA:

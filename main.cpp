@@ -1,14 +1,10 @@
 #include <Cartridge.h>
 #include <GameBoy.h>
-#include <Ppu.h>
 
 #include <iostream>
 #include <memory>
 
 #include<Logger.h>
-
-#include <SDL2/SDL.h>
-
 int main() {
 
     Logger::logging = Logging::On;
