@@ -13,43 +13,171 @@ void STOP();
 void HALT();
 void RST();
 void DI();
+void EI();
 
-void LDB(Cpu& cpu);
-void LDC(Cpu& cpu);
-void LDD(Cpu& cpu);
-void LDE(Cpu& cpu);
-void LDH(Cpu& cpu);
-void LDL(Cpu& cpu);
-void LDBC(Cpu& cpu);
+void JR(Cpu& cpu);
+void JR_NZ(Cpu& cpu);
+void JR_Z(Cpu& cpu);
+void JR_NC(Cpu& cpu);
+void JR_C(Cpu& cpu);
+
+void RET(Cpu& cpu);
+void RET_Z(Cpu& cpu);
+void RET_NZ(Cpu& cpu);
+
+void JUMP(Cpu& cpu);
+void JUMP_NZ(Cpu& cpu);
+void JUMP_Z(Cpu& cpu);
+
+void CALL(Cpu& cpu);
+
+void LD_A(Cpu& cpu);
+void LD_A_A(Cpu& cpu);
+void LD_A_B(Cpu& cpu);
+void LD_A_C(Cpu& cpu);
+void LD_A_D(Cpu& cpu);
+void LD_A_E(Cpu& cpu);
+void LD_A_H(Cpu& cpu);
+void LD_A_L(Cpu& cpu);
+void LD_A_ADDR_BC(Cpu& cpu);
+void LD_A_ADDR_DE(Cpu& cpu);
+void LD_A_ADDR_HL(Cpu& cpu);
+void LD_A_ADDR(Cpu& cpu);
+void LD_ADDR_SP(Cpu& cpu);
+
+void LDI_ADDR_HL_A(Cpu& cpu);
+void LDI_A_ADDR_HL(Cpu& cpu);
+
+void LD_B(Cpu& cpu);
+void LD_B_A(Cpu& cpu);
+void LD_C(Cpu& cpu);
+void LD_C_A(Cpu& cpu);
+void LD_D(Cpu& cpu);
+void LD_D_A(Cpu& cpu);
+void LD_E(Cpu& cpu);
+void LD_E_A(Cpu& cpu);
+void LD_H(Cpu& cpu);
+void LD_H_A(Cpu& cpu);
+void LD_L(Cpu& cpu);
+void LD_L_A(Cpu& cpu);
 void LD_ADDR_BC_A(Cpu& cpu);
+void LD_ADDR_DE_A(Cpu& cpu);
+void LD_ADDR_HL(Cpu& cpu);
+void LD_ADDR_HL_A(Cpu& cpu);
+void LD_ADDR(Cpu& cpu);
 
-void INCA(Cpu& cpu);
-void INCB(Cpu& cpu);
-void INCC(Cpu& cpu);
-void INCD(Cpu& cpu);
-void INCE(Cpu& cpu);
-void INCH(Cpu& cpu);
-void INCL(Cpu& cpu);
+void LD_BC(Cpu& cpu);
+void LD_DE(Cpu& cpu);
+void LD_HL(Cpu& cpu);
+void LD_SP(Cpu& cpu);
 
-void INCBC(Cpu& cpu);
-void INCDE(Cpu& cpu);
-void INCHL(Cpu& cpu);
+void ADD(Cpu& cpu);
+void ADD_A(Cpu& cpu);
+void ADD_B(Cpu& cpu);
+void ADD_C(Cpu& cpu);
+void ADD_D(Cpu& cpu);
+void ADD_E(Cpu& cpu);
+void ADD_H(Cpu& cpu);
+void ADD_L(Cpu& cpu);
+void ADD_HL_BC(Cpu& cpu);
+void ADD_HL_HL(Cpu& cpu);
+void ADD_ADDR_HL(Cpu& cpu);
 
-void DECA(Cpu& cpu);
-void DECB(Cpu& cpu);
-void DECC(Cpu& cpu);
-void DECE(Cpu& cpu);
-void DECD(Cpu& cpu);
-void DECH(Cpu& cpu);
-void DECL(Cpu& cpu);
-void DECSP(Cpu& cpu);
+void SUB(Cpu& cpu);
+void SUB_A(Cpu& cpu);
+void SUB_B(Cpu& cpu);
+void SUB_C(Cpu& cpu);
+void SUB_D(Cpu& cpu);
+void SUB_E(Cpu& cpu);
+void SUB_H(Cpu& cpu);
+void SUB_L(Cpu& cpu);
+void SUB_ADDR_HL(Cpu& cpu);
 
-void DECBC(Cpu& cpu);
-void DECDE(Cpu& cpu);
-void DECHL(Cpu& cpu);
+void INC_A(Cpu& cpu);
+void INC_B(Cpu& cpu);
+void INC_C(Cpu& cpu);
+void INC_D(Cpu& cpu);
+void INC_E(Cpu& cpu);
+void INC_H(Cpu& cpu);
+void INC_L(Cpu& cpu);
+void INC_BC(Cpu& cpu);
+void INC_DE(Cpu& cpu);
+void INC_HL(Cpu& cpu);
+void INC_ADDR_HL(Cpu& cpu);
+
+void DEC_A(Cpu& cpu);
+void DEC_B(Cpu& cpu);
+void DEC_C(Cpu& cpu);
+void DEC_E(Cpu& cpu);
+void DEC_D(Cpu& cpu);
+void DEC_H(Cpu& cpu);
+void DEC_L(Cpu& cpu);
+void DEC_BC(Cpu& cpu);
+void DEC_DE(Cpu& cpu);
+void DEC_HL(Cpu& cpu);
+void DEC_ADDR_HL(Cpu& cpu);
 
 
 void SCF(Cpu& cpu);
 void CCF(Cpu& cpu);
 
+void RRCA(Cpu& cpu);
+void RRA(Cpu& cpu);
+
+void RLA(Cpu& cpu);
 void RLCA(Cpu& cpu);
+
+void DDA(Cpu& cpu);
+
+void INCSP(Cpu& cpu);
+void DECSP(Cpu& cpu);
+
+void AND(Cpu& cpu);
+void AND_A(Cpu& cpu);
+void AND_B(Cpu& cpu);
+void AND_C(Cpu& cpu);
+void AND_D(Cpu& cpu);
+void AND_E(Cpu& cpu);
+void AND_H(Cpu& cpu);
+void AND_L(Cpu& cpu);
+void AND_ADDR_HL(Cpu& cpu);
+
+void XOR(Cpu& cpu);
+void XOR_A(Cpu& cpu);
+void XOR_B(Cpu& cpu);
+void XOR_C(Cpu& cpu);
+void XOR_D(Cpu& cpu);
+void XOR_E(Cpu& cpu);
+void XOR_H(Cpu& cpu);
+void XOR_L(Cpu& cpu);
+void XOR_ADDR_HL(Cpu& cpu);
+
+void OR(Cpu& cpu);
+void OR_A(Cpu& cpu);
+void OR_B(Cpu& cpu);
+void OR_C(Cpu& cpu);
+void OR_D(Cpu& cpu);
+void OR_E(Cpu& cpu);
+void OR_H(Cpu& cpu);
+void OR_L(Cpu& cpu);
+void OR_ADDR_HL(Cpu& cpu);
+
+void CP(Cpu& cpu);
+void CP_A(Cpu& cpu);
+void CP_B(Cpu& cpu);
+void CP_C(Cpu& cpu);
+void CP_D(Cpu& cpu);
+void CP_E(Cpu& cpu);
+void CP_H(Cpu& cpu);
+void CP_L(Cpu& cpu);
+void CP_ADDR_HL(Cpu& cpu);
+
+void PUSH_AF(Cpu& cpu);
+void PUSH_BC(Cpu& cpu);
+void PUSH_DE(Cpu& cpu);
+void PUSH_HL(Cpu& cpu);
+
+void POP_AF(Cpu& cpu);
+void POP_BC(Cpu& cpu);
+void POP_DE(Cpu& cpu);
+void POP_HL(Cpu& cpu);

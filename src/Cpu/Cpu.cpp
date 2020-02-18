@@ -13,27 +13,27 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_BC_D16:
-            // LoadImmediate16BitValue(m_regB, m_regC);
+            LD_BC(cpu);
             break;
 
         case Opcode::LD_ADDR_BC_A:
-            // Load(CombineRegisters(m_regB, m_regC), m_regA);
+            LD_ADDR_BC_A(cpu);
             break;
 
         case Opcode::INC_BC:
-            INCBC(cpu);
+            INC_BC(cpu);
             break;
         
         case Opcode::INC_B:
-            INCB(cpu);
+            INC_B(cpu);
             break;
         
         case Opcode::DEC_B:
-            DECB(cpu);
+            DEC_B(cpu);
             break;
 
         case Opcode::LD_B_D8:
-            LDB(cpu);
+            LD_B(cpu);
             break;
         
         case Opcode::RLCA:
@@ -41,38 +41,35 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_ADDR_A16_SP:
-            UnimplementedOperation("LD (a16), SP");
-            m_programCounter += 3;
+            LD_ADDR_SP(cpu);
             break;
 
         case Opcode::ADD_HL_BC:
-            UnimplementedOperation("ADD HL, BC");
-            m_programCounter++;
+            ADD_HL_BC(cpu);
             break;
 
         case Opcode::LD_A_ADDR_BC:
-            Load(m_regA, CombineRegisters(m_regB, m_regC));
+            LD_A_ADDR_BC(cpu);
             break;
 
         case Opcode::DEC_BC:
-            DECBC(cpu);
+            DEC_BC(cpu);
             break;
         
         case Opcode::INC_C:
-            INCC(cpu);
+            INC_C(cpu);
             break;
         
         case Opcode::DEC_C:
-            DECC(cpu);
+            DEC_C(cpu);
             break;
         
         case Opcode::LD_C_D8:
-            LDC(cpu);
+            LD_C(cpu);
             break;
         
         case Opcode::RRCA:
-            UnimplementedOperation("RRCA");
-            m_programCounter++;
+            RRCA(cpu);
             break;
         
         case Opcode::STOP:
@@ -80,36 +77,35 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_DE_D16:
-            LoadImmediate16BitValue(m_regD, m_regE);
+            LD_DE(cpu);
             break;
         
         case Opcode::LD_ADDR_DE_A:
-            Load(CombineRegisters(m_regD, m_regE), m_regA);
+            LD_ADDR_DE_A(cpu);
             break;
         
         case Opcode::INC_DE:
-            IncrementRegisterPair(m_regD, m_regE);
+            INC_DE(cpu);
             break;
         
         case Opcode::INC_D:
-            INCD(cpu);
+            INC_D(cpu);
             break;
         
         case Opcode::DEC_D:
-            DECD(cpu);
+            DEC_D(cpu);
             break;
         
         case Opcode::LD_D_D8:
-            LDD(cpu);
+            LD_D(cpu);
             break;
         
         case Opcode::RLA:
-            UnimplementedOperation("RLA");
-            m_programCounter++;
+            RLA(cpu);
             break;
 
         case Opcode::JR_R8:
-            JumpRelative();
+            JR(cpu);
             break;
         
         case Opcode::ADD_HL_DE:
@@ -118,101 +114,99 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::LD_A_ADDR_DE:
-            Load(m_regA, CombineRegisters(m_regD, m_regE));
+            LD_A_ADDR_DE(cpu);
             break;
         
         case Opcode::DEC_DE:
-            DECDE(cpu);
+            DEC_DE(cpu);
             break;
         
         case Opcode::INC_E:
-            INCE(cpu);
+            INC_E(cpu);
             break;
 
         case Opcode::DEC_E:
-            DecrementRegister(m_regE);
+            DEC_E(cpu);
             break;
         
         case Opcode::LD_E_D8:
-            LDE(cpu);
+            LD_E(cpu);
             break;
         
         case Opcode::RRA:
-            RR(m_regA);
+            RRA(cpu);
             break;
 
         case Opcode::JR_NZ_R8:
-            JumpRelativeNZ();
+            JR_NZ(cpu);
             break;
         
         case Opcode::LD_HL_D16:
-            LoadImmediate16BitValue(m_regH, m_regL);
+            LD_HL(cpu);
             break;
         
         case Opcode::LD_ADDR_HLI_A:
-            LDIHL();
+            LDI_ADDR_HL_A(cpu);
             break;
         
         case Opcode::INC_HL:
-            IncrementRegisterPair(m_regH, m_regL);
+            INC_HL(cpu);
             break;
 
         case Opcode::INC_H:
-            INCH(cpu);
+            INC_H(cpu);
             break;
         
         case Opcode::DEC_H:
-            DECH(cpu);
+            DEC_H(cpu);
             break;
         
         case Opcode::LD_H_D8:
-            LDH(cpu);
+            LD_H(cpu);
             break;
         
         case Opcode::DAA:
-            UnimplementedOperation("DAA");
-            m_programCounter++;
+            DDA(cpu);
             break;
         
         case Opcode::JR_Z_R8:
-            JumpRelativeZ();
+            JR_Z(cpu);
             break;
 
         case Opcode::ADD_HL_HL:
-            UnimplementedOperation("ADD HL, HL");
-            m_programCounter++;
+            ADD_HL_HL(cpu);
             break;
         
         case Opcode::LD_A_ADDR_HLI:
-            LDIA();
+            LDI_A_ADDR_HL(cpu);
             break;
         
         case Opcode::DEC_HL:
-            DECHL(cpu);
+            DEC_HL(cpu);
             break;
         
         case Opcode::INC_L:
-            INCL(cpu);
+            INC_L(cpu);
             break;
         
         case Opcode::DEC_L:
-            DecrementRegister(m_regL);
+            DEC_L(cpu);
             break;
         
         case Opcode::LD_L_D8:
-            Load(m_regL);
+            LD_L(cpu);
             break;
         
         case Opcode::CPL:
-            ComplementA();
+            CP_L(cpu);
             break;
         
         case Opcode::JR_NC_R8:
-            JumpRelativeNC();
+            JR_NC(cpu);
             break;
         
         case Opcode::LD_SP_D16:
-            LoadImmediate16BitValue(m_stackPtr);
+            LD_SP(cpu);
             break;
         
         case Opcode::LD_ADDR_HLD_A:
@@ -221,31 +215,27 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::INC_SP:
-            IncrementStackpointer();
+            INCSP(cpu);
             break;
         
         case Opcode::INC_ADDR_HL:
-            IncrementAtAddress(CombineRegisters(m_regH, m_regL));
+            INC_ADDR_HL(cpu);
             break;
         
         case Opcode::DEC_ADDR_HL:
-            DecrementAtAddress(CombineRegisters(m_regH, m_regL));
+            DEC_ADDR_HL(cpu);
             break;
         
         case Opcode::LD_ADDR_HL_D8:
-            {
-            auto address = CombineRegisters(m_regH, m_regL);
-            m_mainMemory->Write(address, m_mainMemory->Read(m_programCounter + 1));
-            m_programCounter += 2;
+            LD_A_ADDR_HL(cpu);
             break;
-            }
         
         case Opcode::SCF:
             SCF(cpu);
             break;
         
         case Opcode::JR_C_R8:
-            JumpRelativeC();
+            JR_C(cpu);
             break;
         
         case Opcode::ADD_HL_SP:
@@ -261,15 +251,15 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::INC_A:
-            INCA(cpu);
+            INC_A(cpu);
             break;
         
         case Opcode::DEC_A:
-            DECA(cpu);
+            DEC_A(cpu);
             break;
         
         case Opcode::LD_A_D8:
-            Load(m_regA);
+            LD_A(cpu);
             break;
 
         case Opcode::CCF:
@@ -529,39 +519,39 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::LD_A_A:
-            Load(m_regA, m_regA);
+            LDA(cpu);
             break;
         
         case Opcode::ADD_A_B:
-            AddRegisters(m_regA, m_regB);
+            ADD_B(cpu);
             break;
         
         case Opcode::ADD_A_C:
-            AddRegisters(m_regA, m_regC);
+            ADD_C(cpu);
             break;
         
         case Opcode::ADD_A_D:
-            AddRegisters(m_regA, m_regD);
+            ADD_D(cpu);
             break;
 
         case Opcode::ADD_A_E:
-            AddRegisters(m_regA, m_regE);
+            ADD_E(cpu);
             break;
         
         case Opcode::ADD_A_H:
-            AddRegisters(m_regA, m_regH);
+            ADD_H(cpu);
             break;
         
         case Opcode::ADD_A_L:
-            AddRegisters(m_regA, m_regL);
+            ADD_L(cpu);
             break;
         
         case Opcode::ADD_A_ADDR_HL:
-            UnimplementedOperation("ADD A, (HL)");
+            ADD_ADDR_HL(cpu);
             break;
             
         case Opcode::ADD_A_A:
-            AddRegisters(m_regA, m_regA);
+            ADD_A(cpu);
             break;
 
         case Opcode::ADC_A_B:
@@ -598,35 +588,35 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::SUB_B:
-            SubtractFromA(m_regB);
+            SUB_B(cpu);
             break;
         
         case Opcode::SUB_C:
-            SubtractFromA(m_regC);
+            SUB_C(cpu);
             break;
         
         case Opcode::SUB_D:
-            SubtractFromA(m_regD);
+            SUB_D(cpu);
             break;
         
         case Opcode::SUB_E:
-            SubtractFromA(m_regE);
+            SUB_E(cpu);
             break;
         
         case Opcode::SUB_H:
-            SubtractFromA(m_regH);
+            SUB_H(cpu);
             break;
         
         case Opcode::SUB_L:
-            SubtractFromA(m_regL);
+            SUB_L(cpu);
             break;
         
         case Opcode::SUB_ADDR_HL:
-            UnimplementedOperation("SUB (HL)");
+            SUB_ADDR_HL(cpu);
             break;
         
         case Opcode::SUB_A:
-            SubtractFromA(m_regA);
+            SUB_A(cpu);
             break;
         
         case Opcode::SBC_A_B:
@@ -662,154 +652,147 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::AND_B:
-            And(m_regB);
+            AND_B(cpu);
             break;
         
         case Opcode::AND_C:
-            And(m_regC);
+            AND_C(cpu);
             break;
         
         case Opcode::AND_D:
-            And(m_regD);
+            AND_D(cpu);
             break;
         
         case Opcode::AND_E:
-            And(m_regE);
+            AND_E(cpu);
             break;
         
         case Opcode::AND_H:
-            And(m_regH);
+            AND_H(cpu);
             break;
         
         case Opcode::AND_L:
-            And(m_regL);
+            AND_L(cpu);
             break;
         
         case Opcode::AND_ADDR_HL:
-            And(CombineRegisters(m_regH, m_regL));
+            AND_ADDR_HL(cpu);
             break;
 
         case Opcode::AND_A:
-            And(m_regA);
+            AND_A(cpu);
             break;
         
         case Opcode::XOR_B:
-            Xor(m_regB);
+            XOR_B(cpu);
             break;
         
         case Opcode::XOR_C:
-            Xor(m_regC);
+            XOR_C(cpu);
             break;
         
         case Opcode::XOR_D:
-            Xor(m_regD);
+            XOR_D(cpu);
             break;
         
         case Opcode::XOR_E:
-            Xor(m_regE);
+            XOR_E(cpu);
             break;
         
         case Opcode::XOR_H:
-            Xor(m_regH);
+            XOR_H(cpu);
             break;
         
         case Opcode::XOR_L:
-            Xor(m_regL);
+            XOR_L(cpu);
             break;
         
         case Opcode::XOR_ADDR_HL:
-            Xor(CombineRegisters(m_regH, m_regL)); 
+            XOR_ADDR_HL(cpu);
             break;
         
         case Opcode::XOR_A:
-            Xor(m_regA);
+            XOR_A(cpu);
             break;
         
         case Opcode::OR_B:
-            Or(m_regB);
+            OR_B(cpu);
             break;
         
         case Opcode::OR_C:
-            Or(m_regC);
+            OR_C(cpu);
             break;
         
         case Opcode::OR_D:
-            Or(m_regD);
+            OR_D(cpu);
             break;
         
         case Opcode::OR_E:
-            Or(m_regE);
+            OR_E(cpu);
             break;
         
         case Opcode::OR_H:
-            Or(m_regH);
+            OR_H(cpu);
             break;
         
         case Opcode::OR_L:
-            Or(m_regL);
+            OR_L(cpu);
             break;
         
         case Opcode::OR_ADDR_HL:
-            Or(CombineRegisters(m_regH, m_regL));
+            OR_ADDR_HL(cpu);
             break;
             
         case Opcode::OR_A:
-            Or(m_regA);
+            OR_A(cpu);
             break;
         
         case Opcode::CP_B:
-            CompareWithA(m_regB);
-            m_programCounter++;
+            CP_B(cpu);
             break;
         
         case Opcode::CP_C:
-            CompareWithA(m_regC);
-            m_programCounter++;
+            CP_C(cpu);
             break;
         
         case Opcode::CP_D:
-            CompareWithA(m_regD);
-            m_programCounter++;
+            CP_D(cpu);
             break;
         
         case Opcode::CP_E:
-            CompareWithA(m_regE);
-            m_programCounter++;
+            CP_E(cpu);
             break;
         
         case Opcode::CP_H:
-            CompareWithA(m_regH);
-            m_programCounter++;
+            CP_H(cpu);
             break;
         
         case Opcode::CP_L:
-            CompareWithA(m_regL);
-            m_programCounter++;
+            CP_L(cpu);
             break;
         
         case Opcode::CP_ADDR_HL:
-            UnimplementedOperation("CP (HL)");
+            CP_ADDR_HL(cpu);
             break;
         
         case Opcode::CP_A:
-            CompareWithA(m_regA);
-            m_programCounter++;
+            CP_A(cpu);
             break;
         
         case Opcode::RET_NZ:
-            RetNZ();
+            RET_NZ(cpu);
             break;
         
         case Opcode::POP_BC:
-            Pop(m_regB, m_regC);
+            POP_BC(cpu);
             break;
         
         case Opcode::JP_NZ_A16:
-            UnimplementedOperation("JP NZ, a16");
+            JUMP_NZ(cpu);
             break;
         
         case Opcode::JP_A16:
-            Jump();
+            JUMP(cpu);
             break;
         
         case Opcode::CALL_NZ_A16:
@@ -817,11 +800,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::PUSH_BC:
-            Push(m_regB, m_regC);
+            PUSH_BC(cpu);
             break;
         
         case Opcode::ADD_A_D8:
-            UnimplementedOperation("ADD A, n");
+            ADD(cpu);
             break;
         
         case Opcode::RST_00H:
@@ -829,15 +812,15 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RET_Z:
-            UnimplementedOperation("RET Z");
+            RET_Z(cpu);
             break;
         
         case Opcode::RET:
-            Ret();
+            RET(cpu);
             break;
         
         case Opcode::JP_Z_A16:
-            UnimplementedOperation("JP Z, a16");
+            JUMP_Z(cpu);
             break;
         
         case Opcode::PREFIX_CB:
@@ -850,7 +833,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::CALL_A16:
-            Call();
+            CALL(cpu);
             break;
         
         case Opcode::ADC_A_D8:
@@ -866,7 +849,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::POP_DE:
-            Pop(m_regD, m_regE);
+            POP_DE(cpu);
             break;
         
         case Opcode::JP_NC_A16:
@@ -878,11 +861,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::PUSH_DE:
-            Push(m_regD, m_regE);
+            PUSH_DE(cpu);
             break;
         
         case Opcode::SUB_D8:
-            SubtractImmediateByte();
+            SUB(cpu);
             break;
         
         case Opcode::RST_10H:
@@ -922,20 +905,19 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::POP_HL:
-            Pop(m_regH, m_regL);
+            POP_HL(cpu);
             break;
         
         case Opcode::LD_ADDR_C_A:
             UnimplementedOperation("LD (C), A");
             break;
-        
-        
+
         case Opcode::PUSH_HL:
-            Push(m_regH, m_regL);
+            PUSH_HL(cpu);
             break;
         
         case Opcode::AND_D8:
-            And();
+            AND(cpu);
             break;
         
         case Opcode::RST_20H:
@@ -960,7 +942,7 @@ void step(Cpu& cpu) {
             }
 
         case Opcode::XOR_D8:
-            Xor();
+            XOR(cpu);
             break;
         
         case Opcode::RST_28H:
@@ -973,8 +955,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::POP_AF:
-            UnimplementedOperation("POP AF");
-            //Pop(m_regA, m_flags.asByte());
+            POP_AF(cpu);
             break;
         
         case Opcode::LD_A_ADDR_C:
@@ -982,15 +963,15 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DI:
-            DisableInterrupts();
+            DI();
             break;
         
         case Opcode::PUSH_AF:
-            Push(m_regA, m_flags.asByte());
+            PUSH_AF(cpu);
             break;
         
         case Opcode::OR_D8:
-            Or();
+            OR(cpu);
             break;
         
         case Opcode::RST_30H:
@@ -1014,12 +995,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::EI:
-            UnimplementedOperation("EI");
+            EI();
             break;
         
         case Opcode::CP_D8:
-            CompareWithA(m_mainMemory->Read(m_programCounter+1));
-            m_programCounter += 2;
+            CP(cpu);
             break;
         
         case Opcode::RST_38H:
@@ -1029,7 +1009,6 @@ void step(Cpu& cpu) {
         default:
             UnimplementedOperation("Invalid Opcode");
     }
-
 }
 
 void Cpu::Load(uint8_t & reg) {
