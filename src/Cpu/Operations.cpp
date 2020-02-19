@@ -4,6 +4,8 @@ void NOP(Cpu& cpu) {
     return;
 }
 
+
+
 void LDB(Cpu& cpu) {
     cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter+1);
     cpu.m_cycles += 8;
