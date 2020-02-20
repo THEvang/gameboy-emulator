@@ -1,26 +1,32 @@
 #include <cpu/Operations.h>
+#include <string>
+
+UnimplementedOperation::UnimplementedOperation(const std::string& msg)
+    : runtime_error(msg) {
+
+}
 
 void NOP(Cpu& cpu) {
     return;
 }
 
-void STOP() {
+void STOP(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: STOP");
 }
 
-void HALT() {
+void HALT(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: HALT");
 }
 
-void RST() {
+void RST(int) {
     throw UnimplementedOperation("Unimplemented operation: RST"); 
 }
 
-void DI() {
+void DI(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: DI");
 }
 
-void EI() {
+void EI(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: EI");
 }
 
@@ -48,12 +54,20 @@ void RET(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: RET");
 }
 
+void RET_NZ(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RET NZ");
+}
+
 void RET_Z(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: RET_Z");
+    throw UnimplementedOperation("Unimplemented operation: RET Z");
 }
 
 void RET_NC(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: RET NC");
+}
+
+void RET_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RET C");
 }
 
 void RETI(Cpu& cpu) {
@@ -104,51 +118,51 @@ void CALL_C(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration: CALL C");
 }
 
-void LDA_A_D8(Cpu& cpu) {
+void LD_A_D8(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A D8");
 }
 
-void LDA_A_A(Cpu& cpu) {
+void LD_A_A(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A A");
 }
 
-void LDA_A_B(Cpu& cpu) {
+void LD_A_B(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A B");
 }
 
-void LDA_A_C(Cpu& cpu) {
+void LD_A_C(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A C");
 }
 
-void LDA_A_D(Cpu& cpu) {
+void LD_A_D(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A D");
 }
 
-void LDA_A_E(Cpu& cpu) {
+void LD_A_E(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A E");
 }
 
-void LDA_A_H(Cpu& cpu) {
+void LD_A_H(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A H");
 }
 
-void LDA_A_L(Cpu& cpu) {
+void LD_A_L(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A L");
 }
 
-void LDA_A_ADDR_BC(Cpu& cpu) {
+void LD_A_ADDR_BC(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A ADDR BC");
 }
 
-void LDA_A_ADDR_DE(Cpu& cpu) {
+void LD_A_ADDR_DE(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A ADDR DE");
 }
 
-void LDA_A_ADDR_HL(Cpu& cpu) {
+void LD_A_ADDR_HL(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A ADDR HL");
 }
 
-void LDA_A_ADDR_A16(Cpu& cpu) {
+void LD_A_ADDR_A16(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LDA A ADDR");
 }
 
@@ -174,9 +188,6 @@ void LD_ADDR_BC_A(Cpu& cpu) {
 
 void LD_ADDR_DE_A(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented opration LD ADDR DE A");
-}
-void LD_ADDR_HL_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LD ADDR HL A");
 }
 
 void LD_B_D8(Cpu& cpu) {
@@ -213,10 +224,6 @@ void LD_B_L(Cpu& cpu) {
 
 void LD_B_ADDR_HL(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: LD B ADDR HL");
-}
-
-void LD_C_D8(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C D8");
 }
 
 void LD_C_D8(Cpu& cpu) {
@@ -584,4 +591,356 @@ void INC_HL(Cpu& cpu) {
 
 void INC_ADDR_HL(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: INC ADDR HL");
+}
+
+void INC_SP(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: INC SP");
+}
+
+void DEC_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC A");
+}
+
+void DEC_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC B");
+}
+
+void DEC_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC C");
+}
+
+void DEC_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC D");
+}
+
+void DEC_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC E");
+}
+
+void DEC_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC H");
+}
+
+void DEC_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC L");
+}
+
+void DEC_BC(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC BC");
+}
+
+void DEC_DE(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC DE");
+}
+
+void DEC_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC HL");
+}
+
+void DEC_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC ADDR HL");
+}
+
+void DEC_SP(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DEC SP");
+}
+
+void SCF(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SCF");
+}
+
+void CCF(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: CCF");
+}
+
+void RRCA(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RRCA");
+}
+
+void RRA(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RRA");
+}
+
+void RLA(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RLA");
+}
+
+void RLCA(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: RLCA");
+}
+
+void DDA(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: DDA");
+}
+
+void ADD_SP_R8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADD SP R8");
+}
+
+void AND_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND D8");
+}
+
+void AND_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND A");
+}
+
+void AND_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND B");
+}
+
+void AND_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND C");
+}
+
+void AND_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND D");
+}
+
+void AND_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND E");
+}
+
+void AND_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND H");
+}
+
+void AND_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND L");
+}
+
+void AND_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: AND ADDR HL");
+}
+
+void XOR_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR D8");
+}
+
+void XOR_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR A");
+}
+
+void XOR_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR B");
+}
+
+void XOR_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR C");
+}
+
+void XOR_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR D");
+}
+
+void XOR_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR E");
+}
+
+void XOR_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR H");
+}
+
+void XOR_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR L");
+}
+
+void XOR_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: XOR ADDR HL");
+}
+
+void OR_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR D8");
+}
+
+void OR_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR A");
+}
+
+void OR_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR B");
+}
+
+void OR_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR C");
+}
+
+void OR_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR D");
+}
+
+void OR_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR E");
+}
+
+void OR_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR H");
+}
+
+void OR_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR L");
+}
+
+void OR_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: OR ADDR HL");
+}
+
+void CP_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP D8");
+}
+
+void CP_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP A");
+}
+
+void CP_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP B");
+}
+
+void CP_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP C");
+}
+
+void CP_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP D");
+}
+
+void CP_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP E");
+}
+
+void CP_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP H");
+}
+
+void CP_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP L");
+}
+
+void CP_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation. CP ADDR HL");
+}
+
+void PUSH_AF(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: PUSH AF");
+}
+
+void PUSH_BC(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: PUSH BC");
+}
+
+void PUSH_DE(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: PUSH DE");
+}
+
+void PUSH_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: PUSH HL");
+}
+
+void POP_AF(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: POP AF");
+}
+
+void POP_BC(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: POP BC");
+}
+
+void POP_DE(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: POP DE");
+}
+
+void POP_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: POP HL");
+}
+
+void ADC_A_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A D8");
+}
+
+void ADC_A_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A A");
+}
+
+void ADC_A_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A B");
+}
+
+void ADC_A_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A C");
+}
+
+void ADC_A_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A D");
+}
+
+void ADC_A_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A E");
+}
+
+void ADC_A_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A H");
+}
+
+void ADC_A_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A L");
+}
+
+void ADC_A_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: ADC A ADDR HL");
+}
+
+void LDH_ADDR_A8_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: LDH ADDR A8 A");
+}
+
+void LDH_A_ADDR_A8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation LDH A ADDR A8");
+}
+
+void LD_ADDR_C_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: LD ADDR C A");
+}
+
+void SBC_A_D8(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A D8");
+}
+
+void SBC_A_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A A");
+}
+
+void SBC_A_B(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A B");
+}
+
+void SBC_A_C(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A C");
+}
+
+void SBC_A_D(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A D");
+}
+
+void SBC_A_E(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A E");
+}
+
+void SBC_A_H(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A H");
+}
+
+void SBC_A_L(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A L");
+}
+
+void SBC_A_ADDR_HL(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A ADDR HL");
+}
+
+void PREFIX_CB(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: PREFIX CB");
+}
+
+void LD_ADDR_HLD_A(Cpu& cpu) {
+    throw UnimplementedOperation("Unimplemented operation: SBC A ADDR HL");
 }

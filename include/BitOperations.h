@@ -1,3 +1,5 @@
+#pragma once
+
 template <typename T>
 T rotateLeft(T value, int n) {
 

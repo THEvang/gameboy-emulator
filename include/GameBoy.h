@@ -3,12 +3,10 @@
 #include <memory>
 
 #include <MemoryBankController.h>
-#include <Cpu.h>
+#include <cpu/Cpu.h>
 
 class GameBoy {
 public:
-
-    
 
 private:
 

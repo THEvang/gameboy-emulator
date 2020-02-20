@@ -5,11 +5,15 @@
 
 void step(Cpu& cpu) {
 
+    if(!cpu.m_memory_controller) {
+        return;
+    }
+
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
-            NOP();
+            NOP(cpu);
             break;
 
         case Opcode::LD_BC_D16:
@@ -73,7 +77,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::STOP:
-            STOP();
+            STOP(cpu);
             break;
 
         case Opcode::LD_DE_D16:
@@ -213,7 +217,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::INC_SP:
-            INCSP(cpu);
+            INC_SP(cpu);
             break;
         
         case Opcode::INC_ADDR_HL:
@@ -245,7 +249,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DEC_SP:
-            DECSP(cpu);
+            DEC_SP(cpu);
             break;
         
         case Opcode::INC_A:
@@ -481,7 +485,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::HALT:
-            HALT();
+            HALT(cpu);
             break;
         
         case Opcode::LD_ADDR_HL_A:
@@ -861,7 +865,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::SUB_D8:
-            SUB(cpu);
+            SUB_D8(cpu);
             break;
         
         case Opcode::RST_10H:
@@ -909,7 +913,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::AND_D8:
-            AND(cpu);
+            AND_D8(cpu);
             break;
         
         case Opcode::RST_20H:
@@ -929,7 +933,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::XOR_D8:
-            XOR(cpu);
+            XOR_D8(cpu);
             break;
         
         case Opcode::RST_28H:
@@ -949,7 +953,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DI:
-            DI();
+            DI(cpu);
             break;
         
         case Opcode::PUSH_AF:
@@ -957,7 +961,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::OR_D8:
-            OR(cpu);
+            OR_D8(cpu);
             break;
         
         case Opcode::RST_30H:
@@ -977,11 +981,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::EI:
-            EI();
+            EI(cpu);
             break;
         
         case Opcode::CP_D8:
-            CP(cpu);
+            CP_D8(cpu);
             break;
         
         case Opcode::RST_38H:

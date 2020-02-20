@@ -1,3 +1,4 @@
+#pragma once
 #include <stdexcept>
 #include <string>
 #include <cpu/Cpu.h>
@@ -8,12 +9,12 @@ public:
     UnimplementedOperation(const std::string& msg);
 };
 
-void NOP();
-void STOP();
-void HALT();
+void NOP(Cpu& cpu);
+void STOP(Cpu& cpu);
+void HALT(Cpu& cpu);
 void RST(int);
-void DI();
-void EI();
+void DI(Cpu& cpu);
+void EI(Cpu& cpu);
 
 void JR(Cpu& cpu);
 void JR_NZ(Cpu& cpu);
@@ -61,7 +62,6 @@ void LDI_A_ADDR_HL(Cpu& cpu);
 
 void LD_ADDR_BC_A(Cpu& cpu);
 void LD_ADDR_DE_A(Cpu& cpu);
-void LD_ADDR_HL_A(Cpu& cpu);
 
 void LD_B_D8(Cpu& cpu);
 void LD_B_A(Cpu& cpu);
@@ -176,6 +176,8 @@ void INC_BC(Cpu& cpu);
 void INC_DE(Cpu& cpu);
 void INC_HL(Cpu& cpu);
 void INC_ADDR_HL(Cpu& cpu);
+void INC_SP(Cpu& cpu);
+
 
 void DEC_A(Cpu& cpu);
 void DEC_B(Cpu& cpu);
@@ -188,7 +190,7 @@ void DEC_BC(Cpu& cpu);
 void DEC_DE(Cpu& cpu);
 void DEC_HL(Cpu& cpu);
 void DEC_ADDR_HL(Cpu& cpu);
-
+void DEC_SP(Cpu& cpu);
 
 void SCF(Cpu& cpu);
 void CCF(Cpu& cpu);
@@ -201,11 +203,9 @@ void RLCA(Cpu& cpu);
 
 void DDA(Cpu& cpu);
 
-void INCSP(Cpu& cpu);
-void DECSP(Cpu& cpu);
 void ADD_SP_R8(Cpu& cpu);
 
-void AND(Cpu& cpu);
+void AND_D8(Cpu& cpu);
 void AND_A(Cpu& cpu);
 void AND_B(Cpu& cpu);
 void AND_C(Cpu& cpu);
@@ -215,7 +215,7 @@ void AND_H(Cpu& cpu);
 void AND_L(Cpu& cpu);
 void AND_ADDR_HL(Cpu& cpu);
 
-void XOR(Cpu& cpu);
+void XOR_D8(Cpu& cpu);
 void XOR_A(Cpu& cpu);
 void XOR_B(Cpu& cpu);
 void XOR_C(Cpu& cpu);
@@ -225,7 +225,7 @@ void XOR_H(Cpu& cpu);
 void XOR_L(Cpu& cpu);
 void XOR_ADDR_HL(Cpu& cpu);
 
-void OR(Cpu& cpu);
+void OR_D8(Cpu& cpu);
 void OR_A(Cpu& cpu);
 void OR_B(Cpu& cpu);
 void OR_C(Cpu& cpu);
@@ -235,7 +235,7 @@ void OR_H(Cpu& cpu);
 void OR_L(Cpu& cpu);
 void OR_ADDR_HL(Cpu& cpu);
 
-void CP(Cpu& cpu);
+void CP_D8(Cpu& cpu);
 void CP_A(Cpu& cpu);
 void CP_B(Cpu& cpu);
 void CP_C(Cpu& cpu);
@@ -269,6 +269,7 @@ void LDH_ADDR_A8_A(Cpu& cpu);
 void LDH_A_ADDR_A8(Cpu& cpu);
 void LD_ADDR_C_A(Cpu& cpu);
 
+void SBC_A_D8(Cpu& cpu);
 void SBC_A_A(Cpu& cpu);
 void SBC_A_B(Cpu& cpu);
 void SBC_A_C(Cpu& cpu);
@@ -277,7 +278,6 @@ void SBC_A_E(Cpu& cpu);
 void SBC_A_H(Cpu& cpu);
 void SBC_A_L(Cpu& cpu);
 void SBC_A_ADDR_HL(Cpu& cpu);
-void SBC_A_D8(Cpu& cpu);
 
 void PREFIX_CB(Cpu& cpu);
 
