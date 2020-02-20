@@ -13,7 +13,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_BC_D16:
-            LD_BC(cpu);
+            LD_BC_D16(cpu);
             break;
 
         case Opcode::LD_ADDR_BC_A:
@@ -77,7 +77,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_DE_D16:
-            LD_DE(cpu);
+            LD_DE_D16(cpu);
             break;
         
         case Opcode::LD_ADDR_DE_A:
@@ -141,7 +141,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::LD_HL_D16:
-            LD_HL(cpu);
+            LD_HL_D16(cpu);
             break;
         
         case Opcode::LD_ADDR_HLI_A:
@@ -205,7 +205,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::LD_SP_D16:
-            LD_SP(cpu);
+            LD_SP_D16(cpu);
             break;
         
         case Opcode::LD_ADDR_HLD_A:
@@ -353,7 +353,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_D_ADDR_HL:
-            LD_ADDR_HL(cpu);
+            LD_D_ADDR_HL(cpu);
             break;
 
         case Opcode::LD_D_A:
@@ -521,35 +521,35 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::ADD_A_B:
-            ADD_B(cpu);
+            ADD_A_B(cpu);
             break;
         
         case Opcode::ADD_A_C:
-            ADD_C(cpu);
+            ADD_A_C(cpu);
             break;
         
         case Opcode::ADD_A_D:
-            ADD_D(cpu);
+            ADD_A_D(cpu);
             break;
 
         case Opcode::ADD_A_E:
-            ADD_E(cpu);
+            ADD_A_E(cpu);
             break;
         
         case Opcode::ADD_A_H:
-            ADD_H(cpu);
+            ADD_A_H(cpu);
             break;
         
         case Opcode::ADD_A_L:
-            ADD_L(cpu);
+            ADD_A_L(cpu);
             break;
         
         case Opcode::ADD_A_ADDR_HL:
-            ADD_ADDR_HL(cpu);
+            ADD_A_ADDR_HL(cpu);
             break;
             
         case Opcode::ADD_A_A:
-            ADD_A(cpu);
+            ADD_A_A(cpu);
             break;
 
         case Opcode::ADC_A_B:
@@ -801,7 +801,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::ADD_A_D8:
-            ADD(cpu);
+            ADD_A_D8(cpu);
             break;
         
         case Opcode::RST_00H:

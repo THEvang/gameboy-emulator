@@ -11,7 +11,7 @@ public:
 void NOP();
 void STOP();
 void HALT();
-void RST();
+void RST(int);
 void DI();
 void EI();
 
@@ -36,12 +36,10 @@ void JUMP_C(Cpu& cpu);
 void JUMP_ADDR_HL(Cpu& cpu);
 
 void CALL(Cpu& cpu);
+void CALL_NZ(Cpu& cpu);
 void CALL_Z(Cpu& cpu);
 void CALL_NC(Cpu& cpu);
 void CALL_C(Cpu& cpu);
-void CALL_NZ(Cpu& cpu);
-
-void RST(int);
 
 void LD_A_D8(Cpu& cpu);
 void LD_A_A(Cpu& cpu);
@@ -54,7 +52,8 @@ void LD_A_L(Cpu& cpu);
 void LD_A_ADDR_BC(Cpu& cpu);
 void LD_A_ADDR_DE(Cpu& cpu);
 void LD_A_ADDR_HL(Cpu& cpu);
-void LD_A_ADDR(Cpu& cpu);
+void LD_A_ADDR_C(Cpu& cpu);
+void LD_A_ADDR_A16(Cpu& cpu);
 void LD_ADDR_SP(Cpu& cpu);
 
 void LDI_ADDR_HL_A(Cpu& cpu);
@@ -62,20 +61,7 @@ void LDI_A_ADDR_HL(Cpu& cpu);
 
 void LD_ADDR_BC_A(Cpu& cpu);
 void LD_ADDR_DE_A(Cpu& cpu);
-void LD_ADDR_HL(Cpu& cpu);
 void LD_ADDR_HL_A(Cpu& cpu);
-void LD_ADDR(Cpu& cpu);
-
-void LD_A_A(Cpu& cpu);
-void LD_A_B(Cpu& cpu);
-void LD_A_C(Cpu& cpu);
-void LD_A_D(Cpu& cpu);
-void LD_A_E(Cpu& cpu);
-void LD_A_H(Cpu& cpu);
-void LD_A_L(Cpu& cpu);
-void LD_A_ADDR_HL(Cpu& cpu);
-void LD_A_ADDR_C(Cpu& cpu);
-void LD_A_ADDR_A16(Cpu& cpu);
 
 void LD_B_D8(Cpu& cpu);
 void LD_B_A(Cpu& cpu);
@@ -147,28 +133,29 @@ void LD_ADDR_HL_L(Cpu& cpu);
 void LD_ADDR_HL_ADDR_HL(Cpu& cpu);
 void LD_ADDR_A16_A(Cpu& cpu);
 
-void LD_BC(Cpu& cpu);
-void LD_DE(Cpu& cpu);
-void LD_HL(Cpu& cpu);
+void LD_BC_D16(Cpu& cpu);
+void LD_DE_D16(Cpu& cpu);
+void LD_HL_D16(Cpu& cpu);
 void LD_HL_SPR8(Cpu& cpu);
 
-void LD_SP(Cpu& cpu);
+void LD_SP_D16(Cpu& cpu);
 void LD_SP_HL(Cpu& cpu);
 
-void ADD(Cpu& cpu);
-void ADD_A(Cpu& cpu);
-void ADD_B(Cpu& cpu);
-void ADD_C(Cpu& cpu);
-void ADD_D(Cpu& cpu);
-void ADD_E(Cpu& cpu);
-void ADD_H(Cpu& cpu);
-void ADD_L(Cpu& cpu);
+void ADD_A_D8(Cpu& cpu);
+void ADD_A_A(Cpu& cpu);
+void ADD_A_B(Cpu& cpu);
+void ADD_A_C(Cpu& cpu);
+void ADD_A_D(Cpu& cpu);
+void ADD_A_E(Cpu& cpu);
+void ADD_A_H(Cpu& cpu);
+void ADD_A_L(Cpu& cpu);
+void ADD_A_ADDR_HL(Cpu& cpu);
+
 void ADD_HL_BC(Cpu& cpu);
 void ADD_HL_HL(Cpu& cpu);
-void ADD_ADDR_HL(Cpu& cpu);
 void ADD_HL_DE(Cpu& cpu);
 
-void SUB(Cpu& cpu);
+void SUB_D8(Cpu& cpu);
 void SUB_A(Cpu& cpu);
 void SUB_B(Cpu& cpu);
 void SUB_C(Cpu& cpu);
@@ -193,8 +180,8 @@ void INC_ADDR_HL(Cpu& cpu);
 void DEC_A(Cpu& cpu);
 void DEC_B(Cpu& cpu);
 void DEC_C(Cpu& cpu);
-void DEC_E(Cpu& cpu);
 void DEC_D(Cpu& cpu);
+void DEC_E(Cpu& cpu);
 void DEC_H(Cpu& cpu);
 void DEC_L(Cpu& cpu);
 void DEC_BC(Cpu& cpu);
