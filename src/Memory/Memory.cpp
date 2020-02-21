@@ -1,5 +1,10 @@
 #include "Memory.h"
 
+Memory::Memory(std::vector<uint8_t> memory) 
+    : m_memory(memory)
+{
+}
+
 uint8_t Memory::read(const uint16_t address) const {
     return m_memory[address];
 }

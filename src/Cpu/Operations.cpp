@@ -1,4 +1,5 @@
 #include <cpu/Operations.h>
+#include <BitOperations.h>
 #include <string>
 
 UnimplementedOperation::UnimplementedOperation(const std::string& msg)
@@ -7,7 +8,8 @@ UnimplementedOperation::UnimplementedOperation(const std::string& msg)
 }
 
 void NOP(Cpu& cpu) {
-    return;
+    cpu.m_cycles =4;
+    cpu.m_program_counter++;
 }
 
 void STOP(Cpu& cpu) {
@@ -23,7 +25,10 @@ void RST(int) {
 }
 
 void DI(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: DI");
+    
+    cpu.m_cycles += 4;
+    cpu.m_enabled_interrupts = false;
+    cpu.m_program_counter++;
 }
 
 void EI(Cpu& cpu) {
@@ -75,7 +80,13 @@ void RETI(Cpu& cpu) {
 }
 
 void JUMP(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: JUMP");
+
+    const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+    const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+    const auto address = combine_bytes(upper, lower);
+
+    cpu.m_program_counter = address;
+    cpu.m_cycles += 12;
 }
 
 void JUMP_NZ(Cpu& cpu) {
@@ -99,6 +110,9 @@ void JUMP_ADDR_HL(Cpu& cpu) {
 }
 
 void CALL(Cpu& cpu) {
+
+    
+
     throw UnimplementedOperation("Unimplemented opration: CALL");
 }
 
@@ -119,7 +133,10 @@ void CALL_C(Cpu& cpu) {
 }
 
 void LD_A_D8(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A D8");
+
+    cpu.m_reg_a = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter += 2;
 }
 
 void LD_A_A(Cpu& cpu) {
@@ -439,7 +456,13 @@ void LD_ADDR_HL_ADDR_HL(Cpu& cpu) {
 }
 
 void LD_ADDR_A16_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD ADDR A16 A");
+    const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter+2);
+    const auto address = combine_bytes(upper, lower);
+
+    cpu.m_reg_a = cpu.m_memory_controller->read(address);
+    cpu.m_cycles += 16;
+    cpu.m_program_counter += 3;
 }
 
 void LD_BC_D16(Cpu& cpu) {
@@ -450,7 +473,12 @@ void LD_DE_D16(Cpu& cpu) {
     throw UnimplementedOperation("Unimplemented operation: LD DE D16");
 }
 void LD_HL_D16(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD HL D16");
+
+    cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_program_counter+2);
+
+    cpu.m_cycles += 12;
+    cpu.m_program_counter += 3;
 }
 
 void LD_HL_SPR8(Cpu& cpu) {
@@ -458,7 +486,14 @@ void LD_HL_SPR8(Cpu& cpu) {
 }
 
 void LD_SP_D16(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD SP D16");
+
+    const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter+2);
+    const auto address = combine_bytes(upper, lower);
+
+    cpu.m_stack_ptr = address;
+    cpu.m_cycles += 12;
+    cpu.m_program_counter += 3;
 }
 
 void LD_SP_HL(Cpu& cpu) {
@@ -890,7 +925,11 @@ void ADC_A_ADDR_HL(Cpu& cpu) {
 }
 
 void LDH_ADDR_A8_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LDH ADDR A8 A");
+
+    const uint16_t address = 0xFF00 + cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    cpu.m_memory_controller->write(address, cpu.m_reg_a);
+    cpu.m_cycles += 12;
+    cpu.m_program_counter += 2;
 }
 
 void LDH_A_ADDR_A8(Cpu& cpu) {

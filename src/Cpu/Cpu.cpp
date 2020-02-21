@@ -2,14 +2,12 @@
 #include <cpu/Operations.h>
 #include <Opcodes.h>
 #include <CBCode.h>
+#include <iostream>
 
 void step(Cpu& cpu) {
 
-    if(!cpu.m_memory_controller) {
-        return;
-    }
-
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
+    std::cout << "Opcode: " << std::hex << (int) opcode << "\n";
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
@@ -993,7 +991,8 @@ void step(Cpu& cpu) {
             break;
 
         default:
-            UnimplementedOperation("Invalid Opcode");
+            throw UnimplementedOperation("Invalid Opcode");
+            break;
     }
 }
 

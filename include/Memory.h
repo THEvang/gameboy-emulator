@@ -1,15 +1,18 @@
 #pragma once
 
 #include <cstdint>
-#include <array>
+#include <vector>
 
 class Memory {
 public:
+
+    Memory(std::vector<uint8_t> memory);
 
     uint8_t read(const uint16_t address) const;
     void write(const uint16_t address, const uint8_t value);
 
 private:
 
-    std::array<uint8_t, 0xFFFF> m_memory;
+    std::vector<uint8_t> m_memory;
+
 };
