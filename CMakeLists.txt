@@ -7,13 +7,17 @@ project(Gameboy
 
 set(CXX_STANDARD 17)
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
+#set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
 
-add_executable(Gameboy.out main.cpp src/Cartridge.cpp src/GameBoy.cpp src/Logger.cpp src/MemoryMap.cpp)
-target_compile_options(Gameboy.out PRIVATE -Wall -Wextra -Werror)
-add_subdirectory(cpu)
+add_executable(Gameboy.out main.cpp)
+target_compile_options(Gameboy.out PRIVATE -Wall)
 
-target_include_directories(Gameboy.out PUBLIC include)
-target_link_libraries(Gameboy.out PRIVATE cpu)
+add_subdirectory(src/Cpu)
+add_subdirectory(src/Memory)
+add_subdirectory(src/Utilities)
+add_subdirectory(src/Gameboy)
+
+target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_link_libraries(Gameboy.out PRIVATE Gameboy Cpu Memory Utils)
 
 
