@@ -10,9 +10,9 @@
 #include <MBC1.h>
 #include <Memory.h>
 #include <cpu/Operations.h>
+#include <imgui/imgui.h>
 
 int main() {
-
 
     const auto rom = load_rom("../tests/gb-test-roms/cpu_instr/cpu_instr.gb");
     std::vector<uint8_t> raw_internal(0xFFFF, 0);

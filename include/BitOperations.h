@@ -21,3 +21,4 @@ bool is_set(uint8_t b, int n);
 
 uint16_t combine_bytes(uint8_t upper, uint8_t lower);
 bool half_carry(uint8_t a, uint8_t b);
+bool overflows(uint8_t a, uint8_t b);
