@@ -21,13 +21,13 @@ int main() {
     Memory internal_memory(raw_internal);
     MBC1 mbc1(internal_memory, rom_memory);
 
-    Cpu cpu;
-    cpu.m_memory_controller = &mbc1;
+    Cpu cpu(&mbc1);
 
     try {
         while(true) {
             step(cpu);
             std::cout << "Blarg has written: " <<  (int) cpu.m_memory_controller->read(0xFF01) << "\n";
+            //std::cin.get();
         }
     }   
     catch (std::exception& err)  {

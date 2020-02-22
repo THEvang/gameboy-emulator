@@ -5,6 +5,8 @@
 
 struct Cpu {
 
+    Cpu(MemoryBankController* memory_controller);
+
     uint8_t m_reg_a = 0x01;
     uint8_t m_reg_b = 0x00;
     uint8_t m_reg_c = 0x13;

@@ -1,6 +1,7 @@
 #include <cpu/Operations.h>
 #include <BitOperations.h>
 #include <string>
+#include <iostream>
 
 UnimplementedOperation::UnimplementedOperation(const std::string& msg)
     : runtime_error(msg) {
@@ -8,7 +9,7 @@ UnimplementedOperation::UnimplementedOperation(const std::string& msg)
 }
 
 void NOP(Cpu& cpu) {
-    cpu.m_cycles =4;
+    cpu.m_cycles = 4;
     cpu.m_program_counter++;
 }
 
@@ -36,7 +37,10 @@ void EI(Cpu& cpu) {
 }
 
 void JR(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: JR");
+
+    const auto distance = static_cast<uint8_t>(cpu.m_memory_controller->read(cpu.m_program_counter+1));
+    cpu.m_program_counter += (distance + 2);
+    cpu.m_cycles += 12;
 }
 
 void JR_NZ(Cpu& cpu) {
@@ -56,15 +60,39 @@ void JR_C(Cpu& cpu) {
 }
 
 void RET(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: RET");
+
+    const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+    
+    std::cout << "PC High " << (int)pc_high << "From address: " << cpu.m_stack_ptr << "\n";
+    std::cout << "PC LOW " << (int)pc_low << "From address: " << cpu.m_stack_ptr-1 << "\n""\n";
+
+    cpu.m_program_counter = combine_bytes(pc_high, pc_low);
+    
+    cpu.m_stack_ptr += 2;
+    cpu.m_cycles += 16;
+
+    std::cout << "Returning to: " << (int) cpu.m_program_counter << "\n";
 }
 
 void RET_NZ(Cpu& cpu) {
+
     throw UnimplementedOperation("Unimplemented operation: RET NZ");
 }
 
 void RET_Z(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: RET Z");
+
+    if(is_set(cpu.m_reg_f, 7)) {
+        const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+        const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+        cpu.m_program_counter = combine_bytes(pc_high, pc_low);
+        
+        cpu.m_stack_ptr += 2;
+        cpu.m_cycles += 20;
+    } else {
+        cpu.m_program_counter++;
+        cpu.m_cycles += 8;
+    }
 }
 
 void RET_NC(Cpu& cpu) {
@@ -111,9 +139,22 @@ void JUMP_ADDR_HL(Cpu& cpu) {
 
 void CALL(Cpu& cpu) {
 
-    
+    const auto pc_high = static_cast<uint8_t>((cpu.m_program_counter+3) >> 8);
+    const auto pc_low = static_cast<uint8_t>((cpu.m_program_counter+3) & 0xFF);
 
-    throw UnimplementedOperation("Unimplemented opration: CALL");
+    cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+    cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+
+    
+    const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+    const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+    const auto address = combine_bytes(upper, lower);
+    
+    std::cout << "Address to call: " << (int) address << "\n";
+
+    cpu.m_program_counter = address;
+    cpu.m_stack_ptr -= 2;
+    cpu.m_cycles += 24;
 }
 
 void CALL_NZ(Cpu& cpu) {
@@ -152,7 +193,10 @@ void LD_A_C(Cpu& cpu) {
 }
 
 void LD_A_D(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A D");
+    
+    cpu.m_reg_a = cpu.m_reg_d;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_A_E(Cpu& cpu) {
@@ -160,11 +204,17 @@ void LD_A_E(Cpu& cpu) {
 }
 
 void LD_A_H(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A H");
+
+    cpu.m_reg_a = cpu.m_reg_h;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_A_L(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A L");
+    
+    cpu.m_reg_a = cpu.m_reg_l;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_A_ADDR_BC(Cpu& cpu) {
@@ -180,7 +230,15 @@ void LD_A_ADDR_HL(Cpu& cpu) {
 }
 
 void LD_A_ADDR_A16(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A ADDR");
+
+    const auto low = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+    const auto high = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+    const auto address = combine_bytes(high, low);
+
+    cpu.m_reg_a = cpu.m_memory_controller->read(address);
+
+    cpu.m_program_counter += 3;
+    cpu.m_cycles += 16;
 }
 
 void LD_A_ADDR_C(Cpu& cpu) {
@@ -284,7 +342,10 @@ void LD_D_D8(Cpu& cpu) {
 }
 
 void LD_D_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D A");
+
+    cpu.m_reg_d = cpu.m_reg_a;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_D_B(Cpu& cpu) {
@@ -356,7 +417,10 @@ void LD_H_D8(Cpu& cpu) {
 }
 
 void LD_H_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD H A");
+
+    cpu.m_reg_h = cpu.m_reg_a;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_H_B(Cpu& cpu) {
@@ -392,7 +456,10 @@ void LD_L_D8(Cpu& cpu) {
 }
 
 void LD_L_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD L A");
+
+    cpu.m_reg_a = cpu.m_reg_l;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_L_B(Cpu& cpu) {
@@ -497,7 +564,11 @@ void LD_SP_D16(Cpu& cpu) {
 }
 
 void LD_SP_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD SP HL");
+
+    const auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    cpu.m_stack_ptr = value;
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void ADD_A_D8(Cpu& cpu) {
@@ -585,7 +656,21 @@ void SUB_ADDR_HL(Cpu& cpu) {
 }
 
 void INC_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: INC A");
+
+    if(half_carry(cpu.m_reg_a, 1)) {
+        set_bit(cpu.m_reg_f, 5);
+    }
+
+    cpu.m_reg_a++;
+
+    if(cpu.m_reg_a == 0) {
+        set_bit(cpu.m_reg_f, 7);
+    }
+
+    clear_bit(cpu.m_reg_f, 6);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void INC_B(Cpu& cpu) {
@@ -713,7 +798,20 @@ void ADD_SP_R8(Cpu& cpu) {
 }
 
 void AND_D8(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: AND D8");
+
+    const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+    cpu.m_reg_a &= value;
+
+    if(cpu.m_reg_a == 0) {
+        set_bit(cpu.m_reg_f, 7);
+    }
+
+    clear_bit(cpu.m_reg_f, 6);
+    set_bit(cpu.m_reg_f, 5);
+    clear_bit(cpu.m_reg_f, 4);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter += 2;
 }
 
 void AND_A(Cpu& cpu) {
@@ -857,7 +955,13 @@ void CP_ADDR_HL(Cpu& cpu) {
 }
 
 void PUSH_AF(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: PUSH AF");
+
+    cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_a);
+    cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_f);
+
+    cpu.m_stack_ptr -= 2;
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
 }
 
 void PUSH_BC(Cpu& cpu) {
@@ -869,7 +973,13 @@ void PUSH_DE(Cpu& cpu) {
 }
 
 void PUSH_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: PUSH HL");
+
+    cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_h);
+    cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_l);
+
+    cpu.m_stack_ptr -= 2;
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
 }
 
 void POP_AF(Cpu& cpu) {
@@ -877,7 +987,12 @@ void POP_AF(Cpu& cpu) {
 }
 
 void POP_BC(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: POP BC");
+
+    cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+    cpu.m_stack_ptr += 2;
+    cpu.m_program_counter++;
+    cpu.m_cycles += 12;
 }
 
 void POP_DE(Cpu& cpu) {
@@ -885,7 +1000,13 @@ void POP_DE(Cpu& cpu) {
 }
 
 void POP_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: POP HL");
+
+    cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+    cpu.m_stack_ptr += 2;
+    cpu.m_program_counter++;
+    cpu.m_cycles += 12;
+
 }
 
 void ADC_A_D8(Cpu& cpu) {

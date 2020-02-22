@@ -22,7 +22,7 @@ public:
 protected:
 
     uint8_t m_ram_bank;
-    uint8_t m_rom_bank;
+    uint8_t m_rom_bank = 1;
     bool m_ram_enabled;
     BankingMode m_banking_mode;
 

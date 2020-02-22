@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1..3.15)
-
+set(CMAKE_BUILD_TYPE Debug)
 project(Gameboy
     VERSION 1.0
     DESCRIPTION "Gameboy emulator"
