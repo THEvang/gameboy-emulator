@@ -20,6 +20,6 @@ add_subdirectory(src/imgui)
 
 
 target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(Gameboy.out PRIVATE Gameboy Cpu Memory Utils ImgGui)
+target_link_libraries(Gameboy.out PRIVATE Gameboy Cpu Memory Utils ImgGui SDL2 GLEW GLU GL)
 
 
