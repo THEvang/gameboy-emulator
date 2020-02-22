@@ -3,6 +3,7 @@
 #include <Opcodes.h>
 #include <CBCode.h>
 #include <iostream>
+#include <imgui/imgui.h>
 
 Cpu::Cpu(MemoryBankController* memory_controller)     
     : m_memory_controller(memory_controller) 
@@ -49,6 +50,7 @@ Cpu::Cpu(MemoryBankController* memory_controller)
 }
 
 void step(Cpu& cpu) {
+
 
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
     std::cout << "Opcode: " << std::hex << (int) opcode << "\n";
