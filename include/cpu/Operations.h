@@ -12,7 +12,7 @@ public:
 void NOP(Cpu& cpu);
 void STOP(Cpu& cpu);
 void HALT(Cpu& cpu);
-void RST(int);
+void RST(Cpu& cpu, uint8_t address); 
 void DI(Cpu& cpu);
 void EI(Cpu& cpu);
 

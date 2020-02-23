@@ -21,7 +21,13 @@ void clear_bit(uint8_t& b, int n);
 bool is_set(uint8_t b, int n);
 
 uint16_t combine_bytes(uint8_t upper, uint8_t lower);
-bool half_carry(uint8_t a, uint8_t b);
-bool half_borrow(uint8_t a, uint8_t b);
+bool half_carry_8bit(uint8_t a, uint8_t b);
+bool half_carry_16bit(uint16_t a, uint16_t b);
 
-bool overflows(uint8_t a, uint8_t b);
+bool half_borrow_8bit(uint8_t a, uint8_t b);
+bool half_borrow_16bit(uint16_t a, uint16_t b);
+
+bool overflows_8bit(uint8_t a, uint8_t b);
+bool overflows_16bit(uint16_t a, uint16_t b);
+
+bool underflows_8bit(uint8_t a, uint8_t b);

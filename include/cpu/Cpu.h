@@ -24,6 +24,11 @@ struct Cpu {
     int m_cycles;
 
     MemoryBankController* m_memory_controller;
+
+    static const int zero_flag = 7;
+    static const int sub_flag = 6;
+    static const int half_carry_flag = 5;
+    static const int carry_flag = 4;
 };
 
 void step(Cpu& cpu);
