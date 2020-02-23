@@ -1,9 +1,8 @@
 #include <cpu/Cpu.h>
 #include <cpu/Operations.h>
-#include <Opcodes.h>
-#include <CBCode.h>
+#include <cpu/Opcodes.h>
+#include <cpu/CBCode.h>
 #include <iostream>
-#include <imgui/imgui.h>
 
 Cpu::Cpu(MemoryBankController* memory_controller)     
     : m_memory_controller(memory_controller) 

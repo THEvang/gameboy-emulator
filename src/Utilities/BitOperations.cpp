@@ -25,3 +25,7 @@ void clear_bit(uint8_t& b, int n) {
 bool is_set(uint8_t b, int n) {
     return ((1 << n) & b) != 0;
 }
+
+bool half_borrow(uint8_t a, uint8_t b) {
+   return (a & 0xF) < (b & 0xF);
+}

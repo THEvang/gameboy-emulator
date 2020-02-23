@@ -14,6 +14,7 @@
 #include "Gui.h"
 
 void render_cpu(Cpu& cpu) {
+
     ImGui::Begin("Cpu!"); 
     ImGui::Text("Current Opcode: %i.", cpu.m_memory_controller->read(cpu.m_program_counter));  
     ImGui::Text("Register A: %i.", cpu.m_reg_a);
@@ -49,8 +50,21 @@ void render_cpu(Cpu& cpu) {
     ImGui::Checkbox("Carry flag: ", &carry_flag);
     ImGui::SameLine();
 
-    ImGui::End();
+    ImGui::Text("Serial Output: %u", (int)cpu.m_memory_controller->read(0xFF01));
 
+    ImGui::End();
+}
+
+void render_disassembly(Cpu& cpu) {
+    ImGui::Begin("Disassembled!");
+
+    ImGui::BeginChild("Scrolling Text");
+    for (int n = 0; n < 50; n++) {
+        ImGui::Text("Some Text: %i", n);
+    }
+    ImGui::EndChild();
+
+    ImGui::End();
 }
 
 int main() {
@@ -95,18 +109,16 @@ int main() {
         ImGui_ImplSDL2_NewFrame(gui.window);
         ImGui::NewFrame();
 
-        ImGui::Begin("Cpu!");
-            if(ImGui::Button("Step Cpu!")) {
-                try {
-                step(cpu);
-                std::cout << "Blarg has written: " <<  (int) cpu.m_memory_controller->read(0xFF01) << "\n";
-                //std::cin.get();
+        try {
+            step(cpu);
+            std::cout << "Blarg has written: " <<  (int) cpu.m_memory_controller->read(0xFF01) << "\n";
+            //std::cin.get();
             }   
             catch (std::exception& err)  {
                 std::cout << err.what();
             }
-        }
-        ImGui::End();
+        
+        render_disassembly(cpu);
 
         render_cpu(cpu);
 
@@ -114,8 +126,6 @@ int main() {
 
 
     }
-
-
 
     return 0;
 }
