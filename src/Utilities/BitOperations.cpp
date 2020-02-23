@@ -5,11 +5,6 @@ uint16_t combine_bytes(uint8_t upper, uint8_t lower) {
     return (upper << 8) | lower;
 }
 
-bool overflows(uint8_t a, uint8_t b) {
-    int sum = a + b;
-    return sum > std::numeric_limits<uint8_t>::max();
-};
-
 bool half_carry(uint8_t a, uint8_t b) {
     return (((a & 0xF) + (b & 0xF)) & 0x10) == 0x10;
 }
@@ -29,3 +24,8 @@ bool is_set(uint8_t b, int n) {
 bool half_borrow(uint8_t a, uint8_t b) {
    return (a & 0xF) < (b & 0xF);
 }
+
+bool overflows(uint8_t a, uint8_t b) {
+    int sum = a + b;
+    return sum > std::numeric_limits<uint8_t>::max();
+};

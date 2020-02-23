@@ -1,7 +1,7 @@
 #include <cpu/Cpu.h>
 #include <cpu/Operations.h>
 #include <cpu/Opcodes.h>
-#include <cpu/CBCode.h>
+#include <cpu/CBOpcodes.h>
 #include <iostream>
 
 Cpu::Cpu(MemoryBankController* memory_controller)     
@@ -1042,680 +1042,93 @@ void step(Cpu& cpu) {
     }
 }
 
-// void Cpu::Load(uint8_t & reg) {
-//     reg = m_mainMemory->Read(m_programCounter + 1);
-//     m_programCounter += 2;
-//     m_cycles += 8;
-// }
+ void step_cb(Cpu& cpu) {
 
-// void Cpu::Load(uint8_t & reg, uint8_t value) {
-//     reg = value;
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
+     auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
 
-// void Cpu::Load(uint8_t & reg, uint16_t const addr) {
-//     reg = m_mainMemory->Read(addr);
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::Load(uint16_t const address, uint8_t const value) {
-//     m_mainMemory->Write(address, value);
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::IncrementRegister(Byte& reg) {
-
-//     m_flags.resetSubtract();
-
-//     if ( (((reg & 0xf) + (1 & 0xf)) & 0x10) == 0x10) {
-//         m_flags.setHalfCarry();
-//     }
-
-//     reg++;
-
-//     if (reg == 0) {
-//         m_flags.setZero();
-//     }
-
- 
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::DecrementRegister(Byte& reg) {
-    
-//     Logger::Log(LogLevel::Debug, "Decrement register");
-
-//     m_flags.resetSubtract();
-
-//     if((((reg  & 0x0f) - (1 & 0x0f)) & 0x10) == 0x10) {
-//         m_flags.setHalfCarry();
-//     } 
-
-//     reg--;
-
-//     if (reg == 0) {
-//         m_flags.setZero();
-//     }
-
-    
-//     // Set if no borrow from bit 4
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// uint16_t Cpu::CombineRegisters(const Byte& high, const Byte& low) const {
-
-//     uint16_t combinedRegister = (high << 8) | low;
-
-//     return combinedRegister;
-// }
-
-// void Cpu::AddRegisters(Byte& to, const Byte& from) {
-
-//     m_flags.resetSubtract();
-
-//     if ( (((to & 0xf) + ( (from +1) &0xf)) & 0x10) == 0x10) {
-//         m_flags.setHalfCarry();
-//     } 
-
-//     if( (static_cast<int>(to) + static_cast<int>(from)) > 0xFF) {
-//         m_flags.setCarry();
-//     }
-
-//     if(to == 0) {
-//         m_flags.setZero();
-//     }
-
-
-//     to += from;
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::SubtractFromA(uint8_t value) {
-
-//     Logger::Log(LogLevel::Debug, "Subtract Register from A");
-
-//     m_flags.setSubtract();
-
-//     if (value > m_regA) {
-//         m_flags.setCarry();
-//     }
-
-//     m_regA -= value;
-
-//     if(m_regA == 0) {
-//         m_flags.setZero();
-//     }
-
-
-//     m_programCounter++;
-//     m_cycles += 8;
-//     //Check borrow from 4 bit
-
-// }
-
-// void Cpu::SubtractFromAddress(uint16_t address) {
-
-//     Logger::Log(LogLevel::Debug, "Subtract address from A");
-
-//     m_flags.setSubtract();
-
-//     auto value = m_mainMemory->Read(address);    
-
-//     if (value > m_regA) {
-//         m_flags.setCarry();
-//     }
-
-//     m_regA -= value;
-
-//     if(m_regA == 0) {
-//         m_flags.setZero();
-//     }
-
-
-
-//     //H - set if no borrow from bit 4
-//     //C - set if no borrow
-
-//     m_cycles += 8;
-//     m_programCounter++;
-// }
-
-// void Cpu::SubtractImmediateByte() {
-
-//     Logger::Log(LogLevel::Debug, "Subtract n From A");
-
-//     m_flags.setSubtract();
-
-//     auto value = m_mainMemory->Read(m_programCounter + 1);
-//     m_regA -= value;
-
-//     if(m_regA == 0) {
-//         m_flags.setZero();
-//     }
-
-//     //H - set if no borrow from bit 4
-//     //C - set if no borrow
-
-//     m_programCounter += 2;
-//     m_cycles += 8;
-// }
-
-// void Cpu::UnimplementedOperation(std::string const & message) const {
-
-//     Logger::Log(LogLevel::Error, "Unimplemented operation: \t" + message);
-//     std::cin.get();
-// }
-
-// void Cpu::And() {
-//     auto value = m_mainMemory->Read(m_programCounter + 1);
-
-//     m_regA &= value;
-//     SetAndFlags(m_regA);
-
-//     m_programCounter +=2;
-//     m_cycles += 8;
-// }
-
-// void Cpu::And(uint8_t const value) {
-    
-//     m_regA &= value;
-//     SetAndFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::And(uint16_t const address) {
-//     auto value = m_mainMemory->Read(address);
-
-//     m_regA &= value;
-//     SetAndFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::SetAndFlags(uint8_t const value) {
-    
-//     if (value == 0) {
-//         m_flags.setZero();
-//     }
-
-//     m_flags.resetSubtract();
-//     m_flags.setHalfCarry();
-//     m_flags.resetCarry();
-// }
-
-// void Cpu::Or() {
-
-//     auto value = m_mainMemory->Read(m_programCounter + 1);
-    
-//     m_regA |= value;
-//     SetOrFlags(m_regA);
-
-//     m_programCounter += 2;
-//     m_cycles += 8;
-// }
-
-// void Cpu::Or(uint8_t const value) {
-
-//     m_regA |= value;
-//     SetOrFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::Or(uint16_t const address) {
-
-//     auto value = m_mainMemory->Read(address);
-
-//     m_regA |= value;
-
-//     SetOrFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::SetOrFlags(uint8_t const result) {
-    
-//     if (result == 0) {
-//         m_flags.setZero();
-//     }
-
-//     m_flags.resetSubtract();
-//     m_flags.resetHalfCarry();
-//     m_flags.resetCarry();
-// }
-
-// void Cpu::Xor() {
-//     auto value = m_mainMemory->Read(m_programCounter + 1);
-
-//     m_regA ^= value;
-//     SetOrFlags(m_regA);
-
-//     m_programCounter += 2;
-//     m_cycles += 8;
-// }
-
-// void Cpu::Xor(uint8_t const value) {
-    
-//     m_regA ^= value;
-//     SetOrFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::Xor(uint16_t const address) {
-//     auto value = m_mainMemory->Read(address);
-
-//     m_regA ^= value;
-//     SetOrFlags(m_regA);
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::CompareWithA(const Byte& reg) {
-
-//     Logger::Log(LogLevel::Debug, "Compare register with A");
-
-//     if(m_regA == reg) {
-//        m_flags.setZero();
-//     }
-
-//     m_flags.setSubtract();
-
-//     //Set H if no borrow from bit 4
-
-//     if(m_regA < reg) {
-//         m_flags.setCarry();
-//     }
-// }
-
-// void Cpu::DisableInterrupts() {
-    
-//     m_programCounter++;
-// }
-
- 
-//  void Cpu::ComplementA() {
-
-//     m_regA = ~m_regA;
-
-//     m_flags.setSubtract();
-//     m_flags.setHalfCarry();
-
-//     m_programCounter++;
-//     m_cycles += 4;
-//  }
-
-//  void Cpu::ComplementCarryFlag() {
-
-//     m_flags.flipCarry();
-
-//     m_flags.resetSubtract();
-//     m_flags.resetHalfCarry();
-
-//     m_programCounter++;
-//     m_cycles += 4;
-//  }
-
-//  void Cpu::SetCarryFlag() {
-
-//     m_flags.setCarry();
-//     m_flags.resetSubtract();
-//     m_flags.resetHalfCarry();
-
-//     m_programCounter++;
-//     m_cycles += 4;
-//  }
-
-//  void Cpu::Call() {
-
-//     auto address = m_programCounter + 3;
-
-//     m_mainMemory->Write(m_stackPtr, address);
-//     m_mainMemory->Write(m_stackPtr - 1, (address >> 8));
-//     m_stackPtr -= 2;
-
-//     m_programCounter = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
-    
-//     m_cycles += 12;
-//  }
-
-
-//  void Cpu::Ret() {
-//      auto address = CombineRegisters(m_mainMemory->Read(m_stackPtr + 1), m_mainMemory->Read(m_stackPtr));
-//      m_stackPtr += 2;
-
-//      m_programCounter = address;
-//      m_cycles += 12;
-//  }
-
-//  void Cpu::ExecuteCB() {
-
-//      auto opcode = m_mainMemory->Read(m_programCounter);
-
-//     Logger::Log(LogLevel::Debug, "Program counter: \t" + std::to_string(m_programCounter));
-//     Logger::Log(LogLevel::Debug, "Opcode: \t" + std::to_string(opcode));
-
-//      switch (static_cast<CBCode>(opcode)) {
-//          case CBCode::RLC_B:
-//             UnimplementedOperation("RLC B");
-//             break;
+     switch (static_cast<CBCode>(opcode)) {
+         case CBCode::RLC_B:
+            throw UnimplementedOperation("RLC B");
+            break;
         
-//         case CBCode::RLC_C :
-//             UnimplementedOperation("RLC C");
-//             break;
+        case CBCode::RLC_C :
+            throw UnimplementedOperation("RLC C");
+            break;
         
-//         case CBCode::RLC_D:
-//             UnimplementedOperation("RLC D");
-//             break;
+        case CBCode::RLC_D:
+            throw UnimplementedOperation("RLC D");
+            break;
         
-//         case CBCode::RLC_E:
-//             UnimplementedOperation("RLC E");
-//             break;
+        case CBCode::RLC_E:
+            throw UnimplementedOperation("RLC E");
+            break;
         
-//         case CBCode::RLC_H:
-//             UnimplementedOperation("RLC H");
-//             break;
+        case CBCode::RLC_H:
+            throw UnimplementedOperation("RLC H");
+            break;
         
-//         case CBCode::RLC_L:
-//             UnimplementedOperation("RLC L");
-//             break;
+        case CBCode::RLC_L:
+            throw UnimplementedOperation("RLC L");
+            break;
         
-//         case CBCode::RLC_ADDR_HL:
-//             UnimplementedOperation("RLC (HL)");
-//             break;
+        case CBCode::RLC_ADDR_HL:
+            throw UnimplementedOperation("RLC (HL)");
+            break;
         
-//         case CBCode::RLC_A:
-//             UnimplementedOperation("RLC A");
-//             break;
+        case CBCode::RLC_A:
+            throw UnimplementedOperation("RLC A");
+            break;
         
-//         case CBCode::RRC_B:
-//             UnimplementedOperation("RRC B");
-//             break;
+        case CBCode::RRC_B:
+            throw UnimplementedOperation("RRC B");
+            break;
         
-//         case CBCode::RRC_C:
-//             UnimplementedOperation("RRC C");
-//             break;
+        case CBCode::RRC_C:
+            throw UnimplementedOperation("RRC C");
+            break;
         
-//         case CBCode::RRC_D:
-//             UnimplementedOperation("RRC D");
-//             break;
+        case CBCode::RRC_D:
+            throw UnimplementedOperation("RRC D");
+            break;
         
-//         case CBCode::RRC_E:
-//             UnimplementedOperation("RRC E");
-//             break;
+        case CBCode::RRC_E:
+            throw UnimplementedOperation("RRC E");
+            break;
         
-//         case CBCode::RRC_H:
-//             UnimplementedOperation("RRC H");
-//             break;
+        case CBCode::RRC_H:
+            throw UnimplementedOperation("RRC H");
+            break;
         
-//         case CBCode::RRC_L:
-//             UnimplementedOperation("RRC L");
-//             break;
+        case CBCode::RRC_L:
+            throw UnimplementedOperation("RRC L");
+            break;
         
-//         case CBCode::RRC_ADDR_HL:
-//             UnimplementedOperation("RRC (HL");
-//             break;
+        case CBCode::RRC_ADDR_HL:
+            throw UnimplementedOperation("RRC (HL");
+            break;
         
-//         case CBCode::RRC_A:
-//             UnimplementedOperation("RRC A");
-//             break;
+        case CBCode::RRC_A:
+            throw UnimplementedOperation("RRC A");
+            break;
         
-//         case CBCode::RR_C:
-//             RR(m_regC);
-//             break;
+        case CBCode::RR_C:
+            throw UnimplementedOperation("RR C");
+            break;
         
-//         case CBCode::RR_D:
-//             RR(m_regD);
-//             break;
+        case CBCode::RR_D:
+            throw UnimplementedOperation("RR D");
+            break;
 
-//         case CBCode::SRL_B:
-//             SRL(m_regB);
-//             break;
+        case CBCode::SRL_B:
+            throw UnimplementedOperation("SRL_B");
+            break;
 
-//         case CBCode::RES_6_A:
-//             m_regA &= ~(1ul << 6);
-//             m_programCounter++;
-//             break;
+        case CBCode::RES_6_A:
+            throw UnimplementedOperation("RES_6_A");
+            break;
         
-//         default:
-//             UnimplementedOperation("Unavailable Opcode\n");
-//             break;
-//      }
-
-//  }
-
-// void Cpu::JumpRelativeNZ() {
-
-//     if (m_flags.zeroFlag() == FlagState::Reset) {
-//         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-//     } else {
-//         m_programCounter += 2;
-//     }
-
-//     m_cycles += 8;
-// }
-
-// void Cpu::JumpRelativeNC() {
-
-//     if (m_flags.carryFlag() == FlagState::Reset) {
-//         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-//     } else {
-//         m_programCounter += 2;
-//     }
-
-//     m_cycles += 8;
-// }
-
-// void Cpu::JumpRelativeC() {
-
-//     if (m_flags.carryFlag() == FlagState::Set) {
-//         m_programCounter += static_cast<int8_t>(m_mainMemory->Read(m_programCounter + 1));
-//     } else {
-//         m_programCounter += 2;
-//     }
-
-//     m_cycles += 8;
-// }
-
-// void Cpu::Pop(uint8_t& high, uint8_t& low) {
-//     high = m_mainMemory->Read(m_stackPtr + 1);
-//     low = m_mainMemory->Read(m_stackPtr);
-
-//     m_stackPtr += 2;
-//     m_programCounter++;
-// }
-
-// void Cpu::Restart(uint8_t address) {
-//     m_mainMemory->Write(m_stackPtr, m_programCounter);
-//     m_stackPtr--;
-
-//     m_programCounter += 0x000 + address;
-//     m_cycles += 32;
-// }
-
-// void Cpu::LDHAN() {
-//     auto address = +0xFF00 + m_mainMemory->Read(m_programCounter + 1);
-
-//     m_regA = m_mainMemory->Read(address);
-
-//     m_programCounter++;
-// }
-
-// void Cpu::Push(uint8_t high, uint8_t low) {
-//     m_mainMemory->Write(m_stackPtr, high);
-//     m_stackPtr--;
-
-//     m_mainMemory->Write(m_stackPtr, low);
-//     m_stackPtr--;
-
-//     m_programCounter++;
-// }
-
-// void Cpu::LoadImmediate16BitValue(uint8_t& high, uint8_t& low) {
-
-//     high = m_mainMemory->Read(m_programCounter + 2);
-//     low = m_mainMemory->Read(m_programCounter + 1);
-
-//     m_programCounter += 3;
-//     m_cycles += 12;
-// }
-
-// void Cpu::LoadImmediate16BitValue(uint16_t& to) {
-//     auto value = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
-//     to = value;
-
-//     m_programCounter += 3;
-//     m_cycles += 12;
-// }
-
-// void Cpu::LoadStackPointerFromHL() {
-//     auto value = CombineRegisters(m_regH, m_regL);
-//     m_stackPtr = value;
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-    
-
-// void Cpu::IncrementAtAddress(uint16_t address) {
-    
-//     uint8_t value = m_mainMemory->Read(address);
-
-//     if ( (((value & 0xf) + ( (value +1) &0xf)) & 0x10) == 0x10) {
-//         m_flags.setHalfCarry();
-//     } 
-
-//     value++;
-
-//     if(value == 0) {
-//         m_flags.setZero();
-//     }
-
-//     m_flags.resetSubtract();
-
-//     m_mainMemory->Write(address, value);
-
-//     m_programCounter++;
-//     m_cycles += 12;
-// }
-
-// void Cpu::IncrementRegisterPair(uint8_t& high, uint8_t& low) {
-    
-//     auto value = CombineRegisters(high, low);
-//     value++;
-
-//     high = value >> 8;
-//     low = value;
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::IncrementStackpointer() {
-//     m_stackPtr++;
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::DecrementRegisterPair(uint8_t& high, uint8_t& low) {
-//         uint16_t value = CombineRegisters(high, low);
-//         value--;
-
-//         high = value >> 8;
-//         low = value;
-
-//         m_programCounter++;
-//         m_cycles+= 8;
-// }
-
-// void Cpu::DecrementStackPointer() {
-//     m_stackPtr--;
-
-//     m_programCounter++;
-//     m_cycles += 8;
-// }
-
-// void Cpu::DecrementAtAddress(uint16_t address) {
-    
-//     auto value = m_mainMemory->Read(address);
-//     value--;
-
-//     m_mainMemory->Write(address, value);
-
-//     m_programCounter++;
-//     m_cycles += 12;
-// }
-
-
-// void Cpu::RLCA() {
-
-//     if ( (m_regA & 0b10000000) == 0b10000000) {
-//         m_flags.setCarry();
-//     } else {
-//         m_flags.resetCarry();
-//     }
-
-//     m_regA = m_regA << 1;
-
-//     if (m_regA == 0) {
-//         m_flags.zeroFlag();
-//     }
-
-//     m_flags.resetSubtract();
-//     m_flags.resetHalfCarry();
-
-//     m_programCounter++;
-//     m_cycles += 4;
-// }
-
-// void Cpu::JumpRelative() {
-
-//     auto r8 = m_mainMemory->Read(m_programCounter + 1);
-//     m_programCounter += static_cast<int16_t>(r8);
-//     m_cycles += 8;
-// }
-
-// void Cpu::JumpRelativeZ() {
-
-//     if(m_flags.zeroFlag() == FlagState::Set)
-//     {
-//         m_programCounter += static_cast<int16_t>(m_mainMemory->Read(m_programCounter + 1));
-//     } else {
-//         m_programCounter++;
-//     }
-
-//     m_cycles += 8;
-// }
-
-// void Cpu::RetNZ() {
-
-//     if(m_flags.zeroFlag() == FlagState::Reset) {
-//         Ret();
-//     } else {
-//         m_programCounter++;
-//         m_cycles += 8;
-//     }
-// }
-
-// void Cpu::Jump() {
-//     auto address = CombineRegisters(m_mainMemory->Read(m_programCounter + 2), m_mainMemory->Read(m_programCounter + 1));
-    
-//     m_programCounter = address;
-//     m_cycles += 12;
-// }
+        default:
+            throw UnimplementedOperation("Invalid Opcode\n");
+            break;
+     }
+ }

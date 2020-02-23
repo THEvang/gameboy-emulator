@@ -27,3 +27,4 @@ struct Cpu {
 };
 
 void step(Cpu& cpu);
+void step_cb(Cpu& cpu);

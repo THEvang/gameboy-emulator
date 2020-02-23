@@ -1,3 +1,5 @@
+#pragma once
+
 #include <Cpu.h>
 #include <Opcodes.h>
 

@@ -50,7 +50,7 @@ void render_cpu(Cpu& cpu) {
     ImGui::Checkbox("Carry flag: ", &carry_flag);
     ImGui::SameLine();
 
-    ImGui::Text("Serial Output: %u", (int)cpu.m_memory_controller->read(0xFF01));
+    ImGui::Text("Serial Output: %c", (char)cpu.m_memory_controller->read(0xFF01));
 
     ImGui::End();
 }

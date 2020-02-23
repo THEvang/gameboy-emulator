@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <limits>
 
 template <typename T>
 T rotate_left(T value, int n) {
