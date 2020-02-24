@@ -154,6 +154,7 @@ void ADD_A_ADDR_HL(Cpu& cpu);
 void ADD_HL_BC(Cpu& cpu);
 void ADD_HL_HL(Cpu& cpu);
 void ADD_HL_DE(Cpu& cpu);
+void ADD_HL_SP(Cpu& cpu);
 
 void SUB_D8(Cpu& cpu);
 void SUB_A(Cpu& cpu);
@@ -282,3 +283,4 @@ void SBC_A_ADDR_HL(Cpu& cpu);
 void PREFIX_CB(Cpu& cpu);
 
 void LD_ADDR_HLD_A(Cpu& cpu);
+void LD_A_ADDR_HLD(Cpu& cpu);

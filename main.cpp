@@ -71,7 +71,8 @@ int main() {
 
     Gui gui;
   
-    const auto rom = load_rom("../tests/gb-test-roms/cpu_instr/cpu_instr.gb");
+    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb");
+
     std::vector<uint8_t> raw_internal(0xFFFF, 0);
     
     Memory rom_memory(rom);
@@ -116,6 +117,7 @@ int main() {
             }   
             catch (std::exception& err)  {
                 std::cout << err.what();
+                return 1;
             }
         
         render_disassembly(cpu);

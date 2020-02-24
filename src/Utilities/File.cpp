@@ -5,8 +5,9 @@
 
 std::vector<uint8_t> load_rom(const std::string& path) {
     
-    std::ifstream file("../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb", std::ios::binary);
+    std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) {
+        throw std::runtime_error("Oh no");
         return {};
     }
 
@@ -14,7 +15,3 @@ std::vector<uint8_t> load_rom(const std::string& path) {
 
     return buffer;
 }
-
-void memory_banK_type(std::vector<uint8_t> rom) {
-
-};

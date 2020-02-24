@@ -285,11 +285,11 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::ADD_HL_SP:
-            UnimplementedOperation("ADD HL, SP");
+            ADD_HL_SP(cpu);
             break;
         
         case Opcode::LD_A_ADDR_HLD:
-            UnimplementedOperation("LD A, (HL-)");
+            LD_A_ADDR_HLD(cpu);
             break;
         
         case Opcode::DEC_SP:
@@ -853,7 +853,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_00H:
-            RST(0x00);
+            RST(cpu, 0x00);
             break;
         
         case Opcode::RET_Z:
@@ -885,7 +885,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_08H:
-            RST(0x08);
+            RST(cpu, 0x08);
             break;
         
         case Opcode::RET_NC:
@@ -913,7 +913,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_10H:
-            RST(0x10);
+            RST(cpu, 0x10);
             break;
         
         case Opcode::RET_C:
@@ -937,7 +937,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_18H:
-            RST(0x18);
+            RST(cpu, 0x18);
             break;
         
         case Opcode::LDH_ADDR_A8_A:
@@ -961,7 +961,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_20H:
-            RST(0x20);
+            RST(cpu, 0x20);
             break;
         
         case Opcode::ADD_SP_R8:
@@ -981,7 +981,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_28H:
-            RST(0x28);
+            RST(cpu, 0x28);
             break;
         
         case Opcode::LDH_A_ADDR_A8:
@@ -1009,7 +1009,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_30H:
-            RST(0x30);
+            RST(cpu, 0x30);
             break;
         
         case Opcode::LD_HL_SPR8:
@@ -1033,7 +1033,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::RST_38H:
-            RST(0x38);
+            RST(cpu, 0x38);
             break;
 
         default:
