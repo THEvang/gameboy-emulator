@@ -10,7 +10,7 @@ uint8_t MBC1::read(const uint16_t address) {
     if(address <= 0x3FFF) {
         return m_rom_memory.read(address);
     } else if (address >= 0x4000 && address <= 0x7FFF) {
-        return m_rom_memory.read(address + m_rom_bank * 16000);
+        return m_rom_memory.read(address + (m_rom_bank -1) * (0x3FFF +1) );
     } else {
         return m_internal_memory.read(address);
     }
@@ -19,32 +19,32 @@ uint8_t MBC1::read(const uint16_t address) {
 void MBC1::write(const uint16_t address, uint8_t value) {
 
     if(address <= 0x1FFF) {
-        m_ram_enabled = (value == 0) ? false : true; 
+        m_ram_enabled = ( (value & 0xF) == 0x0A) ? true : false; 
     } else if (address >= 0x2000 && address <= 0x3FFF) {
 
-        if(value == 0) {
+        value &= (0b00011111);
+        m_rom_bank &= (0b11100000);
+        m_rom_bank |= value;
+        
+        if(m_rom_bank == 0) {
             m_rom_bank = 1;
-        } else if (value == 20) {
+        } else if (m_rom_bank == 20) {
             m_rom_bank = 21;
-        } else if (value == 40) {
+        } else if (m_rom_bank == 40) {
             m_rom_bank = 41;
-        } else if (value == 60) {
+        } else if (m_rom_bank == 60) {
             m_ram_bank = 61;   
-        } else {            
-            value &= (0b00011111);
-            m_rom_bank &= (0b11100000);
-            m_rom_bank |= value;
         }
 
     } else if (address >= 0x4000 && address <= 0x5FFF) {
 
         switch (m_banking_mode) {
             case BankingMode::RAM:
-                m_rom_bank = value;
+                m_ram_bank = value;
                 break;
             case BankingMode::ROM:
-                m_ram_bank &= ~((0b00000011) << 5);
-                m_ram_bank |= (value << 5);
+                m_rom_bank &= ~((0b00000011) << 5);
+                m_rom_bank |= (value << 5);
                 break;
         }
 

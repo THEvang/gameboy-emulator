@@ -24,7 +24,7 @@ void HALT(Cpu& cpu) {
 void RST(Cpu& cpu, uint8_t address) {
 
     const auto pc_high = ( (cpu.m_program_counter + 1) >> 8);
-    const auto pc_low = ( (cpu.m_program_counter + 1) & 0xF);
+    const auto pc_low = ( (cpu.m_program_counter + 1) & 0xFF);
 
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
@@ -32,7 +32,7 @@ void RST(Cpu& cpu, uint8_t address) {
     cpu.m_program_counter = 0x0000 + address;
     cpu.m_stack_ptr -= 2;
     cpu.m_cycles += 16;
-    //throw UnimplementedOperation("RST\n");
+    throw UnimplementedOperation("RST\n");
 }
 
 void DI(Cpu& cpu) {
@@ -216,7 +216,7 @@ void JUMP_ADDR_HL(Cpu& cpu) {
 void CALL(Cpu& cpu) {
 
     const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
-    const auto pc_low = ( (cpu.m_program_counter+3) & 0xF);
+    const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
 
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
@@ -234,7 +234,7 @@ void CALL_NZ(Cpu& cpu) {
 
     if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
         const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
-        const auto pc_low = ( (cpu.m_program_counter+3) & 0xF);
+        const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
 
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
@@ -367,7 +367,7 @@ void LDI_ADDR_HL_A(Cpu& cpu) {
 
     address++;
     cpu.m_reg_h = (address >> 8);
-    cpu.m_reg_l = (address & 0xF);
+    cpu.m_reg_l = (address & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -381,7 +381,7 @@ void LDI_A_ADDR_HL(Cpu& cpu) {
     
     address++;
     cpu.m_reg_h = (address >> 8);
-    cpu.m_reg_l = (address & 0xF);
+    cpu.m_reg_l = (address & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -805,7 +805,7 @@ void LD_HL_SPR8(Cpu& cpu) {
 
     const auto result = cpu.m_stack_ptr + distance;
     cpu.m_reg_h = (result >> 8);
-    cpu.m_reg_l = (result & 0xF);
+    cpu.m_reg_l = (result & 0xFF);
 
     cpu.m_cycles += 12;
     cpu.m_program_counter += 2;
@@ -943,7 +943,7 @@ void ADD_HL_BC(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
     cpu.m_reg_h = (hl >> 8);
-    cpu.m_reg_l = (hl & 0xF);
+    cpu.m_reg_l = (hl & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -968,7 +968,7 @@ void ADD_HL_DE(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
     cpu.m_reg_h = (hl >> 8);
-    cpu.m_reg_l = (hl & 0xF);
+    cpu.m_reg_l = (hl & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -988,7 +988,7 @@ void ADD_HL_HL(Cpu& cpu) {
 
     value += value;
     cpu.m_reg_h = (value >> 8);
-    cpu.m_reg_l = (value & 0xF);
+    cpu.m_reg_l = (value & 0xFF);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1206,7 +1206,7 @@ void INC_BC(Cpu& cpu) {
     value++;
 
     cpu.m_reg_b = (value >> 8);
-    cpu.m_reg_c = (value & 0xF);
+    cpu.m_reg_c = (value & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -1218,7 +1218,7 @@ void INC_DE(Cpu& cpu) {
     value++;
 
     cpu.m_reg_d = (value >> 8);
-    cpu.m_reg_e = (value & 0xF);
+    cpu.m_reg_e = (value & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -1230,7 +1230,7 @@ void INC_HL(Cpu& cpu) {
     value++;
 
     cpu.m_reg_h = (value >> 8);
-    cpu.m_reg_l = (value & 0xF);
+    cpu.m_reg_l = (value & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -1362,7 +1362,7 @@ void DEC_BC(Cpu& cpu) {
     bc--;
 
     cpu.m_reg_b = (bc >> 8);
-    cpu.m_reg_c = (bc & 0xF);
+    cpu.m_reg_c = (bc & 0xFF);
 
     cpu.m_program_counter++;
     cpu.m_cycles += 4;
@@ -1377,7 +1377,26 @@ void DEC_HL(Cpu& cpu) {
 }
 
 void DEC_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: DEC ADDR HL");
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    if(half_borrow_8bit(value, 1)) {
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    value--;
+
+    if(value == 0) {
+        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+    }
+
+    set_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 12;
 }
 
 void DEC_SP(Cpu& cpu) {
@@ -1647,7 +1666,21 @@ void OR_L(Cpu& cpu) {
 }
 
 void OR_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: OR ADDR HL");
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto value = cpu.m_memory_controller->read(address);
+
+    cpu.m_reg_a |= value;
+    if(cpu.m_reg_a == 0) {
+        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+    }
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void CP_D8(Cpu& cpu) {
@@ -2085,12 +2118,14 @@ void SBC_A_ADDR_HL(Cpu& cpu) {
 }
 
 void PREFIX_CB(Cpu& cpu) {
+
+    throw UnimplementedOperation("PREFIX CB\n");
+
     cpu.m_program_counter++;
     cpu.m_cycles += 4;
 
     step_cb(cpu);
 
-    throw UnimplementedOperation("PREFIX CB");
 }
 
 void LD_ADDR_HLD_A(Cpu& cpu) {
@@ -2101,7 +2136,7 @@ void LD_ADDR_HLD_A(Cpu& cpu) {
     address--;
 
     cpu.m_reg_h = (address >> 8);
-    cpu.m_reg_l = (address & 0xF);
+    cpu.m_reg_l = (address & 0xFF);
 
     cpu.m_cycles += 8;
     cpu.m_program_counter++;

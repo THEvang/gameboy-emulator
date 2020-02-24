@@ -2,7 +2,10 @@
 #include <limits>
 
 auto combine_bytes(uint8_t upper, uint8_t lower) -> uint16_t {
-    return (upper << 8) | lower;
+    const uint16_t a = upper;
+    const uint16_t b = lower;
+    const uint16_t result = (a << 8) | b;
+    return result;
 }
 
 auto half_carry_8bit(uint8_t a, uint8_t b) -> bool {

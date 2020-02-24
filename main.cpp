@@ -13,7 +13,7 @@
 #include <BitOperations.h>
 #include "Gui.h"
 
-void render_cpu(Cpu& cpu) {
+void render_cpu(Cpu& cpu, std::vector<char> blarg) {
 
     ImGui::Begin("Cpu!"); 
     ImGui::Text("Current Opcode: %i.", cpu.m_memory_controller->read(cpu.m_program_counter));  
@@ -49,8 +49,13 @@ void render_cpu(Cpu& cpu) {
     bool carry_flag = is_set(cpu.m_reg_f, 4);
     ImGui::Checkbox("Carry flag: ", &carry_flag);
     ImGui::SameLine();
+    
+    std::string s;
+    for(const auto e : blarg) {
+        s += e;
+    }
 
-    ImGui::Text("Serial Output: %c", (char)cpu.m_memory_controller->read(0xFF01));
+    ImGui::Text("Serial Output: %s", s.c_str());//(char)cpu.m_memory_controller->read(0xFF01));
 
     ImGui::End();
 }
@@ -80,6 +85,8 @@ int main() {
     MBC1 mbc1(internal_memory, rom_memory);
 
     Cpu cpu(&mbc1);
+
+    std::vector<char> blarg;
 
     bool done = false;
     while (!done)
@@ -112,8 +119,9 @@ int main() {
 
         try {
             step(cpu);
-            std::cout << "Blarg has written: " <<  (int) cpu.m_memory_controller->read(0xFF01) << "\n";
-            //std::cin.get();
+            if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
+                blarg.push_back(cpu.m_memory_controller->read(0xFF01));
+            }
             }   
             catch (std::exception& err)  {
                 std::cout << err.what();
@@ -122,7 +130,7 @@ int main() {
         
         render_disassembly(cpu);
 
-        render_cpu(cpu);
+        render_cpu(cpu, blarg);
 
         gui.render();
 
