@@ -20,6 +20,7 @@ struct Cpu {
     uint16_t m_program_counter = 0x0100;
 
     bool m_enabled_interrupts = false;
+    bool should_stop = false;
 
     int m_cycles;
 

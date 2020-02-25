@@ -1,6 +1,7 @@
 #include <cpu/Cpu.h>
 #include <cpu/Operations.h>
 #include <cpu/Opcodes.h>
+#include <cpu/CBOperations.h>
 #include <cpu/CBOpcodes.h>
 #include <iostream>
 
@@ -89,7 +90,7 @@ void step(Cpu& cpu) {
             break;
 
         case Opcode::LD_ADDR_A16_SP:
-            LD_ADDR_SP(cpu);
+            LD_ADDR_A16_SP(cpu);
             break;
 
         case Opcode::ADD_HL_BC:
@@ -1111,24 +1112,204 @@ void step(Cpu& cpu) {
             throw UnimplementedOperation("RRC A");
             break;
         
+        case CBCode::RL_B:
+            throw UnimplementedOperation("RL B\n");
+            break;
+        
+        case CBCode::RL_C:
+            throw UnimplementedOperation("RL C\n");
+            break;
+        
+        case CBCode::RL_D:
+            throw UnimplementedOperation("RL D\n");
+            break;
+        
+        case CBCode::RL_E:
+            throw UnimplementedOperation("RL E\n");
+            break;
+        
+        case CBCode::RL_H:
+            throw UnimplementedOperation("RL H\n");
+            break;
+
+        case CBCode::RL_ADDR_HL:
+            throw UnimplementedOperation("RL ADDR HL\n");
+            break;
+        
+        case CBCode::RL_A:
+            throw UnimplementedOperation("RL A\n");
+            break;
+
+        case CBCode::RR_B:
+            throw UnimplementedOperation("RR B\n");
+            break;
+
         case CBCode::RR_C:
-            throw UnimplementedOperation("RR C");
+            RR_C(cpu);
             break;
         
         case CBCode::RR_D:
-            throw UnimplementedOperation("RR D");
+            RR_D(cpu);
             break;
 
-        case CBCode::SRL_B:
-            throw UnimplementedOperation("SRL_B");
+        case CBCode::RR_E:
+            RR_E(cpu);
             break;
+
+        case CBCode::RR_H:
+            throw UnimplementedOperation("RR H\n");
+            break;
+
+        case CBCode::RR_L:
+            throw UnimplementedOperation("RR L\n");
+            break;    
+            
+        case CBCode::RR_ADDR_HL:
+            throw UnimplementedOperation("RR ADDR HL\n");
+            break;
+
+        case CBCode::RR_A:
+            throw UnimplementedOperation("RR A\n");
+            break;
+        
+        case CBCode::SLA_B:
+            throw UnimplementedOperation("SLA B\n");
+            break;
+
+        case CBCode::SLA_C:
+            throw UnimplementedOperation("SLA C\n");
+            break;
+
+        case CBCode::SLA_D:
+            throw UnimplementedOperation("SLA D\n");
+            break;
+
+        case CBCode::SLA_E:
+            throw UnimplementedOperation("SLA E\n");
+            break;
+
+        case CBCode::SLA_H:
+            throw UnimplementedOperation("SLA H\n");
+            break;
+
+        case CBCode::SLA_L:
+            throw UnimplementedOperation("SLA L\n");
+            break;
+
+        case CBCode::SLA_ADDR_HL:
+            throw UnimplementedOperation("SLA HL\n");
+            break;
+
+        case CBCode::SLA_A:
+            throw UnimplementedOperation("SLA A\n");
+            break;
+
+        case CBCode::SRA_B:
+            throw UnimplementedOperation("SRL B\n");
+            break;
+
+        case CBCode::SRA_C:
+            throw UnimplementedOperation("SRL C\n");
+            break;
+
+        case CBCode::SRA_D:
+            throw UnimplementedOperation("SRL D\n");
+            break;
+
+        case CBCode::SRA_E:
+            throw UnimplementedOperation("SRL E\n");
+            break;
+
+        case CBCode::SRA_H:
+            throw UnimplementedOperation("SRL H\n");
+            break;
+
+        case CBCode::SRA_L:
+            throw UnimplementedOperation("SRL L\n");
+            break;
+
+        case CBCode::SRA_ADDR_HL:
+            throw UnimplementedOperation("SRL HL\n");
+            break;
+        
+        case CBCode::SRA_A:
+            throw UnimplementedOperation("SRL A\n");
+            break;
+        
+        case CBCode::SWAP_B:
+            throw UnimplementedOperation("SWAP B\n");
+            break;
+
+        case CBCode::SWAP_C:
+            throw UnimplementedOperation("SWAP C\n");
+            break;
+
+        case CBCode::SWAP_D:
+            throw UnimplementedOperation("SWAP D\n");
+            break;
+
+        case CBCode::SWAP_E:
+            throw UnimplementedOperation("SWAP E\n");
+            break;
+
+        case CBCode::SWAP_H:
+            throw UnimplementedOperation("SWAP H\n");
+            break;
+
+        case CBCode::SWAP_L:
+            throw UnimplementedOperation("SWAP L\n");
+            break;
+
+        case CBCode::SWAP_ADDR_HL:
+            throw UnimplementedOperation("SWAP ADDR HL\n");
+            break;
+
+        case CBCode::SWAP_A:
+            SWAP_A(cpu);
+            break;
+        
+        case CBCode::SRL_B:
+            SRL_B(cpu);            
+            break;
+
+        case CBCode::SRL_C:
+            throw UnimplementedOperation("SRL C\n");
+            break;
+
+        case CBCode::SRL_D:
+            throw UnimplementedOperation("SRL D\n");
+            break;
+
+        case CBCode::SRL_E:
+            throw UnimplementedOperation("SRL E\n");
+            break;
+
+        case CBCode::SRL_H:
+            throw UnimplementedOperation("SRL H\n");
+            break;
+
+        case CBCode::SRL_L:
+            throw UnimplementedOperation("SRL L\n");
+            break;
+
+        case CBCode::SRL_ADDR_HL:
+            throw UnimplementedOperation("SRL ADDR HL\n");
+            break;
+
+        case CBCode::SRL_A:
+            SRL_A(cpu);
+            break;
+
+
+
+
 
         case CBCode::RES_6_A:
             throw UnimplementedOperation("RES_6_A");
             break;
         
         default:
-            throw UnimplementedOperation("Invalid Opcode\n");
+            throw UnimplementedOperation("Unimplemented CB Code\n");
             break;
      }
  }

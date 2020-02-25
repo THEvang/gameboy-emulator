@@ -55,7 +55,7 @@ void LD_A_ADDR_DE(Cpu& cpu);
 void LD_A_ADDR_HL(Cpu& cpu);
 void LD_A_ADDR_C(Cpu& cpu);
 void LD_A_ADDR_A16(Cpu& cpu);
-void LD_ADDR_SP(Cpu& cpu);
+void LD_ADDR_A16_SP(Cpu& cpu);
 
 void LDI_ADDR_HL_A(Cpu& cpu);
 void LDI_A_ADDR_HL(Cpu& cpu);

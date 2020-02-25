@@ -74,9 +74,8 @@ void render_disassembly(Cpu& cpu) {
 
 int main() {
 
-    Gui gui;
   
-    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/individual/06-ld r,r.gb");
+    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb");
     std::cout << "Cartridge type: " << (int ) rom[0x0147] << "\n";
     std::cout << "Rom siz: " << (int ) rom[0x0148] << "\n";
 
@@ -90,18 +89,26 @@ int main() {
 
     std::vector<char> blarg;
 
-    while(true) {
+    while(!cpu.should_stop) {
         try {
-        step(cpu);
-        if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-            blarg.push_back(cpu.m_memory_controller->read(0xFF01));
-        }
+            step(cpu);
         }   
         catch (std::exception& err)  {
             std::cout << err.what();
             return 1;
         }
+
+        // if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
+        //   std::cout << (char) cpu.m_memory_controller->read(0xFF01) << "\n";
+        // }
     }
+    
+    std::cout << "CPU STOP\n";
+    std::cout << "SB: " << (int)cpu.m_memory_controller->read(0xFF01) << "\n";
+
+    return 0;
+
+    Gui gui;
     bool done = false;
     while (!done)
     {
