@@ -21,10 +21,10 @@ public:
 
 protected:
 
-    uint8_t m_ram_bank;
+    uint8_t m_ram_bank = 1;
     uint8_t m_rom_bank = 1;
-    bool m_ram_enabled;
-    BankingMode m_banking_mode;
+    bool m_ram_enabled = false;
+    BankingMode m_banking_mode = BankingMode::ROM;
 
     Memory m_internal_memory;
     Memory m_rom_memory;

@@ -13,7 +13,9 @@ uint8_t MBC1::read(const uint16_t address) {
         const auto read_addr = address + (m_rom_bank -1) * 0x4000;
         return m_rom_memory.read( read_addr);
     } else if (address >= 0xA000 && address <= 0xBFFF) {
-        throw std::runtime_error("RAM");
+
+        return m_internal_memory.read(address);
+        // throw std::runtime_error("RAM");
     } 
     else {
         return m_internal_memory.read(address);
@@ -23,7 +25,7 @@ uint8_t MBC1::read(const uint16_t address) {
 void MBC1::write(const uint16_t address, uint8_t value) {
 
     if(address <= 0x1FFF) {
-        m_ram_enabled =  (value == 0x0A) ? true : false; 
+        m_ram_enabled =  ( (value & 0xF) == 0x0A) ? true : false; 
     } else if (address >= 0x2000 && address <= 0x3FFF) {
 
         value &= (0b00011111);
@@ -58,7 +60,12 @@ void MBC1::write(const uint16_t address, uint8_t value) {
         } else if (value == 1) {
             m_banking_mode = BankingMode::RAM;
         }
-    } else {
+    } else if (address >= 0xA000 && address <= 0xBFFF) {
+        if(m_ram_enabled) {
+            m_internal_memory.write(address, value);
+        }
+    }
+    else {
         m_internal_memory.write(address, value);
     }
 }
