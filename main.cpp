@@ -90,6 +90,18 @@ int main() {
 
     std::vector<char> blarg;
 
+    while(true) {
+        try {
+        step(cpu);
+        if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
+            blarg.push_back(cpu.m_memory_controller->read(0xFF01));
+        }
+        }   
+        catch (std::exception& err)  {
+            std::cout << err.what();
+            return 1;
+        }
+    }
     bool done = false;
     while (!done)
     {

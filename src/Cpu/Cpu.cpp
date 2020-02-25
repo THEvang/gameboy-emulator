@@ -52,8 +52,8 @@ void step(Cpu& cpu) {
 
 
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
-     std::cout << "Opcode: " << std::hex << (int) opcode << "\n";
-    std::cout << "Program Counter: " << (int) cpu.m_program_counter << "\n";
+    //std::cout << "Opcode: " << std::hex << (int) opcode << "\n";
+    //std::cout << "Program Counter: " << (int) cpu.m_program_counter << "\n";
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:

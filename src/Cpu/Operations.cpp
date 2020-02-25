@@ -798,13 +798,14 @@ void LD_HL_SPR8(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::zero_flag);
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
-    if(half_carry_16bit(cpu.m_stack_ptr, distance)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_16bit(cpu.m_stack_ptr, distance)     ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    
 
-    if(overflows_16bit(cpu.m_stack_ptr, distance)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_16bit(cpu.m_stack_ptr, distance)  ? 
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     const auto result = cpu.m_stack_ptr + distance;
     cpu.m_reg_h = (result >> 8);
@@ -838,13 +839,14 @@ void ADD_A_D8(Cpu& cpu) {
 
 
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
-    if(half_carry_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    
+    half_carry_8bit(cpu.m_reg_a, value)             ? 
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(overflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_8bit(cpu.m_reg_a, value)          ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a += value;
 
@@ -864,13 +866,14 @@ void ADD_A_A(Cpu& cpu) {
 void ADD_A_B(Cpu& cpu) {
 
     const auto value = cpu.m_reg_b;
-    if(half_carry_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
 
-    if(overflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_a, value)             ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    overflows_8bit(cpu.m_reg_a, value)          ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a += value;
 
@@ -886,13 +889,13 @@ void ADD_A_B(Cpu& cpu) {
 void ADD_A_C(Cpu& cpu) {
 
     const auto value = cpu.m_reg_c;
-    if(half_carry_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_a, value)             ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(overflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_8bit(cpu.m_reg_a, value)          ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a += value;
 
@@ -930,13 +933,13 @@ void ADD_HL_BC(Cpu& cpu) {
     auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
     const auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
 
-    if(overflows_16bit(hl, bc)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_16bit(hl, bc)                     ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_carry_16bit(hl, bc)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_16bit(hl, bc)                        ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     hl += bc;
 
@@ -955,13 +958,13 @@ void ADD_HL_DE(Cpu& cpu) {
     auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
     const auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
 
-    if(overflows_16bit(hl, de)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_16bit(hl, de)                     ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_carry_16bit(hl, de)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_16bit(hl, de)                        ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     hl += de;
 
@@ -978,13 +981,14 @@ void ADD_HL_HL(Cpu& cpu) {
 
     auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
     
-    if(overflows_16bit(value, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_16bit(value, value)               ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_carry_16bit(value, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_16bit(value, value)               ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    
 
     value += value;
     cpu.m_reg_h = (value >> 8);
@@ -1003,19 +1007,18 @@ void ADD_HL_SP(Cpu& cpu) {
 void SUB_D8(Cpu& cpu) {
 
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a -= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1034,13 +1037,15 @@ void SUB_B(Cpu& cpu) {
 void SUB_C(Cpu& cpu) {
 
     const auto value = cpu.m_reg_c;
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    
 
     cpu.m_reg_a -= value;
 
@@ -1075,9 +1080,9 @@ void SUB_ADDR_HL(Cpu& cpu) {
 
 void INC_A(Cpu& cpu) {
 
-    if(half_carry_8bit(cpu.m_reg_a, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_a, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_a++;
 
@@ -1092,9 +1097,9 @@ void INC_A(Cpu& cpu) {
 
 void INC_B(Cpu& cpu) {
     
-    if(half_carry_8bit(cpu.m_reg_b, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_b, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_b++;
 
@@ -1109,9 +1114,9 @@ void INC_B(Cpu& cpu) {
 
 void INC_C(Cpu& cpu) {
 
-    if(half_carry_8bit(cpu.m_reg_c, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_c, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_c++;
 
@@ -1126,9 +1131,9 @@ void INC_C(Cpu& cpu) {
 
 void INC_D(Cpu& cpu) {
     
-    if(half_carry_8bit(cpu.m_reg_d, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_d, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_d++;
 
@@ -1143,9 +1148,9 @@ void INC_D(Cpu& cpu) {
 
 void INC_E(Cpu& cpu) {
 
-    if(half_carry_8bit(cpu.m_reg_e, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_e, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_e++;
 
@@ -1160,9 +1165,9 @@ void INC_E(Cpu& cpu) {
 
 void INC_H(Cpu& cpu) {
     
-    if(half_carry_8bit(cpu.m_reg_h, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_h, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_h++;
 
@@ -1177,9 +1182,9 @@ void INC_H(Cpu& cpu) {
 
 void INC_L(Cpu& cpu) {
 
-    if(half_carry_8bit(cpu.m_reg_l, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_l, 1)                 ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_l++;
 
@@ -1238,9 +1243,9 @@ void INC_SP(Cpu& cpu) {
 
 void DEC_A(Cpu& cpu) {
 
-    if(half_borrow_8bit(cpu.m_reg_a, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_a--;
     
@@ -1255,9 +1260,9 @@ void DEC_A(Cpu& cpu) {
 
 void DEC_B(Cpu& cpu) {
 
-    if(half_borrow_8bit(cpu.m_reg_b, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_b, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_b--;
 
@@ -1272,9 +1277,9 @@ void DEC_B(Cpu& cpu) {
 
 void DEC_C(Cpu& cpu) {
 
-    if(half_borrow_8bit(cpu.m_reg_c, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_c, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_c--;
 
@@ -1293,9 +1298,9 @@ void DEC_D(Cpu& cpu) {
 
 void DEC_E(Cpu& cpu) {    
     
-    if(half_borrow_8bit(cpu.m_reg_e, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_e, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_e--;
 
@@ -1310,9 +1315,9 @@ void DEC_E(Cpu& cpu) {
 
 void DEC_H(Cpu& cpu) {
 
-    if(half_borrow_8bit(cpu.m_reg_h, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_h, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_h--;
 
@@ -1327,9 +1332,9 @@ void DEC_H(Cpu& cpu) {
 
 void DEC_L(Cpu& cpu) {
 
-    if(half_borrow_8bit(cpu.m_reg_l, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_l, 1)                ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_l--;
 
@@ -1367,15 +1372,15 @@ void DEC_ADDR_HL(Cpu& cpu) {
     const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
     auto value = cpu.m_memory_controller->read(address);
 
-    if(half_borrow_8bit(value, 1)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(value, 1)                      ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     value--;
 
-    if(value == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    value == 0                                  ?
+        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1664,13 +1669,13 @@ void CP_D8(Cpu& cpu) {
     
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1684,13 +1689,13 @@ void CP_D8(Cpu& cpu) {
 void CP_A(Cpu& cpu) {
     const auto value = cpu.m_reg_a;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1705,13 +1710,13 @@ void CP_B(Cpu& cpu) {
 
     const auto value = cpu.m_reg_b;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1726,13 +1731,13 @@ void CP_C(Cpu& cpu) {
 
     const auto value = cpu.m_reg_c;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
-
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1746,13 +1751,13 @@ void CP_C(Cpu& cpu) {
 void CP_D(Cpu& cpu) {
     const auto value = cpu.m_reg_d;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1767,13 +1772,13 @@ void CP_E(Cpu& cpu) {
 
     const auto value = cpu.m_reg_e;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1792,13 +1797,13 @@ void CP_L(Cpu& cpu) {
 
     const auto value = cpu.m_reg_l;
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -1895,13 +1900,13 @@ void ADC_A_D8(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
 
-    if(half_carry_8bit(cpu.m_reg_a, value + carry_value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_a, value + carry_value)   ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)      :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(overflows_8bit(cpu.m_reg_a, value + carry_value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_8bit(cpu.m_reg_a, value + carry_value)    ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)           :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a += value + carry_value;
 
@@ -1942,13 +1947,13 @@ void ADC_A_L(Cpu& cpu) {
     
     const uint8_t carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
 
-    if(half_carry_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_carry_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value) ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(overflows_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    overflows_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value)  ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a += cpu.m_reg_l + carry_value;
 
@@ -1990,13 +1995,13 @@ void SBC_A_D8(Cpu& cpu) {
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1)
         + (is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a -= value;
 
@@ -2034,13 +2039,13 @@ void SBC_A_H(Cpu& cpu) {
     const auto value = cpu.m_reg_h
         + (is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a -= value;
 
@@ -2063,13 +2068,13 @@ void SBC_A_ADDR_HL(Cpu& cpu) {
     const auto value = cpu.m_memory_controller->read(address)
         + (is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0);
 
-    if(half_borrow_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    }
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    if(underflows_8bit(cpu.m_reg_a, value)) {
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
-    }
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a -= value;
 
