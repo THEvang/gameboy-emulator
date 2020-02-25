@@ -38,13 +38,13 @@ void RST(Cpu& cpu, uint8_t address) {
 void DI(Cpu& cpu) {
     
     cpu.m_cycles += 4;
-    cpu.m_enabled_interrupts = false;
+    cpu.m_memory_controller->write(0xFFFF, 0);
     cpu.m_program_counter++;
 }
 
 void EI(Cpu& cpu) {
     cpu.m_cycles += 4;
-    cpu.m_enabled_interrupts = true;
+    cpu.m_memory_controller->write(0xFFFF, 1);
     cpu.m_program_counter++;
 }
 
@@ -59,8 +59,9 @@ void JR(Cpu& cpu) {
 void JR_NZ(Cpu& cpu) {
     
     if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter+1));
-        cpu.m_program_counter += (distance + 2);
+        cpu.m_program_counter += 2;
+        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        cpu.m_program_counter += distance;
         cpu.m_cycles += 12;
     } else {
         cpu.m_program_counter += 2;
@@ -71,8 +72,9 @@ void JR_NZ(Cpu& cpu) {
 void JR_Z(Cpu& cpu) {
 
     if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter+1));
-        cpu.m_program_counter += (distance + 2);
+        cpu.m_program_counter += 2;
+        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        cpu.m_program_counter += distance;
         cpu.m_cycles += 12;
     } else {
         cpu.m_program_counter += 2;
@@ -83,8 +85,9 @@ void JR_Z(Cpu& cpu) {
 void JR_NC(Cpu& cpu) {
 
     if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter+1));
-        cpu.m_program_counter += (distance + 2);
+        cpu.m_program_counter += 2;
+        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        cpu.m_program_counter += distance;
         cpu.m_cycles += 12;
     } else {
         cpu.m_program_counter += 2;
@@ -215,8 +218,8 @@ void JUMP_ADDR_HL(Cpu& cpu) {
 
 void CALL(Cpu& cpu) {
 
-    const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
-    const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
+    const uint8_t pc_high = ( (cpu.m_program_counter+3) >> 8);
+    const uint8_t pc_low = ( (cpu.m_program_counter+3) & 0xFF);
 
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
@@ -845,9 +848,8 @@ void ADD_A_D8(Cpu& cpu) {
 
     cpu.m_reg_a += value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -872,9 +874,8 @@ void ADD_A_B(Cpu& cpu) {
 
     cpu.m_reg_a += value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -895,9 +896,8 @@ void ADD_A_C(Cpu& cpu) {
 
     cpu.m_reg_a += value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1044,9 +1044,8 @@ void SUB_C(Cpu& cpu) {
 
     cpu.m_reg_a -= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1082,9 +1081,8 @@ void INC_A(Cpu& cpu) {
 
     cpu.m_reg_a++;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1100,9 +1098,8 @@ void INC_B(Cpu& cpu) {
 
     cpu.m_reg_b++;
 
-    if(cpu.m_reg_b == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1118,9 +1115,8 @@ void INC_C(Cpu& cpu) {
 
     cpu.m_reg_c++;
 
-    if(cpu.m_reg_c == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1136,9 +1132,8 @@ void INC_D(Cpu& cpu) {
 
     cpu.m_reg_d++;
 
-    if(cpu.m_reg_d == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_d == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1154,9 +1149,8 @@ void INC_E(Cpu& cpu) {
 
     cpu.m_reg_e++;
 
-    if(cpu.m_reg_e == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1172,9 +1166,8 @@ void INC_H(Cpu& cpu) {
 
     cpu.m_reg_h++;
 
-    if(cpu.m_reg_h == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1190,9 +1183,8 @@ void INC_L(Cpu& cpu) {
 
     cpu.m_reg_l++;
 
-    if(cpu.m_reg_l == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1252,9 +1244,8 @@ void DEC_A(Cpu& cpu) {
 
     cpu.m_reg_a--;
     
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1270,9 +1261,8 @@ void DEC_B(Cpu& cpu) {
 
     cpu.m_reg_b--;
 
-    if(cpu.m_reg_b == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1288,9 +1278,8 @@ void DEC_C(Cpu& cpu) {
 
     cpu.m_reg_c--;
 
-    if(cpu.m_reg_c == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1310,9 +1299,8 @@ void DEC_E(Cpu& cpu) {
 
     cpu.m_reg_e--;
 
-    if(cpu.m_reg_e == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1328,9 +1316,8 @@ void DEC_H(Cpu& cpu) {
 
     cpu.m_reg_h--;
 
-    if(cpu.m_reg_h == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1346,9 +1333,8 @@ void DEC_L(Cpu& cpu) {
 
     cpu.m_reg_l--;
 
-    if(cpu.m_reg_l == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1470,9 +1456,8 @@ void AND_D8(Cpu& cpu) {
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     cpu.m_reg_a &= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1490,9 +1475,8 @@ void AND_B(Cpu& cpu) {
     const auto value = cpu.m_reg_b;
     cpu.m_reg_a &= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1530,9 +1514,8 @@ void XOR_D8(Cpu& cpu) {
 
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     cpu.m_reg_a ^= value;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1554,9 +1537,8 @@ void XOR_B(Cpu& cpu) {
 void XOR_C(Cpu& cpu) {
 
     cpu.m_reg_a ^= cpu.m_reg_c;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1588,9 +1570,8 @@ void XOR_ADDR_HL(Cpu& cpu) {
     const auto value = cpu.m_memory_controller->read(address);
 
     cpu.m_reg_a ^= value;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1604,9 +1585,8 @@ void OR_D8(Cpu& cpu) {
 
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     cpu.m_reg_a |= value;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1618,9 +1598,8 @@ void OR_D8(Cpu& cpu) {
 
 void OR_A(Cpu& cpu) {
     cpu.m_reg_a |= cpu.m_reg_a;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1637,9 +1616,8 @@ void OR_B(Cpu& cpu) {
 void OR_C(Cpu& cpu) {
 
     cpu.m_reg_a |= cpu.m_reg_c;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1671,9 +1649,8 @@ void OR_ADDR_HL(Cpu& cpu) {
     const auto value = cpu.m_memory_controller->read(address);
 
     cpu.m_reg_a |= value;
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1695,9 +1672,8 @@ void CP_D8(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if((cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1716,9 +1692,8 @@ void CP_A(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1738,9 +1713,8 @@ void CP_B(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1760,9 +1734,8 @@ void CP_C(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1781,9 +1754,8 @@ void CP_D(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1803,9 +1775,8 @@ void CP_E(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1829,9 +1800,8 @@ void CP_L(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
     }
 
-    if( (cpu.m_reg_a - value) == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1935,9 +1905,8 @@ void ADC_A_D8(Cpu& cpu) {
 
     cpu.m_reg_a += value + carry_value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -1983,9 +1952,8 @@ void ADC_A_L(Cpu& cpu) {
 
     cpu.m_reg_a += cpu.m_reg_l + carry_value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -2032,9 +2000,8 @@ void SBC_A_D8(Cpu& cpu) {
 
     cpu.m_reg_a -= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -2077,9 +2044,8 @@ void SBC_A_H(Cpu& cpu) {
 
     cpu.m_reg_a -= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
@@ -2107,9 +2073,8 @@ void SBC_A_ADDR_HL(Cpu& cpu) {
 
     cpu.m_reg_a -= value;
 
-    if(cpu.m_reg_a == 0) {
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    }
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 

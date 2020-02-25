@@ -76,7 +76,9 @@ int main() {
 
     Gui gui;
   
-    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb");
+    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/individual/06-ld r,r.gb");
+    std::cout << "Cartridge type: " << (int ) rom[0x0147] << "\n";
+    std::cout << "Rom siz: " << (int ) rom[0x0148] << "\n";
 
     std::vector<uint8_t> raw_internal(0xFFFF, 0);
     
