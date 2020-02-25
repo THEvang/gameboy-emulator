@@ -51,3 +51,7 @@ auto overflows_16bit(uint16_t a, uint16_t b) -> bool {
 auto underflows_8bit(uint8_t a, uint8_t b) -> bool {
     return b > a;
 }
+
+void swap_nibbles(uint8_t& a) {
+    a = ( (a & 0x0F) << 4 | (a & 0xF0) >> 4 );
+}
