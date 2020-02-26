@@ -484,7 +484,9 @@ void LD_B_H(Cpu& cpu) {
 }
 
 void LD_B_L(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD B L");
+    cpu.m_reg_b = cpu.m_reg_l;
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void LD_B_ADDR_HL(Cpu& cpu) {
@@ -510,27 +512,39 @@ void LD_C_A(Cpu& cpu) {
 }
 
 void LD_C_B(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C B");
+    cpu.m_reg_c = cpu.m_reg_b;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_C(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C C");
+    cpu.m_reg_c = cpu.m_reg_c;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_D(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C D");
+    cpu.m_reg_c = cpu.m_reg_d;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_E(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C E");
+    cpu.m_reg_c = cpu.m_reg_e;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_H(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C H");
+    cpu.m_reg_c = cpu.m_reg_h;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_L(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD C L");
+    cpu.m_reg_c = cpu.m_reg_l;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_C_ADDR_HL(Cpu& cpu) {
@@ -560,23 +574,32 @@ void LD_D_B(Cpu& cpu) {
 }
 
 void LD_D_C(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D C");
+    cpu.m_reg_d = cpu.m_reg_c;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_D_D(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D D");
+    cpu.m_reg_d = cpu.m_reg_d;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_D_E(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D E");
+    cpu.m_reg_d = cpu.m_reg_e;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_D_H(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D H");
-}
+    cpu.m_reg_d = cpu.m_reg_h;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;}
 
 void LD_D_L(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D L");
+    cpu.m_reg_d = cpu.m_reg_l;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_D_ADDR_HL(Cpu& cpu) {
@@ -602,11 +625,15 @@ void LD_E_A(Cpu& cpu) {
 }
 
 void LD_E_B(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD E B");
+    cpu.m_reg_e = cpu.m_reg_b;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_E_C(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD E C");
+    cpu.m_reg_e = cpu.m_reg_c;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_E_D(Cpu& cpu) {
@@ -616,11 +643,15 @@ void LD_E_D(Cpu& cpu) {
 }
 
 void LD_E_E(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD E E");
+    cpu.m_reg_e = cpu.m_reg_e;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_E_H(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD E H");
+    cpu.m_reg_e = cpu.m_reg_h;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_E_L(Cpu& cpu) {
@@ -675,7 +706,9 @@ void LD_H_E(Cpu& cpu) {
 }
 
 void LD_H_H(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD H H");
+    cpu.m_reg_h = cpu.m_reg_h;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_H_L(Cpu& cpu) {
@@ -707,7 +740,9 @@ void LD_L_A(Cpu& cpu) {
 }
 
 void LD_L_B(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD L B");
+    cpu.m_reg_l = cpu.m_reg_b;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_L_C(Cpu& cpu) {
@@ -735,7 +770,9 @@ void LD_L_H(Cpu& cpu) {
 }
 
 void LD_L_L(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD L L");
+    cpu.m_reg_l = cpu.m_reg_l;
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void LD_L_ADDR_HL(Cpu& cpu) {
@@ -1522,9 +1559,15 @@ void RRA(Cpu& cpu) {
     const auto new_carry_flag = is_set(cpu.m_reg_a, 0);
     cpu.m_reg_a >>= 1;
 
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 7) : clear_bit(cpu.m_reg_a, 7);
+    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 7) 
+        : clear_bit(cpu.m_reg_a, 7);
 
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag) 
+        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -1540,6 +1583,10 @@ void RLCA(Cpu& cpu) {
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a = rotate_left(cpu.m_reg_a, 1);
+
+    clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -1803,7 +1850,7 @@ void CP_D8(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2046,7 +2093,7 @@ void ADC_A_D8(Cpu& cpu) {
 }
 
 void ADC_A_A(Cpu& cpu) {
-    const uint8_t carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_a;
 
     half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
@@ -2086,7 +2133,7 @@ void ADC_A_E(Cpu& cpu) {
 
 void ADC_A_H(Cpu& cpu) {
 
-    const uint8_t carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_h;
 
     half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
@@ -2110,17 +2157,18 @@ void ADC_A_H(Cpu& cpu) {
 
 void ADC_A_L(Cpu& cpu) {
     
-    const uint8_t carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto value = cpu.m_reg_l;
 
-    half_carry_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value) ?
+    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, cpu.m_reg_l + carry_value)  ?
+    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += cpu.m_reg_l + carry_value;
+    cpu.m_reg_a += value + carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
