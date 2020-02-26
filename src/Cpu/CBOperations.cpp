@@ -41,7 +41,6 @@ void SRL_B(Cpu& cpu) {
     cpu.m_program_counter++;
 }
 
-
 void RR_C(Cpu& cpu) {
 
     bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
