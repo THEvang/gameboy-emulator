@@ -75,7 +75,7 @@ void render_disassembly(Cpu& cpu) {
 int main() {
 
   
-    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb");
+    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/individual/01-special.gb");
     std::cout << "Cartridge type: " << (int ) rom[0x0147] << "\n";
     std::cout << "Rom siz: " << (int ) rom[0x0148] << "\n";
 
@@ -98,9 +98,10 @@ int main() {
             return 1;
         }
 
-        // if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-        //   std::cout << (char) cpu.m_memory_controller->read(0xFF01) << "\n";
-        // }
+        if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
+          std::cout << (char) cpu.m_memory_controller->read(0xFF01) << "\n";
+          cpu.m_memory_controller->write(0xFF02, 0);
+        }
     }
     
     std::cout << "CPU STOP\n";
@@ -108,55 +109,55 @@ int main() {
 
     return 0;
 
-    Gui gui;
-    bool done = false;
-    while (!done)
-    {
-        // Poll and handle events (inputs, window resize, etc.)
-        // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-        // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-        // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-        // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                done = true;
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window))
-                done = true;
-            if(event.type == SDL_KEYDOWN) {
-                switch(event.key.keysym.sym) {
-                    case SDLK_RETURN:
-                        step(cpu);
-                        break;
-                }
-            }
-        }
+    // Gui gui;
+    // bool done = false;
+    // while (!done)
+    // {
+    //     // Poll and handle events (inputs, window resize, etc.)
+    //     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+    //     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+    //     // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+    //     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+    //     SDL_Event event;
+    //     while (SDL_PollEvent(&event))
+    //     {
+    //         ImGui_ImplSDL2_ProcessEvent(&event);
+    //         if (event.type == SDL_QUIT)
+    //             done = true;
+    //         if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window))
+    //             done = true;
+    //         if(event.type == SDL_KEYDOWN) {
+    //             switch(event.key.keysym.sym) {
+    //                 case SDLK_RETURN:
+    //                     step(cpu);
+    //                     break;
+    //             }
+    //         }
+    //     }
 
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame(gui.window);
-        ImGui::NewFrame();
+    //     ImGui_ImplOpenGL3_NewFrame();
+    //     ImGui_ImplSDL2_NewFrame(gui.window);
+    //     ImGui::NewFrame();
 
-        try {
-            step(cpu);
-            if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-                blarg.push_back(cpu.m_memory_controller->read(0xFF01));
-            }
-            }   
-            catch (std::exception& err)  {
-                std::cout << err.what();
-                return 1;
-            }
+    //     try {
+    //         step(cpu);
+    //         if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
+    //             blarg.push_back(cpu.m_memory_controller->read(0xFF01));
+    //         }
+    //         }   
+    //         catch (std::exception& err)  {
+    //             std::cout << err.what();
+    //             return 1;
+    //         }
         
-        render_disassembly(cpu);
+    //     render_disassembly(cpu);
 
-        render_cpu(cpu, blarg);
+    //     render_cpu(cpu, blarg);
 
-        gui.render();
+    //     gui.render();
 
 
-    }
+    // }
 
-    return 0;
+    // return 0;
 }

@@ -246,7 +246,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::CPL:
-            CP_L(cpu);
+            CPL(cpu);
             break;
         
         case Opcode::JR_NC_R8:

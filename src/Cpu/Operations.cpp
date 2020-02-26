@@ -929,7 +929,6 @@ void LD_SP_HL(Cpu& cpu) {
 
 void ADD_A_D8(Cpu& cpu) {
 
-
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     
     half_carry_8bit(cpu.m_reg_a, value)             ? 
@@ -1394,7 +1393,28 @@ void SUB_L(Cpu& cpu) {
 }
 
 void SUB_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: SUB ADDR HL");
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto value = cpu.m_memory_controller->read(address);
+    
+    half_borrow_8bit(cpu.m_reg_a, value)            ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    underflows_8bit(cpu.m_reg_a, value)         ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    
+
+    cpu.m_reg_a -= value;
+
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    set_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void INC_A(Cpu& cpu) {
@@ -1490,7 +1510,7 @@ void INC_H(Cpu& cpu) {
 
     cpu.m_reg_h++;
 
-    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -1553,7 +1573,24 @@ void INC_HL(Cpu& cpu) {
 }
 
 void INC_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: INC ADDR HL");
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    half_carry_8bit(value, 1) ? set_bit(cpu.m_reg_f, Cpu::half_carry_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    value++;
+
+    value == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    cpu.m_memory_controller->write(address, value);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
 }
 
 void INC_SP(Cpu& cpu) {
@@ -1695,11 +1732,26 @@ void DEC_BC(Cpu& cpu) {
 }
 
 void DEC_DE(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: DEC DE");
+
+    auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
+    de--;
+
+    cpu.m_reg_d = (de >> 8);
+    cpu.m_reg_e = (de & 0xFF);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void DEC_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: DEC HL");
+    auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    hl--;
+
+    cpu.m_reg_h = (hl >> 8);
+    cpu.m_reg_l = (hl & 0xFF);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void DEC_ADDR_HL(Cpu& cpu) {
@@ -1756,8 +1808,9 @@ void RRCA(Cpu& cpu) {
     is_set(cpu.m_reg_a, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
         : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
     
-    cpu.m_reg_a = rotate_right(cpu.m_reg_a, 1);
+    cpu.m_reg_a = rotate_right<uint8_t>(cpu.m_reg_a, 1);
 
+    
     clear_bit(cpu.m_reg_f, Cpu::zero_flag);
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
@@ -1809,7 +1862,7 @@ void RLCA(Cpu& cpu) {
     is_set(cpu.m_reg_a, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a = rotate_left(cpu.m_reg_a, 1);
+    cpu.m_reg_a = rotate_left<uint8_t>(cpu.m_reg_a, 1);
 
     clear_bit(cpu.m_reg_f, Cpu::zero_flag);
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -1819,10 +1872,7 @@ void RLCA(Cpu& cpu) {
     cpu.m_program_counter++;
 }
 
-void DDA(Cpu& cpu) {
-
-
-    
+void DDA(Cpu& cpu) {    
     throw UnimplementedOperation("Unimplemented operation: DDA");
 }
 
@@ -1953,7 +2003,20 @@ void AND_L(Cpu& cpu) {
 }
 
 void AND_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: AND ADDR HL");
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto value = cpu.m_memory_controller->read(address);
+    cpu.m_reg_a &= value;
+
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void XOR_D8(Cpu& cpu) {
@@ -2166,7 +2229,8 @@ void OR_E(Cpu& cpu) {
 }
 
 void OR_H(Cpu& cpu) {
-    cpu.m_reg_a |= cpu.m_reg_e;
+
+    cpu.m_reg_a |= cpu.m_reg_h;
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
@@ -2520,6 +2584,7 @@ void ADC_A_A(Cpu& cpu) {
 }
 
 void ADC_A_B(Cpu& cpu) {
+
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_b;
 
@@ -2543,6 +2608,7 @@ void ADC_A_B(Cpu& cpu) {
 }
 
 void ADC_A_C(Cpu& cpu) {
+
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_c;
 
@@ -2660,7 +2726,28 @@ void ADC_A_L(Cpu& cpu) {
 }
 
 void ADC_A_ADDR_HL(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: ADC A ADDR HL");
+
+    const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto value = cpu.m_memory_controller->read(address);
+
+    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_a += value + carry_value;
+
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }
 
 void LDH_ADDR_A8_A(Cpu& cpu) {
@@ -2930,4 +3017,15 @@ void LD_A_ADDR_HLD(Cpu& cpu) {
 
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
+}
+
+void CPL(Cpu& cpu) {
+
+    cpu.m_reg_a = ~cpu.m_reg_a;
+
+    set_bit(cpu.m_reg_f, Cpu::sub_flag);
+    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 4;
 }

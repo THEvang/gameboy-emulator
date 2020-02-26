@@ -284,3 +284,5 @@ void PREFIX_CB(Cpu& cpu);
 
 void LD_ADDR_HLD_A(Cpu& cpu);
 void LD_A_ADDR_HLD(Cpu& cpu);
+
+void CPL(Cpu& cpu);
