@@ -44,3 +44,12 @@ void BIT_0_H(Cpu& cpu);
 void BIT_0_L(Cpu& cpu);
 void BIT_0_ADDR_HL(Cpu& cpu);
 void BIT_0_A(Cpu& cpu);
+
+void BIT_1_B(Cpu& cpu);
+void BIT_1_C(Cpu& cpu);
+void BIT_1_D(Cpu& cpu);
+void BIT_1_E(Cpu& cpu);
+void BIT_1_H(Cpu& cpu);
+void BIT_1_L(Cpu& cpu);
+void BIT_1_ADDR_HL(Cpu& cpu);
+void BIT_1_A(Cpu& cpu);
