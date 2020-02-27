@@ -53,3 +53,12 @@ void BIT_1_H(Cpu& cpu);
 void BIT_1_L(Cpu& cpu);
 void BIT_1_ADDR_HL(Cpu& cpu);
 void BIT_1_A(Cpu& cpu);
+
+void BIT_2_B(Cpu& cpu);
+void BIT_2_C(Cpu& cpu);
+void BIT_2_D(Cpu& cpu);
+void BIT_2_E(Cpu& cpu);
+void BIT_2_H(Cpu& cpu);
+void BIT_2_L(Cpu& cpu);
+void BIT_2_ADDR_HL(Cpu& cpu);
+void BIT_2_A(Cpu& cpu);
