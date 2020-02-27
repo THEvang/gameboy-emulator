@@ -6,13 +6,13 @@
 template <typename T>
 T rotate_left(T value, int n) {
 
-    return (value << n) | (value >> (n - sizeof(T) * 8));
+    return (value << n) | (value >> (sizeof(T) * 8 - n));
 }
 
 template <typename T>
 T rotate_right(T value, int n) {
 
-    return (value >> n) | (value << (n - sizeof(T) * 8));
+    return (value >> n) | (value << (sizeof(T) * 8 - n));
 }
 
 void set_bit(uint8_t& b, int n);
