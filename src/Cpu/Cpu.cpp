@@ -1301,35 +1301,35 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::BIT_0_B:
-            throw UnimplementedOperation("BIT 0 B\n");
+            BIT_0_B(cpu);
             break;
         
         case CBCode::BIT_0_C:
-            throw UnimplementedOperation("BIT 0 C\n");
+            BIT_0_C(cpu);
             break;
 
         case CBCode::BIT_0_D:
-            throw UnimplementedOperation("BIT 0 D\n");
+            BIT_0_D(cpu);
             break;
 
         case CBCode::BIT_0_E:
-            throw UnimplementedOperation("BIT 0 E\n");
+            BIT_0_E(cpu);
             break;
 
         case CBCode::BIT_0_H:
-            throw UnimplementedOperation("BIT 0 H\n");
+            BIT_0_H(cpu);
             break;
 
         case CBCode::BIT_0_L:
-            throw UnimplementedOperation("BIT 0 L\n");
+            BIT_0_L(cpu);
             break;
 
         case CBCode::BIT_0_ADDR_HL:
-            throw UnimplementedOperation("BIT 0 ADDR HL\n");
+            BIT_0_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_0_A:
-            throw UnimplementedOperation("BIT 0 A\n");
+            BIT_0_A(cpu);
             break;
 
         case CBCode::BIT_1_B:

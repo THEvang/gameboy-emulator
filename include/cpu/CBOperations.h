@@ -35,3 +35,12 @@ void SWAP_H(Cpu& cpu);
 void SWAP_L(Cpu& cpu);
 void SWAP_ADDR_HL(Cpu& cpu);
 void SWAP_A(Cpu& cpu);
+
+void BIT_0_B(Cpu& cpu);
+void BIT_0_C(Cpu& cpu);
+void BIT_0_D(Cpu& cpu);
+void BIT_0_E(Cpu& cpu);
+void BIT_0_H(Cpu& cpu);
+void BIT_0_L(Cpu& cpu);
+void BIT_0_ADDR_HL(Cpu& cpu);
+void BIT_0_A(Cpu& cpu);
