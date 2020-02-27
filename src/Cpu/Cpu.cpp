@@ -1299,15 +1299,774 @@ void step(Cpu& cpu) {
         case CBCode::SRL_A:
             SRL_A(cpu);
             break;
-
-
-
-
-
-        case CBCode::RES_6_A:
-            throw UnimplementedOperation("RES_6_A");
+        
+        case CBCode::BIT_0_B:
+            throw UnimplementedOperation("BIT 0 B\n");
             break;
         
+        case CBCode::BIT_0_C:
+            throw UnimplementedOperation("BIT 0 C\n");
+            break;
+
+        case CBCode::BIT_0_D:
+            throw UnimplementedOperation("BIT 0 D\n");
+            break;
+
+        case CBCode::BIT_0_E:
+            throw UnimplementedOperation("BIT 0 E\n");
+            break;
+
+        case CBCode::BIT_0_H:
+            throw UnimplementedOperation("BIT 0 H\n");
+            break;
+
+        case CBCode::BIT_0_L:
+            throw UnimplementedOperation("BIT 0 L\n");
+            break;
+
+        case CBCode::BIT_0_ADDR_HL:
+            throw UnimplementedOperation("BIT 0 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_0_A:
+            throw UnimplementedOperation("BIT 0 A\n");
+            break;
+
+        case CBCode::BIT_1_B:
+            throw UnimplementedOperation("BIT 1 B\n");
+            break;
+        
+        case CBCode::BIT_1_C:
+            throw UnimplementedOperation("BIT 1 C\n");
+            break;
+
+        case CBCode::BIT_1_D:
+            throw UnimplementedOperation("BIT 1 D\n");
+            break;
+
+        case CBCode::BIT_1_E:
+            throw UnimplementedOperation("BIT 1 E\n");
+            break;
+
+        case CBCode::BIT_1_H:
+            throw UnimplementedOperation("BIT 1 H\n");
+            break;
+
+        case CBCode::BIT_1_L:
+            throw UnimplementedOperation("BIT 1 L\n");
+            break;
+
+        case CBCode::BIT_1_ADDR_HL:
+            throw UnimplementedOperation("BIT 1 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_1_A:
+            throw UnimplementedOperation("BIT 1 A\n");
+            break;
+
+        case CBCode::BIT_2_B:
+            throw UnimplementedOperation("BIT 2 B\n");
+            break;
+        
+        case CBCode::BIT_2_C:
+            throw UnimplementedOperation("BIT 2 C\n");
+            break;
+
+        case CBCode::BIT_2_D:
+            throw UnimplementedOperation("BIT 2 D\n");
+            break;
+
+        case CBCode::BIT_2_E:
+            throw UnimplementedOperation("BIT 2 E\n");
+            break;
+
+        case CBCode::BIT_2_H:
+            throw UnimplementedOperation("BIT 2 H\n");
+            break;
+
+        case CBCode::BIT_2_L:
+            throw UnimplementedOperation("BIT 2 L\n");
+            break;
+
+        case CBCode::BIT_2_ADDR_HL:
+            throw UnimplementedOperation("BIT 2 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_2_A:
+            throw UnimplementedOperation("BIT 2 A\n");
+            break;
+
+        case CBCode::BIT_3_B:
+            throw UnimplementedOperation("BIT 3 B\n");
+            break;
+        
+        case CBCode::BIT_3_C:
+            throw UnimplementedOperation("BIT 3 C\n");
+            break;
+
+        case CBCode::BIT_3_D:
+            throw UnimplementedOperation("BIT 3 D\n");
+            break;
+
+        case CBCode::BIT_3_E:
+            throw UnimplementedOperation("BIT 3 E\n");
+            break;
+
+        case CBCode::BIT_3_H:
+            throw UnimplementedOperation("BIT 3 H\n");
+            break;
+
+        case CBCode::BIT_3_L:
+            throw UnimplementedOperation("BIT 3 L\n");
+            break;
+
+        case CBCode::BIT_3_ADDR_HL:
+            throw UnimplementedOperation("BIT 3 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_3_A:
+            throw UnimplementedOperation("BIT 3 A\n");
+            break;
+       
+       case CBCode::BIT_4_B:
+            throw UnimplementedOperation("BIT 4 B\n");
+            break;
+        
+        case CBCode::BIT_4_C:
+            throw UnimplementedOperation("BIT 4 C\n");
+            break;
+
+        case CBCode::BIT_4_D:
+            throw UnimplementedOperation("BIT 4 D\n");
+            break;
+
+        case CBCode::BIT_4_E:
+            throw UnimplementedOperation("BIT 4 E\n");
+            break;
+
+        case CBCode::BIT_4_H:
+            throw UnimplementedOperation("BIT 4 H\n");
+            break;
+
+        case CBCode::BIT_4_L:
+            throw UnimplementedOperation("BIT 4 L\n");
+            break;
+
+        case CBCode::BIT_4_ADDR_HL:
+            throw UnimplementedOperation("BIT 4 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_4_A:
+            throw UnimplementedOperation("BIT 4 A\n");
+            break;
+
+       case CBCode::BIT_5_B:
+            throw UnimplementedOperation("BIT 5 B\n");
+            break;
+        
+        case CBCode::BIT_5_C:
+            throw UnimplementedOperation("BIT 5 C\n");
+            break;
+
+        case CBCode::BIT_5_D:
+            throw UnimplementedOperation("BIT 5 D\n");
+            break;
+
+        case CBCode::BIT_5_E:
+            throw UnimplementedOperation("BIT 5 E\n");
+            break;
+
+        case CBCode::BIT_5_H:
+            throw UnimplementedOperation("BIT 5 H\n");
+            break;
+
+        case CBCode::BIT_5_L:
+            throw UnimplementedOperation("BIT 5 L\n");
+            break;
+
+        case CBCode::BIT_5_ADDR_HL:
+            throw UnimplementedOperation("BIT 5 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_5_A:
+            throw UnimplementedOperation("BIT 5 A\n");
+            break;
+        
+        case CBCode::BIT_6_B:
+            throw UnimplementedOperation("BIT 6 B\n");
+            break;
+        
+        case CBCode::BIT_6_C:
+            throw UnimplementedOperation("BIT 6 C\n");
+            break;
+
+        case CBCode::BIT_6_D:
+            throw UnimplementedOperation("BIT 6 D\n");
+            break;
+
+        case CBCode::BIT_6_E:
+            throw UnimplementedOperation("BIT 6 E\n");
+            break;
+
+        case CBCode::BIT_6_H:
+            throw UnimplementedOperation("BIT 6 H\n");
+            break;
+
+        case CBCode::BIT_6_L:
+            throw UnimplementedOperation("BIT 6 L\n");
+            break;
+
+        case CBCode::BIT_6_ADDR_HL:
+            throw UnimplementedOperation("BIT 6 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_6_A:
+            throw UnimplementedOperation("BIT 6 A\n");
+            break;
+
+        case CBCode::BIT_7_B:
+            throw UnimplementedOperation("BIT 7 B\n");
+            break;
+        
+        case CBCode::BIT_7_C:
+            throw UnimplementedOperation("BIT 7 C\n");
+            break;
+
+        case CBCode::BIT_7_D:
+            throw UnimplementedOperation("BIT 7 D\n");
+            break;
+
+        case CBCode::BIT_7_E:
+            throw UnimplementedOperation("BIT 7 E\n");
+            break;
+
+        case CBCode::BIT_7_H:
+            throw UnimplementedOperation("BIT 7 H\n");
+            break;
+
+        case CBCode::BIT_7_L:
+            throw UnimplementedOperation("BIT 7 L\n");
+            break;
+
+        case CBCode::BIT_7_ADDR_HL:
+            throw UnimplementedOperation("BIT 7 ADDR HL\n");
+            break;
+
+        case CBCode::BIT_7_A:
+            throw UnimplementedOperation("BIT 7 A\n");
+            break;
+        
+        case CBCode::RES_0_B:
+            throw UnimplementedOperation("RES 0 B");
+            break;
+
+        case CBCode::RES_0_C:
+            throw UnimplementedOperation("RES 0 C");
+            break;
+
+        case CBCode::RES_0_D:
+            throw UnimplementedOperation("RES 0 D");
+            break;
+
+        case CBCode::RES_0_E:
+            throw UnimplementedOperation("RES 0 E");
+            break;
+
+        case CBCode::RES_0_H:
+            throw UnimplementedOperation("RES 0 H");
+            break;
+
+        case CBCode::RES_0_L:
+            throw UnimplementedOperation("RES 0 L");
+            break;
+
+        case CBCode::RES_0_ADDR_HL:
+            throw UnimplementedOperation("RES 0 ADDR HL");
+            break;
+
+        case CBCode::RES_0_A:
+            throw UnimplementedOperation("RES 0 A");
+            break;
+            
+        case CBCode::RES_1_B:
+            throw UnimplementedOperation("RES 1 B");
+            break;
+
+        case CBCode::RES_1_C:
+            throw UnimplementedOperation("RES 1 C");
+            break;
+
+        case CBCode::RES_1_D:
+            throw UnimplementedOperation("RES 1 D");
+            break;
+
+        case CBCode::RES_1_E:
+            throw UnimplementedOperation("RES 1 E");
+            break;
+
+        case CBCode::RES_1_H:
+            throw UnimplementedOperation("RES 1 H");
+            break;
+
+        case CBCode::RES_1_L:
+            throw UnimplementedOperation("RES 1 L");
+            break;
+
+        case CBCode::RES_1_ADDR_HL:
+            throw UnimplementedOperation("RES 1 ADDR HL");
+            break;
+
+        case CBCode::RES_1_A:
+            throw UnimplementedOperation("RES 1 A");
+            break;
+        
+        case CBCode::RES_2_B:
+            throw UnimplementedOperation("RES 2 B");
+            break;
+
+        case CBCode::RES_2_C:
+            throw UnimplementedOperation("RES 2 C");
+            break;
+
+        case CBCode::RES_2_D:
+            throw UnimplementedOperation("RES 2 D");
+            break;
+
+        case CBCode::RES_2_E:
+            throw UnimplementedOperation("RES 2 E");
+            break;
+
+        case CBCode::RES_2_H:
+            throw UnimplementedOperation("RES 2 H");
+            break;
+
+        case CBCode::RES_2_L:
+            throw UnimplementedOperation("RES 2 L");
+            break;
+
+        case CBCode::RES_2_ADDR_HL:
+            throw UnimplementedOperation("RES 2 ADDR HL");
+            break;
+
+        case CBCode::RES_2_A:
+            throw UnimplementedOperation("RES 2 A");
+            break;
+
+        case CBCode::RES_3_B:
+            throw UnimplementedOperation("RES 3 B");
+            break;
+
+        case CBCode::RES_3_C:
+            throw UnimplementedOperation("RES 3 C");
+            break;
+
+        case CBCode::RES_3_D:
+            throw UnimplementedOperation("RES 3 D");
+            break;
+
+        case CBCode::RES_3_E:
+            throw UnimplementedOperation("RES 3 E");
+            break;
+
+        case CBCode::RES_3_H:
+            throw UnimplementedOperation("RES 3 H");
+            break;
+
+        case CBCode::RES_3_L:
+            throw UnimplementedOperation("RES 3 L");
+            break;
+
+        case CBCode::RES_3_ADDR_HL:
+            throw UnimplementedOperation("RES 3 ADDR HL");
+            break;
+
+        case CBCode::RES_3_A:
+            throw UnimplementedOperation("RES 3 A");
+            break;
+
+        case CBCode::RES_4_B:
+            throw UnimplementedOperation("RES 4 B");
+            break;
+
+        case CBCode::RES_4_C:
+            throw UnimplementedOperation("RES 4 C");
+            break;
+
+        case CBCode::RES_4_D:
+            throw UnimplementedOperation("RES 4 D");
+            break;
+
+        case CBCode::RES_4_E:
+            throw UnimplementedOperation("RES 4 E");
+            break;
+
+        case CBCode::RES_4_H:
+            throw UnimplementedOperation("RES 4 H");
+            break;
+
+        case CBCode::RES_4_L:
+            throw UnimplementedOperation("RES 4 L");
+            break;
+
+        case CBCode::RES_4_ADDR_HL:
+            throw UnimplementedOperation("RES 4 ADDR HL");
+            break;
+
+        case CBCode::RES_4_A:
+            throw UnimplementedOperation("RES 4 A");
+            break;
+        
+        case CBCode::RES_5_B:
+            throw UnimplementedOperation("RES 5 B");
+            break;
+
+        case CBCode::RES_5_C:
+            throw UnimplementedOperation("RES 5 C");
+            break;
+
+        case CBCode::RES_5_D:
+            throw UnimplementedOperation("RES 5 D");
+            break;
+
+        case CBCode::RES_5_E:
+            throw UnimplementedOperation("RES 5 E");
+            break;
+
+        case CBCode::RES_5_H:
+            throw UnimplementedOperation("RES 5 H");
+            break;
+
+        case CBCode::RES_5_L:
+            throw UnimplementedOperation("RES 5 L");
+            break;
+
+        case CBCode::RES_5_ADDR_HL:
+            throw UnimplementedOperation("RES 5 ADDR HL");
+            break;
+
+        case CBCode::RES_5_A:
+            throw UnimplementedOperation("RES 5 A");
+            break;
+        
+        case CBCode::RES_6_B:
+            throw UnimplementedOperation("RES 6 B");
+            break;
+
+        case CBCode::RES_6_C:
+            throw UnimplementedOperation("RES 6 C");
+            break;
+
+        case CBCode::RES_6_D:
+            throw UnimplementedOperation("RES 6 D");
+            break;
+
+        case CBCode::RES_6_E:
+            throw UnimplementedOperation("RES 6 E");
+            break;
+
+        case CBCode::RES_6_H:
+            throw UnimplementedOperation("RES 6 H");
+            break;
+
+        case CBCode::RES_6_L:
+            throw UnimplementedOperation("RES 6 L");
+            break;
+
+        case CBCode::RES_6_ADDR_HL:
+            throw UnimplementedOperation("RES 6 ADDR HL");
+            break;
+
+        case CBCode::RES_6_A:
+            throw UnimplementedOperation("RES 6 A");
+            break;
+        
+        case CBCode::RES_7_B:
+            throw UnimplementedOperation("RES 7 B");
+            break;
+
+        case CBCode::RES_7_C:
+            throw UnimplementedOperation("RES 7 C");
+            break;
+
+        case CBCode::RES_7_D:
+            throw UnimplementedOperation("RES 7 D");
+            break;
+
+        case CBCode::RES_7_E:
+            throw UnimplementedOperation("RES 7 E");
+            break;
+
+        case CBCode::RES_7_H:
+            throw UnimplementedOperation("RES 7 H");
+            break;
+
+        case CBCode::RES_7_L:
+            throw UnimplementedOperation("RES 7 L");
+            break;
+
+        case CBCode::RES_7_ADDR_HL:
+            throw UnimplementedOperation("RES 7 ADDR HL");
+            break;
+
+        case CBCode::RES_7_A:
+            throw UnimplementedOperation("RES 7 A");
+            break;
+        
+        case CBCode::SET_0_B:
+            throw UnimplementedOperation("SET 0 B");
+            break;
+
+        case CBCode::SET_0_C:
+            throw UnimplementedOperation("SET 0 C");
+            break;
+
+        case CBCode::SET_0_D:
+            throw UnimplementedOperation("SET 0 D");
+            break;
+
+        case CBCode::SET_0_E:
+            throw UnimplementedOperation("SET 0 E");
+            break;
+
+        case CBCode::SET_0_H:
+            throw UnimplementedOperation("SET 0 H");
+            break;
+
+        case CBCode::SET_0_L:
+            throw UnimplementedOperation("SET 0 L");
+            break;
+
+        case CBCode::SET_0_ADDR_HL:
+            throw UnimplementedOperation("SET 0 ADDR HL");
+            break;
+
+        case CBCode::SET_0_A:
+            throw UnimplementedOperation("SET 0 A");
+            break;
+
+        case CBCode::SET_1_B:
+            throw UnimplementedOperation("SET 1 B");
+            break;
+
+        case CBCode::SET_1_C:
+            throw UnimplementedOperation("SET 1 C");
+            break;
+
+        case CBCode::SET_1_D:
+            throw UnimplementedOperation("SET 1 D");
+            break;
+
+        case CBCode::SET_1_E:
+            throw UnimplementedOperation("SET 1 E");
+            break;
+
+        case CBCode::SET_1_H:
+            throw UnimplementedOperation("SET 1 H");
+            break;
+
+        case CBCode::SET_1_L:
+            throw UnimplementedOperation("SET 1 L");
+            break;
+
+        case CBCode::SET_1_ADDR_HL:
+            throw UnimplementedOperation("SET 1 ADDR HL");
+            break;
+
+        case CBCode::SET_1_A:
+            throw UnimplementedOperation("SET 1 A");
+            break;
+                
+        case CBCode::SET_2_B:
+            throw UnimplementedOperation("SET 2 B");
+            break;
+
+        case CBCode::SET_2_C:
+            throw UnimplementedOperation("SET 2 C");
+            break;
+
+        case CBCode::SET_2_D:
+            throw UnimplementedOperation("SET 2 D");
+            break;
+
+        case CBCode::SET_2_E:
+            throw UnimplementedOperation("SET 2 E");
+            break;
+
+        case CBCode::SET_2_H:
+            throw UnimplementedOperation("SET 2 H");
+            break;
+
+        case CBCode::SET_2_L:
+            throw UnimplementedOperation("SET 2 L");
+            break;
+
+        case CBCode::SET_2_ADDR_HL:
+            throw UnimplementedOperation("SET 2 ADDR HL");
+            break;
+
+        case CBCode::SET_2_A:
+            throw UnimplementedOperation("SET 2 A");
+            break;
+
+        case CBCode::SET_3_B:
+            throw UnimplementedOperation("SET 3 B");
+            break;
+
+        case CBCode::SET_3_C:
+            throw UnimplementedOperation("SET 3 C");
+            break;
+
+        case CBCode::SET_3_D:
+            throw UnimplementedOperation("SET 3 D");
+            break;
+
+        case CBCode::SET_3_E:
+            throw UnimplementedOperation("SET 3 E");
+            break;
+
+        case CBCode::SET_3_H:
+            throw UnimplementedOperation("SET 3 H");
+            break;
+
+        case CBCode::SET_3_L:
+            throw UnimplementedOperation("SET 3 L");
+            break;
+
+        case CBCode::SET_3_ADDR_HL:
+            throw UnimplementedOperation("SET 3 ADDR HL");
+            break;
+
+        case CBCode::SET_3_A:
+            throw UnimplementedOperation("SET 3 A");
+            break;
+        
+        case CBCode::SET_4_B:
+            throw UnimplementedOperation("SET 4 B");
+            break;
+
+        case CBCode::SET_4_C:
+            throw UnimplementedOperation("SET 4 C");
+            break;
+
+        case CBCode::SET_4_D:
+            throw UnimplementedOperation("SET 4 D");
+            break;
+
+        case CBCode::SET_4_E:
+            throw UnimplementedOperation("SET 4 E");
+            break;
+
+        case CBCode::SET_4_H:
+            throw UnimplementedOperation("SET 4 H");
+            break;
+
+        case CBCode::SET_4_L:
+            throw UnimplementedOperation("SET 4 L");
+            break;
+
+        case CBCode::SET_4_ADDR_HL:
+            throw UnimplementedOperation("SET 4 ADDR HL");
+            break;
+
+        case CBCode::SET_4_A:
+            throw UnimplementedOperation("SET 0 A");
+            break;
+        
+        case CBCode::SET_5_B:
+            throw UnimplementedOperation("SET 5 B");
+            break;
+
+        case CBCode::SET_5_C:
+            throw UnimplementedOperation("SET 5 C");
+            break;
+
+        case CBCode::SET_5_D:
+            throw UnimplementedOperation("SET 5 D");
+            break;
+
+        case CBCode::SET_5_E:
+            throw UnimplementedOperation("SET 5 E");
+            break;
+
+        case CBCode::SET_5_H:
+            throw UnimplementedOperation("SET 5 H");
+            break;
+
+        case CBCode::SET_5_L:
+            throw UnimplementedOperation("SET 5 L");
+            break;
+
+        case CBCode::SET_5_ADDR_HL:
+            throw UnimplementedOperation("SET 5 ADDR HL");
+            break;
+
+        case CBCode::SET_5_A:
+            throw UnimplementedOperation("SET 0 A");
+            break;
+        
+        case CBCode::SET_6_B:
+            throw UnimplementedOperation("SET 6 B");
+            break;
+
+        case CBCode::SET_6_C:
+            throw UnimplementedOperation("SET 6 C");
+            break;
+
+        case CBCode::SET_6_D:
+            throw UnimplementedOperation("SET 6 D");
+            break;
+
+        case CBCode::SET_6_E:
+            throw UnimplementedOperation("SET 6 E");
+            break;
+
+        case CBCode::SET_6_H:
+            throw UnimplementedOperation("SET 6 H");
+            break;
+
+        case CBCode::SET_6_L:
+            throw UnimplementedOperation("SET 6 L");
+            break;
+
+        case CBCode::SET_6_ADDR_HL:
+            throw UnimplementedOperation("SET 6 ADDR HL");
+            break;
+
+        case CBCode::SET_6_A:
+            throw UnimplementedOperation("SET 6 A");
+            break;
+        
+        case CBCode::SET_7_B:
+            throw UnimplementedOperation("SET 7 B");
+            break;
+
+        case CBCode::SET_7_C:
+            throw UnimplementedOperation("SET 7 C");
+            break;
+
+        case CBCode::SET_7_D:
+            throw UnimplementedOperation("SET 7 D");
+            break;
+
+        case CBCode::SET_7_E:
+            throw UnimplementedOperation("SET 7 E");
+            break;
+
+        case CBCode::SET_7_H:
+            throw UnimplementedOperation("SET 7 H");
+            break;
+
+        case CBCode::SET_7_L:
+            throw UnimplementedOperation("SET 7 L");
+            break;
+
+        case CBCode::SET_7_ADDR_HL:
+            throw UnimplementedOperation("SET 7 ADDR HL");
+            break;
+
+        case CBCode::SET_7_A:
+            throw UnimplementedOperation("SET 7 A");
+            break;
         default:
             throw UnimplementedOperation("Unimplemented CB Code\n");
             break;

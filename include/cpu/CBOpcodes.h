@@ -233,7 +233,7 @@ enum class CBCode {
     SET_1_H,
     SET_1_L,
     SET_1_ADDR_HL,
-    SET_1_ADDR_A,
+    SET_1_A,
 
     SET_2_B = 0XD0,
     SET_2_C,
