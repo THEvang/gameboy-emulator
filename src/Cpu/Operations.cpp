@@ -2561,18 +2561,33 @@ void ADC_A_D8(Cpu& cpu) {
 }
 
 void ADC_A_A(Cpu& cpu) {
+    
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_a;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2588,15 +2603,29 @@ void ADC_A_B(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_b;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2612,15 +2641,29 @@ void ADC_A_C(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_c;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2632,18 +2675,33 @@ void ADC_A_C(Cpu& cpu) {
 }
 
 void ADC_A_D(Cpu& cpu) {
+    
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_d;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2658,15 +2716,29 @@ void ADC_A_E(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_e;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2682,15 +2754,29 @@ void ADC_A_H(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_h;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2706,15 +2792,29 @@ void ADC_A_L(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_reg_l;
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)       ?
+    half_carry_8bit(cpu.m_reg_a, value)       ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)        ?
+    overflows_8bit(cpu.m_reg_a, value)        ?
         set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
@@ -2967,8 +3067,8 @@ void SBC_A_H(Cpu& cpu) {
 
 void SBC_A_L(Cpu& cpu) {
 
-    const auto value = cpu.m_reg_l
-        + (is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0);
+    const auto carry_value =  is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
+    const auto value = cpu.m_reg_l;
 
     half_borrow_8bit(cpu.m_reg_a, value)            ?
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
@@ -2979,6 +3079,20 @@ void SBC_A_L(Cpu& cpu) {
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
     cpu.m_reg_a -= value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_borrow_8bit(cpu.m_reg_a, carry_value)            ?
+            set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+            clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        underflows_8bit(cpu.m_reg_a, carry_value)         ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a -= carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
