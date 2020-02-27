@@ -921,3 +921,443 @@ void BIT_7_A(Cpu& cpu) {
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
 }
+
+void RES_0_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_0_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 0);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_0_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 0);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_1_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 1);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_1_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 1);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_2_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 2);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_2_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 2);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_3_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 3);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_3_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 3);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_4_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 4);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_4_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 4);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_5_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 5);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_5_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 5);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_6_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 6);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_6_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 6);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_B(Cpu& cpu) {
+    clear_bit(cpu.m_reg_b, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_C(Cpu& cpu) {
+    clear_bit(cpu.m_reg_c, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_D(Cpu& cpu) {
+    clear_bit(cpu.m_reg_d, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_E(Cpu& cpu) {
+    clear_bit(cpu.m_reg_e, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_H(Cpu& cpu) {
+    clear_bit(cpu.m_reg_h, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_L(Cpu& cpu) {
+    clear_bit(cpu.m_reg_l, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void RES_7_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    clear_bit(value, 7);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 16;
+}
+
+void RES_7_A(Cpu& cpu) {
+    clear_bit(cpu.m_reg_a, 7);
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}

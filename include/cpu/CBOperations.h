@@ -107,3 +107,75 @@ void BIT_7_H(Cpu& cpu);
 void BIT_7_L(Cpu& cpu);
 void BIT_7_ADDR_HL(Cpu& cpu);
 void BIT_7_A(Cpu& cpu);
+
+void RES_0_B(Cpu& cpu);
+void RES_0_C(Cpu& cpu);
+void RES_0_D(Cpu& cpu);
+void RES_0_E(Cpu& cpu);
+void RES_0_H(Cpu& cpu);
+void RES_0_L(Cpu& cpu);
+void RES_0_ADDR_HL(Cpu& cpu);
+void RES_0_A(Cpu& cpu);
+
+void RES_1_B(Cpu& cpu);
+void RES_1_C(Cpu& cpu);
+void RES_1_D(Cpu& cpu);
+void RES_1_E(Cpu& cpu);
+void RES_1_H(Cpu& cpu);
+void RES_1_L(Cpu& cpu);
+void RES_1_ADDR_HL(Cpu& cpu);
+void RES_1_A(Cpu& cpu);
+
+void RES_2_B(Cpu& cpu);
+void RES_2_C(Cpu& cpu);
+void RES_2_D(Cpu& cpu);
+void RES_2_E(Cpu& cpu);
+void RES_2_H(Cpu& cpu);
+void RES_2_L(Cpu& cpu);
+void RES_2_ADDR_HL(Cpu& cpu);
+void RES_2_A(Cpu& cpu);
+
+void RES_3_B(Cpu& cpu);
+void RES_3_C(Cpu& cpu);
+void RES_3_D(Cpu& cpu);
+void RES_3_E(Cpu& cpu);
+void RES_3_H(Cpu& cpu);
+void RES_3_L(Cpu& cpu);
+void RES_3_ADDR_HL(Cpu& cpu);
+void RES_3_A(Cpu& cpu);
+
+void RES_4_B(Cpu& cpu);
+void RES_4_C(Cpu& cpu);
+void RES_4_D(Cpu& cpu);
+void RES_4_E(Cpu& cpu);
+void RES_4_H(Cpu& cpu);
+void RES_4_L(Cpu& cpu);
+void RES_4_ADDR_HL(Cpu& cpu);
+void RES_4_A(Cpu& cpu);
+
+void RES_5_B(Cpu& cpu);
+void RES_5_C(Cpu& cpu);
+void RES_5_D(Cpu& cpu);
+void RES_5_E(Cpu& cpu);
+void RES_5_H(Cpu& cpu);
+void RES_5_L(Cpu& cpu);
+void RES_5_ADDR_HL(Cpu& cpu);
+void RES_5_A(Cpu& cpu);
+
+void RES_6_B(Cpu& cpu);
+void RES_6_C(Cpu& cpu);
+void RES_6_D(Cpu& cpu);
+void RES_6_E(Cpu& cpu);
+void RES_6_H(Cpu& cpu);
+void RES_6_L(Cpu& cpu);
+void RES_6_ADDR_HL(Cpu& cpu);
+void RES_6_A(Cpu& cpu);
+
+void RES_7_B(Cpu& cpu);
+void RES_7_C(Cpu& cpu);
+void RES_7_D(Cpu& cpu);
+void RES_7_E(Cpu& cpu);
+void RES_7_H(Cpu& cpu);
+void RES_7_L(Cpu& cpu);
+void RES_7_ADDR_HL(Cpu& cpu);
+void RES_7_A(Cpu& cpu);
