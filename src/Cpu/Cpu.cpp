@@ -1301,259 +1301,259 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::BIT_0_B:
-            throw UnimplementedOperation("BIT 0 B\n");
+            BIT_0_B(cpu);
             break;
         
         case CBCode::BIT_0_C:
-            throw UnimplementedOperation("BIT 0 C\n");
+            BIT_0_C(cpu);
             break;
 
         case CBCode::BIT_0_D:
-            throw UnimplementedOperation("BIT 0 D\n");
+            BIT_0_D(cpu);
             break;
 
         case CBCode::BIT_0_E:
-            throw UnimplementedOperation("BIT 0 E\n");
+            BIT_0_E(cpu);
             break;
 
         case CBCode::BIT_0_H:
-            throw UnimplementedOperation("BIT 0 H\n");
+            BIT_0_H(cpu);
             break;
 
         case CBCode::BIT_0_L:
-            throw UnimplementedOperation("BIT 0 L\n");
+            BIT_0_L(cpu);
             break;
 
         case CBCode::BIT_0_ADDR_HL:
-            throw UnimplementedOperation("BIT 0 ADDR HL\n");
+            BIT_0_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_0_A:
-            throw UnimplementedOperation("BIT 0 A\n");
+            BIT_0_A(cpu);
             break;
 
         case CBCode::BIT_1_B:
-            throw UnimplementedOperation("BIT 1 B\n");
+            BIT_1_B(cpu);
             break;
         
         case CBCode::BIT_1_C:
-            throw UnimplementedOperation("BIT 1 C\n");
+            BIT_1_C(cpu);
             break;
 
         case CBCode::BIT_1_D:
-            throw UnimplementedOperation("BIT 1 D\n");
+            BIT_1_D(cpu);
             break;
 
         case CBCode::BIT_1_E:
-            throw UnimplementedOperation("BIT 1 E\n");
+            BIT_1_E(cpu);
             break;
 
         case CBCode::BIT_1_H:
-            throw UnimplementedOperation("BIT 1 H\n");
+            BIT_1_H(cpu);
             break;
 
         case CBCode::BIT_1_L:
-            throw UnimplementedOperation("BIT 1 L\n");
+            BIT_1_L(cpu);
             break;
 
         case CBCode::BIT_1_ADDR_HL:
-            throw UnimplementedOperation("BIT 1 ADDR HL\n");
+            BIT_1_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_1_A:
-            throw UnimplementedOperation("BIT 1 A\n");
+            BIT_1_A(cpu);
             break;
 
         case CBCode::BIT_2_B:
-            throw UnimplementedOperation("BIT 2 B\n");
+            BIT_2_B(cpu);
             break;
         
         case CBCode::BIT_2_C:
-            throw UnimplementedOperation("BIT 2 C\n");
+            BIT_2_C(cpu);
             break;
 
         case CBCode::BIT_2_D:
-            throw UnimplementedOperation("BIT 2 D\n");
+            BIT_2_D(cpu);
             break;
 
         case CBCode::BIT_2_E:
-            throw UnimplementedOperation("BIT 2 E\n");
+            BIT_2_E(cpu);
             break;
 
         case CBCode::BIT_2_H:
-            throw UnimplementedOperation("BIT 2 H\n");
+            BIT_2_H(cpu);
             break;
 
         case CBCode::BIT_2_L:
-            throw UnimplementedOperation("BIT 2 L\n");
+            BIT_2_L(cpu);
             break;
 
         case CBCode::BIT_2_ADDR_HL:
-            throw UnimplementedOperation("BIT 2 ADDR HL\n");
+            BIT_2_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_2_A:
-            throw UnimplementedOperation("BIT 2 A\n");
+            BIT_2_A(cpu);
             break;
 
         case CBCode::BIT_3_B:
-            throw UnimplementedOperation("BIT 3 B\n");
+            BIT_3_B(cpu);
             break;
         
         case CBCode::BIT_3_C:
-            throw UnimplementedOperation("BIT 3 C\n");
+            BIT_3_C(cpu);
             break;
 
         case CBCode::BIT_3_D:
-            throw UnimplementedOperation("BIT 3 D\n");
+            BIT_3_D(cpu);
             break;
 
         case CBCode::BIT_3_E:
-            throw UnimplementedOperation("BIT 3 E\n");
+            BIT_3_E(cpu);
             break;
 
         case CBCode::BIT_3_H:
-            throw UnimplementedOperation("BIT 3 H\n");
+            BIT_3_H(cpu);
             break;
 
         case CBCode::BIT_3_L:
-            throw UnimplementedOperation("BIT 3 L\n");
+            BIT_3_L(cpu);
             break;
 
         case CBCode::BIT_3_ADDR_HL:
-            throw UnimplementedOperation("BIT 3 ADDR HL\n");
+            BIT_3_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_3_A:
-            throw UnimplementedOperation("BIT 3 A\n");
+            BIT_3_A(cpu);
             break;
        
        case CBCode::BIT_4_B:
-            throw UnimplementedOperation("BIT 4 B\n");
+            BIT_4_B(cpu);
             break;
         
         case CBCode::BIT_4_C:
-            throw UnimplementedOperation("BIT 4 C\n");
+            BIT_4_C(cpu);
             break;
 
         case CBCode::BIT_4_D:
-            throw UnimplementedOperation("BIT 4 D\n");
+            BIT_4_D(cpu);
             break;
 
         case CBCode::BIT_4_E:
-            throw UnimplementedOperation("BIT 4 E\n");
+            BIT_4_E(cpu);
             break;
 
         case CBCode::BIT_4_H:
-            throw UnimplementedOperation("BIT 4 H\n");
+            BIT_4_H(cpu);
             break;
 
         case CBCode::BIT_4_L:
-            throw UnimplementedOperation("BIT 4 L\n");
+            BIT_4_L(cpu);
             break;
 
         case CBCode::BIT_4_ADDR_HL:
-            throw UnimplementedOperation("BIT 4 ADDR HL\n");
+            BIT_4_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_4_A:
-            throw UnimplementedOperation("BIT 4 A\n");
+            BIT_4_A(cpu);
             break;
 
        case CBCode::BIT_5_B:
-            throw UnimplementedOperation("BIT 5 B\n");
+            BIT_5_B(cpu);
             break;
         
         case CBCode::BIT_5_C:
-            throw UnimplementedOperation("BIT 5 C\n");
+            BIT_5_C(cpu);
             break;
 
         case CBCode::BIT_5_D:
-            throw UnimplementedOperation("BIT 5 D\n");
+            BIT_5_D(cpu);
             break;
 
         case CBCode::BIT_5_E:
-            throw UnimplementedOperation("BIT 5 E\n");
+            BIT_5_E(cpu);
             break;
 
         case CBCode::BIT_5_H:
-            throw UnimplementedOperation("BIT 5 H\n");
+            BIT_5_H(cpu);
             break;
 
         case CBCode::BIT_5_L:
-            throw UnimplementedOperation("BIT 5 L\n");
+            BIT_5_L(cpu);
             break;
 
         case CBCode::BIT_5_ADDR_HL:
-            throw UnimplementedOperation("BIT 5 ADDR HL\n");
+            BIT_5_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_5_A:
-            throw UnimplementedOperation("BIT 5 A\n");
+            BIT_5_A(cpu);
             break;
         
         case CBCode::BIT_6_B:
-            throw UnimplementedOperation("BIT 6 B\n");
+            BIT_6_B(cpu);
             break;
         
         case CBCode::BIT_6_C:
-            throw UnimplementedOperation("BIT 6 C\n");
+            BIT_6_C(cpu);
             break;
 
         case CBCode::BIT_6_D:
-            throw UnimplementedOperation("BIT 6 D\n");
+            BIT_6_D(cpu);
             break;
 
         case CBCode::BIT_6_E:
-            throw UnimplementedOperation("BIT 6 E\n");
+            BIT_6_E(cpu);
             break;
 
         case CBCode::BIT_6_H:
-            throw UnimplementedOperation("BIT 6 H\n");
+            BIT_6_H(cpu);
             break;
 
         case CBCode::BIT_6_L:
-            throw UnimplementedOperation("BIT 6 L\n");
+            BIT_6_L(cpu);
             break;
 
         case CBCode::BIT_6_ADDR_HL:
-            throw UnimplementedOperation("BIT 6 ADDR HL\n");
+            BIT_6_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_6_A:
-            throw UnimplementedOperation("BIT 6 A\n");
+            BIT_6_A(cpu);
             break;
 
         case CBCode::BIT_7_B:
-            throw UnimplementedOperation("BIT 7 B\n");
+            BIT_7_B(cpu);
             break;
         
         case CBCode::BIT_7_C:
-            throw UnimplementedOperation("BIT 7 C\n");
+            BIT_7_C(cpu);
             break;
 
         case CBCode::BIT_7_D:
-            throw UnimplementedOperation("BIT 7 D\n");
+            BIT_7_D(cpu);
             break;
 
         case CBCode::BIT_7_E:
-            throw UnimplementedOperation("BIT 7 E\n");
+            BIT_7_E(cpu);
             break;
 
         case CBCode::BIT_7_H:
-            throw UnimplementedOperation("BIT 7 H\n");
+            BIT_7_H(cpu);
             break;
 
         case CBCode::BIT_7_L:
-            throw UnimplementedOperation("BIT 7 L\n");
+            BIT_7_L(cpu);
             break;
 
         case CBCode::BIT_7_ADDR_HL:
-            throw UnimplementedOperation("BIT 7 ADDR HL\n");
+            BIT_7_ADDR_HL(cpu);
             break;
 
         case CBCode::BIT_7_A:
-            throw UnimplementedOperation("BIT 7 A\n");
+            BIT_7_A(cpu);
             break;
         
         case CBCode::RES_0_B:
