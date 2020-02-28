@@ -1813,35 +1813,35 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::SET_0_B:
-            throw UnimplementedOperation("SET 0 B");
+            SET_0_B(cpu);
             break;
 
         case CBCode::SET_0_C:
-            throw UnimplementedOperation("SET 0 C");
+            SET_0_C(cpu);
             break;
 
         case CBCode::SET_0_D:
-            throw UnimplementedOperation("SET 0 D");
+            SET_0_D(cpu);
             break;
 
         case CBCode::SET_0_E:
-            throw UnimplementedOperation("SET 0 E");
+            SET_0_E(cpu);
             break;
 
         case CBCode::SET_0_H:
-            throw UnimplementedOperation("SET 0 H");
+            SET_0_H(cpu);
             break;
 
         case CBCode::SET_0_L:
-            throw UnimplementedOperation("SET 0 L");
+            SET_0_L(cpu);
             break;
 
         case CBCode::SET_0_ADDR_HL:
-            throw UnimplementedOperation("SET 0 ADDR HL");
+            SET_0_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_0_A:
-            throw UnimplementedOperation("SET 0 A");
+            SET_0_A(cpu);
             break;
 
         case CBCode::SET_1_B:
