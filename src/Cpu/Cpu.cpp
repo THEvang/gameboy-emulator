@@ -1049,35 +1049,35 @@ void step(Cpu& cpu) {
 
      switch (static_cast<CBCode>(opcode)) {
          case CBCode::RLC_B:
-            throw UnimplementedOperation("RLC B");
+            RLC_B(cpu);
             break;
         
         case CBCode::RLC_C :
-            throw UnimplementedOperation("RLC C");
+            RLC_C(cpu);
             break;
         
         case CBCode::RLC_D:
-            throw UnimplementedOperation("RLC D");
+            RLC_D(cpu);
             break;
         
         case CBCode::RLC_E:
-            throw UnimplementedOperation("RLC E");
+            RLC_E(cpu);
             break;
         
         case CBCode::RLC_H:
-            throw UnimplementedOperation("RLC H");
+            RLC_H(cpu);
             break;
         
         case CBCode::RLC_L:
-            throw UnimplementedOperation("RLC L");
+            RLC_L(cpu);
             break;
         
         case CBCode::RLC_ADDR_HL:
-            throw UnimplementedOperation("RLC (HL)");
+            RLC_ADDR_HL(cpu);
             break;
         
         case CBCode::RLC_A:
-            throw UnimplementedOperation("RLC A");
+            RLC_A(cpu);
             break;
         
         case CBCode::RRC_B:

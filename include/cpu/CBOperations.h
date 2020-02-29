@@ -2,12 +2,14 @@
 #include <cpu/Cpu.h>
 #include <cpu/CBOpcodes.h>
 
-void RLC_B();
-void RLC_C();
-void RLC_D();
-void RLC_E();
-void RLC_H();
-void RLC_L();
+void RLC_B(Cpu& cpu);
+void RLC_C(Cpu& cpu);
+void RLC_D(Cpu& cpu);
+void RLC_E(Cpu& cpu);
+void RLC_H(Cpu& cpu);
+void RLC_L(Cpu& cpu);
+void RLC_ADDR_HL(Cpu& cpu);
+void RLC_A(Cpu& cpu);
 
 void SRL_A(Cpu& cpu);
 void SRL_B(Cpu& cpu);
