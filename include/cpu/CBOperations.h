@@ -47,6 +47,15 @@ void RR_L(Cpu& cpu);
 void RR_ADDR_HL(Cpu& cpu);
 void RR_A(Cpu& cpu);
 
+void SLA_B(Cpu& cpu);
+void SLA_C(Cpu& cpu);
+void SLA_D(Cpu& cpu);
+void SLA_E(Cpu& cpu);
+void SLA_H(Cpu& cpu);
+void SLA_L(Cpu& cpu);
+void SLA_ADDR_HL(Cpu& cpu);
+void SLA_A(Cpu& cpu);
+
 void SWAP_B(Cpu& cpu);
 void SWAP_C(Cpu& cpu);
 void SWAP_D(Cpu& cpu);

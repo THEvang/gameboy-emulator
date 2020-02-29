@@ -1277,27 +1277,27 @@ void step(Cpu& cpu) {
             break;
 
         case CBCode::SRL_C:
-            throw UnimplementedOperation("SRL C\n");
+            SRL_C(cpu);
             break;
 
         case CBCode::SRL_D:
-            throw UnimplementedOperation("SRL D\n");
+            SRL_D(cpu);
             break;
 
         case CBCode::SRL_E:
-            throw UnimplementedOperation("SRL E\n");
+            SRL_E(cpu);
             break;
 
         case CBCode::SRL_H:
-            throw UnimplementedOperation("SRL H\n");
+            SRL_H(cpu);
             break;
 
         case CBCode::SRL_L:
-            throw UnimplementedOperation("SRL L\n");
+            SRL_L(cpu); 
             break;
 
         case CBCode::SRL_ADDR_HL:
-            throw UnimplementedOperation("SRL ADDR HL\n");
+            SRL_ADDR_HL(cpu);
             break;
 
         case CBCode::SRL_A:
