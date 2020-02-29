@@ -1081,35 +1081,35 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::RRC_B:
-            throw UnimplementedOperation("RRC B");
+            RRC_B(cpu);
             break;
         
         case CBCode::RRC_C:
-            throw UnimplementedOperation("RRC C");
+            RRC_C(cpu);
             break;
         
         case CBCode::RRC_D:
-            throw UnimplementedOperation("RRC D");
+            RRC_D(cpu);
             break;
         
         case CBCode::RRC_E:
-            throw UnimplementedOperation("RRC E");
+            RRC_E(cpu);
             break;
         
         case CBCode::RRC_H:
-            throw UnimplementedOperation("RRC H");
+            RRC_H(cpu);
             break;
         
         case CBCode::RRC_L:
-            throw UnimplementedOperation("RRC L");
+            RRC_L(cpu);
             break;
         
         case CBCode::RRC_ADDR_HL:
-            throw UnimplementedOperation("RRC (HL");
+            RRC_ADDR_HL(cpu);
             break;
         
         case CBCode::RRC_A:
-            throw UnimplementedOperation("RRC A");
+            RRC_A(cpu);
             break;
         
         case CBCode::RL_B:

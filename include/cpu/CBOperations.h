@@ -11,6 +11,15 @@ void RLC_L(Cpu& cpu);
 void RLC_ADDR_HL(Cpu& cpu);
 void RLC_A(Cpu& cpu);
 
+void RRC_B(Cpu& cpu);
+void RRC_C(Cpu& cpu);
+void RRC_D(Cpu& cpu);
+void RRC_E(Cpu& cpu);
+void RRC_H(Cpu& cpu);
+void RRC_L(Cpu& cpu);
+void RRC_ADDR_HL(Cpu& cpu);
+void RRC_A(Cpu& cpu);
+
 void SRL_A(Cpu& cpu);
 void SRL_B(Cpu& cpu);
 void SRL_C(Cpu& cpu);
