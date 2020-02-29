@@ -1,6 +1,147 @@
 #include <cpu/CBOperations.h>
 #include <BitOperations.h>
 
+void RLC_B(Cpu& cpu) {
+
+     is_set(cpu.m_reg_b, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_b = rotate_left<uint8_t>(cpu.m_reg_b, 1);
+
+    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_C(Cpu& cpu) {
+
+     is_set(cpu.m_reg_c, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_c = rotate_left<uint8_t>(cpu.m_reg_c, 1);
+
+    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_D(Cpu& cpu) {
+
+     is_set(cpu.m_reg_d, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_d = rotate_left<uint8_t>(cpu.m_reg_d, 1);
+
+    cpu.m_reg_d == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_E(Cpu& cpu) {
+
+     is_set(cpu.m_reg_e, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_e = rotate_left<uint8_t>(cpu.m_reg_e, 1);
+
+    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_H(Cpu& cpu) {
+
+     is_set(cpu.m_reg_h, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_h = rotate_left<uint8_t>(cpu.m_reg_h, 1);
+
+    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_L(Cpu& cpu) {
+
+     is_set(cpu.m_reg_l, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_l = rotate_left<uint8_t>(cpu.m_reg_l, 1);
+
+    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
+void RLC_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+     is_set(value, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    value = rotate_left<uint8_t>(value, 1);
+
+    value == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    cpu.m_memory_controller->write(address, value);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
+}
+
+void RLC_A(Cpu& cpu) {
+
+     is_set(cpu.m_reg_a, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_reg_a = rotate_left<uint8_t>(cpu.m_reg_a, 1);
+
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
+}
+
 void SRL_A(Cpu& cpu) {
 
     is_set(cpu.m_reg_a, 0)                      ? 

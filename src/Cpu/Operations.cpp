@@ -905,16 +905,16 @@ void LD_HL_SPR8(Cpu& cpu) {
 
     cpu.m_cycles += 12;
     cpu.m_program_counter += 2;
-    throw UnimplementedOperation("LD HL SPR8");
+    throw UnimplementedOperation("LD HL SP R8");
 }
 
 void LD_SP_D16(Cpu& cpu) {
 
     const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter+1);
     const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter+2);
-    const auto address = combine_bytes(upper, lower);
+    const auto value = combine_bytes(upper, lower);
 
-    cpu.m_stack_ptr = address;
+    cpu.m_stack_ptr = value;
     cpu.m_cycles += 12;
     cpu.m_program_counter += 3;
 }
@@ -2387,7 +2387,7 @@ void CP_E(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    cpu.m_reg_a  == value ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
