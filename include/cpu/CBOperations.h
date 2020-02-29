@@ -29,7 +29,15 @@ void SRL_H(Cpu& cpu);
 void SRL_L(Cpu& cpu);
 void SRL_ADDR_HL(Cpu& cpu);
 
-void RR_A(Cpu& cpu);
+void RL_B(Cpu& cpu);
+void RL_C(Cpu& cpu);
+void RL_D(Cpu& cpu);
+void RL_E(Cpu& cpu);
+void RL_H(Cpu& cpu);
+void RL_L(Cpu& cpu);
+void RL_ADDR_HL(Cpu& cpu);
+void RL_A(Cpu& cpu);
+
 void RR_B(Cpu& cpu);
 void RR_C(Cpu& cpu);
 void RR_D(Cpu& cpu);
@@ -37,6 +45,7 @@ void RR_E(Cpu& cpu);
 void RR_H(Cpu& cpu);
 void RR_L(Cpu& cpu);
 void RR_ADDR_HL(Cpu& cpu);
+void RR_A(Cpu& cpu);
 
 void SWAP_B(Cpu& cpu);
 void SWAP_C(Cpu& cpu);

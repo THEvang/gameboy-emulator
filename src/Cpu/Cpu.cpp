@@ -1113,31 +1113,31 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::RL_B:
-            throw UnimplementedOperation("RL B\n");
+            RL_B(cpu);
             break;
         
         case CBCode::RL_C:
-            throw UnimplementedOperation("RL C\n");
+            RL_C(cpu);
             break;
         
         case CBCode::RL_D:
-            throw UnimplementedOperation("RL D\n");
+            RL_D(cpu);
             break;
         
         case CBCode::RL_E:
-            throw UnimplementedOperation("RL E\n");
+            RL_E(cpu);
             break;
         
         case CBCode::RL_H:
-            throw UnimplementedOperation("RL H\n");
+            RL_H(cpu);
             break;
 
         case CBCode::RL_ADDR_HL:
-            throw UnimplementedOperation("RL ADDR HL\n");
+            RL_ADDR_HL(cpu);
             break;
         
         case CBCode::RL_A:
-            throw UnimplementedOperation("RL A\n");
+            RL_A(cpu);
             break;
 
         case CBCode::RR_B:
