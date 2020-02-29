@@ -1407,7 +1407,7 @@ void SET_0_ADDR_HL(Cpu& cpu) {
 }
 
 void SET_0_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 0);
+    set_bit(cpu.m_reg_a, 0);
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
@@ -1461,7 +1461,7 @@ void SET_1_ADDR_HL(Cpu& cpu) {
 }
 
 void SET_1_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 0);
+    set_bit(cpu.m_reg_a, 1);
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
@@ -1515,7 +1515,7 @@ void SET_2_ADDR_HL(Cpu& cpu) {
 }
 
 void SET_2_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 2);
+    set_bit(cpu.m_reg_a, 2);
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
@@ -1569,7 +1569,7 @@ void SET_3_ADDR_HL(Cpu& cpu) {
 }
 
 void SET_3_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 3);
+    set_bit(cpu.m_reg_a, 3);
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
@@ -1623,7 +1623,169 @@ void SET_4_ADDR_HL(Cpu& cpu) {
 }
 
 void SET_4_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 4);
+    set_bit(cpu.m_reg_a, 4);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_B(Cpu& cpu) {
+    set_bit(cpu.m_reg_b, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_C(Cpu& cpu) {
+    set_bit(cpu.m_reg_c, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_D(Cpu& cpu) {
+    set_bit(cpu.m_reg_d, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_E(Cpu& cpu) {
+    set_bit(cpu.m_reg_e, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_H(Cpu& cpu) {
+    set_bit(cpu.m_reg_h, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_L(Cpu& cpu) {
+    set_bit(cpu.m_reg_l, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_5_ADDR_HL(Cpu& cpu) {
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    set_bit(value, 5);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
+}
+
+void SET_5_A(Cpu& cpu) {
+    set_bit(cpu.m_reg_a, 5);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_B(Cpu& cpu) {
+    set_bit(cpu.m_reg_b, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_C(Cpu& cpu) {
+    set_bit(cpu.m_reg_c, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_D(Cpu& cpu) {
+    set_bit(cpu.m_reg_d, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_E(Cpu& cpu) {
+    set_bit(cpu.m_reg_e, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_H(Cpu& cpu) {
+    set_bit(cpu.m_reg_h, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_L(Cpu& cpu) {
+    set_bit(cpu.m_reg_l, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_6_ADDR_HL(Cpu& cpu) {
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    set_bit(value, 6);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
+}
+
+void SET_6_A(Cpu& cpu) {
+    set_bit(cpu.m_reg_a, 6);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_B(Cpu& cpu) {
+    set_bit(cpu.m_reg_b, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_C(Cpu& cpu) {
+    set_bit(cpu.m_reg_c, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_D(Cpu& cpu) {
+    set_bit(cpu.m_reg_d, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_E(Cpu& cpu) {
+    set_bit(cpu.m_reg_e, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_H(Cpu& cpu) {
+    set_bit(cpu.m_reg_h, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_L(Cpu& cpu) {
+    set_bit(cpu.m_reg_l, 7);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
+}
+
+void SET_7_ADDR_HL(Cpu& cpu) {
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    set_bit(value, 7);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_cycles += 16;
+    cpu.m_program_counter++;
+}
+
+void SET_7_A(Cpu& cpu) {
+    set_bit(cpu.m_reg_a, 7);
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }

@@ -1845,228 +1845,229 @@ void step(Cpu& cpu) {
             break;
 
         case CBCode::SET_1_B:
-            throw UnimplementedOperation("SET 1 B");
+            SET_1_B(cpu);
             break;
 
         case CBCode::SET_1_C:
-            throw UnimplementedOperation("SET 1 C");
+            SET_1_C(cpu);
             break;
 
         case CBCode::SET_1_D:
-            throw UnimplementedOperation("SET 1 D");
+            SET_1_D(cpu);
             break;
 
         case CBCode::SET_1_E:
-            throw UnimplementedOperation("SET 1 E");
+            SET_1_E(cpu);
             break;
 
         case CBCode::SET_1_H:
-            throw UnimplementedOperation("SET 1 H");
+            SET_1_H(cpu);
             break;
 
         case CBCode::SET_1_L:
-            throw UnimplementedOperation("SET 1 L");
+            SET_1_L(cpu);
             break;
 
         case CBCode::SET_1_ADDR_HL:
-            throw UnimplementedOperation("SET 1 ADDR HL");
+            SET_1_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_1_A:
-            throw UnimplementedOperation("SET 1 A");
+            SET_1_A(cpu);
             break;
                 
         case CBCode::SET_2_B:
-            throw UnimplementedOperation("SET 2 B");
+            SET_2_B(cpu);
             break;
 
         case CBCode::SET_2_C:
-            throw UnimplementedOperation("SET 2 C");
+            SET_2_C(cpu);
             break;
 
         case CBCode::SET_2_D:
-            throw UnimplementedOperation("SET 2 D");
+            SET_2_D(cpu);
             break;
 
         case CBCode::SET_2_E:
-            throw UnimplementedOperation("SET 2 E");
+            SET_2_E(cpu);
             break;
 
         case CBCode::SET_2_H:
-            throw UnimplementedOperation("SET 2 H");
+            SET_2_H(cpu);
             break;
 
         case CBCode::SET_2_L:
-            throw UnimplementedOperation("SET 2 L");
+            SET_2_L(cpu);
             break;
 
         case CBCode::SET_2_ADDR_HL:
-            throw UnimplementedOperation("SET 2 ADDR HL");
+            SET_2_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_2_A:
-            throw UnimplementedOperation("SET 2 A");
+            SET_2_A(cpu);
             break;
 
         case CBCode::SET_3_B:
-            throw UnimplementedOperation("SET 3 B");
+            SET_3_B(cpu);
             break;
 
         case CBCode::SET_3_C:
-            throw UnimplementedOperation("SET 3 C");
+            SET_3_C(cpu);
             break;
 
         case CBCode::SET_3_D:
-            throw UnimplementedOperation("SET 3 D");
+            SET_3_D(cpu);
             break;
 
         case CBCode::SET_3_E:
-            throw UnimplementedOperation("SET 3 E");
+            SET_3_E(cpu);
             break;
 
         case CBCode::SET_3_H:
-            throw UnimplementedOperation("SET 3 H");
+            SET_3_H(cpu);
             break;
 
         case CBCode::SET_3_L:
-            throw UnimplementedOperation("SET 3 L");
+            SET_3_L(cpu);
             break;
 
         case CBCode::SET_3_ADDR_HL:
-            throw UnimplementedOperation("SET 3 ADDR HL");
+            SET_3_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_3_A:
-            throw UnimplementedOperation("SET 3 A");
+            SET_3_A(cpu);
             break;
         
         case CBCode::SET_4_B:
-            throw UnimplementedOperation("SET 4 B");
+            SET_4_B(cpu);
             break;
 
         case CBCode::SET_4_C:
-            throw UnimplementedOperation("SET 4 C");
+            SET_4_C(cpu);
             break;
 
         case CBCode::SET_4_D:
-            throw UnimplementedOperation("SET 4 D");
+            SET_4_D(cpu);
             break;
 
         case CBCode::SET_4_E:
-            throw UnimplementedOperation("SET 4 E");
+            SET_4_E(cpu);
             break;
 
         case CBCode::SET_4_H:
-            throw UnimplementedOperation("SET 4 H");
+            SET_4_H(cpu);
             break;
 
         case CBCode::SET_4_L:
-            throw UnimplementedOperation("SET 4 L");
+            SET_4_L(cpu);
             break;
 
         case CBCode::SET_4_ADDR_HL:
-            throw UnimplementedOperation("SET 4 ADDR HL");
+            SET_4_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_4_A:
-            throw UnimplementedOperation("SET 0 A");
+            SET_4_A(cpu);
             break;
         
         case CBCode::SET_5_B:
-            throw UnimplementedOperation("SET 5 B");
+            SET_5_B(cpu);
             break;
 
         case CBCode::SET_5_C:
-            throw UnimplementedOperation("SET 5 C");
+            SET_5_C(cpu);
             break;
 
         case CBCode::SET_5_D:
-            throw UnimplementedOperation("SET 5 D");
+            SET_5_D(cpu);
             break;
 
         case CBCode::SET_5_E:
-            throw UnimplementedOperation("SET 5 E");
+            SET_5_E(cpu);
             break;
 
         case CBCode::SET_5_H:
-            throw UnimplementedOperation("SET 5 H");
+            SET_5_H(cpu);
             break;
 
         case CBCode::SET_5_L:
-            throw UnimplementedOperation("SET 5 L");
+            SET_5_L(cpu);
             break;
 
         case CBCode::SET_5_ADDR_HL:
-            throw UnimplementedOperation("SET 5 ADDR HL");
+            SET_5_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_5_A:
-            throw UnimplementedOperation("SET 0 A");
+            SET_5_A(cpu);
             break;
         
         case CBCode::SET_6_B:
-            throw UnimplementedOperation("SET 6 B");
+            SET_6_B(cpu);
             break;
 
         case CBCode::SET_6_C:
-            throw UnimplementedOperation("SET 6 C");
+            SET_6_C(cpu);
             break;
 
         case CBCode::SET_6_D:
-            throw UnimplementedOperation("SET 6 D");
+            SET_6_D(cpu);
             break;
 
         case CBCode::SET_6_E:
-            throw UnimplementedOperation("SET 6 E");
+            SET_6_E(cpu);
             break;
 
         case CBCode::SET_6_H:
-            throw UnimplementedOperation("SET 6 H");
+            SET_6_H(cpu);
             break;
 
         case CBCode::SET_6_L:
-            throw UnimplementedOperation("SET 6 L");
+            SET_6_L(cpu);
             break;
 
         case CBCode::SET_6_ADDR_HL:
-            throw UnimplementedOperation("SET 6 ADDR HL");
+            SET_6_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_6_A:
-            throw UnimplementedOperation("SET 6 A");
+            SET_6_A(cpu);
             break;
         
         case CBCode::SET_7_B:
-            throw UnimplementedOperation("SET 7 B");
+            SET_7_B(cpu);
             break;
 
         case CBCode::SET_7_C:
-            throw UnimplementedOperation("SET 7 C");
+            SET_7_C(cpu);
             break;
 
         case CBCode::SET_7_D:
-            throw UnimplementedOperation("SET 7 D");
+            SET_7_D(cpu);
             break;
 
         case CBCode::SET_7_E:
-            throw UnimplementedOperation("SET 7 E");
+            SET_7_E(cpu);
             break;
 
         case CBCode::SET_7_H:
-            throw UnimplementedOperation("SET 7 H");
+            SET_7_H(cpu);
             break;
 
         case CBCode::SET_7_L:
-            throw UnimplementedOperation("SET 7 L");
+            SET_7_L(cpu);
             break;
 
         case CBCode::SET_7_ADDR_HL:
-            throw UnimplementedOperation("SET 7 ADDR HL");
+            SET_7_ADDR_HL(cpu);
             break;
 
         case CBCode::SET_7_A:
-            throw UnimplementedOperation("SET 7 A");
+            SET_7_A(cpu);
             break;
+            
         default:
             throw UnimplementedOperation("Unimplemented CB Code\n");
             break;
