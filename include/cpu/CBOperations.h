@@ -65,6 +65,15 @@ void SLA_L(Cpu& cpu);
 void SLA_ADDR_HL(Cpu& cpu);
 void SLA_A(Cpu& cpu);
 
+void SRA_B(Cpu& cpu);
+void SRA_C(Cpu& cpu);
+void SRA_D(Cpu& cpu);
+void SRA_E(Cpu& cpu);
+void SRA_H(Cpu& cpu);
+void SRA_L(Cpu& cpu);
+void SRA_ADDR_HL(Cpu& cpu);
+void SRA_A(Cpu& cpu);
+
 void SWAP_B(Cpu& cpu);
 void SWAP_C(Cpu& cpu);
 void SWAP_D(Cpu& cpu);
