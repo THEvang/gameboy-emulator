@@ -1209,35 +1209,35 @@ void step(Cpu& cpu) {
             break;
 
         case CBCode::SRA_B:
-            throw UnimplementedOperation("SRL B\n");
+            SRA_B(cpu);
             break;
 
         case CBCode::SRA_C:
-            throw UnimplementedOperation("SRL C\n");
+            SRA_C(cpu);
             break;
 
         case CBCode::SRA_D:
-            throw UnimplementedOperation("SRL D\n");
+            SRA_D(cpu);
             break;
 
         case CBCode::SRA_E:
-            throw UnimplementedOperation("SRL E\n");
+            SRA_E(cpu);
             break;
 
         case CBCode::SRA_H:
-            throw UnimplementedOperation("SRL H\n");
+            SRA_H(cpu);
             break;
 
         case CBCode::SRA_L:
-            throw UnimplementedOperation("SRL L\n");
+            SRA_L(cpu);
             break;
 
         case CBCode::SRA_ADDR_HL:
-            throw UnimplementedOperation("SRL HL\n");
+            SRA_ADDR_HL(cpu);
             break;
         
         case CBCode::SRA_A:
-            throw UnimplementedOperation("SRL A\n");
+            SRA_A(cpu);
             break;
         
         case CBCode::SWAP_B:
