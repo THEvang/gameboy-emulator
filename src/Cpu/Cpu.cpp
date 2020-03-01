@@ -1241,31 +1241,31 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::SWAP_B:
-            throw UnimplementedOperation("SWAP B\n");
+            SWAP_B(cpu);
             break;
 
         case CBCode::SWAP_C:
-            throw UnimplementedOperation("SWAP C\n");
+            SWAP_C(cpu);
             break;
 
         case CBCode::SWAP_D:
-            throw UnimplementedOperation("SWAP D\n");
+            SWAP_D(cpu);
             break;
 
         case CBCode::SWAP_E:
-            throw UnimplementedOperation("SWAP E\n");
+            SWAP_E(cpu);
             break;
 
         case CBCode::SWAP_H:
-            throw UnimplementedOperation("SWAP H\n");
+            SWAP_H(cpu);
             break;
 
         case CBCode::SWAP_L:
-            throw UnimplementedOperation("SWAP L\n");
+            SWAP_L(cpu);
             break;
 
         case CBCode::SWAP_ADDR_HL:
-            throw UnimplementedOperation("SWAP ADDR HL\n");
+            SWAP_ADDR_HL(cpu);
             break;
 
         case CBCode::SWAP_A:
