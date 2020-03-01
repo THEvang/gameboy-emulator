@@ -1155,6 +1155,122 @@ void RR_A(Cpu& cpu) {
     cpu.m_program_counter++;
 }
 
+void SWAP_B(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_b);
+    
+    cpu.m_reg_b == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_C(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_c);
+    
+    cpu.m_reg_c == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_D(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_d);
+    
+    cpu.m_reg_d == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_E(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_e);
+    
+    cpu.m_reg_e == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_H(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_h);
+    
+    cpu.m_reg_h == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_L(Cpu& cpu) {
+
+    swap_nibbles(cpu.m_reg_l);
+    
+    cpu.m_reg_l == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
+
+void SWAP_ADDR_HL(Cpu& cpu) {
+
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    auto value = cpu.m_memory_controller->read(address);
+
+    swap_nibbles(value);
+    
+    value == 0 ? 
+        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    cpu.m_memory_controller->write(address, value);
+
+    cpu.m_program_counter++;
+    cpu.m_cycles += 8;
+}
 void SWAP_A(Cpu& cpu) {
 
     swap_nibbles(cpu.m_reg_a);
