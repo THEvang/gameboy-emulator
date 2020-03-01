@@ -1177,35 +1177,35 @@ void step(Cpu& cpu) {
             break;
         
         case CBCode::SLA_B:
-            throw UnimplementedOperation("SLA B\n");
+            SLA_B(cpu);
             break;
 
         case CBCode::SLA_C:
-            throw UnimplementedOperation("SLA C\n");
+            SLA_C(cpu);
             break;
 
         case CBCode::SLA_D:
-            throw UnimplementedOperation("SLA D\n");
+            SLA_D(cpu);
             break;
 
         case CBCode::SLA_E:
-            throw UnimplementedOperation("SLA E\n");
+            SLA_E(cpu);
             break;
 
         case CBCode::SLA_H:
-            throw UnimplementedOperation("SLA H\n");
+            SLA_H(cpu);
             break;
 
         case CBCode::SLA_L:
-            throw UnimplementedOperation("SLA L\n");
+            SLA_L(cpu);
             break;
 
         case CBCode::SLA_ADDR_HL:
-            throw UnimplementedOperation("SLA HL\n");
+            SLA_ADDR_HL(cpu);
             break;
 
         case CBCode::SLA_A:
-            throw UnimplementedOperation("SLA A\n");
+            SLA_A(cpu);
             break;
 
         case CBCode::SRA_B:
