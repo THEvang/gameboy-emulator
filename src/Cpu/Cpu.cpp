@@ -214,7 +214,7 @@ void step(Cpu& cpu) {
             break;
         
         case Opcode::DAA:
-            DDA(cpu);
+            DAA(cpu);
             break;
         
         case Opcode::JR_Z_R8:

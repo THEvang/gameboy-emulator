@@ -202,7 +202,7 @@ void RRA(Cpu& cpu);
 void RLA(Cpu& cpu);
 void RLCA(Cpu& cpu);
 
-void DDA(Cpu& cpu);
+void DAA(Cpu& cpu);
 
 void ADD_SP_R8(Cpu& cpu);
 
