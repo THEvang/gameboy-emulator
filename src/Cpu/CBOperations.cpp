@@ -1129,6 +1129,8 @@ void RR_ADDR_HL(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
+    cpu.m_memory_controller->write(address, value);
+
     cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }

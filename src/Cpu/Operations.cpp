@@ -31,7 +31,7 @@ void RST(Cpu& cpu, uint8_t address) {
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
     cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
 
-    cpu.m_program_counter = 0x0000 + address;
+    cpu.m_program_counter = combine_bytes(0x00, address);
     cpu.m_stack_ptr -= 2;
     cpu.m_cycles += 16;
 }
@@ -1151,7 +1151,6 @@ void ADD_HL_BC(Cpu& cpu) {
 
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
-
 }
 
 void ADD_HL_DE(Cpu& cpu) {
@@ -1872,8 +1871,8 @@ void RLCA(Cpu& cpu) {
     cpu.m_program_counter++;
 }
 
-void DDA(Cpu& cpu) {    
-    throw UnimplementedOperation("Unimplemented operation: DDA");
+void DAA(Cpu& cpu) {    
+    throw UnimplementedOperation("Unimplemented operation: DAA");
 }
 
 void ADD_SP_R8(Cpu& cpu) {
@@ -2541,15 +2540,29 @@ void ADC_A_D8(Cpu& cpu) {
     const auto carry_value = is_set(cpu.m_reg_f, Cpu::carry_flag) ? 1 : 0;
     const auto value = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
 
-    half_carry_8bit(cpu.m_reg_a, value + carry_value)   ?
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)      :
+    half_carry_8bit(cpu.m_reg_a, value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    overflows_8bit(cpu.m_reg_a, value + carry_value)    ?
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)           :
+    overflows_8bit(cpu.m_reg_a, value)        ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
         clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-    cpu.m_reg_a += value + carry_value;
+    cpu.m_reg_a += value;
+
+    if(!is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+        half_carry_8bit(cpu.m_reg_a, carry_value)       ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)          :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    }
+
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        overflows_8bit(cpu.m_reg_a, carry_value)        ?
+            set_bit(cpu.m_reg_f, Cpu::carry_flag)               :
+            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    }
+
+    cpu.m_reg_a += carry_value;
 
     cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
