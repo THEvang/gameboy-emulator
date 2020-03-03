@@ -183,7 +183,14 @@ void RET_C(Cpu& cpu) {
 }
 
 void RETI(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: RETI");
+    const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+    
+    cpu.m_program_counter = combine_bytes(pc_high, pc_low);
+    
+    cpu.m_stack_ptr += 2;
+    cpu.m_cycles += 16;
+    cpu.m_enabled_interrupts = true;
 }
 
 void JUMP(Cpu& cpu) {
@@ -212,11 +219,31 @@ void JUMP_NZ(Cpu& cpu) {
 }
 
 void JUMP_Z(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: JUMP Z");
+    if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
+        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+        const auto address = combine_bytes(upper, lower);
+
+        cpu.m_program_counter = address;
+        cpu.m_cycles += 16;
+    } else {
+        cpu.m_program_counter += 3;
+        cpu.m_cycles += 12;
+    }
 }
 
 void JUMP_NC(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: JUMP NC");
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+        const auto address = combine_bytes(upper, lower);
+
+        cpu.m_program_counter = address;
+        cpu.m_cycles += 16;
+    } else {
+        cpu.m_program_counter += 3;
+        cpu.m_cycles += 12;
+    }
 }
 
 void JUMP_C(Cpu& cpu) {
@@ -282,15 +309,70 @@ void CALL_NZ(Cpu& cpu) {
 }
 
 void CALL_Z(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: CALL Z");
+    
+    if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
+        const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
+        const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
+
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+
+        
+        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+        const auto address = combine_bytes(upper, lower);
+        
+        cpu.m_program_counter = address;
+        cpu.m_stack_ptr -= 2;
+        cpu.m_cycles += 24;
+    } else {
+        cpu.m_cycles += 12;
+        cpu.m_program_counter += 3;
+    }
 }
 
 void CALL_NC(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: CALL NC");
+    if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
+        const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
+
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+
+        
+        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+        const auto address = combine_bytes(upper, lower);
+        
+        cpu.m_program_counter = address;
+        cpu.m_stack_ptr -= 2;
+        cpu.m_cycles += 24;
+    } else {
+        cpu.m_cycles += 12;
+        cpu.m_program_counter += 3;
+    }
 }
 
 void CALL_C(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration: CALL C");
+    if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+        const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
+        const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
+
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+
+        
+        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
+        const auto address = combine_bytes(upper, lower);
+        
+        cpu.m_program_counter = address;
+        cpu.m_stack_ptr -= 2;
+        cpu.m_cycles += 24;
+    } else {
+        cpu.m_cycles += 12;
+        cpu.m_program_counter += 3;
+    }
 }
 
 void LD_A_D8(Cpu& cpu) {
