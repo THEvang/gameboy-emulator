@@ -14,8 +14,8 @@ void NOP(Cpu& cpu) {
 }
 
 void STOP(Cpu& cpu) {
-    cpu.should_stop = true;
-    cpu.m_program_counter++;
+    //cpu.should_stop = false;
+    cpu.m_program_counter += 2;
     cpu.m_cycles += 4;
 }
 
@@ -38,15 +38,18 @@ void RST(Cpu& cpu, uint8_t address) {
 
 void DI(Cpu& cpu) {
     
+    cpu.m_enabled_interrupts = false;
     cpu.m_cycles += 4;
-    cpu.m_memory_controller->write(0xFFFF, 0);
     cpu.m_program_counter++;
 }
 
 void EI(Cpu& cpu) {
+
+    cpu.m_enabled_interrupts = true;
     cpu.m_cycles += 4;
-    cpu.m_memory_controller->write(0xFFFF, 1);
     cpu.m_program_counter++;
+
+    step(cpu);
 }
 
 void JR(Cpu& cpu) {
@@ -99,8 +102,9 @@ void JR_NC(Cpu& cpu) {
 void JR_C(Cpu& cpu) {
 
     if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter+1));
-        cpu.m_program_counter += (distance + 2);
+        cpu.m_program_counter += 2;
+        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        cpu.m_program_counter += distance;
         cpu.m_cycles += 12;
     } else {
         cpu.m_program_counter += 2;
@@ -390,7 +394,8 @@ void LD_ADDR_A16_SP(Cpu& cpu) {
     const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
     const auto address = combine_bytes(upper, lower);
-    cpu.m_memory_controller->write(address, cpu.m_stack_ptr);
+    cpu.m_memory_controller->write(address, cpu.m_stack_ptr & 0xFF);
+    cpu.m_memory_controller->write(address + 1, cpu.m_stack_ptr >> 8);
 
     cpu.m_program_counter += 3;
     cpu.m_cycles += 20;
@@ -885,27 +890,26 @@ void LD_HL_D16(Cpu& cpu) {
 
 void LD_HL_SPR8(Cpu& cpu) {
 
-    const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter + 1));
+    const auto distance = (cpu.m_memory_controller->read(cpu.m_program_counter + 1));
+
+    half_carry_8bit(cpu.m_stack_ptr, distance)     ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+
+    overflows_8bit(cpu.m_stack_ptr, distance)  ? 
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    const auto result = cpu.m_stack_ptr + static_cast<int8_t>(distance);
+    cpu.m_reg_h = (result >> 8);
+    cpu.m_reg_l = (result & 0xFF);
 
     clear_bit(cpu.m_reg_f, Cpu::zero_flag);
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
-    half_carry_16bit(cpu.m_stack_ptr, distance)     ?
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    
-
-    overflows_16bit(cpu.m_stack_ptr, distance)  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    const auto result = cpu.m_stack_ptr + distance;
-    cpu.m_reg_h = (result >> 8);
-    cpu.m_reg_l = (result & 0xFF);
-
     cpu.m_cycles += 12;
     cpu.m_program_counter += 2;
-    throw UnimplementedOperation("LD HL SP R8");
 }
 
 void LD_SP_D16(Cpu& cpu) {
@@ -1201,7 +1205,27 @@ void ADD_HL_HL(Cpu& cpu) {
 }
 
 void ADD_HL_SP(Cpu& cpu) {
-    throw UnimplementedOperation("ADD HL SP\n");
+
+    auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto value = cpu.m_stack_ptr;
+    
+    overflows_16bit(hl, value)               ?
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+    half_carry_16bit(hl, value)               ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    
+
+    hl += value;
+    cpu.m_reg_h = (hl >> 8);
+    cpu.m_reg_l = (hl & 0xFF);
+
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void SUB_D8(Cpu& cpu) {
@@ -1413,7 +1437,7 @@ void SUB_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
 }
 
 void INC_A(Cpu& cpu) {
@@ -1589,11 +1613,10 @@ void INC_ADDR_HL(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 12;
 }
 
 void INC_SP(Cpu& cpu) {
-    
     cpu.m_stack_ptr++;
     cpu.m_program_counter++;
     cpu.m_cycles += 8;
@@ -1777,7 +1800,9 @@ void DEC_ADDR_HL(Cpu& cpu) {
 }
 
 void DEC_SP(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: DEC SP");
+    cpu.m_stack_ptr--;
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void SCF(Cpu& cpu) {
@@ -1872,11 +1897,55 @@ void RLCA(Cpu& cpu) {
 }
 
 void DAA(Cpu& cpu) {    
-    throw UnimplementedOperation("Unimplemented operation: DAA");
+
+    if(!is_set(cpu.m_reg_f, Cpu::sub_flag)) {
+        if(is_set(cpu.m_reg_f, Cpu::carry_flag) || cpu.m_reg_a > 0x99) {
+            cpu.m_reg_a += 0x60;
+            set_bit(cpu.m_reg_f, Cpu::carry_flag);
+        }
+
+        if(is_set(cpu.m_reg_f, Cpu::half_carry_flag) || (cpu.m_reg_a & 0x0F) > 0x09) {
+            cpu.m_reg_a += 0x06;
+        }
+    } else {
+        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+            cpu.m_reg_a -= 0x60;
+        }
+        if(is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
+            cpu.m_reg_a -= 0x6;
+        }
+    }
+
+    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+
+    cpu.m_cycles += 4;
+    cpu.m_program_counter++;
 }
 
 void ADD_SP_R8(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: ADD SP R8");
+
+    const auto distance = (cpu.m_memory_controller->read(cpu.m_program_counter + 1));
+
+    half_carry_8bit(cpu.m_stack_ptr, distance)     ?
+        set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
+        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+
+    overflows_8bit(cpu.m_stack_ptr, distance)  ? 
+        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
+        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+
+
+    cpu.m_stack_ptr += static_cast<int8_t>(distance);
+
+    clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+
+    cpu.m_cycles += 12;
+    cpu.m_program_counter += 2;
 }
 
 void AND_D8(Cpu& cpu) {
@@ -2283,7 +2352,7 @@ void CP_D8(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2303,7 +2372,7 @@ void CP_A(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2324,7 +2393,7 @@ void CP_B(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2345,7 +2414,7 @@ void CP_C(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2365,7 +2434,7 @@ void CP_D(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2386,7 +2455,7 @@ void CP_E(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_reg_a  == value ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a  == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2406,7 +2475,7 @@ void CP_H(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2427,7 +2496,7 @@ void CP_L(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2449,7 +2518,7 @@ void CP_ADDR_HL(Cpu& cpu) {
         set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
         clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    (cpu.m_reg_a - value) == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
+    (cpu.m_reg_a == value) ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2500,7 +2569,7 @@ void PUSH_HL(Cpu& cpu) {
 
 void POP_AF(Cpu& cpu) {
 
-    cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0;
     cpu.m_reg_a = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
     cpu.m_stack_ptr += 2;
     cpu.m_program_counter++;
@@ -3276,7 +3345,7 @@ void LD_A_ADDR_HLD(Cpu& cpu) {
 
 void CPL(Cpu& cpu) {
 
-    cpu.m_reg_a = ~cpu.m_reg_a;
+    cpu.m_reg_a ^= 0xFF;
 
     set_bit(cpu.m_reg_f, Cpu::sub_flag);
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);

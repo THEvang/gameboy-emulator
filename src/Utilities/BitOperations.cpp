@@ -15,7 +15,7 @@ auto half_carry_8bit(uint8_t a, uint8_t b) -> bool {
 
 auto half_carry_16bit(uint16_t a, uint16_t b) -> bool {
 
-    return ((a & 0xFF) + (b & 0xFF)) > 0xFF;
+    return ((a & 0xFFF) + (b & 0xFFF)) > 0xFFF;
 }
 
 auto half_borrow_8bit(uint8_t a, uint8_t b) -> bool {
@@ -23,7 +23,7 @@ auto half_borrow_8bit(uint8_t a, uint8_t b) -> bool {
 }
 
 auto half_borrow_16bit(uint16_t a, uint16_t b) -> bool {
-   return (a & 0xFF) < (b & 0xFF);
+   return (a & 0xFFF) < (b & 0xFFF);
 }
 
 void set_bit(uint8_t& b, int n) {
@@ -49,6 +49,10 @@ auto overflows_16bit(uint16_t a, uint16_t b) -> bool {
 };
 
 auto underflows_8bit(uint8_t a, uint8_t b) -> bool {
+    return b > a;
+}
+
+auto underflows_16bit(uint16_t a, uint16_t b) -> bool {
     return b > a;
 }
 

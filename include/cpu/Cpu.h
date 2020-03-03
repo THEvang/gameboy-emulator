@@ -22,7 +22,7 @@ struct Cpu {
     bool m_enabled_interrupts = false;
     bool should_stop = false;
 
-    int m_cycles;
+    int m_cycles = 0;
 
     MemoryBankController* m_memory_controller;
 
@@ -34,3 +34,5 @@ struct Cpu {
 
 void step(Cpu& cpu);
 void step_cb(Cpu& cpu);
+
+void handle_interrupts(Cpu& cpu);
