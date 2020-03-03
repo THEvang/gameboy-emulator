@@ -468,7 +468,11 @@ void LD_A_ADDR_A16(Cpu& cpu) {
 }
 
 void LD_A_ADDR_C(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented opration LDA A ADDR C");
+    const auto address = 0xFF00 + cpu.m_reg_c;
+    cpu.m_reg_a = cpu.m_memory_controller->read(address);
+
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void LD_ADDR_A16_SP(Cpu& cpu) {
@@ -3046,7 +3050,11 @@ void LDH_A_ADDR_A8(Cpu& cpu) {
 }
 
 void LD_ADDR_C_A(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD ADDR C A");
+    const auto address = 0xFF00 + cpu.m_reg_c;
+    cpu.m_memory_controller->write(address, cpu.m_reg_a);
+
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void SBC_A_D8(Cpu& cpu) {
