@@ -25,10 +25,10 @@ uint8_t MBC1::read(const uint16_t address) {
 void MBC1::write(const uint16_t address, uint8_t value) {
 
     if(address <= 0x1FFF) {
-        m_ram_enabled =  ( (value & 0xF) == 0x0A) ? true : false; 
+        m_ram_enabled =  ( (value & 0x0F) == 0x0A) ? true : false; 
     } else if (address >= 0x2000 && address <= 0x3FFF) {
 
-        value &= (0b00011111);
+        value &= 0x1F;
         m_rom_bank &= (0b11100000);
         m_rom_bank |= value;
         

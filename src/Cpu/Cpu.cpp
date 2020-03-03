@@ -49,12 +49,17 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFFFF, 0x00);
 }
 
+void handle_interrupts(Cpu& cpu) {
+    
+}
+
 void step(Cpu& cpu) {
 
+    if(cpu.m_enabled_interrupts) {
+        handle_interrupts(cpu);
+    }
 
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
-    //std::cout << "Opcode: " << std::hex << (int) opcode << "\n";
-    //std::cout << "Program Counter: " << (int) cpu.m_program_counter << "\n";
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
