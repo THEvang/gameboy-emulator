@@ -37,7 +37,6 @@ void RST(Cpu& cpu, uint8_t address) {
 }
 
 void DI(Cpu& cpu) {
-    
     cpu.m_enabled_interrupts = false;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -45,11 +44,12 @@ void DI(Cpu& cpu) {
 
 void EI(Cpu& cpu) {
 
-    cpu.m_enabled_interrupts = true;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 
     step(cpu);
+
+    cpu.m_enabled_interrupts = true;
 }
 
 void JR(Cpu& cpu) {
@@ -332,7 +332,7 @@ void CALL_Z(Cpu& cpu) {
 }
 
 void CALL_NC(Cpu& cpu) {
-    if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
+    if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
         const auto pc_high = ( (cpu.m_program_counter+3) >> 8);
         const auto pc_low = ( (cpu.m_program_counter+3) & 0xFF);
 
@@ -648,7 +648,9 @@ void LD_C_ADDR_HL(Cpu& cpu) {
 }
 
 void LD_D_D8(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: LD D D8");
+    cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
+    cpu.m_cycles += 8;
+    cpu.m_program_counter++;
 }
 
 void LD_D_A(Cpu& cpu) {
@@ -933,7 +935,7 @@ void LD_ADDR_HL_L(Cpu& cpu) {
     cpu.m_program_counter++;
 }
 
-void LD_ADDR_HL_ADDR_HL(Cpu& cpu) {
+void LD_ADDR_HL_ADDR_HL(Cpu& cpu) {    
     throw UnimplementedOperation("Unimplemented operation: LD ADDR HL ADDR HL");
 }
 
@@ -3035,7 +3037,8 @@ void ADC_A_ADDR_HL(Cpu& cpu) {
 
 void LDH_ADDR_A8_A(Cpu& cpu) {
 
-    const uint16_t address = 0xFF00 + cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    const auto value = cpu.m_memory_controller->read(cpu.m_program_counter+1);
+    const uint16_t address = 0xFF00 + value;
     cpu.m_memory_controller->write(address, cpu.m_reg_a);
     cpu.m_cycles += 12;
     cpu.m_program_counter += 2;

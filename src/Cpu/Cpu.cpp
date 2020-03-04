@@ -4,7 +4,7 @@
 #include <cpu/CBOperations.h>
 #include <cpu/CBOpcodes.h>
 #include <iostream>
-
+#include <BitOperations.h>
 Cpu::Cpu(MemoryBankController* memory_controller)     
     : m_memory_controller(memory_controller) 
 {
@@ -51,6 +51,98 @@ Cpu::Cpu(MemoryBankController* memory_controller)
 
 void handle_interrupts(Cpu& cpu) {
     
+    const auto interrupt_request_addr = 0xFF0F;
+    const auto interrupt_enable_addr = 0xFFFF;
+
+    auto interrupt_request_register = cpu.m_memory_controller->read(interrupt_request_addr);
+    auto interrupt_enable_register = cpu.m_memory_controller->read(interrupt_enable_addr);
+
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::V_Blank))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank))) {
+
+        const auto pc_low = cpu.m_program_counter & 0xFF;
+        const auto pc_high = cpu.m_program_counter >> 8;
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_stack_ptr -= 2;
+        cpu.m_enabled_interrupts = false;
+        cpu.m_program_counter = 0x40;
+
+        clear_bit(interrupt_request_register, static_cast<int>(Interrupts::V_Blank));
+        cpu.m_enabled_interrupts = false;
+
+        return;
+    }
+
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT)) 
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::LCD_STAT))) {
+        
+        const auto pc_low = cpu.m_program_counter & 0xFF;
+        const auto pc_high = cpu.m_program_counter >> 8;
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_stack_ptr -= 2;
+        cpu.m_enabled_interrupts = false;
+        cpu.m_program_counter = 0x48;
+        
+        clear_bit(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT));
+        cpu.m_enabled_interrupts = false;
+
+        return;
+    }
+
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Timer))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Timer))) {
+        
+        const auto pc_low = cpu.m_program_counter & 0xFF;
+        const auto pc_high = cpu.m_program_counter >> 8;
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_stack_ptr -= 2;
+        cpu.m_enabled_interrupts = false;
+        cpu.m_program_counter = 0x50;
+
+        clear_bit(interrupt_request_register, static_cast<int>(Interrupts::Timer));
+        cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
+
+        return;
+    }
+
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Serial))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Serial))) {
+        
+        const auto pc_low = cpu.m_program_counter & 0xFF;
+        const auto pc_high = cpu.m_program_counter >> 8;
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_stack_ptr -= 2;
+        cpu.m_enabled_interrupts = false;
+        cpu.m_program_counter = 0x58;
+
+        clear_bit(interrupt_request_register, static_cast<int>(Interrupts::Serial));
+        cpu.m_enabled_interrupts = false;
+
+        return;
+    }
+    
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Joypad))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad))) {
+        
+        const auto pc_low = cpu.m_program_counter & 0xFF;
+        const auto pc_high = cpu.m_program_counter >> 8;
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
+        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_stack_ptr -= 2;
+        cpu.m_enabled_interrupts = false;
+        cpu.m_program_counter = 0x60;
+
+        clear_bit(interrupt_request_register, static_cast<int>(Interrupts::Joypad));
+        cpu.m_enabled_interrupts = false;
+
+        return;
+    }
+    
+    cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
 }
 
 void step(Cpu& cpu) {
