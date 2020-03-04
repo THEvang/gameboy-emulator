@@ -3,6 +3,14 @@
 #include <cstdint>
 #include <MemoryBankController.h>
 
+enum class Interrupts {
+    V_Blank = 0,
+    LCD_STAT,
+    Timer,
+    Serial,
+    Joypad
+};
+
 struct Cpu {
 
     Cpu(MemoryBankController* memory_controller);
