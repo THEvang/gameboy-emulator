@@ -49,6 +49,37 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFFFF, 0x00);
 }
 
+void timer(Cpu& cpu) {
+
+    constexpr auto div_addr = 0xFF04;
+    constexpr auto tima_addr = 0xFF05;
+    constexpr auto tma_addr = 0xFF06;
+    constexpr auto tac_addr = 0xFF07;
+
+    if(cpu.timer.increment_div(cpu.m_cycles)) {
+        auto div_value = cpu.m_memory_controller->read(div_addr);
+        div_value++;
+        cpu.m_memory_controller->write(div_addr, div_value);
+    }
+    
+    if(cpu.timer.increment_tima(cpu.m_cycles, cpu.m_memory_controller->read(tac_addr))) {
+        auto tima_value = cpu.m_memory_controller->read(tima_addr);
+
+        if(overflows_8bit(tima_value, 1)) {
+            const auto tima_reset_value = cpu.m_memory_controller->read(tma_addr);
+            cpu.m_memory_controller->write(tima_addr, tima_reset_value);
+
+            auto if_register = cpu.m_memory_controller->read(0xFF0F);
+            set_bit(if_register, 2);
+            cpu.m_memory_controller->write(0xFF0F, if_register);
+
+        } else {
+            tima_value++;
+            cpu.m_memory_controller->write(tima_addr, tima_value);
+        }
+    }
+}
+
 void handle_interrupts(Cpu& cpu) {
     
     const auto interrupt_request_addr = 0xFF0F;
@@ -59,6 +90,12 @@ void handle_interrupts(Cpu& cpu) {
 
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::V_Blank))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank))) {
+            
+        if(cpu.m_is_halted) {
+            cpu.m_program_counter++;
+            cpu.m_is_halted = false;
+        }
+
 
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
@@ -77,6 +114,12 @@ void handle_interrupts(Cpu& cpu) {
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT)) 
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::LCD_STAT))) {
         
+        
+        if(cpu.m_is_halted) {
+            cpu.m_program_counter++;
+            cpu.m_is_halted = false;
+        }
+
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
@@ -94,6 +137,12 @@ void handle_interrupts(Cpu& cpu) {
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Timer))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Timer))) {
         
+        
+        if(cpu.m_is_halted) {
+            cpu.m_program_counter++;
+            cpu.m_is_halted = false;
+        }
+
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
@@ -111,6 +160,12 @@ void handle_interrupts(Cpu& cpu) {
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Serial))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Serial))) {
         
+        
+        if(cpu.m_is_halted) {
+            cpu.m_program_counter++;
+            cpu.m_is_halted = false;
+        }
+
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
@@ -128,6 +183,10 @@ void handle_interrupts(Cpu& cpu) {
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Joypad))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad))) {
         
+        if(cpu.m_is_halted) {
+            cpu.m_program_counter++;
+            cpu.m_is_halted = false;
+        }
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
@@ -146,6 +205,8 @@ void handle_interrupts(Cpu& cpu) {
 }
 
 void step(Cpu& cpu) {
+
+    timer(cpu);
 
     if(cpu.m_enabled_interrupts) {
         handle_interrupts(cpu);

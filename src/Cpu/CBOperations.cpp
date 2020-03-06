@@ -14,7 +14,7 @@ void RLC_B(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -31,7 +31,7 @@ void RLC_C(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -48,7 +48,7 @@ void RLC_D(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -65,7 +65,7 @@ void RLC_E(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -82,7 +82,7 @@ void RLC_H(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -99,7 +99,7 @@ void RLC_L(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -138,7 +138,7 @@ void RLC_A(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -155,7 +155,7 @@ void RRC_B(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -172,7 +172,7 @@ void RRC_C(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -189,7 +189,7 @@ void RRC_D(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -206,7 +206,7 @@ void RRC_E(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -223,7 +223,7 @@ void RRC_H(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -240,7 +240,7 @@ void RRC_L(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -279,7 +279,7 @@ void RRC_A(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -300,7 +300,7 @@ void RL_B(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -321,7 +321,7 @@ void RL_C(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -342,7 +342,7 @@ void RL_D(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -363,7 +363,7 @@ void RL_E(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -384,7 +384,7 @@ void RL_H(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -405,7 +405,7 @@ void RL_L(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -431,7 +431,7 @@ void RL_ADDR_HL(Cpu& cpu) {
 
     cpu.m_memory_controller->write(address, value);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 16;
     cpu.m_program_counter++;
 }
 
@@ -452,7 +452,7 @@ void RL_A(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
     clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -617,7 +617,7 @@ void SRL_ADDR_HL(Cpu& cpu) {
 
     cpu.m_memory_controller->write(address, value);
 
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
     cpu.m_program_counter++;
 }
 
@@ -762,7 +762,7 @@ void SLA_ADDR_HL(Cpu& cpu) {
 
     cpu.m_memory_controller->write(address, value);
 
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
     cpu.m_program_counter++;
 }
 
@@ -948,7 +948,7 @@ void SRA_ADDR_HL(Cpu& cpu) {
 
     cpu.m_memory_controller->write(address, value);
 
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
     cpu.m_program_counter++;
 }
 
@@ -1131,7 +1131,7 @@ void RR_ADDR_HL(Cpu& cpu) {
 
     cpu.m_memory_controller->write(address, value);
 
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
     cpu.m_program_counter++;
 }
 
@@ -1271,8 +1271,9 @@ void SWAP_ADDR_HL(Cpu& cpu) {
     cpu.m_memory_controller->write(address, value);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 }
+
 void SWAP_A(Cpu& cpu) {
 
     swap_nibbles(cpu.m_reg_a);
@@ -1372,7 +1373,7 @@ void BIT_0_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -1472,7 +1473,7 @@ void BIT_1_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -1572,7 +1573,7 @@ void BIT_2_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -1672,7 +1673,7 @@ void BIT_3_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    cpu.m_cycles += 16;
 }
 
 void BIT_3_A(Cpu& cpu) {
@@ -1771,7 +1772,7 @@ void BIT_4_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -1871,7 +1872,7 @@ void BIT_5_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -1971,7 +1972,7 @@ void BIT_6_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 
@@ -2071,7 +2072,7 @@ void BIT_7_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    cpu.m_cycles += 16;
 
 }
 

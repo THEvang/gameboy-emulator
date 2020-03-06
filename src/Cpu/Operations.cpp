@@ -9,18 +9,25 @@ UnimplementedOperation::UnimplementedOperation(const std::string& msg)
 }
 
 void NOP(Cpu& cpu) {
-    cpu.m_cycles = 4;
+    cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
 
 void STOP(Cpu& cpu) {
-    //cpu.should_stop = false;
     cpu.m_program_counter += 2;
     cpu.m_cycles += 4;
 }
 
 void HALT(Cpu& cpu) {
-    throw UnimplementedOperation("Unimplemented operation: HALT");
+
+    if(!cpu.m_enabled_interrupts) {
+        cpu.m_program_counter++;
+        cpu.m_cycles += 4;
+    } else if (!cpu.m_is_halted) {
+        cpu.m_is_halted = true;
+    }
+    cpu.m_cycles += 4;
+    throw UnimplementedOperation("HALT");
 }
 
 void RST(Cpu& cpu, uint8_t address) {
@@ -476,7 +483,6 @@ void LD_A_ADDR_C(Cpu& cpu) {
 }
 
 void LD_ADDR_A16_SP(Cpu& cpu) {
-
     const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
     const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter + 2);
     const auto address = combine_bytes(upper, lower);
@@ -585,7 +591,7 @@ void LD_B_ADDR_HL(Cpu& cpu) {
     const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
     cpu.m_reg_b = cpu.m_memory_controller->read(address);
 
-    cpu.m_cycles += 2;
+    cpu.m_cycles += 8;
     cpu.m_program_counter++;
 }
 
@@ -1838,7 +1844,7 @@ void DEC_BC(Cpu& cpu) {
     cpu.m_reg_c = (bc & 0xFF);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
 }
 
 void DEC_DE(Cpu& cpu) {
@@ -1850,7 +1856,7 @@ void DEC_DE(Cpu& cpu) {
     cpu.m_reg_e = (de & 0xFF);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
 }
 
 void DEC_HL(Cpu& cpu) {
@@ -1861,7 +1867,7 @@ void DEC_HL(Cpu& cpu) {
     cpu.m_reg_l = (hl & 0xFF);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 4;
+    cpu.m_cycles += 8;
 }
 
 void DEC_ADDR_HL(Cpu& cpu) {
@@ -2014,7 +2020,6 @@ void DAA(Cpu& cpu) {
 }
 
 void ADD_SP_R8(Cpu& cpu) {
-
     const auto distance = (cpu.m_memory_controller->read(cpu.m_program_counter + 1));
 
     half_carry_8bit(cpu.m_stack_ptr, distance)     ?
@@ -2032,7 +2037,7 @@ void ADD_SP_R8(Cpu& cpu) {
     clear_bit(cpu.m_reg_f, Cpu::zero_flag);
     clear_bit(cpu.m_reg_f, Cpu::sub_flag);
 
-    cpu.m_cycles += 12;
+    cpu.m_cycles += 16;
     cpu.m_program_counter += 2;
 }
 
@@ -3403,7 +3408,6 @@ void SBC_A_ADDR_HL(Cpu& cpu) {
 }
 
 void PREFIX_CB(Cpu& cpu) {
-
     cpu.m_program_counter++;
     cpu.m_cycles += 4;
     step_cb(cpu);
