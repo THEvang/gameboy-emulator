@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <MemoryBankController.h>
+#include <Timer.h>
 
 enum class Interrupts {
     V_Blank = 0,
@@ -38,6 +39,11 @@ struct Cpu {
     static const int sub_flag = 6;
     static const int half_carry_flag = 5;
     static const int carry_flag = 4;
+
+    bool m_is_halted = false;
+
+    Timer timer;
+    const int speed = 4.194304e6;
 };
 
 void step(Cpu& cpu);
