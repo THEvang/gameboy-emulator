@@ -8,7 +8,7 @@ branches:
 
 before_install:
   - sudo apt update
-  - sudo apt -y install libsdl2-dev mesa-common-dev
+  - sudo apt -y install libsdl2-dev mesa-common-dev libglew-dev
 
 install:
   - pip install --user cmake
