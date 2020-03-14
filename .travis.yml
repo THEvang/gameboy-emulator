@@ -12,4 +12,4 @@ install:
 
 script:
   - CXX=/usr/bin/gcc-10 CC=/usr/bin/g++-10
-  - cmake --build . -- -j2
+  - cmake --build . -j2
