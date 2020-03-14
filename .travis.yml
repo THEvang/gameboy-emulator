@@ -1,11 +1,15 @@
 language: cpp
-sudo: required
+sudo: false
 dist: bionic
-compiler: 
-  - gcc
-os:
-  - linux
 
 branches:
   only:
     - master
+
+
+install:
+  - pip install --user cmake
+
+script:
+  - CXX=/usr/bin/gcc-10 CC=/usr/bin/g++-10
+  - cmake --build . -- -j2
