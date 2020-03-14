@@ -7,6 +7,7 @@ branches:
     - master
 
 before_install:
+  - sudo apt update
   - sudo apt -y install libsdl2-dev
 
 install:
