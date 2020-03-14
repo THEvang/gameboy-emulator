@@ -19,15 +19,8 @@ void STOP(Cpu& cpu) {
 }
 
 void HALT(Cpu& cpu) {
-
-    if(!cpu.m_enabled_interrupts) {
-        cpu.m_program_counter++;
-        cpu.m_cycles += 4;
-    } else if (!cpu.m_is_halted) {
-        cpu.m_is_halted = true;
-    }
+    cpu.m_is_halted = true;
     cpu.m_cycles += 4;
-    throw UnimplementedOperation("HALT");
 }
 
 void RST(Cpu& cpu, uint8_t address) {
@@ -383,20 +376,17 @@ void CALL_C(Cpu& cpu) {
 }
 
 void LD_A_D8(Cpu& cpu) {
-
     cpu.m_reg_a = cpu.m_memory_controller->read(cpu.m_program_counter+1);
     cpu.m_cycles += 8;
     cpu.m_program_counter += 2;
 }
 
 void LD_A_A(Cpu& cpu) {
-    cpu.m_reg_a = cpu.m_reg_a;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
 
 void LD_A_B(Cpu& cpu) {
-
     cpu.m_reg_a = cpu.m_reg_b;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -536,9 +526,7 @@ void LD_ADDR_DE_A(Cpu& cpu) {
 }
 
 void LD_B_D8(Cpu& cpu) {
-
     cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter + 1);
-
     cpu.m_cycles += 8;
     cpu.m_program_counter += 2;
 }
@@ -550,7 +538,6 @@ void LD_B_A(Cpu& cpu) {
 }
 
 void LD_B_B(Cpu& cpu) {
-    cpu.m_reg_b = cpu.m_reg_b;
     cpu.m_program_counter++;
     cpu.m_cycles += 4;
 }
@@ -562,7 +549,6 @@ void LD_B_C(Cpu& cpu) {
 }
 
 void LD_B_D(Cpu& cpu) {
-
     cpu.m_reg_b = cpu.m_reg_d;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -615,7 +601,6 @@ void LD_C_B(Cpu& cpu) {
 }
 
 void LD_C_C(Cpu& cpu) {
-    cpu.m_reg_c = cpu.m_reg_c;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
@@ -660,7 +645,6 @@ void LD_D_D8(Cpu& cpu) {
 }
 
 void LD_D_A(Cpu& cpu) {
-
     cpu.m_reg_d = cpu.m_reg_a;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
@@ -679,7 +663,6 @@ void LD_D_C(Cpu& cpu) {
 }
 
 void LD_D_D(Cpu& cpu) {
-    cpu.m_reg_d = cpu.m_reg_d;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
@@ -742,7 +725,6 @@ void LD_E_D(Cpu& cpu) {
 }
 
 void LD_E_E(Cpu& cpu) {
-    cpu.m_reg_e = cpu.m_reg_e;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
@@ -805,7 +787,6 @@ void LD_H_E(Cpu& cpu) {
 }
 
 void LD_H_H(Cpu& cpu) {
-    cpu.m_reg_h = cpu.m_reg_h;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }
@@ -869,7 +850,6 @@ void LD_L_H(Cpu& cpu) {
 }
 
 void LD_L_L(Cpu& cpu) {
-    cpu.m_reg_l = cpu.m_reg_l;
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 }

@@ -1,6 +1,6 @@
 #include "Memory.h"
 
-Memory::Memory(std::vector<uint8_t> memory) 
+Memory::Memory(const std::vector<uint8_t>& memory) 
     : m_memory(memory)
 {
 }

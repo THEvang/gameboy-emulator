@@ -14,7 +14,7 @@ enum class Interrupts {
 
 struct Cpu {
 
-    Cpu(MemoryBankController* memory_controller);
+    explicit Cpu(MemoryBankController* memory_controller);
 
     uint8_t m_reg_a = 0x01;
     uint8_t m_reg_b = 0x00;

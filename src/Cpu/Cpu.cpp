@@ -90,12 +90,11 @@ void handle_interrupts(Cpu& cpu) {
 
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::V_Blank))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank))) {
-            
+        
         if(cpu.m_is_halted) {
             cpu.m_program_counter++;
             cpu.m_is_halted = false;
         }
-
 
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
@@ -107,6 +106,7 @@ void handle_interrupts(Cpu& cpu) {
 
         clear_bit(interrupt_request_register, static_cast<int>(Interrupts::V_Blank));
         cpu.m_enabled_interrupts = false;
+        cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
 
         return;
     }
@@ -130,6 +130,7 @@ void handle_interrupts(Cpu& cpu) {
         
         clear_bit(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT));
         cpu.m_enabled_interrupts = false;
+        cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
 
         return;
     }
@@ -176,6 +177,7 @@ void handle_interrupts(Cpu& cpu) {
 
         clear_bit(interrupt_request_register, static_cast<int>(Interrupts::Serial));
         cpu.m_enabled_interrupts = false;
+        cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
 
         return;
     }
@@ -183,10 +185,12 @@ void handle_interrupts(Cpu& cpu) {
     if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Joypad))
         && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad))) {
         
+
         if(cpu.m_is_halted) {
             cpu.m_program_counter++;
             cpu.m_is_halted = false;
         }
+
         const auto pc_low = cpu.m_program_counter & 0xFF;
         const auto pc_high = cpu.m_program_counter >> 8;
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
@@ -197,19 +201,53 @@ void handle_interrupts(Cpu& cpu) {
 
         clear_bit(interrupt_request_register, static_cast<int>(Interrupts::Joypad));
         cpu.m_enabled_interrupts = false;
+        cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
 
         return;
     }
-    
-    cpu.m_memory_controller->write(interrupt_request_addr, interrupt_request_register);
+
 }
 
 void step(Cpu& cpu) {
 
-    timer(cpu);
 
     if(cpu.m_enabled_interrupts) {
         handle_interrupts(cpu);
+    }
+
+    timer(cpu);
+
+    if(cpu.m_is_halted) {
+        const auto interrupt_request_addr = 0xFF0F;
+        const auto interrupt_enable_addr = 0xFFFF;
+        auto interrupt_request_register = cpu.m_memory_controller->read(interrupt_request_addr);
+        auto interrupt_enable_register = cpu.m_memory_controller->read(interrupt_enable_addr);
+
+
+    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::V_Blank))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank))) {
+        cpu.m_is_halted = false;
+        cpu.m_program_counter++;
+    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT)) 
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::LCD_STAT))) {
+        cpu.m_is_halted = false;
+        cpu.m_program_counter++;
+    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Timer))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Timer))) {
+        cpu.m_is_halted = false;
+        cpu.m_program_counter++;
+    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Serial))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Serial))) {
+        cpu.m_is_halted = false;
+        cpu.m_program_counter++;
+    }  else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Joypad))
+        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad))) {
+        cpu.m_is_halted = false;
+        cpu.m_program_counter++;
+    } else {
+        cpu.m_cycles += 4;
+        return;
+        }
     }
 
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
