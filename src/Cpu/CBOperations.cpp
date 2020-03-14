@@ -1373,7 +1373,7 @@ void BIT_0_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -1473,7 +1473,7 @@ void BIT_1_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -1573,7 +1573,7 @@ void BIT_2_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -1673,7 +1673,7 @@ void BIT_3_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 }
 
 void BIT_3_A(Cpu& cpu) {
@@ -1772,7 +1772,7 @@ void BIT_4_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -1872,7 +1872,7 @@ void BIT_5_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -1972,7 +1972,7 @@ void BIT_6_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 
@@ -2072,7 +2072,7 @@ void BIT_7_ADDR_HL(Cpu& cpu) {
     set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
     cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    cpu.m_cycles += 12;
 
 }
 

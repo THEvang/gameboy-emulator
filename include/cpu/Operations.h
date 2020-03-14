@@ -6,7 +6,7 @@
 class UnimplementedOperation : public std::runtime_error {
 public:
 
-    UnimplementedOperation(const std::string& msg);
+    explicit UnimplementedOperation(const std::string& msg);
 };
 
 void NOP(Cpu& cpu);
