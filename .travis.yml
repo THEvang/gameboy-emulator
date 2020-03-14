@@ -1,0 +1,30 @@
+language: cpp
+sudo: required
+dist: bionic
+
+compiler: 
+  - gcc
+
+os:
+  - linux
+
+branches:
+  only:
+    - master
+
+before_install:
+  - sudo apt -y install libsdl2-dev mesa-common-dev libglew-dev
+
+install:
+  - pip install --user cmake
+  - 
+
+script:
+  - mkdir -p build
+  - cd build
+  - cmake ..
+  - make -j7
+
+addons:
+  apt:
+    update: true
