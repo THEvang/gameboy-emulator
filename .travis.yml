@@ -11,5 +11,7 @@ install:
   - pip install --user cmake
 
 script:
-  - CXX=/usr/bin/gcc-10 CC=/usr/bin/g++-10
-  - cmake --build . -j2
+  - mkdir -p build
+  - cd build
+  - cmake ..
+  - make -j7
