@@ -14,8 +14,7 @@ add_library(project_warnings INTERFACE)
 include(cmake/CompilerWarnings.cmake)
 set_project_warnings(project_warnings)
 
-#set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
-
+include(cmake/StaticAnalyzers.cmake)
 add_subdirectory(src)
 
 # target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)
