@@ -3,4 +3,4 @@ target_sources(utilities
     BitOperations.cpp 
     File.cpp
 )
-target_compile_options(utilities PRIVATE -Wall -std=c++17)
+target_link_libraries(utilities PRIVATE project_warnings)

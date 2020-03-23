@@ -8,3 +8,4 @@ target_sources(cpu
 )
 
 target_compile_options(cpu PRIVATE -Wall)
+target_link_libraries(cpu PRIVATE project_warnings)

@@ -7,6 +7,13 @@ project(Gameboy
 
 set(CXX_STANDARD 17)
 set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_library(project_warnings INTERFACE)
+
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
 #set(CMAKE_CXX_CLANG_TIDY "clang-tidy" "-checks=cppcoreguidelines-*,clang-analyzer-*,modernize-*,performance-*, readability-*")
 
 add_subdirectory(src)
