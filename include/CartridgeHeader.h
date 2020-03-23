@@ -9,10 +9,19 @@ enum class DestinationCode {
     NonJapanese
 };
 
+enum class CartridgeType {
+    ROM_ONLY,
+    MBC1,
+    MBC2_RAM,
+};
 
-struct CartridgeHeader {
-    std::string title;
-    std::string manufacturerCode;
+struct Rom {
+    const std::string title;
+    const std::string manufacturerCode;
+    const bool is_color_gameboy;
+    const bool is_super_gameboy;
+    CartridgeType cartiridge_type;
+
     ROMSize romSize;
-    DestinationCode destinationCode;  
+    DestinationCode destinationCode;
 };
