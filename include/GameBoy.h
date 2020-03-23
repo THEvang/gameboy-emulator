@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <MemoryBankController.h>
 #include <cpu/Cpu.h>
@@ -8,12 +9,10 @@
 class GameBoy {
 public:
 
+    void run(const std::vector<uint8_t>& rom);
+
 private:
 
-    Cpu m_cpu;
-    std::unique_ptr<MemoryBankController> m_memory_bank_controller;
-
+    // Cpu m_cpu;
+//    std::unique_ptr<MemoryBankController> m_memory_bank_controller;
 };
-
-
-
