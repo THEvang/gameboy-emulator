@@ -74,14 +74,18 @@ void render_disassembly(Cpu& cpu) {
 
 int main() {
 
-  
-    const auto rom = load_rom("../tests/gb-test-roms/cpu_instrs/individual/01-special.gb");
-    std::cout << "Cartridge type: " << (int ) rom[0x0147] << "\n";
-    std::cout << "Rom siz: " << (int ) rom[0x0148] << "\n";
+    constexpr auto rom_path = "../tests/gb-test-roms/cpu_instrs/individual/01-special.gb";
+    const auto rom = load_rom(rom_path);
+    if(!rom) {
+        std::cerr << "Unable to find Rom: " << rom_path << "\n";
+        return 1;
+    }
+    std::cout << "Cartridge type: " << (int ) (*rom)[0x0147] << "\n";
+    std::cout << "Rom siz: " << (int ) (*rom)[0x0148] << "\n";
 
     std::vector<uint8_t> raw_internal(0xFFFF, 0);
     
-    Memory rom_memory(rom);
+    Memory rom_memory(*rom);
     Memory internal_memory(raw_internal);
     MBC1 mbc1(internal_memory, rom_memory);
 

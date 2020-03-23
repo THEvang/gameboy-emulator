@@ -3,11 +3,14 @@
 #include <fstream>
 #include <iterator>
 
-std::vector<uint8_t> load_rom(const std::string& path) {
+std::experimental::optional<std::vector<uint8_t>> load_rom(const std::experimental::filesystem::path& path) {
     
+    if(!std::experimental::filesystem::exists(path)) {
+        return {};
+    }
+
     std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) {
-        throw std::runtime_error("Oh no");
         return {};
     }
 
