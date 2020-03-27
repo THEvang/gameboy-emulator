@@ -5,6 +5,7 @@
 #include <cpu/CBOpcodes.h>
 #include <iostream>
 #include <BitOperations.h>
+
 Cpu::Cpu(MemoryBankController* memory_controller)     
     : m_memory_controller(memory_controller) 
 {
@@ -208,1030 +209,746 @@ void handle_interrupts(Cpu& cpu) {
 
 }
 
-void fetch(Cpu& cpu) {
-
-
-    if(cpu.m_enabled_interrupts) {
-        handle_interrupts(cpu);
-    }
-
-    timer(cpu);
-
-    if(cpu.m_is_halted) {
-        const auto interrupt_request_addr = 0xFF0F;
-        const auto interrupt_enable_addr = 0xFFFF;
-        auto interrupt_request_register = cpu.m_memory_controller->read(interrupt_request_addr);
-        auto interrupt_enable_register = cpu.m_memory_controller->read(interrupt_enable_addr);
-
-
-    if(is_set(interrupt_request_register, static_cast<int>(Interrupts::V_Blank))
-        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank))) {
-        cpu.m_is_halted = false;
-        cpu.m_program_counter++;
-    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::LCD_STAT)) 
-        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::LCD_STAT))) {
-        cpu.m_is_halted = false;
-        cpu.m_program_counter++;
-    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Timer))
-        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Timer))) {
-        cpu.m_is_halted = false;
-        cpu.m_program_counter++;
-    } else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Serial))
-        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Serial))) {
-        cpu.m_is_halted = false;
-        cpu.m_program_counter++;
-    }  else if(is_set(interrupt_request_register, static_cast<int>(Interrupts::Joypad))
-        && is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad))) {
-        cpu.m_is_halted = false;
-        cpu.m_program_counter++;
-    } else {
-        cpu.m_cycles += 4;
-        return;
-        }
-    }
+FetchResult fetch(Cpu& cpu) {
 
     const auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
 
     switch(static_cast<Opcode>(opcode)) {
         case Opcode::NOP:
-            NOP(cpu);
-            break;
+            return NOP(cpu);
 
         case Opcode::LD_BC_D16:
-            LD_BC_D16(cpu);
-            break;
+            return LD_BC_D16(cpu);
 
         case Opcode::LD_ADDR_BC_A:
-            LD_ADDR_BC_A(cpu);
-            break;
+            return LD_ADDR_BC_A(cpu);
 
         case Opcode::INC_BC:
-            INC_BC(cpu);
-            break;
+            return INC_BC(cpu);
         
         case Opcode::INC_B:
-            INC_B(cpu);
-            break;
+            return INC_B(cpu);
         
         case Opcode::DEC_B:
-            DEC_B(cpu);
-            break;
+            return DEC_B(cpu);
 
         case Opcode::LD_B_D8:
-            LD_B_D8(cpu);
-            break;
+            return LD_B_D8(cpu);
         
         case Opcode::RLCA:
-            RLCA(cpu);
-            break;
+            return RLCA(cpu);
 
         case Opcode::LD_ADDR_A16_SP:
-            LD_ADDR_A16_SP(cpu);
-            break;
+            return LD_ADDR_A16_SP(cpu);
 
         case Opcode::ADD_HL_BC:
-            ADD_HL_BC(cpu);
-            break;
+            return ADD_HL_BC(cpu);
 
         case Opcode::LD_A_ADDR_BC:
-            LD_A_ADDR_BC(cpu);
-            break;
+            return LD_A_ADDR_BC(cpu);
 
         case Opcode::DEC_BC:
-            DEC_BC(cpu);
-            break;
+            return DEC_BC(cpu);
         
         case Opcode::INC_C:
-            INC_C(cpu);
-            break;
+            return INC_C(cpu);
         
         case Opcode::DEC_C:
-            DEC_C(cpu);
-            break;
+            return DEC_C(cpu);
         
         case Opcode::LD_C_D8:
-            LD_C_D8(cpu);
-            break;
+            return LD_C_D8(cpu);
         
         case Opcode::RRCA:
-            RRCA(cpu);
-            break;
+            return RRCA(cpu);
         
         case Opcode::STOP:
-            STOP(cpu);
-            break;
+            return STOP(cpu);
 
         case Opcode::LD_DE_D16:
-            LD_DE_D16(cpu);
-            break;
+            return LD_DE_D16(cpu);
         
         case Opcode::LD_ADDR_DE_A:
-            LD_ADDR_DE_A(cpu);
-            break;
+            return LD_ADDR_DE_A(cpu);
         
         case Opcode::INC_DE:
-            INC_DE(cpu);
-            break;
+            return INC_DE(cpu);
         
         case Opcode::INC_D:
-            INC_D(cpu);
-            break;
+            return INC_D(cpu);
         
         case Opcode::DEC_D:
-            DEC_D(cpu);
-            break;
+            return DEC_D(cpu);
         
         case Opcode::LD_D_D8:
-            LD_D_D8(cpu);
-            break;
+            return LD_D_D8(cpu);
         
         case Opcode::RLA:
-            RLA(cpu);
-            break;
+            return RLA(cpu);
 
         case Opcode::JR_R8:
-            JR(cpu);
-            break;
+            return JR(cpu);
         
         case Opcode::ADD_HL_DE:
-            ADD_HL_DE(cpu);
-            break;
+            return ADD_HL_DE(cpu);
         
         case Opcode::LD_A_ADDR_DE:
-            LD_A_ADDR_DE(cpu);
-            break;
+            return LD_A_ADDR_DE(cpu);
         
         case Opcode::DEC_DE:
-            DEC_DE(cpu);
-            break;
+            return DEC_DE(cpu);
         
         case Opcode::INC_E:
-            INC_E(cpu);
-            break;
+            return INC_E(cpu);
 
         case Opcode::DEC_E:
-            DEC_E(cpu);
-            break;
+            return DEC_E(cpu);
         
         case Opcode::LD_E_D8:
-            LD_E_D8(cpu);
-            break;
+            return LD_E_D8(cpu);
         
         case Opcode::RRA:
-            RRA(cpu);
-            break;
+            return RRA(cpu);
 
         case Opcode::JR_NZ_R8:
-            JR_NZ(cpu);
-            break;
+            return JR_NZ(cpu);
         
         case Opcode::LD_HL_D16:
-            LD_HL_D16(cpu);
-            break;
+            return LD_HL_D16(cpu);
         
         case Opcode::LD_ADDR_HLI_A:
-            LDI_ADDR_HL_A(cpu);
-            break;
+            return LDI_ADDR_HL_A(cpu);
         
         case Opcode::INC_HL:
-            INC_HL(cpu);
-            break;
+            return INC_HL(cpu);
 
         case Opcode::INC_H:
-            INC_H(cpu);
-            break;
+            return INC_H(cpu);
         
         case Opcode::DEC_H:
-            DEC_H(cpu);
-            break;
+            return DEC_H(cpu);
         
         case Opcode::LD_H_D8:
-            LD_H_D8(cpu);
-            break;
+            return LD_H_D8(cpu);
         
         case Opcode::DAA:
-            DAA(cpu);
-            break;
+            return DAA(cpu);
         
         case Opcode::JR_Z_R8:
-            JR_Z(cpu);
-            break;
+            return JR_Z(cpu);
 
         case Opcode::ADD_HL_HL:
-            ADD_HL_HL(cpu);
-            break;
+            return ADD_HL_HL(cpu);
         
         case Opcode::LD_A_ADDR_HLI:
-            LDI_A_ADDR_HL(cpu);
-            break;
+            return LDI_A_ADDR_HL(cpu);
         
         case Opcode::DEC_HL:
-            DEC_HL(cpu);
-            break;
+            return DEC_HL(cpu);
         
         case Opcode::INC_L:
-            INC_L(cpu);
-            break;
+            return INC_L(cpu);
         
         case Opcode::DEC_L:
-            DEC_L(cpu);
-            break;
+            return DEC_L(cpu);
         
         case Opcode::LD_L_D8:
-            LD_L_D8(cpu);
-            break;
+            return LD_L_D8(cpu);
         
         case Opcode::CPL:
-            CPL(cpu);
-            break;
+            return CPL(cpu);
         
         case Opcode::JR_NC_R8:
-            JR_NC(cpu);
-            break;
+            return JR_NC(cpu);
         
         case Opcode::LD_SP_D16:
-            LD_SP_D16(cpu);
-            break;
+            return LD_SP_D16(cpu);
         
         case Opcode::LD_ADDR_HLD_A:
-            LD_ADDR_HLD_A(cpu);
-            break;
+            return LD_ADDR_HLD_A(cpu);
         
         case Opcode::INC_SP:
-            INC_SP(cpu);
-            break;
+            return INC_SP(cpu);
         
         case Opcode::INC_ADDR_HL:
-            INC_ADDR_HL(cpu);
-            break;
+            return INC_ADDR_HL(cpu);
         
         case Opcode::DEC_ADDR_HL:
-            DEC_ADDR_HL(cpu);
-            break;
+            return DEC_ADDR_HL(cpu);
         
         case Opcode::LD_ADDR_HL_D8:
-            LD_A_ADDR_HL(cpu);
-            break;
+            return LD_A_ADDR_HL(cpu);
         
         case Opcode::SCF:
-            SCF(cpu);
-            break;
+            return SCF(cpu);
         
         case Opcode::JR_C_R8:
-            JR_C(cpu);
-            break;
+            return JR_C(cpu);
         
         case Opcode::ADD_HL_SP:
-            ADD_HL_SP(cpu);
-            break;
+            return ADD_HL_SP(cpu);
         
         case Opcode::LD_A_ADDR_HLD:
-            LD_A_ADDR_HLD(cpu);
-            break;
+            return LD_A_ADDR_HLD(cpu);
         
         case Opcode::DEC_SP:
-            DEC_SP(cpu);
-            break;
+            return DEC_SP(cpu);
         
         case Opcode::INC_A:
-            INC_A(cpu);
-            break;
+            return INC_A(cpu);
         
         case Opcode::DEC_A:
-            DEC_A(cpu);
-            break;
+            return DEC_A(cpu);
         
         case Opcode::LD_A_D8:
-            LD_A_D8(cpu);
-            break;
+            return LD_A_D8(cpu);
 
         case Opcode::CCF:
-            CCF(cpu);
-            break;
+            return CCF(cpu);
         
         case Opcode::LD_B_B:
-            LD_B_B(cpu);
-            break;
+            return LD_B_B(cpu);
         
         case Opcode::LD_B_C:
-            LD_B_C(cpu);
-            break;
+            return LD_B_C(cpu);
         
         case Opcode::LD_B_D:
-            LD_B_D(cpu);
-            break;
+            return LD_B_D(cpu);
         
         case Opcode::LD_B_E:
-            LD_B_E(cpu);
-            break;
+            return LD_B_E(cpu);
         
         case Opcode::LD_B_H:
-            LD_B_H(cpu);
-            break;
+            return LD_B_H(cpu);
         
         case Opcode::LD_B_L:
-            LD_B_L(cpu);
-            break;
+            return LD_B_L(cpu);
         
         case Opcode::LD_B_ADDR_HL:
-            LD_B_ADDR_HL(cpu);
-            break;
+            return LD_B_ADDR_HL(cpu);
         
         case Opcode::LD_B_A:
-            LD_B_A(cpu);
-            break;
+            return LD_B_A(cpu);
         
         case Opcode::LD_C_B:
-            LD_C_B(cpu);
-            break;
+            return LD_C_B(cpu);
         
         case Opcode::LD_C_C:
-            LD_C_C(cpu);
+            return LD_C_C(cpu);
             break;
         
         case Opcode::LD_C_D:
-            LD_C_D(cpu);
-            break;
+            return LD_C_D(cpu);
         
         case Opcode::LD_C_E:
-            LD_C_E(cpu);
-            break;
+            return LD_C_E(cpu);
         
         case Opcode::LD_C_H:
-            LD_C_H(cpu);
-            break;
-        
+            return LD_C_H(cpu);
+
         case Opcode::LD_C_L:
-            LD_C_L(cpu);
-            break;
+            return LD_C_L(cpu);
         
         case Opcode::LD_C_ADDR_HL:
-            LD_C_ADDR_HL(cpu);
-            break;
+            return LD_C_ADDR_HL(cpu);
         
         case Opcode::LD_C_A:
-            LD_C_A(cpu);
-            break;
+            return LD_C_A(cpu);
 
         case Opcode::LD_D_B:
-            LD_D_B(cpu);
-            break;
+            return LD_D_B(cpu);
 
         case Opcode::LD_D_C:
-            LD_D_C(cpu);
-            break;
+            return LD_D_C(cpu);
 
         case Opcode::LD_D_D:
-            LD_D_D(cpu);
-            break;
+            return LD_D_D(cpu);
 
         case Opcode::LD_D_E:
-            LD_D_E(cpu);
-            break;
+            return LD_D_E(cpu);
 
         case Opcode::LD_D_H:
-            LD_D_H(cpu);
-            break;
+            return LD_D_H(cpu);
 
         case Opcode::LD_D_L:
-            LD_D_L(cpu);
-            break;
+            return LD_D_L(cpu);
 
         case Opcode::LD_D_ADDR_HL:
-            LD_D_ADDR_HL(cpu);
-            break;
+            return LD_D_ADDR_HL(cpu);
 
         case Opcode::LD_D_A:
-            LD_D_A(cpu);
-            break;
+            return LD_D_A(cpu);
 
         case Opcode::LD_E_B:
-            LD_E_B(cpu);
-            break;
+            return LD_E_B(cpu);
 
         case Opcode::LD_E_C:
-            LD_E_C(cpu);
-            break;
+            return LD_E_C(cpu);
 
         case Opcode::LD_E_D:
-            LD_E_D(cpu);
-            break;
+            return LD_E_D(cpu);
 
         case Opcode::LD_E_E:
-            LD_E_E(cpu);
-            break;
+            return LD_E_E(cpu);
 
         case Opcode::LD_E_H:
-            LD_E_H(cpu);
-            break;
+            return LD_E_H(cpu);
 
         case Opcode::LD_E_L:
-            LD_E_L(cpu);
-            break;
+            return LD_E_L(cpu);
 
         case Opcode::LD_E_ADDR_HL:
-            LD_E_ADDR_HL(cpu);
-            break;
+            return LD_E_ADDR_HL(cpu);
 
         case Opcode::LD_E_A:
-            LD_E_A(cpu);
-            break;
+            return LD_E_A(cpu);
 
         case Opcode::LD_H_B:
-            LD_H_B(cpu);
-            break;
+            return LD_H_B(cpu);
 
         case Opcode::LD_H_C:
-            LD_H_C(cpu);
-            break;
+            return LD_H_C(cpu);
 
         case Opcode::LD_H_D:
-            LD_H_D(cpu);
-            break;
+            return LD_H_D(cpu);
 
         case Opcode::LD_H_E:
-            LD_H_E(cpu);
-            break;
+            return LD_H_E(cpu);
 
         case Opcode::LD_H_H:
-            LD_H_H(cpu);
-            break;
+            return LD_H_H(cpu);
 
         case Opcode::LD_H_L:
-            LD_H_L(cpu);
-            break;
+            return LD_H_L(cpu);
 
         case Opcode::LD_H_ADDR_HL:
-            LD_H_ADDR_HL(cpu);
-            break;
+            return LD_H_ADDR_HL(cpu);
 
         case Opcode::LD_H_A:
-            LD_H_A(cpu);
-            break;
+            return LD_H_A(cpu);
 
         case Opcode::LD_L_B: 
-            LD_L_B(cpu);
-            break;
+            return LD_L_B(cpu);
         
         case Opcode::LD_L_C:
-            LD_L_C(cpu);
-            break;
+            return LD_L_C(cpu);
         
         case Opcode::LD_L_D:
-            LD_L_D(cpu);
-            break;
+            return LD_L_D(cpu);
         
         case Opcode::LD_L_E:
-            LD_L_E(cpu);
-            break;
+            return LD_L_E(cpu);
         
         case Opcode::LD_L_H:
-            LD_L_H(cpu);
-            break;
+            return LD_L_H(cpu);
         
         case Opcode::LD_L_L:
-            LD_L_L(cpu);
-            break;
+            return LD_L_L(cpu);
         
         case Opcode::LD_L_ADDR_HL:
-            LD_L_ADDR_HL(cpu);
-            break;
+            return LD_L_ADDR_HL(cpu);
         
         case Opcode::LD_L_A:
-            LD_L_A(cpu);
-            break;
+            return LD_L_A(cpu);
         
         case Opcode::LD_ADDR_HL_B:
-            LD_ADDR_HL_B(cpu);
-            break;
+            return LD_ADDR_HL_B(cpu);
 
         case Opcode::LD_ADDR_HL_C:
-            LD_ADDR_HL_C(cpu);
-            break;
+            return LD_ADDR_HL_C(cpu);
 
         case Opcode::LD_ADDR_HL_D:
-            LD_ADDR_HL_D(cpu);
-            break;
+            return LD_ADDR_HL_D(cpu);
         
         case Opcode::LD_ADDR_HL_E:
-            LD_ADDR_HL_E(cpu);
-            break;
+            return LD_ADDR_HL_E(cpu);
         
         case Opcode::LD_ADDR_HL_H:
-            LD_ADDR_HL_H(cpu);
-            break;
+            return LD_ADDR_HL_H(cpu);
         
         case Opcode::LD_ADDR_HL_L:
-            LD_ADDR_HL_L(cpu);
-            break;
+            return LD_ADDR_HL_L(cpu);
         
         case Opcode::HALT:
-            HALT(cpu);
-            break;
+            return HALT(cpu);
         
         case Opcode::LD_ADDR_HL_A:
-            LD_ADDR_HL_A(cpu);
-            break;
+            return LD_ADDR_HL_A(cpu);
 
         case Opcode::LD_A_B:
-            LD_A_B(cpu);
-            break;
+            return LD_A_B(cpu);
         
         case Opcode::LD_A_C:
-            LD_A_C(cpu);
-            break;
+            return LD_A_C(cpu);
         
         case Opcode::LD_A_D:
-            LD_A_D(cpu);
-            break;
+            return LD_A_D(cpu);
         
         case Opcode::LD_A_E:
-            LD_A_E(cpu);
-            break;
+            return LD_A_E(cpu);
         
         case Opcode::LD_A_H:
-            LD_A_H(cpu);
-            break;
+            return LD_A_H(cpu);
         
         case Opcode::LD_A_L:
-            LD_A_L(cpu);
-            break;
+            return LD_A_L(cpu);
         
         case Opcode::LD_A_ADDR_HL:
-            LD_A_ADDR_HL(cpu);
-            break;
+            return LD_A_ADDR_HL(cpu);
         
         case Opcode::LD_A_A:
-            LD_A_A(cpu);
-            break;
+            return LD_A_A(cpu);
         
         case Opcode::ADD_A_B:
-            ADD_A_B(cpu);
-            break;
+            return ADD_A_B(cpu);
         
         case Opcode::ADD_A_C:
-            ADD_A_C(cpu);
-            break;
+            return ADD_A_C(cpu);
         
         case Opcode::ADD_A_D:
-            ADD_A_D(cpu);
-            break;
+            return ADD_A_D(cpu);
 
         case Opcode::ADD_A_E:
-            ADD_A_E(cpu);
-            break;
+            return ADD_A_E(cpu);
         
         case Opcode::ADD_A_H:
-            ADD_A_H(cpu);
-            break;
+            return ADD_A_H(cpu);
         
         case Opcode::ADD_A_L:
-            ADD_A_L(cpu);
-            break;
+            return ADD_A_L(cpu);
         
         case Opcode::ADD_A_ADDR_HL:
-            ADD_A_ADDR_HL(cpu);
-            break;
+            return ADD_A_ADDR_HL(cpu);
             
         case Opcode::ADD_A_A:
-            ADD_A_A(cpu);
-            break;
+            return ADD_A_A(cpu);
 
         case Opcode::ADC_A_B:
-            ADC_A_B(cpu);
-            break;
+            return ADC_A_B(cpu);
 
         case Opcode::ADC_A_C:
-            ADC_A_C(cpu);
-            break;
+            return ADC_A_C(cpu);
 
         case Opcode::ADC_A_D:
-            ADC_A_D(cpu);
-            break;
+            return ADC_A_D(cpu);
         
         case Opcode::ADC_A_E:
-            ADC_A_E(cpu);
-            break;
+            return ADC_A_E(cpu);
         
         case Opcode::ADC_A_H:
-            ADC_A_H(cpu);
-            break;
+            return ADC_A_H(cpu);
         
         case Opcode::ADC_A_L:
-            ADC_A_L(cpu);
-            break;
+            return ADC_A_L(cpu);
         
         case Opcode::ADC_A_ADDR_HL:
-            ADC_A_ADDR_HL(cpu);
-            break;
+            return ADC_A_ADDR_HL(cpu);
         
         case Opcode::ADC_A_A:
-            ADC_A_A(cpu);
-            break;
+            return ADC_A_A(cpu);
         
         case Opcode::SUB_B:
-            SUB_B(cpu);
-            break;
+            return SUB_B(cpu);
         
         case Opcode::SUB_C:
-            SUB_C(cpu);
-            break;
+            return SUB_C(cpu);
         
         case Opcode::SUB_D:
-            SUB_D(cpu);
-            break;
+            return SUB_D(cpu);
         
         case Opcode::SUB_E:
-            SUB_E(cpu);
-            break;
+            return SUB_E(cpu);
         
         case Opcode::SUB_H:
-            SUB_H(cpu);
-            break;
+            return SUB_H(cpu);
         
         case Opcode::SUB_L:
-            SUB_L(cpu);
-            break;
+            return SUB_L(cpu);
         
         case Opcode::SUB_ADDR_HL:
-            SUB_ADDR_HL(cpu);
-            break;
+            return SUB_ADDR_HL(cpu);
         
         case Opcode::SUB_A:
-            SUB_A(cpu);
-            break;
+            return SUB_A(cpu);
         
         case Opcode::SBC_A_B:
-            SBC_A_B(cpu);
-            break;
+            return SBC_A_B(cpu);
         
         case Opcode::SBC_A_C:
-            SBC_A_C(cpu);
-            break;
+            return SBC_A_C(cpu);
         
         case Opcode::SBC_A_D:
-            SBC_A_D(cpu);
-            break;
+            return SBC_A_D(cpu);
         
         case Opcode::SBC_A_E:
-            SBC_A_E(cpu);
-            break;
+            return SBC_A_E(cpu);
         
         case Opcode::SBC_A_H:
-            SBC_A_H(cpu);
-            break;
+            return SBC_A_H(cpu);
         
         case Opcode::SBC_A_L:
-            SBC_A_L(cpu);
-            break;
+            return SBC_A_L(cpu);
         
         case Opcode::SBC_A_ADDR_HL:
-            SBC_A_ADDR_HL(cpu);
-            break;
+            return SBC_A_ADDR_HL(cpu);
 
         case Opcode::SBC_A_A:
-            SBC_A_A(cpu);
-            break;
+            return SBC_A_A(cpu);
         
         case Opcode::AND_B:
-            AND_B(cpu);
-            break;
+            return AND_B(cpu);
         
         case Opcode::AND_C:
-            AND_C(cpu);
-            break;
+            return AND_C(cpu);
         
         case Opcode::AND_D:
-            AND_D(cpu);
-            break;
+            return AND_D(cpu);
         
         case Opcode::AND_E:
-            AND_E(cpu);
-            break;
+            return AND_E(cpu);
         
         case Opcode::AND_H:
-            AND_H(cpu);
-            break;
+            return AND_H(cpu);
         
         case Opcode::AND_L:
-            AND_L(cpu);
-            break;
+            return AND_L(cpu);
         
         case Opcode::AND_ADDR_HL:
-            AND_ADDR_HL(cpu);
-            break;
+            return AND_ADDR_HL(cpu);
 
         case Opcode::AND_A:
-            AND_A(cpu);
-            break;
+            return AND_A(cpu);
         
         case Opcode::XOR_B:
-            XOR_B(cpu);
-            break;
+            return XOR_B(cpu);
         
         case Opcode::XOR_C:
-            XOR_C(cpu);
-            break;
+            return XOR_C(cpu);
         
         case Opcode::XOR_D:
-            XOR_D(cpu);
-            break;
+            return XOR_D(cpu);
         
         case Opcode::XOR_E:
-            XOR_E(cpu);
-            break;
+            return XOR_E(cpu);
         
         case Opcode::XOR_H:
-            XOR_H(cpu);
-            break;
+            return XOR_H(cpu);
         
         case Opcode::XOR_L:
-            XOR_L(cpu);
-            break;
+            return XOR_L(cpu);
         
         case Opcode::XOR_ADDR_HL:
-            XOR_ADDR_HL(cpu);
-            break;
+            return XOR_ADDR_HL(cpu);
         
         case Opcode::XOR_A:
-            XOR_A(cpu);
-            break;
+            return XOR_A(cpu);
         
         case Opcode::OR_B:
-            OR_B(cpu);
-            break;
+            return OR_B(cpu);
         
         case Opcode::OR_C:
-            OR_C(cpu);
-            break;
+            return OR_C(cpu);
         
         case Opcode::OR_D:
-            OR_D(cpu);
-            break;
+            return OR_D(cpu);
         
         case Opcode::OR_E:
-            OR_E(cpu);
-            break;
+            return OR_E(cpu);
         
         case Opcode::OR_H:
-            OR_H(cpu);
-            break;
+            return OR_H(cpu);
         
         case Opcode::OR_L:
-            OR_L(cpu);
-            break;
+            return OR_L(cpu);
         
         case Opcode::OR_ADDR_HL:
-            OR_ADDR_HL(cpu);
-            break;
+            return OR_ADDR_HL(cpu);
             
         case Opcode::OR_A:
-            OR_A(cpu);
-            break;
+            return OR_A(cpu);
         
         case Opcode::CP_B:
-            CP_B(cpu);
-            break;
+            return CP_B(cpu);
         
         case Opcode::CP_C:
-            CP_C(cpu);
-            break;
+            return CP_C(cpu);
         
         case Opcode::CP_D:
-            CP_D(cpu);
-            break;
+            return CP_D(cpu);
         
         case Opcode::CP_E:
-            CP_E(cpu);
-            break;
+            return CP_E(cpu);
         
         case Opcode::CP_H:
-            CP_H(cpu);
-            break;
+            return CP_H(cpu);
         
         case Opcode::CP_L:
-            CP_L(cpu);
-            break;
+            return CP_L(cpu);
         
         case Opcode::CP_ADDR_HL:
-            CP_ADDR_HL(cpu);
-            break;
+            return CP_ADDR_HL(cpu);
         
         case Opcode::CP_A:
-            CP_A(cpu);
-            break;
+            return CP_A(cpu);
         
         case Opcode::RET_NZ:
-            RET_NZ(cpu);
-            break;
+            return RET_NZ(cpu);
         
         case Opcode::POP_BC:
-            POP_BC(cpu);
-            break;
-        
+            return POP_BC(cpu);
+
         case Opcode::JP_NZ_A16:
-            JUMP_NZ(cpu);
-            break;
+            return JUMP_NZ(cpu);
         
         case Opcode::JP_A16:
-            JUMP(cpu);
-            break;
+            return JUMP(cpu);
         
         case Opcode::CALL_NZ_A16:
-            CALL_NZ(cpu);
-            break;
+            return CALL_NZ(cpu);
         
         case Opcode::PUSH_BC:
-            PUSH_BC(cpu);
-            break;
+            return PUSH_BC(cpu);
         
         case Opcode::ADD_A_D8:
-            ADD_A_D8(cpu);
-            break;
+            return ADD_A_D8(cpu);
         
         case Opcode::RST_00H:
-            RST(cpu, 0x00);
-            break;
+            return RST(cpu, 0x00);
         
         case Opcode::RET_Z:
-            RET_Z(cpu);
-            break;
+            return RET_Z(cpu);
         
         case Opcode::RET:
-            RET(cpu);
-            break;
+            return RET(cpu);
         
         case Opcode::JP_Z_A16:
-            JUMP_Z(cpu);
-            break;
+            return JUMP_Z(cpu);
         
         case Opcode::PREFIX_CB:
-            PREFIX_CB(cpu);
-            break;
+            return PREFIX_CB(cpu);
         
         case Opcode::CALL_Z_A16: 
-            CALL_Z(cpu);
-            break;
+            return CALL_Z(cpu);
         
         case Opcode::CALL_A16:
-            CALL(cpu);
-            break;
+            return CALL(cpu);
         
         case Opcode::ADC_A_D8:
-            ADC_A_D8(cpu);
-            break;
+            return ADC_A_D8(cpu);
         
         case Opcode::RST_08H:
-            RST(cpu, 0x08);
-            break;
+            return RST(cpu, 0x08);
         
         case Opcode::RET_NC:
-            RET_NC(cpu);
-            break;
+            return RET_NC(cpu);
         
         case Opcode::POP_DE:
-            POP_DE(cpu);
-            break;
+            return POP_DE(cpu);
         
         case Opcode::JP_NC_A16:
-            JUMP_NC(cpu);
-            break;
+            return JUMP_NC(cpu);
         
         case Opcode::CALL_NC_A16:
-            CALL_NC(cpu);
-            break;
+            return CALL_NC(cpu);
         
         case Opcode::PUSH_DE:
-            PUSH_DE(cpu);
-            break;
+            return PUSH_DE(cpu);
         
         case Opcode::SUB_D8:
-            SUB_D8(cpu);
-            break;
+            return SUB_D8(cpu);
         
         case Opcode::RST_10H:
-            RST(cpu, 0x10);
-            break;
+            return RST(cpu, 0x10);
         
         case Opcode::RET_C:
-            RET_C(cpu);
-            break;
+            return RET_C(cpu);
         
         case Opcode::RETI:
-            RETI(cpu);
-            break;
+            return RETI(cpu);
         
         case Opcode::JP_C_A16:
-            JUMP_C(cpu);
-            break;
+            return JUMP_C(cpu);
         
         case Opcode::CALL_C_A16:
-            CALL_C(cpu);
-            break;
+            return CALL_C(cpu);
         
         case Opcode::SBC_A_D8:
-            SBC_A_D8(cpu);
-            break;
+            return SBC_A_D8(cpu);
         
         case Opcode::RST_18H:
-            RST(cpu, 0x18);
-            break;
+            return RST(cpu, 0x18);
         
         case Opcode::LDH_ADDR_A8_A:
-            LDH_ADDR_A8_A(cpu);
-            break;
+            return LDH_ADDR_A8_A(cpu);
         
         case Opcode::POP_HL:
-            POP_HL(cpu);
-            break;
+            return POP_HL(cpu);
         
         case Opcode::LD_ADDR_C_A:
-            LD_ADDR_C_A(cpu); 
-            break;
+            return LD_ADDR_C_A(cpu); 
 
         case Opcode::PUSH_HL:
-            PUSH_HL(cpu);
-            break;
+            return PUSH_HL(cpu);
         
         case Opcode::AND_D8:
-            AND_D8(cpu);
-            break;
+            return AND_D8(cpu);
         
         case Opcode::RST_20H:
-            RST(cpu, 0x20);
-            break;
+            return RST(cpu, 0x20);
         
         case Opcode::ADD_SP_R8:
-            ADD_SP_R8(cpu);
-            break;
+            return ADD_SP_R8(cpu);
         
         case Opcode::JP_ADDR_HL:
-            JUMP_ADDR_HL(cpu);
-            break;
+            return JUMP_ADDR_HL(cpu);
         
         case Opcode::LD_ADDR_A16_A:
-            LD_ADDR_A16_A(cpu);
-            break;
+            return LD_ADDR_A16_A(cpu);
 
         case Opcode::XOR_D8:
-            XOR_D8(cpu);
-            break;
+            return XOR_D8(cpu);
         
         case Opcode::RST_28H:
-            RST(cpu, 0x28);
-            break;
+            return RST(cpu, 0x28);
         
         case Opcode::LDH_A_ADDR_A8:
-            LDH_A_ADDR_A8(cpu);
-            break;
+            return LDH_A_ADDR_A8(cpu);
         
         case Opcode::POP_AF:
-            POP_AF(cpu);
-            break;
+            return POP_AF(cpu);
         
         case Opcode::LD_A_ADDR_C:
-            LD_A_ADDR_C(cpu);
-            break;
+            return LD_A_ADDR_C(cpu);
         
         case Opcode::DI:
-            DI(cpu);
-            break;
+            return DI(cpu);
         
         case Opcode::PUSH_AF:
-            PUSH_AF(cpu);
-            break;
+            return PUSH_AF(cpu);
         
         case Opcode::OR_D8:
-            OR_D8(cpu);
-            break;
+            return OR_D8(cpu);
         
         case Opcode::RST_30H:
-            RST(cpu, 0x30);
-            break;
+            return RST(cpu, 0x30);
         
         case Opcode::LD_HL_SPR8:
-            LD_HL_SPR8(cpu);
-            break;
+            return LD_HL_SPR8(cpu);
         
         case Opcode::LD_SP_HL:
-            LD_SP_HL(cpu);
-            break;
+            return LD_SP_HL(cpu);
         
         case Opcode::LD_A_ADDR_A16:
-            LD_A_ADDR_A16(cpu);
-            break;
+            return LD_A_ADDR_A16(cpu);
         
         case Opcode::EI:
-            EI(cpu);
-            break;
+            return EI(cpu);
         
         case Opcode::CP_D8:
-            CP_D8(cpu);
-            break;
+            return CP_D8(cpu);
         
         case Opcode::RST_38H:
-            RST(cpu, 0x38);
-            break;
+            return RST(cpu, 0x38);
 
         default:
             throw UnimplementedOperation("Invalid Opcode");
@@ -1239,10 +956,10 @@ void fetch(Cpu& cpu) {
     }
 }
 
- void fetch_cb(Cpu& cpu) {
+FetchResult fetch_cb(Cpu& cpu) {
 
      auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
-
+    
      switch (static_cast<CBCode>(opcode)) {
          case CBCode::RLC_B:
             RLC_B(cpu);

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <MemoryBankController.h>
 #include <Timer.h>
+#include <functional>
 
 enum class Interrupts {
     V_Blank = 0,
@@ -46,7 +47,15 @@ struct Cpu {
     const int speed = 4.194304e6;
 };
 
-void fetch(Cpu& cpu);
-void fetch_cb(Cpu& cpu);
+struct FetchResult {
+    int cycles = 0;
+    int delta_pc = 0;
+    std::function<void(Cpu&)> operation;
+};
+
+FetchResult fetch(Cpu& cpu);
+FetchResult fetch_cb(Cpu& cpu);
 
 void handle_interrupts(Cpu& cpu);
+
+uint8_t ADD(uint8_t value, uint8_t& flags);
