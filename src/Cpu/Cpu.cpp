@@ -208,7 +208,7 @@ void handle_interrupts(Cpu& cpu) {
 
 }
 
-void step(Cpu& cpu) {
+void fetch(Cpu& cpu) {
 
 
     if(cpu.m_enabled_interrupts) {
@@ -1239,7 +1239,7 @@ void step(Cpu& cpu) {
     }
 }
 
- void step_cb(Cpu& cpu) {
+ void fetch_cb(Cpu& cpu) {
 
      auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
 

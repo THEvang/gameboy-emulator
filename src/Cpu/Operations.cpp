@@ -47,7 +47,7 @@ void EI(Cpu& cpu) {
     cpu.m_cycles += 4;
     cpu.m_program_counter++;
 
-    step(cpu);
+    fetch(cpu);
 
     cpu.m_enabled_interrupts = true;
 }
@@ -3390,7 +3390,7 @@ void SBC_A_ADDR_HL(Cpu& cpu) {
 void PREFIX_CB(Cpu& cpu) {
     cpu.m_program_counter++;
     cpu.m_cycles += 4;
-    step_cb(cpu);
+    fetch_cb(cpu);
 }
 
 void LD_ADDR_HLD_A(Cpu& cpu) {
