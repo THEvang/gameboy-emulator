@@ -46,7 +46,7 @@ struct Cpu {
     const int speed = 4.194304e6;
 };
 
-void step(Cpu& cpu);
-void step_cb(Cpu& cpu);
+void fetch(Cpu& cpu);
+void fetch_cb(Cpu& cpu);
 
 void handle_interrupts(Cpu& cpu);
