@@ -76,7 +76,7 @@ void render_disassembly(Cpu& cpu) {
 
 int main() {
 
-    constexpr auto rom_path = "../tests/gb-test-roms/cpu_instrs/individual/01-special.gb";
+    constexpr auto rom_path = "../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb";
     const auto rom = load_rom(rom_path);
     if(!rom) {
         std::cerr << "Unable to find Rom: " << rom_path << "\n";

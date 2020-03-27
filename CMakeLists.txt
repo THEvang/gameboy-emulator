@@ -5,14 +5,14 @@ project(Gameboy
     DESCRIPTION "Gameboy emulator"
     LANGUAGES CXX)
 
-set(CXX_STANDARD 17)
-set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   
 
 add_library(project_warnings INTERFACE)
 
 include(cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
+#set_project_warnings(project_warnings)
 
 include(cmake/StaticAnalyzers.cmake)
 add_subdirectory(src)

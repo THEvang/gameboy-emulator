@@ -13,7 +13,13 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
     while(!cpu.should_stop)
     {
         try {
-            fetch(cpu);
+            
+            auto [cycles, delta_pc, operation] = fetch(cpu);
+            cpu.m_program_counter += delta_pc;
+            //handle_interrupts(cpu);
+            operation(cpu);
+            //timer(cpu);
+
         }   
         catch (std::exception& err)  {
             std::cout << err.what();
