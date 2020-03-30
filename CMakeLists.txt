@@ -12,7 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(project_warnings INTERFACE)
 
 include(cmake/CompilerWarnings.cmake)
-#set_project_warnings(project_warnings)
+set_project_warnings(project_warnings)
 
 include(cmake/StaticAnalyzers.cmake)
 add_subdirectory(src)

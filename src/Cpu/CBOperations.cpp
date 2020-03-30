@@ -1,937 +1,516 @@
 #include <cpu/CBOperations.h>
 #include <BitOperations.h>
 
-void RLC_B(Cpu& cpu) {
+uint8_t RLC(uint8_t value, uint8_t& flags) {
 
-     is_set(cpu.m_reg_b, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_b = rotate_left<uint8_t>(cpu.m_reg_b, 1);
-
-    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_C(Cpu& cpu) {
-
-     is_set(cpu.m_reg_c, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_c = rotate_left<uint8_t>(cpu.m_reg_c, 1);
-
-    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_D(Cpu& cpu) {
-
-     is_set(cpu.m_reg_d, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_d = rotate_left<uint8_t>(cpu.m_reg_d, 1);
-
-    cpu.m_reg_d == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_E(Cpu& cpu) {
-
-     is_set(cpu.m_reg_e, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_e = rotate_left<uint8_t>(cpu.m_reg_e, 1);
-
-    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_H(Cpu& cpu) {
-
-     is_set(cpu.m_reg_h, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_h = rotate_left<uint8_t>(cpu.m_reg_h, 1);
-
-    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_L(Cpu& cpu) {
-
-     is_set(cpu.m_reg_l, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_l = rotate_left<uint8_t>(cpu.m_reg_l, 1);
-
-    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RLC_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
-
-     is_set(value, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    is_set(value, 7) ? set_bit(flags, Cpu::carry_flag) : 
+        clear_bit(flags, Cpu::carry_flag);
 
     value = rotate_left<uint8_t>(value, 1);
 
-    value == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::zero_flag) :
+        clear_bit(flags, Cpu::zero_flag);
 
-    cpu.m_memory_controller->write(address, value);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void RLC_A(Cpu& cpu) {
+FetchResult RLC_B(Cpu& cpu) {
 
-     is_set(cpu.m_reg_a, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_a = rotate_left<uint8_t>(cpu.m_reg_a, 1);
-
-    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = RLC(cpu.m_reg_b, cpu.m_reg_f);
+    }};
 }
 
-void RRC_B(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_b, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_b = rotate_right<uint8_t>(cpu.m_reg_b, 1);
+FetchResult RLC_C(Cpu& cpu) {
 
-    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = RLC(cpu.m_reg_c, cpu.m_reg_f);
+    }};
 }
 
-void RRC_C(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_c, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_c = rotate_right<uint8_t>(cpu.m_reg_c, 1);
-    
-    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult RLC_D(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = RLC(cpu.m_reg_d, cpu.m_reg_f);
+    }};
 }
 
-void RRC_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_d = rotate_right<uint8_t>(cpu.m_reg_d, 1);
+FetchResult RLC_E(Cpu& cpu) {
 
-    cpu.m_reg_d == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = RLC(cpu.m_reg_e, cpu.m_reg_f);
+    }};
 }
 
-void RRC_E(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_e, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_e = rotate_right<uint8_t>(cpu.m_reg_e, 1);
-    
-    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult RLC_H(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = RLC(cpu.m_reg_h, cpu.m_reg_f);
+    }};
 }
 
-void RRC_H(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_h, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_h = rotate_right<uint8_t>(cpu.m_reg_h, 1);
-    
-    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult RLC_L(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = RLC(cpu.m_reg_l, cpu.m_reg_f);
+    }};
 }
 
-void RRC_L(Cpu& cpu) {
+FetchResult RLC_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
     
-    is_set(cpu.m_reg_l, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_l = rotate_right<uint8_t>(cpu.m_reg_l, 1);
-
-    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = RLC(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RRC_ADDR_HL(Cpu& cpu) {
+FetchResult RLC_A(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = RLC(cpu.m_reg_a, cpu.m_reg_f);
+    }};
+}
 
-    is_set(value, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+uint8_t RRC(uint8_t value, uint8_t& flags) {
+    
+    is_set(value, 0) ? set_bit(flags, Cpu::carry_flag)
+        : clear_bit(flags, Cpu::carry_flag);
     
     value = rotate_right<uint8_t>(value, 1);
 
-    value == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::zero_flag) :
+        clear_bit(flags, Cpu::zero_flag);
+    
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void RRC_A(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_a, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_a = rotate_right<uint8_t>(cpu.m_reg_a, 1);
-    
-    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult RRC_B(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = RRC(cpu.m_reg_b, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_B(Cpu& cpu) {
-
-    const auto new_carry_flag = is_set(cpu.m_reg_b, 7);
-    cpu.m_reg_b <<= 1;
-
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_b, 0)
-        : clear_bit(cpu.m_reg_b, 0);
+FetchResult RRC_C(Cpu& cpu) {
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_b == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = RRC(cpu.m_reg_c, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_C(Cpu& cpu) {
-
-    const auto new_carry_flag = is_set(cpu.m_reg_c, 7);
-    cpu.m_reg_c <<= 1;
-
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_c, 0)
-        : clear_bit(cpu.m_reg_c, 0);
+FetchResult RRC_D(Cpu& cpu) {
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_c == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = RRC(cpu.m_reg_d, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_D(Cpu& cpu) {
-
-    const auto new_carry_flag = is_set(cpu.m_reg_d, 7);
-    cpu.m_reg_d <<= 1;
-
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_d, 0)
-        : clear_bit(cpu.m_reg_d, 0);
+FetchResult RRC_E(Cpu& cpu) {
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_d == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = RRC(cpu.m_reg_e, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_E(Cpu& cpu) {
-
-    const auto new_carry_flag = is_set(cpu.m_reg_e, 7);
-    cpu.m_reg_e <<= 1;
-
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_e, 0)
-        : clear_bit(cpu.m_reg_e, 0);
+FetchResult RRC_H(Cpu& cpu) {
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_e == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = RRC(cpu.m_reg_h, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_H(Cpu& cpu) {
-
-    const auto new_carry_flag = is_set(cpu.m_reg_h, 7);
-    cpu.m_reg_h <<= 1;
-
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_h, 0)
-        : clear_bit(cpu.m_reg_h, 0);
+FetchResult RRC_L(Cpu& cpu) {
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_h == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = RRC(cpu.m_reg_l, cpu.m_reg_f);
+    }}; 
 }
 
-void RL_L(Cpu& cpu) {
+FetchResult RRC_ADDR_HL(Cpu& cpu) {
 
-    const auto new_carry_flag = is_set(cpu.m_reg_l, 7);
-    cpu.m_reg_l <<= 1;
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_l, 0)
-        : clear_bit(cpu.m_reg_l, 0);
-    
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_l == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = RRC(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }}; 
 }
 
-void RL_ADDR_HL(Cpu& cpu) {
+FetchResult RRC_A(Cpu& cpu) {
+    
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = RRC(cpu.m_reg_a, cpu.m_reg_f);
+    }}; 
+}
 
+uint8_t RL(uint8_t value, uint8_t& flags) {
+    
     const auto new_carry_flag = is_set(value, 7);
     value <<= 1;
 
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(value, 0)
+    is_set(flags, Cpu::carry_flag) ? set_bit(value, 0)
         : clear_bit(value, 0);
     
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    new_carry_flag ? set_bit(flags, Cpu::carry_flag)
+        : clear_bit(flags, Cpu::carry_flag);
 
-    value == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::zero_flag) :
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void RL_A(Cpu& cpu) {
+FetchResult RL_B(Cpu& cpu) {
 
-    const auto new_carry_flag = is_set(cpu.m_reg_a, 7);
-    cpu.m_reg_a <<= 1;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 0)
-        : clear_bit(cpu.m_reg_a, 0);
-    
-    new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-        : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = RL(cpu.m_reg_b, cpu.m_reg_f);
+    }};
 }
 
-void SRL_A(Cpu& cpu) {
+FetchResult RL_C(Cpu& cpu) {
 
-    is_set(cpu.m_reg_a, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_a >>= 1;
-    clear_bit(cpu.m_reg_a, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_a == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = RL(cpu.m_reg_c, cpu.m_reg_f);
+    }};
 }
 
-void SRL_B(Cpu& cpu) {
+FetchResult RL_D(Cpu& cpu) {
 
-    is_set(cpu.m_reg_b, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_b >>= 1;
-    clear_bit(cpu.m_reg_b, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_b == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = RL(cpu.m_reg_d, cpu.m_reg_f);
+    }};
 }
 
-void SRL_C(Cpu& cpu) {
+FetchResult RL_E(Cpu& cpu) {
 
-    is_set(cpu.m_reg_c, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_c >>= 1;
-    clear_bit(cpu.m_reg_c, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_c == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = RL(cpu.m_reg_e, cpu.m_reg_f);
+    }};
 }
 
-void SRL_D(Cpu& cpu) {
+FetchResult RL_H(Cpu& cpu) {
 
-    is_set(cpu.m_reg_d, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_d >>= 1;
-    clear_bit(cpu.m_reg_d, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_d == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = RL(cpu.m_reg_h, cpu.m_reg_f);
+    }};
 }
 
-void SRL_E(Cpu& cpu) {
+FetchResult RL_L(Cpu& cpu) {
 
-    is_set(cpu.m_reg_e, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_e >>= 1;
-    clear_bit(cpu.m_reg_e, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_e == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = RL(cpu.m_reg_l, cpu.m_reg_f);
+    }};
 }
 
-void SRL_H(Cpu& cpu) {
+FetchResult RL_ADDR_HL(Cpu& cpu) {
 
-    is_set(cpu.m_reg_h, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_h >>= 1;
-    clear_bit(cpu.m_reg_h, 7);
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_h == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = RL(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SRL_L(Cpu& cpu) {
+FetchResult RL_A(Cpu& cpu) {
 
-    is_set(cpu.m_reg_l, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_l >>= 1;
-    clear_bit(cpu.m_reg_l, 7);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_l == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = RL(cpu.m_reg_a, cpu.m_reg_f);
+    }};
 }
 
-void SRL_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+uint8_t SRL(uint8_t value, uint8_t& flags) {
 
     is_set(value, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        set_bit(flags, Cpu::carry_flag)   :
+        clear_bit(flags, Cpu::carry_flag);
     
     value >>= 1;
     clear_bit(value, 7);
 
     value == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        set_bit(flags, Cpu::zero_flag)    :
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void SLA_B(Cpu& cpu) {
+FetchResult SRL_A(Cpu& cpu) {
 
-    is_set(cpu.m_reg_b, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_b <<= 1;
-    clear_bit(cpu.m_reg_b, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_b == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = SRL(cpu.m_reg_a, cpu.m_reg_f);
+    }};
 }
 
-void SLA_C(Cpu& cpu) {
+FetchResult SRL_B(Cpu& cpu) {
 
-    is_set(cpu.m_reg_c, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_c <<= 1;
-    clear_bit(cpu.m_reg_c, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_c == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = SRL(cpu.m_reg_b, cpu.m_reg_f);
+    }};
 }
 
-void SLA_D(Cpu& cpu) {
+FetchResult SRL_C(Cpu& cpu) {
 
-    is_set(cpu.m_reg_d, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_d <<= 1;
-    clear_bit(cpu.m_reg_d, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_d == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = SRL(cpu.m_reg_c, cpu.m_reg_f);
+    }};
 }
 
-void SLA_E(Cpu& cpu) {
+FetchResult SRL_D(Cpu& cpu) {
 
-    is_set(cpu.m_reg_e, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_e <<= 1;
-    clear_bit(cpu.m_reg_e, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_e == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = SRL(cpu.m_reg_d, cpu.m_reg_f);
+    }};
 }
 
-void SLA_H(Cpu& cpu) {
+FetchResult SRL_E(Cpu& cpu) {
 
-    is_set(cpu.m_reg_h, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_h <<= 1;
-    clear_bit(cpu.m_reg_h, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_h == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = SRL(cpu.m_reg_e, cpu.m_reg_f);
+    }};
 }
 
-void SLA_L(Cpu& cpu) {
+FetchResult SRL_H(Cpu& cpu) {
 
-    is_set(cpu.m_reg_l, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    cpu.m_reg_l <<= 1;
-    clear_bit(cpu.m_reg_l, 0);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_reg_l == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = SRL(cpu.m_reg_h, cpu.m_reg_f);
+    }};
 }
 
-void SLA_ADDR_HL(Cpu& cpu) {
+FetchResult SRL_L(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = SRL(cpu.m_reg_l, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRL_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = SRL(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
+
+uint8_t SLA(uint8_t value, uint8_t& flags) {
 
     is_set(value, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        set_bit(flags, Cpu::carry_flag)   :
+        clear_bit(flags, Cpu::carry_flag);
     
     value <<= 1;
     clear_bit(value, 0);
 
     value == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        set_bit(flags, Cpu::zero_flag)    :
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void SLA_A(Cpu& cpu) {
+FetchResult SLA_B(Cpu& cpu) {
 
-    is_set(cpu.m_reg_a, 7)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_b = SLA(cpu.m_reg_b, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_C(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_c = SLA(cpu.m_reg_c, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_D(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_d = SLA(cpu.m_reg_d, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_E(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_e = SLA(cpu.m_reg_e, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_H(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_h = SLA(cpu.m_reg_h, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_L(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_l = SLA(cpu.m_reg_l, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SLA_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = SLA(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
+
+FetchResult SLA_A(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu){
+        cpu.m_reg_a = SLA(cpu.m_reg_a, cpu.m_reg_f);
+    }};
+}
+
+uint8_t SRA(uint8_t value, uint8_t& flags) {
     
-    cpu.m_reg_a <<= 1;
-    clear_bit(cpu.m_reg_a, 0);
-
-    cpu.m_reg_a == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_B(Cpu& cpu) {
-
-    is_set(cpu.m_reg_b, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_b, 7);
-
-    cpu.m_reg_b >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_b, 7) : clear_bit(cpu.m_reg_b, 7);
-
-    cpu.m_reg_b == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_C(Cpu& cpu) {
-
-    is_set(cpu.m_reg_c, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_c, 7);
-
-    cpu.m_reg_c >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_c, 7) : clear_bit(cpu.m_reg_c, 7);
-
-    cpu.m_reg_c == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_D(Cpu& cpu) {
-
-    is_set(cpu.m_reg_d, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_d, 7);
-
-    cpu.m_reg_d >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_d, 7) : clear_bit(cpu.m_reg_d, 7);
-
-    cpu.m_reg_d == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_E(Cpu& cpu) {
-
-    is_set(cpu.m_reg_e, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_e, 7);
-
-    cpu.m_reg_e >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_e, 7) : clear_bit(cpu.m_reg_e, 7);
-
-    cpu.m_reg_e == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_H(Cpu& cpu) {
-
-    is_set(cpu.m_reg_h, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_h, 7);
-
-    cpu.m_reg_h >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_h, 7) : clear_bit(cpu.m_reg_h, 7);
-
-    cpu.m_reg_h == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_L(Cpu& cpu) {
-
-    is_set(cpu.m_reg_l, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-    
-    const auto old_msb = is_set(cpu.m_reg_l, 7);
-
-    cpu.m_reg_l >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_l, 7) : clear_bit(cpu.m_reg_l, 7);
-
-    cpu.m_reg_l == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void SRA_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
-
     is_set(value, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        set_bit(flags, Cpu::carry_flag)   :
+        clear_bit(flags, Cpu::carry_flag);
     
     const auto old_msb = is_set(value, 7);
 
@@ -940,2018 +519,2164 @@ void SRA_ADDR_HL(Cpu& cpu) {
     old_msb ? set_bit(value, 7) : clear_bit(value, 7);
 
     value == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        set_bit(flags, Cpu::zero_flag)    :
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void SRA_A(Cpu& cpu) {
+FetchResult SRA_B(Cpu& cpu) {
 
-    is_set(cpu.m_reg_a, 0)                      ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = SRA(cpu.m_reg_b, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_C(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = SRA(cpu.m_reg_c, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_D(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = SRA(cpu.m_reg_d, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_E(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = SRA(cpu.m_reg_e, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_H(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = SRA(cpu.m_reg_h, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_L(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = SRA(cpu.m_reg_l, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SRA_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = SRA(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
+
+FetchResult SRA_A(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = SRA(cpu.m_reg_a, cpu.m_reg_f);
+    }};
+}
+
+uint8_t RR(uint8_t value, uint8_t& flags) {
     
-    const auto old_msb = is_set(cpu.m_reg_a, 7);
-
-    cpu.m_reg_a >>= 1;
-
-    old_msb ? set_bit(cpu.m_reg_a, 7) : clear_bit(cpu.m_reg_a, 7);
-
-    cpu.m_reg_a == 0                            ?
-        set_bit(cpu.m_reg_f, Cpu::zero_flag)    :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_B(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_b, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_b >>= 1;
-    carry_status ? set_bit(cpu.m_reg_b, 7) : clear_bit(cpu.m_reg_b, 7);
-
-    cpu.m_reg_b == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-
-void RR_C(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_c, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_c >>= 1;
-    carry_status ? set_bit(cpu.m_reg_c, 7) : clear_bit(cpu.m_reg_c, 7);
-
-    cpu.m_reg_c == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_D(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_d, 0)                  ? 
-    set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_d >>= 1;
-    carry_status ? set_bit(cpu.m_reg_d, 7) : clear_bit(cpu.m_reg_d, 7);
-
-    cpu.m_reg_d == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_E(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_e, 0)                  ? 
-    set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_e >>= 1;
-    carry_status ? set_bit(cpu.m_reg_e, 7) : clear_bit(cpu.m_reg_e, 7);
-
-    cpu.m_reg_e == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_H(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_h, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_h >>= 1;
-    carry_status ? set_bit(cpu.m_reg_h, 7) : clear_bit(cpu.m_reg_h, 7);
-
-    cpu.m_reg_h == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_L(Cpu& cpu) {
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
-
-    is_set(cpu.m_reg_l, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_l >>= 1;
-    carry_status ? set_bit(cpu.m_reg_l, 7) : clear_bit(cpu.m_reg_l, 7);
-
-    cpu.m_reg_l == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-
-void RR_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
-
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
+    bool carry_status = is_set(flags, Cpu::carry_flag);
 
     is_set(value, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        set_bit(flags, Cpu::carry_flag)   :
+        clear_bit(flags, Cpu::carry_flag);
 
     value >>= 1;
     carry_status ? set_bit(value, 7) : clear_bit(value, 7);
 
     value == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        set_bit(flags, Cpu::zero_flag) : 
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
-
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return value;
 }
 
-void RR_A(Cpu& cpu) {
+FetchResult RR_B(Cpu& cpu) {
 
-    bool carry_status = is_set(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    is_set(cpu.m_reg_a, 0)                  ? 
-        set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-        clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_reg_a >>= 1;
-    carry_status ? set_bit(cpu.m_reg_a, 7) : clear_bit(cpu.m_reg_a, 7);
-
-    cpu.m_reg_a == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) : 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = RR(cpu.m_reg_b, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_B(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_b);
-    
-    cpu.m_reg_b == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult RR_C(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = RR(cpu.m_reg_c, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_C(Cpu& cpu) {
+FetchResult RR_D(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_c);
-    
-    cpu.m_reg_c == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = RR(cpu.m_reg_d, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_D(Cpu& cpu) {
+FetchResult RR_E(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_d);
-    
-    cpu.m_reg_d == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = RR(cpu.m_reg_e, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_E(Cpu& cpu) {
+FetchResult RR_H(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_e);
-    
-    cpu.m_reg_e == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = RR(cpu.m_reg_h, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_H(Cpu& cpu) {
+FetchResult RR_L(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_h);
-    
-    cpu.m_reg_h == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = RR(cpu.m_reg_l, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_L(Cpu& cpu) {
+FetchResult RR_ADDR_HL(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_l);
-    
-    cpu.m_reg_l == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = RR(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SWAP_ADDR_HL(Cpu& cpu) {
+FetchResult RR_A(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = RR(cpu.m_reg_a, cpu.m_reg_f);
+    }};
+}
+
+uint8_t SWAP(uint8_t value, uint8_t& flags) {
 
     swap_nibbles(value);
     
     value == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        set_bit(flags, Cpu::zero_flag) :
+        clear_bit(flags, Cpu::zero_flag);
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::half_carry_flag);
+    clear_bit(flags, Cpu::carry_flag);
 
-    cpu.m_memory_controller->write(address, value);
+    return value;
+}
+
+FetchResult SWAP_B(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_b = SWAP(cpu.m_reg_b, cpu.m_reg_f);
+    }};
 }
 
-void SWAP_A(Cpu& cpu) {
+FetchResult SWAP_C(Cpu& cpu) {
 
-    swap_nibbles(cpu.m_reg_a);
-    
-    cpu.m_reg_a == 0 ? 
-        set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_c = SWAP(cpu.m_reg_c, cpu.m_reg_f);
+    }};
+}
+
+FetchResult SWAP_D(Cpu& cpu) {
 
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-    clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_d = SWAP(cpu.m_reg_d, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_B(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_b, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult SWAP_E(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_e = SWAP(cpu.m_reg_e, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_C(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_c, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult SWAP_H(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_h = SWAP(cpu.m_reg_h, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult SWAP_L(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_l = SWAP(cpu.m_reg_l, cpu.m_reg_f);
+    }};
 }
-void BIT_0_E(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_e, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+
+FetchResult SWAP_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        value = SWAP(value, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult SWAP_A(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        cpu.m_reg_a = SWAP(cpu.m_reg_a, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_H(Cpu& cpu) {
+void BIT(uint8_t value, int n, uint8_t& flags) {
     
-    is_set(cpu.m_reg_h, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+    is_set(value, n) ? clear_bit(flags, Cpu::zero_flag) :
+        set_bit(flags, Cpu::zero_flag);
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    clear_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::half_carry_flag);
 }
 
-void BIT_0_L(Cpu& cpu) {
+FetchResult BIT_0_B(Cpu& cpu) {
     
-    is_set(cpu.m_reg_l, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 0, cpu.m_reg_f);
+    }};
+}
+
+FetchResult BIT_0_C(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_ADDR_HL(Cpu& cpu) {
+FetchResult BIT_0_D(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 0, cpu.m_reg_f);
+    }};
+}
+FetchResult BIT_0_E(Cpu& cpu) {
+    
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_0_A(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_a, 0) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_0_H(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_B(Cpu& cpu) {
+FetchResult BIT_0_L(Cpu& cpu) {
     
-    is_set(cpu.m_reg_b, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_C(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_c, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult BIT_0_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {    
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_D(Cpu& cpu) {
+FetchResult BIT_0_A(Cpu& cpu) {
     
-    is_set(cpu.m_reg_d, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 0, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_E(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_e, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_1_B(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 1, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_H(Cpu& cpu) {
+FetchResult BIT_1_C(Cpu& cpu) {
     
-    is_set(cpu.m_reg_h, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 1, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_L(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_l, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_1_D(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 1, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_ADDR_HL(Cpu& cpu) {
+FetchResult BIT_1_E(Cpu& cpu) {
+    
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 1, cpu.m_reg_f);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
+FetchResult BIT_1_H(Cpu& cpu) {
     
-    is_set(value, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 1, cpu.m_reg_f);
+    }};
+}
+
+FetchResult BIT_1_L(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 1, cpu.m_reg_f);
+    }};
+}
+
+FetchResult BIT_1_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 1, cpu.m_reg_f);
+    }};
 }
 
-void BIT_1_A(Cpu& cpu) {
+FetchResult BIT_1_A(Cpu& cpu) {
     
-    is_set(cpu.m_reg_a, 1) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 1, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_B(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_b, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_2_B(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_C(Cpu& cpu) {
+FetchResult BIT_2_C(Cpu& cpu) {
     
-    is_set(cpu.m_reg_c, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_2_D(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_E(Cpu& cpu) {
+FetchResult BIT_2_E(Cpu& cpu) {
     
-    is_set(cpu.m_reg_e, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_H(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_h, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_2_H(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_2_L(Cpu& cpu) {
+FetchResult BIT_2_L(Cpu& cpu) {
     
-    is_set(cpu.m_reg_l, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 2, cpu.m_reg_f);
+    }};
 }
-
-void BIT_2_ADDR_HL(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult BIT_2_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 2, cpu.m_reg_f);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void BIT_2_A(Cpu& cpu) {
+FetchResult BIT_2_A(Cpu& cpu) {
     
-    is_set(cpu.m_reg_a, 2) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 2, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_B(Cpu& cpu) {
+FetchResult BIT_3_B(Cpu& cpu) {
     
-    is_set(cpu.m_reg_b, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_C(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_c, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_3_C(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_D(Cpu& cpu) {
+FetchResult BIT_3_D(Cpu& cpu) {
     
-    is_set(cpu.m_reg_d, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_E(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_e, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_3_E(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_H(Cpu& cpu) {
+FetchResult BIT_3_H(Cpu& cpu) {
     
-    is_set(cpu.m_reg_h, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_L(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_l, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_3_L(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_ADDR_HL(Cpu& cpu) {
+FetchResult BIT_3_ADDR_HL(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_3_A(Cpu& cpu) {
+FetchResult BIT_3_A(Cpu& cpu) {
     
-    is_set(cpu.m_reg_a, 3) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 3, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_B(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_b, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_4_B(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_C(Cpu& cpu) {
+FetchResult BIT_4_C(Cpu& cpu) {
     
-    is_set(cpu.m_reg_c, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_4_D(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_E(Cpu& cpu) {
+FetchResult BIT_4_E(Cpu& cpu) {
     
-    is_set(cpu.m_reg_e, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_H(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_h, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_4_H(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_L(Cpu& cpu) {
+FetchResult BIT_4_L(Cpu& cpu) {
     
-    is_set(cpu.m_reg_l, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult BIT_4_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_4_A(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_a, 4) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_4_A(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 4, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_B(Cpu& cpu) {
+FetchResult BIT_5_B(Cpu& cpu) {
     
-    is_set(cpu.m_reg_b, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_C(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_c, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_5_C(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_D(Cpu& cpu) {
+FetchResult BIT_5_D(Cpu& cpu) {
     
-    is_set(cpu.m_reg_d, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_E(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_e, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_5_E(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_H(Cpu& cpu) {
+FetchResult BIT_5_H(Cpu& cpu) {
     
-    is_set(cpu.m_reg_h, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_L(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_l, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_5_L(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_ADDR_HL(Cpu& cpu) {
+FetchResult BIT_5_ADDR_HL(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
-
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);  
+        BIT(value, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_5_A(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_a, 5) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_5_A(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 5, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_B(Cpu& cpu) {
+FetchResult BIT_6_B(Cpu& cpu) {
     
-    is_set(cpu.m_reg_b, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_C(Cpu& cpu) {
+FetchResult BIT_6_C(Cpu& cpu) {
     
-    is_set(cpu.m_reg_c, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_6_D(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_E(Cpu& cpu) {
+FetchResult BIT_6_E(Cpu& cpu) {
     
-    is_set(cpu.m_reg_e, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_H(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_h, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_6_H(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_L(Cpu& cpu) {
+FetchResult BIT_6_L(Cpu& cpu) {
     
-    is_set(cpu.m_reg_l, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 6, cpu.m_reg_f);
+    }};
 }
-
-void BIT_6_ADDR_HL(Cpu& cpu) {
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult BIT_6_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_6_A(Cpu& cpu) {
+FetchResult BIT_6_A(Cpu& cpu) {
     
-    is_set(cpu.m_reg_a, 6) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 6, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_B(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_b, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_7_B(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_b, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_C(Cpu& cpu) {
+FetchResult BIT_7_C(Cpu& cpu) {
     
-    is_set(cpu.m_reg_c, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_c, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_D(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_d, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_7_D(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_d, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_E(Cpu& cpu) {
+FetchResult BIT_7_E(Cpu& cpu) {
     
-    is_set(cpu.m_reg_e, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_e, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_H(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_h, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_7_H(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_h, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_L(Cpu& cpu) {
+FetchResult BIT_7_L(Cpu& cpu) {
     
-    is_set(cpu.m_reg_l, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_l, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_ADDR_HL(Cpu& cpu) {
-
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    const auto value = cpu.m_memory_controller->read(address);
-    
-    is_set(value, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
-    
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+FetchResult BIT_7_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 12;
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(address);
+        BIT(value, 7, cpu.m_reg_f);
+    }};
 }
 
-void BIT_7_A(Cpu& cpu) {
-    
-    is_set(cpu.m_reg_a, 7) ? clear_bit(cpu.m_reg_f, Cpu::zero_flag) :
-        set_bit(cpu.m_reg_f, Cpu::zero_flag);
+FetchResult BIT_7_A(Cpu& cpu) {
     
-    clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-    set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        BIT(cpu.m_reg_a, 7, cpu.m_reg_f);
+    }};
 }
 
-void RES_0_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult RES_0_B(Cpu& cpu) {
+
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_0_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 0);
+    }};
 }
 
-void RES_0_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_0_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 0);
+    }};
 }
+
+FetchResult RES_0_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_0_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 0);
+    }};
 }
 
-void RES_0_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_0_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 0);
+    }};
 }
+
+FetchResult RES_0_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_0_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 0);
+    }};
 }
 
-void RES_0_ADDR_HL(Cpu& cpu) {
+FetchResult RES_0_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 0);
+    }};
+}
 
-    clear_bit(value, 0);
+FetchResult RES_0_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_memory_controller->write(address, value);
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 0);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_0_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 0);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult RES_0_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_1_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 0);
+    }};
 }
 
-void RES_1_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_1_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 1);
+    }};
 }
+
+FetchResult RES_1_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_1_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 1);
+    }};
 }
 
-void RES_1_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_1_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 1);
+    }};
 }
 
-void RES_1_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_1_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 1);
+    }};
 }
+
+FetchResult RES_1_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_1_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 1);
+    }};
 }
 
-void RES_1_ADDR_HL(Cpu& cpu) {
+FetchResult RES_1_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 1);
+    }};
+}
 
-    clear_bit(value, 1);
+FetchResult RES_1_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_memory_controller->write(address, value);
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 1);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_1_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 1);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult RES_1_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_2_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 1);
+    }};
 }
 
-void RES_2_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_2_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 2);
+    }};
 }
+
+FetchResult RES_2_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_2_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 2);
+    }};
 }
 
-void RES_2_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_2_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 2);
+    }};
 }
+
+FetchResult RES_2_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_2_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 2);
+    }};
 }
 
-void RES_2_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_2_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 2);
+    }};
 }
 
-void RES_2_ADDR_HL(Cpu& cpu) {
+FetchResult RES_2_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 2);
+    }};
+}
 
-    clear_bit(value, 2);
+FetchResult RES_2_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_memory_controller->write(address, value);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 2);
+        cpu.m_memory_controller->write(address, value);
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    }};
 }
 
-void RES_2_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 2);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult RES_2_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_3_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 2);
+    }};
 }
 
-void RES_3_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult RES_3_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_3_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 3);
+    }};
 }
 
-void RES_3_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_3_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 3);
+    }};
 }
 
-void RES_3_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_3_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 3);
+    }};
 }
 
-void RES_3_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_3_E(Cpu& cpu) {
+     constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 3);
+    }};
 }
 
-void RES_3_ADDR_HL(Cpu& cpu) {
+FetchResult RES_3_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 3);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult RES_3_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 3);
+    }};
+}
 
-    clear_bit(value, 3);
+FetchResult RES_3_ADDR_HL(Cpu& cpu) {
 
-    cpu.m_memory_controller->write(address, value);
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 3);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+FetchResult RES_3_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 3);
+    }};
 }
 
-void RES_3_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 3);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 4);
+    }};
 }
 
-void RES_4_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 4);
+    }};
 }
 
-void RES_4_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 4);
+    }};
 }
 
-void RES_4_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 4);
+    }};
 }
 
-void RES_4_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 4);
+    }};
 }
 
-void RES_4_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 4);
+    }};
 }
 
-void RES_4_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_4_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 4);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_4_ADDR_HL(Cpu& cpu) {
+FetchResult RES_4_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 4);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult RES_5_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 5);
+    }};
+}
 
-    clear_bit(value, 4);
+FetchResult RES_5_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 5);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult RES_5_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 5);
+    }};
+}
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+FetchResult RES_5_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 5);
+    }};
 }
 
-void RES_4_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 4);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_5_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 5);
+    }};
 }
 
-void RES_5_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_5_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 5);
+    }};
 }
 
-void RES_5_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_5_ADDR_HL(Cpu& cpu) {
+
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 5);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_5_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_5_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 5);
+    }};
 }
 
-void RES_5_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_6_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 6);
+    }};
 }
 
-void RES_5_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_6_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 6);
+    }};
 }
 
-void RES_5_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_6_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 6);
+    }};
 }
 
-void RES_5_ADDR_HL(Cpu& cpu) {
+FetchResult RES_6_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 6);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult RES_6_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 6);
+    }};
+}
 
-    clear_bit(value, 5);
+FetchResult RES_6_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 6);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult RES_6_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 6);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+FetchResult RES_6_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 6);
+    }};
 }
 
-void RES_5_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 5);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_b, 7);
+    }};
 }
 
-void RES_6_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_c, 7);
+    }};
 }
 
-void RES_6_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_d, 7);
+    }};
 }
 
-void RES_6_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_e, 7);
+    }};
 }
 
-void RES_6_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_h, 7);
+    }};
 }
 
-void RES_6_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_l, 7);
+    }};
 }
 
-void RES_6_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+FetchResult RES_7_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        clear_bit(value, 7);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_6_ADDR_HL(Cpu& cpu) {
+FetchResult RES_7_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+    
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        clear_bit(cpu.m_reg_a, 7);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_0_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(value, 6);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 0);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_0_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 0);
+    }};
 }
+FetchResult SET_0_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_6_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 6);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 0);
+    }};
 }
+FetchResult SET_0_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_7_B(Cpu& cpu) {
-    clear_bit(cpu.m_reg_b, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 0);
+    }};
 }
+FetchResult SET_0_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_7_C(Cpu& cpu) {
-    clear_bit(cpu.m_reg_c, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 0);
+    }};
 }
+FetchResult SET_0_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_7_D(Cpu& cpu) {
-    clear_bit(cpu.m_reg_d, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 0);
+    }};
 }
 
-void RES_7_E(Cpu& cpu) {
-    clear_bit(cpu.m_reg_e, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult SET_0_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void RES_7_H(Cpu& cpu) {
-    clear_bit(cpu.m_reg_h, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 0);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void RES_7_L(Cpu& cpu) {
-    clear_bit(cpu.m_reg_l, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult SET_0_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void RES_7_ADDR_HL(Cpu& cpu) {
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 0);
+    }};
+}
 
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_1_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    clear_bit(value, 7);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 1);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_1_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_program_counter++;
-    cpu.m_cycles += 16;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 1);
+    }};
 }
 
-void RES_7_A(Cpu& cpu) {
-    clear_bit(cpu.m_reg_a, 7);
-    cpu.m_program_counter++;
-    cpu.m_cycles += 8;
-}
+FetchResult SET_1_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_0_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 1);
+    }};
 }
 
-void SET_0_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-void SET_0_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-void SET_0_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-void SET_0_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
-void SET_0_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_1_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 1);
+    }};
 }
 
-void SET_0_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_1_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 0);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 1);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_1_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 1);
+    }};
 }
 
-void SET_0_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 0);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_1_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void SET_1_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 1);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SET_1_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_1_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_1_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 1);
+    }};
 }
 
-void SET_1_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_2_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_1_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 2);
+    }};
 }
 
-void SET_1_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_2_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 2);
+    }};
 }
 
-void SET_1_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_2_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 1);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 2);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_2_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 2);
+    }};
 }
 
-void SET_1_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 1);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_2_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_2_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 2);
+    }};
 }
 
-void SET_2_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_2_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_2_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 2);
+    }};
 }
 
-void SET_2_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_2_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void SET_2_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 2);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
+
+FetchResult SET_2_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_2_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 2);
+    }};
 }
 
-void SET_2_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_3_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 2);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 3);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_3_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 3);
+    }};
 }
 
-void SET_2_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 2);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_3_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_3_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 3);
+    }};
 }
 
-void SET_3_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_3_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_3_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 3);
+    }};
 }
 
-void SET_3_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_3_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_3_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 3);
+    }};
 }
 
-void SET_3_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_3_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 3);
+    }};
 }
 
-void SET_3_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_3_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 3);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 3);
+        cpu.m_memory_controller->write(address, value);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_3_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 3);
+    }};
 }
 
-void SET_3_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 3);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_4_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_4_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 4);
+    }};
 }
 
-void SET_4_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_4_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_4_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 4);
+    }};
 }
 
-void SET_4_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_4_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_4_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 4);
+    }};
 }
 
-void SET_4_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_4_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 4);
+    }};
 }
 
-void SET_4_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_4_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 4);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 4);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_4_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 4);
+    }};
 }
 
-void SET_4_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 4);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_4_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void SET_5_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 4);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SET_5_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
-}
+FetchResult SET_4_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_5_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 4);
+    }};
 }
 
-void SET_5_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_5_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 5);
+    }};
 }
+
+FetchResult SET_5_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_5_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 5);
+    }};
 }
 
-void SET_5_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_5_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 5);
+    }};
 }
 
-void SET_5_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_5_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 5);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 5);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_5_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 5);
+    }};
 }
 
-void SET_5_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 5);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_5_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 5);
+    }};
 }
+
+FetchResult SET_5_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void SET_6_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 5);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SET_6_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_5_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 5);
+    }};
 }
 
-void SET_6_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_6_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 6);
+    }};
 }
+
+FetchResult SET_6_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_6_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 6);
+    }};
 }
 
-void SET_6_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_6_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 6);
+    }};
 }
+
+FetchResult SET_6_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_6_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 6);
+    }};
 }
 
-void SET_6_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_6_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 6);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 6);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_6_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 6);
+    }};
 }
+
+FetchResult SET_6_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 16;
+    constexpr auto delta_pc = 1;
 
-void SET_6_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 6);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 6);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
-void SET_7_B(Cpu& cpu) {
-    set_bit(cpu.m_reg_b, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_6_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 6);
+    }};
 }
+
+FetchResult SET_7_B(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_7_C(Cpu& cpu) {
-    set_bit(cpu.m_reg_c, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_b, 7);
+    }};
 }
 
-void SET_7_D(Cpu& cpu) {
-    set_bit(cpu.m_reg_d, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_7_C(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_c, 7);
+    }};
 }
+
+FetchResult SET_7_D(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_7_E(Cpu& cpu) {
-    set_bit(cpu.m_reg_e, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_d, 7);
+    }};
 }
 
-void SET_7_H(Cpu& cpu) {
-    set_bit(cpu.m_reg_h, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+FetchResult SET_7_E(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_e, 7);
+    }};
 }
+
+FetchResult SET_7_H(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_7_L(Cpu& cpu) {
-    set_bit(cpu.m_reg_l, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_h, 7);
+    }};
 }
 
-void SET_7_ADDR_HL(Cpu& cpu) {
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-    auto value = cpu.m_memory_controller->read(address);
+FetchResult SET_7_L(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    set_bit(value, 7);
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_l, 7);
+    }};
+}
 
-    cpu.m_memory_controller->write(address, value);
+FetchResult SET_7_ADDR_HL(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-    cpu.m_cycles += 16;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        auto value = cpu.m_memory_controller->read(address);
+        set_bit(value, 7);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
+
+FetchResult SET_7_A(Cpu& cpu) {
+    constexpr auto cycles = 8;
+    constexpr auto delta_pc = 1;
 
-void SET_7_A(Cpu& cpu) {
-    set_bit(cpu.m_reg_a, 7);
-    cpu.m_cycles += 8;
-    cpu.m_program_counter++;
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        set_bit(cpu.m_reg_a, 7);
+    }};
 }

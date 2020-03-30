@@ -27,7 +27,7 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
         }
 
         if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-            std::cout << (char) cpu.m_memory_controller->read(0xFF01) << "\n";
+            std::cout << static_cast<char>(cpu.m_memory_controller->read(0xFF01));
             cpu.m_memory_controller->write(0xFF02, 0);
         }
     }

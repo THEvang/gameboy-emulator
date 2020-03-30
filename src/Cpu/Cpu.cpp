@@ -435,7 +435,6 @@ FetchResult fetch(Cpu& cpu) {
         
         case Opcode::LD_C_C:
             return LD_C_C(cpu);
-            break;
         
         case Opcode::LD_C_D:
             return LD_C_D(cpu);
@@ -958,1032 +957,776 @@ FetchResult fetch(Cpu& cpu) {
 
 FetchResult fetch_cb(Cpu& cpu) {
 
-     auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter);
+     auto opcode = cpu.m_memory_controller->read(cpu.m_program_counter+1);
     
      switch (static_cast<CBCode>(opcode)) {
          case CBCode::RLC_B:
-            RLC_B(cpu);
-            break;
+            return RLC_B(cpu);
         
         case CBCode::RLC_C :
-            RLC_C(cpu);
-            break;
+            return RLC_C(cpu);
         
         case CBCode::RLC_D:
-            RLC_D(cpu);
-            break;
+            return RLC_D(cpu);
         
         case CBCode::RLC_E:
-            RLC_E(cpu);
-            break;
+            return RLC_E(cpu);
         
         case CBCode::RLC_H:
-            RLC_H(cpu);
-            break;
+            return RLC_H(cpu);
         
         case CBCode::RLC_L:
-            RLC_L(cpu);
-            break;
+            return RLC_L(cpu);
         
         case CBCode::RLC_ADDR_HL:
-            RLC_ADDR_HL(cpu);
-            break;
+            return RLC_ADDR_HL(cpu);
         
         case CBCode::RLC_A:
-            RLC_A(cpu);
-            break;
+            return RLC_A(cpu);
         
         case CBCode::RRC_B:
-            RRC_B(cpu);
-            break;
+            return RRC_B(cpu);
         
         case CBCode::RRC_C:
-            RRC_C(cpu);
-            break;
+            return RRC_C(cpu);
         
         case CBCode::RRC_D:
-            RRC_D(cpu);
-            break;
+            return RRC_D(cpu);
         
         case CBCode::RRC_E:
-            RRC_E(cpu);
-            break;
+            return RRC_E(cpu);
         
         case CBCode::RRC_H:
-            RRC_H(cpu);
-            break;
+            return RRC_H(cpu);
         
         case CBCode::RRC_L:
-            RRC_L(cpu);
-            break;
+            return RRC_L(cpu);
         
         case CBCode::RRC_ADDR_HL:
-            RRC_ADDR_HL(cpu);
-            break;
+            return RRC_ADDR_HL(cpu);
         
         case CBCode::RRC_A:
-            RRC_A(cpu);
-            break;
+            return RRC_A(cpu);
         
         case CBCode::RL_B:
-            RL_B(cpu);
-            break;
+            return RL_B(cpu);
         
         case CBCode::RL_C:
-            RL_C(cpu);
-            break;
+            return RL_C(cpu);
         
         case CBCode::RL_D:
-            RL_D(cpu);
-            break;
+            return RL_D(cpu);
         
         case CBCode::RL_E:
-            RL_E(cpu);
-            break;
+            return RL_E(cpu);
         
         case CBCode::RL_H:
-            RL_H(cpu);
-            break;
+            return RL_H(cpu);
         
         case CBCode::RL_L:
-            RL_L(cpu);
-            break;
+            return RL_L(cpu);
 
         case CBCode::RL_ADDR_HL:
-            RL_ADDR_HL(cpu);
-            break;
+            return RL_ADDR_HL(cpu);
         
         case CBCode::RL_A:
-            RL_A(cpu);
-            break;
+            return RL_A(cpu);
 
         case CBCode::RR_B:
-            RR_B(cpu);
-            break;
+            return RR_B(cpu);
 
         case CBCode::RR_C:
-            RR_C(cpu);
-            break;
+            return RR_C(cpu);
         
         case CBCode::RR_D:
-            RR_D(cpu);
-            break;
+            return RR_D(cpu);
 
         case CBCode::RR_E:
-            RR_E(cpu);
-            break;
+            return RR_E(cpu);
 
         case CBCode::RR_H:
-            RR_H(cpu);
-            break;
+            return RR_H(cpu);
 
         case CBCode::RR_L:
-            RR_L(cpu);
-            break;    
+            return RR_L(cpu);
             
         case CBCode::RR_ADDR_HL:
-            RR_ADDR_HL(cpu);
-            break;
+            return RR_ADDR_HL(cpu);
 
         case CBCode::RR_A:
-            RR_A(cpu);
-            break;
+            return RR_A(cpu);
         
         case CBCode::SLA_B:
-            SLA_B(cpu);
-            break;
+            return SLA_B(cpu);
 
         case CBCode::SLA_C:
-            SLA_C(cpu);
-            break;
+            return SLA_C(cpu);
 
         case CBCode::SLA_D:
-            SLA_D(cpu);
-            break;
+            return SLA_D(cpu);
 
         case CBCode::SLA_E:
-            SLA_E(cpu);
-            break;
+            return SLA_E(cpu);
 
         case CBCode::SLA_H:
-            SLA_H(cpu);
-            break;
+            return SLA_H(cpu);
 
         case CBCode::SLA_L:
-            SLA_L(cpu);
-            break;
+            return SLA_L(cpu);
 
         case CBCode::SLA_ADDR_HL:
-            SLA_ADDR_HL(cpu);
-            break;
+            return SLA_ADDR_HL(cpu);
 
         case CBCode::SLA_A:
-            SLA_A(cpu);
-            break;
+            return SLA_A(cpu);
 
         case CBCode::SRA_B:
-            SRA_B(cpu);
-            break;
+            return SRA_B(cpu);
 
         case CBCode::SRA_C:
-            SRA_C(cpu);
-            break;
+            return SRA_C(cpu);
 
         case CBCode::SRA_D:
-            SRA_D(cpu);
-            break;
+            return SRA_D(cpu);
 
         case CBCode::SRA_E:
-            SRA_E(cpu);
-            break;
+            return SRA_E(cpu);
 
         case CBCode::SRA_H:
-            SRA_H(cpu);
-            break;
+            return SRA_H(cpu);
 
         case CBCode::SRA_L:
-            SRA_L(cpu);
-            break;
+            return SRA_L(cpu);
 
         case CBCode::SRA_ADDR_HL:
-            SRA_ADDR_HL(cpu);
-            break;
+            return SRA_ADDR_HL(cpu);
         
         case CBCode::SRA_A:
-            SRA_A(cpu);
-            break;
+            return SRA_A(cpu);
         
         case CBCode::SWAP_B:
-            SWAP_B(cpu);
-            break;
+            return SWAP_B(cpu);
 
         case CBCode::SWAP_C:
-            SWAP_C(cpu);
-            break;
+            return SWAP_C(cpu);
 
         case CBCode::SWAP_D:
-            SWAP_D(cpu);
-            break;
+            return SWAP_D(cpu);
 
         case CBCode::SWAP_E:
-            SWAP_E(cpu);
-            break;
+            return SWAP_E(cpu);
 
         case CBCode::SWAP_H:
-            SWAP_H(cpu);
-            break;
+            return SWAP_H(cpu);
 
         case CBCode::SWAP_L:
-            SWAP_L(cpu);
-            break;
+            return SWAP_L(cpu);
 
         case CBCode::SWAP_ADDR_HL:
-            SWAP_ADDR_HL(cpu);
-            break;
+            return SWAP_ADDR_HL(cpu);
 
         case CBCode::SWAP_A:
-            SWAP_A(cpu);
-            break;
+            return SWAP_A(cpu);
         
         case CBCode::SRL_B:
-            SRL_B(cpu);            
-            break;
+            return SRL_B(cpu);            
 
         case CBCode::SRL_C:
-            SRL_C(cpu);
-            break;
+            return SRL_C(cpu);
 
         case CBCode::SRL_D:
-            SRL_D(cpu);
-            break;
+            return SRL_D(cpu);
 
         case CBCode::SRL_E:
-            SRL_E(cpu);
-            break;
+            return SRL_E(cpu);
 
         case CBCode::SRL_H:
-            SRL_H(cpu);
-            break;
+            return SRL_H(cpu);
 
         case CBCode::SRL_L:
-            SRL_L(cpu); 
-            break;
+            return SRL_L(cpu); 
 
         case CBCode::SRL_ADDR_HL:
-            SRL_ADDR_HL(cpu);
-            break;
+            return SRL_ADDR_HL(cpu);
 
         case CBCode::SRL_A:
-            SRL_A(cpu);
-            break;
+            return SRL_A(cpu);
         
         case CBCode::BIT_0_B:
-            BIT_0_B(cpu);
-            break;
+            return BIT_0_B(cpu);
         
         case CBCode::BIT_0_C:
-            BIT_0_C(cpu);
-            break;
+            return BIT_0_C(cpu);
 
         case CBCode::BIT_0_D:
-            BIT_0_D(cpu);
-            break;
+            return BIT_0_D(cpu);
 
         case CBCode::BIT_0_E:
-            BIT_0_E(cpu);
-            break;
+            return BIT_0_E(cpu);
 
         case CBCode::BIT_0_H:
-            BIT_0_H(cpu);
-            break;
+            return BIT_0_H(cpu);
 
         case CBCode::BIT_0_L:
-            BIT_0_L(cpu);
-            break;
+            return BIT_0_L(cpu);
 
         case CBCode::BIT_0_ADDR_HL:
-            BIT_0_ADDR_HL(cpu);
-            break;
+            return BIT_0_ADDR_HL(cpu);
 
         case CBCode::BIT_0_A:
-            BIT_0_A(cpu);
-            break;
+            return BIT_0_A(cpu);
 
         case CBCode::BIT_1_B:
-            BIT_1_B(cpu);
-            break;
+            return BIT_1_B(cpu);
         
         case CBCode::BIT_1_C:
-            BIT_1_C(cpu);
-            break;
+            return BIT_1_C(cpu);
 
         case CBCode::BIT_1_D:
-            BIT_1_D(cpu);
-            break;
+            return BIT_1_D(cpu);
 
         case CBCode::BIT_1_E:
-            BIT_1_E(cpu);
-            break;
+            return BIT_1_E(cpu);
 
         case CBCode::BIT_1_H:
-            BIT_1_H(cpu);
-            break;
+            return BIT_1_H(cpu);
 
         case CBCode::BIT_1_L:
-            BIT_1_L(cpu);
-            break;
+            return BIT_1_L(cpu);
 
         case CBCode::BIT_1_ADDR_HL:
-            BIT_1_ADDR_HL(cpu);
-            break;
+            return BIT_1_ADDR_HL(cpu);
 
         case CBCode::BIT_1_A:
-            BIT_1_A(cpu);
-            break;
+            return BIT_1_A(cpu);
 
         case CBCode::BIT_2_B:
-            BIT_2_B(cpu);
-            break;
+            return BIT_2_B(cpu);
         
         case CBCode::BIT_2_C:
-            BIT_2_C(cpu);
-            break;
+            return BIT_2_C(cpu);
 
         case CBCode::BIT_2_D:
-            BIT_2_D(cpu);
-            break;
+            return BIT_2_D(cpu);
 
         case CBCode::BIT_2_E:
-            BIT_2_E(cpu);
-            break;
+            return BIT_2_E(cpu);
 
         case CBCode::BIT_2_H:
-            BIT_2_H(cpu);
-            break;
+            return BIT_2_H(cpu);
 
         case CBCode::BIT_2_L:
-            BIT_2_L(cpu);
-            break;
+            return BIT_2_L(cpu);
 
         case CBCode::BIT_2_ADDR_HL:
-            BIT_2_ADDR_HL(cpu);
-            break;
+            return BIT_2_ADDR_HL(cpu);
 
         case CBCode::BIT_2_A:
-            BIT_2_A(cpu);
-            break;
+            return BIT_2_A(cpu);
 
         case CBCode::BIT_3_B:
-            BIT_3_B(cpu);
-            break;
+            return BIT_3_B(cpu);
         
         case CBCode::BIT_3_C:
-            BIT_3_C(cpu);
-            break;
+            return BIT_3_C(cpu);
 
         case CBCode::BIT_3_D:
-            BIT_3_D(cpu);
-            break;
+            return BIT_3_D(cpu);
 
         case CBCode::BIT_3_E:
-            BIT_3_E(cpu);
-            break;
+            return BIT_3_E(cpu);
 
         case CBCode::BIT_3_H:
-            BIT_3_H(cpu);
-            break;
+            return BIT_3_H(cpu);
 
         case CBCode::BIT_3_L:
-            BIT_3_L(cpu);
-            break;
+            return BIT_3_L(cpu);
 
         case CBCode::BIT_3_ADDR_HL:
-            BIT_3_ADDR_HL(cpu);
-            break;
+            return BIT_3_ADDR_HL(cpu);
 
         case CBCode::BIT_3_A:
-            BIT_3_A(cpu);
-            break;
+            return BIT_3_A(cpu);
        
        case CBCode::BIT_4_B:
-            BIT_4_B(cpu);
-            break;
+            return BIT_4_B(cpu);
         
         case CBCode::BIT_4_C:
-            BIT_4_C(cpu);
-            break;
+            return BIT_4_C(cpu);
 
         case CBCode::BIT_4_D:
-            BIT_4_D(cpu);
-            break;
+            return BIT_4_D(cpu);
 
         case CBCode::BIT_4_E:
-            BIT_4_E(cpu);
-            break;
+            return BIT_4_E(cpu);
 
         case CBCode::BIT_4_H:
-            BIT_4_H(cpu);
-            break;
+            return BIT_4_H(cpu);
 
         case CBCode::BIT_4_L:
-            BIT_4_L(cpu);
-            break;
+            return BIT_4_L(cpu);
 
         case CBCode::BIT_4_ADDR_HL:
-            BIT_4_ADDR_HL(cpu);
-            break;
+            return BIT_4_ADDR_HL(cpu);
 
         case CBCode::BIT_4_A:
-            BIT_4_A(cpu);
-            break;
+            return BIT_4_A(cpu);
 
        case CBCode::BIT_5_B:
-            BIT_5_B(cpu);
-            break;
+            return BIT_5_B(cpu);
         
         case CBCode::BIT_5_C:
-            BIT_5_C(cpu);
-            break;
+            return BIT_5_C(cpu);
 
         case CBCode::BIT_5_D:
-            BIT_5_D(cpu);
-            break;
+            return BIT_5_D(cpu);
 
         case CBCode::BIT_5_E:
-            BIT_5_E(cpu);
-            break;
+            return BIT_5_E(cpu);
 
         case CBCode::BIT_5_H:
-            BIT_5_H(cpu);
-            break;
+            return BIT_5_H(cpu);
 
         case CBCode::BIT_5_L:
-            BIT_5_L(cpu);
-            break;
+            return BIT_5_L(cpu);
 
         case CBCode::BIT_5_ADDR_HL:
-            BIT_5_ADDR_HL(cpu);
-            break;
+            return BIT_5_ADDR_HL(cpu);
 
         case CBCode::BIT_5_A:
-            BIT_5_A(cpu);
-            break;
+            return BIT_5_A(cpu);
         
         case CBCode::BIT_6_B:
-            BIT_6_B(cpu);
-            break;
+            return BIT_6_B(cpu);
         
         case CBCode::BIT_6_C:
-            BIT_6_C(cpu);
-            break;
+            return BIT_6_C(cpu);
 
         case CBCode::BIT_6_D:
-            BIT_6_D(cpu);
-            break;
+            return BIT_6_D(cpu);
 
         case CBCode::BIT_6_E:
-            BIT_6_E(cpu);
-            break;
+            return BIT_6_E(cpu);
 
         case CBCode::BIT_6_H:
-            BIT_6_H(cpu);
-            break;
+            return BIT_6_H(cpu);
 
         case CBCode::BIT_6_L:
-            BIT_6_L(cpu);
-            break;
+            return BIT_6_L(cpu);
 
         case CBCode::BIT_6_ADDR_HL:
-            BIT_6_ADDR_HL(cpu);
-            break;
+            return BIT_6_ADDR_HL(cpu);
 
         case CBCode::BIT_6_A:
-            BIT_6_A(cpu);
-            break;
+            return BIT_6_A(cpu);
 
         case CBCode::BIT_7_B:
-            BIT_7_B(cpu);
-            break;
+            return BIT_7_B(cpu);
         
         case CBCode::BIT_7_C:
-            BIT_7_C(cpu);
-            break;
+            return BIT_7_C(cpu);
 
         case CBCode::BIT_7_D:
-            BIT_7_D(cpu);
-            break;
+            return BIT_7_D(cpu);
 
         case CBCode::BIT_7_E:
-            BIT_7_E(cpu);
-            break;
+            return BIT_7_E(cpu);
 
         case CBCode::BIT_7_H:
-            BIT_7_H(cpu);
-            break;
+            return BIT_7_H(cpu);
 
         case CBCode::BIT_7_L:
-            BIT_7_L(cpu);
-            break;
+            return BIT_7_L(cpu);
 
         case CBCode::BIT_7_ADDR_HL:
-            BIT_7_ADDR_HL(cpu);
-            break;
+            return BIT_7_ADDR_HL(cpu);
 
         case CBCode::BIT_7_A:
-            BIT_7_A(cpu);
-            break;
+            return BIT_7_A(cpu);
         
         case CBCode::RES_0_B:
-            RES_0_B(cpu);
-            break;
+            return RES_0_B(cpu);
 
         case CBCode::RES_0_C:
-            RES_0_C(cpu);
-            break;
+            return RES_0_C(cpu);
 
         case CBCode::RES_0_D:
-            RES_0_D(cpu);
-            break;
+            return RES_0_D(cpu);
 
         case CBCode::RES_0_E:
-            RES_0_E(cpu);
-            break;
+            return RES_0_E(cpu);
 
         case CBCode::RES_0_H:
-            RES_0_H(cpu);
-            break;
+            return RES_0_H(cpu);
 
         case CBCode::RES_0_L:
-            RES_0_L(cpu);
-            break;
+            return RES_0_L(cpu);
 
         case CBCode::RES_0_ADDR_HL:
-            RES_0_ADDR_HL(cpu);
-            break;
+            return RES_0_ADDR_HL(cpu);
 
         case CBCode::RES_0_A:
-            RES_0_A(cpu);
-            break;
+            return RES_0_A(cpu);
             
         case CBCode::RES_1_B:
-            RES_1_B(cpu);
-            break;
+            return RES_1_B(cpu);
 
         case CBCode::RES_1_C:
-            RES_1_C(cpu);
-            break;
+            return RES_1_C(cpu);
 
         case CBCode::RES_1_D:
-            RES_1_D(cpu);
-            break;
+            return RES_1_D(cpu);
 
         case CBCode::RES_1_E:
-            RES_1_E(cpu);
-            break;
+            return RES_1_E(cpu);
 
         case CBCode::RES_1_H:
-            RES_1_H(cpu);
-            break;
+            return RES_1_H(cpu);
 
         case CBCode::RES_1_L:
-            RES_1_L(cpu);
-            break;
+            return RES_1_L(cpu);
 
         case CBCode::RES_1_ADDR_HL:
-            RES_1_ADDR_HL(cpu);
-            break;
+            return RES_1_ADDR_HL(cpu);
 
         case CBCode::RES_1_A:
-            RES_1_A(cpu);
-            break;
+            return RES_1_A(cpu);
         
         case CBCode::RES_2_B:
-            RES_2_B(cpu);
-            break;
+            return RES_2_B(cpu);
 
         case CBCode::RES_2_C:
-            RES_2_C(cpu);
-            break;
+            return RES_2_C(cpu);
 
         case CBCode::RES_2_D:
-            RES_2_D(cpu);
-            break;
+            return RES_2_D(cpu);
 
         case CBCode::RES_2_E:
-            RES_2_E(cpu);
-            break;
+            return RES_2_E(cpu);
 
         case CBCode::RES_2_H:
-            RES_2_H(cpu);
-            break;
+            return RES_2_H(cpu);
 
         case CBCode::RES_2_L:
-            RES_2_L(cpu);
-            break;
+            return RES_2_L(cpu);
 
         case CBCode::RES_2_ADDR_HL:
-            RES_2_ADDR_HL(cpu);
-            break;
+            return RES_2_ADDR_HL(cpu);
 
         case CBCode::RES_2_A:
-            RES_2_A(cpu);
-            break;
+            return RES_2_A(cpu);
 
         case CBCode::RES_3_B:
-            RES_3_B(cpu);
-            break;
+            return RES_3_B(cpu);
 
         case CBCode::RES_3_C:
-            RES_3_C(cpu);
-            break;
+            return RES_3_C(cpu);
 
         case CBCode::RES_3_D:
-            RES_3_D(cpu);
-            break;
+            return RES_3_D(cpu);
 
         case CBCode::RES_3_E:
-            RES_3_E(cpu);
-            break;
+            return RES_3_E(cpu);
 
         case CBCode::RES_3_H:
-            RES_3_H(cpu);
-            break;
+            return RES_3_H(cpu);
 
         case CBCode::RES_3_L:
-            RES_3_L(cpu);
-            break;
+            return RES_3_L(cpu);
 
         case CBCode::RES_3_ADDR_HL:
-            RES_3_ADDR_HL(cpu);
-            break;
+            return RES_3_ADDR_HL(cpu);
 
         case CBCode::RES_3_A:
-            RES_3_A(cpu);
-            break;
+            return RES_3_A(cpu);
 
         case CBCode::RES_4_B:
-            RES_4_B(cpu);
-            break;
+            return RES_4_B(cpu);
 
         case CBCode::RES_4_C:
-            RES_4_C(cpu);
-            break;
+            return RES_4_C(cpu);
 
         case CBCode::RES_4_D:
-            RES_4_D(cpu);
-            break;
+            return RES_4_D(cpu);
 
         case CBCode::RES_4_E:
-            RES_4_E(cpu);
-            break;
+            return RES_4_E(cpu);
 
         case CBCode::RES_4_H:
-            RES_4_H(cpu);
-            break;
+            return RES_4_H(cpu);
 
         case CBCode::RES_4_L:
-            RES_4_L(cpu);
-            break;
+            return RES_4_L(cpu);
 
         case CBCode::RES_4_ADDR_HL:
-            RES_4_ADDR_HL(cpu);
-            break;
+            return RES_4_ADDR_HL(cpu);
 
         case CBCode::RES_4_A:
-            RES_4_A(cpu);
-            break;
+            return RES_4_A(cpu);
         
         case CBCode::RES_5_B:
-            RES_5_B(cpu);
-            break;
+            return RES_5_B(cpu);
 
         case CBCode::RES_5_C:
-            RES_5_C(cpu);
-            break;
+            return RES_5_C(cpu);
 
         case CBCode::RES_5_D:
-            RES_5_D(cpu);
-            break;
+            return RES_5_D(cpu);
 
         case CBCode::RES_5_E:
-            RES_5_E(cpu);
-            break;
+            return RES_5_E(cpu);
 
         case CBCode::RES_5_H:
-            RES_5_H(cpu);
-            break;
+            return RES_5_H(cpu);
 
         case CBCode::RES_5_L:
-            RES_5_L(cpu);
-            break;
+            return RES_5_L(cpu);
 
         case CBCode::RES_5_ADDR_HL:
-            RES_5_ADDR_HL(cpu);
-            break;
+            return RES_5_ADDR_HL(cpu);
 
         case CBCode::RES_5_A:
-            RES_5_A(cpu);
-            break;
+            return RES_5_A(cpu);
         
         case CBCode::RES_6_B:
-            RES_6_B(cpu);
-            break;
+            return RES_6_B(cpu);
 
         case CBCode::RES_6_C:
-            RES_6_C(cpu);
-            break;
+            return RES_6_C(cpu);
 
         case CBCode::RES_6_D:
-            RES_6_D(cpu);
-            break;
+            return RES_6_D(cpu);
 
         case CBCode::RES_6_E:
-            RES_6_E(cpu);
-            break;
+            return RES_6_E(cpu);
 
         case CBCode::RES_6_H:
-            RES_6_H(cpu);
-            break;
+            return RES_6_H(cpu);
 
         case CBCode::RES_6_L:
-            RES_6_L(cpu);
-            break;
+            return RES_6_L(cpu);
 
         case CBCode::RES_6_ADDR_HL:
-            RES_6_ADDR_HL(cpu);
-            break;
+            return RES_6_ADDR_HL(cpu);
 
         case CBCode::RES_6_A:
-            RES_6_A(cpu);
-            break;
+            return RES_6_A(cpu);
         
         case CBCode::RES_7_B:
-            RES_7_B(cpu);
-            break;
+            return RES_7_B(cpu);
 
         case CBCode::RES_7_C:
-            RES_7_C(cpu);
-            break;
+            return RES_7_C(cpu);
 
         case CBCode::RES_7_D:
-            RES_7_D(cpu);
-            break;
+            return RES_7_D(cpu);
 
         case CBCode::RES_7_E:
-            RES_7_E(cpu);
-            break;
+            return RES_7_E(cpu);
 
         case CBCode::RES_7_H:
-            RES_7_H(cpu);
-            break;
+            return RES_7_H(cpu);
 
         case CBCode::RES_7_L:
-            RES_7_L(cpu);
-            break;
+            return RES_7_L(cpu);
 
         case CBCode::RES_7_ADDR_HL:
-            RES_7_ADDR_HL(cpu);
-            break;
+            return RES_7_ADDR_HL(cpu);
 
         case CBCode::RES_7_A:
-            RES_7_A(cpu);
-            break;
+            return RES_7_A(cpu);
         
         case CBCode::SET_0_B:
-            SET_0_B(cpu);
-            break;
+            return SET_0_B(cpu);
 
         case CBCode::SET_0_C:
-            SET_0_C(cpu);
-            break;
+            return SET_0_C(cpu);
 
         case CBCode::SET_0_D:
-            SET_0_D(cpu);
-            break;
+            return SET_0_D(cpu);
 
         case CBCode::SET_0_E:
-            SET_0_E(cpu);
-            break;
+            return SET_0_E(cpu);
 
         case CBCode::SET_0_H:
-            SET_0_H(cpu);
-            break;
+            return SET_0_H(cpu);
 
         case CBCode::SET_0_L:
-            SET_0_L(cpu);
-            break;
+            return SET_0_L(cpu);
 
         case CBCode::SET_0_ADDR_HL:
-            SET_0_ADDR_HL(cpu);
-            break;
+            return SET_0_ADDR_HL(cpu);
 
         case CBCode::SET_0_A:
-            SET_0_A(cpu);
-            break;
+            return SET_0_A(cpu);
 
         case CBCode::SET_1_B:
-            SET_1_B(cpu);
-            break;
+            return SET_1_B(cpu);
 
         case CBCode::SET_1_C:
-            SET_1_C(cpu);
-            break;
+            return SET_1_C(cpu);
 
         case CBCode::SET_1_D:
-            SET_1_D(cpu);
-            break;
+            return SET_1_D(cpu);
 
         case CBCode::SET_1_E:
-            SET_1_E(cpu);
-            break;
+            return SET_1_E(cpu);
 
         case CBCode::SET_1_H:
-            SET_1_H(cpu);
-            break;
+            return SET_1_H(cpu);
 
         case CBCode::SET_1_L:
-            SET_1_L(cpu);
-            break;
+            return SET_1_L(cpu);
 
         case CBCode::SET_1_ADDR_HL:
-            SET_1_ADDR_HL(cpu);
-            break;
+            return SET_1_ADDR_HL(cpu);
 
         case CBCode::SET_1_A:
-            SET_1_A(cpu);
-            break;
+            return SET_1_A(cpu);
                 
         case CBCode::SET_2_B:
-            SET_2_B(cpu);
-            break;
+            return SET_2_B(cpu);
 
         case CBCode::SET_2_C:
-            SET_2_C(cpu);
-            break;
+            return SET_2_C(cpu);
 
         case CBCode::SET_2_D:
-            SET_2_D(cpu);
-            break;
+            return SET_2_D(cpu);
 
         case CBCode::SET_2_E:
-            SET_2_E(cpu);
-            break;
+            return SET_2_E(cpu);
 
         case CBCode::SET_2_H:
-            SET_2_H(cpu);
-            break;
+            return SET_2_H(cpu);
 
         case CBCode::SET_2_L:
-            SET_2_L(cpu);
-            break;
+            return SET_2_L(cpu);
 
         case CBCode::SET_2_ADDR_HL:
-            SET_2_ADDR_HL(cpu);
-            break;
+            return SET_2_ADDR_HL(cpu);
 
         case CBCode::SET_2_A:
-            SET_2_A(cpu);
-            break;
+            return SET_2_A(cpu);
 
         case CBCode::SET_3_B:
-            SET_3_B(cpu);
-            break;
+            return SET_3_B(cpu);
 
         case CBCode::SET_3_C:
-            SET_3_C(cpu);
-            break;
+            return SET_3_C(cpu);
 
         case CBCode::SET_3_D:
-            SET_3_D(cpu);
-            break;
+            return SET_3_D(cpu);
 
         case CBCode::SET_3_E:
-            SET_3_E(cpu);
-            break;
+            return SET_3_E(cpu);
 
         case CBCode::SET_3_H:
-            SET_3_H(cpu);
-            break;
+            return SET_3_H(cpu);
 
         case CBCode::SET_3_L:
-            SET_3_L(cpu);
-            break;
+            return SET_3_L(cpu);
 
         case CBCode::SET_3_ADDR_HL:
-            SET_3_ADDR_HL(cpu);
-            break;
+            return SET_3_ADDR_HL(cpu);
 
         case CBCode::SET_3_A:
-            SET_3_A(cpu);
-            break;
+            return SET_3_A(cpu);
         
         case CBCode::SET_4_B:
-            SET_4_B(cpu);
-            break;
+            return SET_4_B(cpu);
 
         case CBCode::SET_4_C:
-            SET_4_C(cpu);
-            break;
+            return SET_4_C(cpu);
 
         case CBCode::SET_4_D:
-            SET_4_D(cpu);
-            break;
+            return SET_4_D(cpu);
 
         case CBCode::SET_4_E:
-            SET_4_E(cpu);
-            break;
+            return SET_4_E(cpu);
 
         case CBCode::SET_4_H:
-            SET_4_H(cpu);
-            break;
+            return SET_4_H(cpu);
 
         case CBCode::SET_4_L:
-            SET_4_L(cpu);
-            break;
+            return SET_4_L(cpu);
 
         case CBCode::SET_4_ADDR_HL:
-            SET_4_ADDR_HL(cpu);
-            break;
+            return SET_4_ADDR_HL(cpu);
 
         case CBCode::SET_4_A:
-            SET_4_A(cpu);
-            break;
+            return SET_4_A(cpu);
         
         case CBCode::SET_5_B:
-            SET_5_B(cpu);
-            break;
+            return SET_5_B(cpu);
 
         case CBCode::SET_5_C:
-            SET_5_C(cpu);
-            break;
+            return SET_5_C(cpu);
 
         case CBCode::SET_5_D:
-            SET_5_D(cpu);
-            break;
+            return SET_5_D(cpu);
 
         case CBCode::SET_5_E:
-            SET_5_E(cpu);
-            break;
+            return SET_5_E(cpu);
 
         case CBCode::SET_5_H:
-            SET_5_H(cpu);
-            break;
+            return SET_5_H(cpu);
 
         case CBCode::SET_5_L:
-            SET_5_L(cpu);
-            break;
+            return SET_5_L(cpu);
 
         case CBCode::SET_5_ADDR_HL:
-            SET_5_ADDR_HL(cpu);
-            break;
+            return SET_5_ADDR_HL(cpu);
 
         case CBCode::SET_5_A:
-            SET_5_A(cpu);
-            break;
+            return SET_5_A(cpu);
         
         case CBCode::SET_6_B:
-            SET_6_B(cpu);
-            break;
+            return SET_6_B(cpu);
 
         case CBCode::SET_6_C:
-            SET_6_C(cpu);
-            break;
+            return SET_6_C(cpu);
 
         case CBCode::SET_6_D:
-            SET_6_D(cpu);
-            break;
+            return SET_6_D(cpu);
 
         case CBCode::SET_6_E:
-            SET_6_E(cpu);
-            break;
+            return SET_6_E(cpu);
 
         case CBCode::SET_6_H:
-            SET_6_H(cpu);
-            break;
+            return SET_6_H(cpu);
 
         case CBCode::SET_6_L:
-            SET_6_L(cpu);
-            break;
+            return SET_6_L(cpu);
 
         case CBCode::SET_6_ADDR_HL:
-            SET_6_ADDR_HL(cpu);
-            break;
+            return SET_6_ADDR_HL(cpu);
 
         case CBCode::SET_6_A:
-            SET_6_A(cpu);
-            break;
+            return SET_6_A(cpu);
         
         case CBCode::SET_7_B:
-            SET_7_B(cpu);
-            break;
+            return SET_7_B(cpu);
 
         case CBCode::SET_7_C:
-            SET_7_C(cpu);
-            break;
+            return SET_7_C(cpu);
 
         case CBCode::SET_7_D:
-            SET_7_D(cpu);
-            break;
+            return SET_7_D(cpu);
 
         case CBCode::SET_7_E:
-            SET_7_E(cpu);
-            break;
+            return SET_7_E(cpu);
 
         case CBCode::SET_7_H:
-            SET_7_H(cpu);
-            break;
+            return SET_7_H(cpu);
 
         case CBCode::SET_7_L:
-            SET_7_L(cpu);
-            break;
+            return SET_7_L(cpu);
 
         case CBCode::SET_7_ADDR_HL:
-            SET_7_ADDR_HL(cpu);
-            break;
+            return SET_7_ADDR_HL(cpu);
 
         case CBCode::SET_7_A:
-            SET_7_A(cpu);
-            break;
+            return SET_7_A(cpu);
             
         default:
             throw UnimplementedOperation("Unimplemented CB Code\n");

@@ -49,6 +49,7 @@ FetchResult RST(Cpu& cpu, uint8_t address) {
         cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
 
         cpu.m_program_counter = combine_bytes(0x00, address);
+        cpu.m_stack_ptr -= 2;
     }};
 }
 
@@ -1401,7 +1402,7 @@ FetchResult ADD_A_ADDR_HL(Cpu& cpu) {
     }};
 }
 
-uint8_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
+uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
     
     overflows_16bit(first, second)                     ?
         set_bit(flags, Cpu::carry_flag)   :
@@ -2891,9 +2892,8 @@ FetchResult PREFIX_CB(Cpu& cpu) {
     auto cycles = 4;
     auto delta_pc = 1;
 
-    //fetch_cb(cpu);
-
-    throw UnimplementedOperation("PREFIX CB\n");
+    auto [cb_cycles, cb_delta_pc, cb_operation] = fetch_cb(cpu);
+    return {cycles + cb_cycles, delta_pc + cb_delta_pc, cb_operation};
 }
 
 FetchResult LD_ADDR_HLD_A(Cpu& cpu) {

@@ -41,12 +41,12 @@ auto is_set(uint8_t b, int n) -> bool {
 auto overflows_8bit(uint8_t a, uint8_t b) -> bool {
     int sum = a + b;
     return sum > std::numeric_limits<uint8_t>::max();
-};
+}
 
 auto overflows_16bit(uint16_t a, uint16_t b) -> bool {
     int sum = a + b;
     return sum > std::numeric_limits<uint16_t>::max();
-};
+}
 
 auto underflows_8bit(uint8_t a, uint8_t b) -> bool {
     return b > a;
