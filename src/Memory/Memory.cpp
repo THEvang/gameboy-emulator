@@ -1,4 +1,4 @@
-#include "Memory.h"
+#include "memory_controllers/Memory.h"
 
 Memory::Memory(const std::vector<uint8_t>& memory) 
     : m_memory(memory)

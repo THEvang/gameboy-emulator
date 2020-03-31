@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <MemoryBankController.h>
+#include "memory_controllers/MemoryBankController.h"
 #include <Timer.h>
 #include <functional>
 

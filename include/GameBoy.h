@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include <MemoryBankController.h>
-#include <cpu/Cpu.h>
+#include "memory_controllers/MemoryBankController.h"
+#include "cpu/Cpu.h"
 
 class GameBoy {
 public:

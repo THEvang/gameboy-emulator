@@ -1,7 +1,7 @@
 #include <GameBoy.h>
 #include <iostream>
-#include <MBC1.h>
-#include <Memory.h>
+#include "memory_controllers/MBC1.h"
+#include "memory_controllers/Memory.h"
 
 void GameBoy::run(const std::vector<uint8_t>& rom) {
     

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Memory.h>
+#include "memory_controllers/Memory.h"
 #include <memory>
 
 enum class BankingMode {

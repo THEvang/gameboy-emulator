@@ -1,4 +1,4 @@
-#include "MBC1.h"
+#include "memory_controllers/MBC1.h"
 
 MBC1::MBC1(Memory& internal_memory, Memory& rom_memory) 
     : MemoryBankController(internal_memory, rom_memory) 

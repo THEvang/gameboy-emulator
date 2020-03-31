@@ -7,11 +7,8 @@
 #include <fstream>
 
 #include <File.h>
-#include <MBC1.h>
-#include <Memory.h>
-#include <cpu/Operations.h>
-#include <BitOperations.h>
 #include "Gui.h"
+#include "BitOperations.h"
 
 #include <GameBoy.h>
 
