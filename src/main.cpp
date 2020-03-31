@@ -74,9 +74,14 @@ void render_disassembly(Cpu& cpu) {
     ImGui::End();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 
-    constexpr auto rom_path = "../tests/gb-test-roms/cpu_instrs/cpu_instrs.gb";
+    if(argc < 2) {
+        std::cerr << "Please provide rom\n";
+        return 1;
+    }
+
+    const auto rom_path = argv[1];
     const auto rom = load_rom(rom_path);
     if(!rom) {
         std::cerr << "Unable to find Rom: " << rom_path << "\n";
