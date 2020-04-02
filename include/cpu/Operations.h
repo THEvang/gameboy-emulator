@@ -130,6 +130,7 @@ FetchResult LD_ADDR_HL_D(Cpu& cpu);
 FetchResult LD_ADDR_HL_E(Cpu& cpu);
 FetchResult LD_ADDR_HL_H(Cpu& cpu);
 FetchResult LD_ADDR_HL_L(Cpu& cpu);
+FetchResult LD_ADDR_HL_D8(Cpu& cpu);
 FetchResult LD_ADDR_HL_ADDR_HL(Cpu& cpu);
 FetchResult LD_ADDR_A16_A(Cpu& cpu);
 

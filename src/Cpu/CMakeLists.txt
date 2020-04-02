@@ -5,6 +5,7 @@ target_sources(cpu
     Operations.cpp 
     CBOperations.cpp 
     Timer.cpp
+    Interrupt_Handler.cpp
 )
 
 target_compile_options(cpu PRIVATE -Wall)

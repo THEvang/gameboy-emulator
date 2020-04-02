@@ -2,16 +2,7 @@
 
 #include <cstdint>
 #include "memory_controllers/MemoryBankController.h"
-#include <Timer.h>
 #include <functional>
-
-enum class Interrupts {
-    V_Blank = 0,
-    LCD_STAT,
-    Timer,
-    Serial,
-    Joypad
-};
 
 struct Cpu {
 
@@ -29,7 +20,9 @@ struct Cpu {
     uint16_t m_stack_ptr = 0xFFFE;
     uint16_t m_program_counter = 0x0100;
 
-    bool m_enabled_interrupts = false;
+    bool m_interrupts_enabled = false;
+    bool m_should_enable_interrupts = false;
+    bool m_should_disable_interrupts = false;
     bool should_stop = false;
 
     int m_cycles = 0;
@@ -42,9 +35,6 @@ struct Cpu {
     static const int carry_flag = 4;
 
     bool m_is_halted = false;
-
-    Timer timer;
-    const int speed = 4.194304e6;
 };
 
 struct FetchResult {
@@ -55,7 +45,6 @@ struct FetchResult {
 
 FetchResult fetch(Cpu& cpu);
 FetchResult fetch_cb(Cpu& cpu);
-
-void handle_interrupts(Cpu& cpu);
+void timer(Cpu& cpu);
 
 uint8_t ADD(uint8_t value, uint8_t& flags);

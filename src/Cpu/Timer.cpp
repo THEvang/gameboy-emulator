@@ -1,26 +1,59 @@
 #include <Timer.h>
-
 #include <BitOperations.h>
 
-bool Timer::increment_div(const int current_cycles) {
+Timer::Timer(MemoryBankController* memory_controller) 
+    : m_memory_controller(memory_controller)
+{}
 
-    const auto cpu_speed = 4.194304e6;
-    const auto div_speed = 16384;
-    const auto ratio = cpu_speed / div_speed;
+void Timer::increment(uint8_t cycles) {
 
-    if( (current_cycles - last_div_increment) >= ratio) {
-        
-        last_div_increment = current_cycles - current_cycles % static_cast<int>(ratio);
-        return true;
-    } else {
-        return false;
+    m_div_cycles += cycles;
+    if(increment_div()) {
+        auto div_value = m_memory_controller->read(div_address);
+        div_value++;
+        m_memory_controller->write(div_address, div_value);
+    };
+    
+    const auto time_control = m_memory_controller->read(tac_address);
+    if(is_set(time_control, 2)) {
+        m_tima_cycles += cycles;
+        if(increment_tima(time_control)) {
+
+            auto tima_value = m_memory_controller->read(tima_address);
+
+            if(overflows_8bit(tima_value, 1)) {
+                
+                const auto tima_reset_value = m_memory_controller->read(tma_address);
+                m_memory_controller->write(tima_address, tima_reset_value);
+
+                auto if_register = m_memory_controller->read(0xFF0F);
+                auto ie_register = m_memory_controller->read(0xFFFF);
+                if(is_set(ie_register, 2)) {
+                    set_bit(if_register, 2);
+                    m_memory_controller->write(0xFF0F, if_register);
+                }
+                
+            } else {
+                tima_value++;
+                m_memory_controller->write(tima_address, tima_value);
+            }
+        }
     }
 }
 
-bool Timer::increment_tima(const int current_cycles, uint8_t timer_control) {
+bool Timer::increment_div() {
 
-    const auto cpu_speed = 4.194304e6;
+    const auto ratio =  m_cpu_speed / m_div_speed;
 
+    if(m_div_cycles >= ratio) {
+        m_div_cycles -= ratio;
+        return true;
+    }
+
+    return false;
+}
+
+bool Timer::increment_tima(uint8_t timer_control) {
 
     const auto clock_select = timer_control & 0x03;
     auto clock_value = 0;
@@ -43,14 +76,12 @@ bool Timer::increment_tima(const int current_cycles, uint8_t timer_control) {
             break;
     }
 
-    const auto ratio = cpu_speed / clock_value;
-    if ((current_cycles - last_tima_increment) >= ratio) {
+    const auto ratio = m_cpu_speed / clock_value;
+    if (m_tima_cycles >= ratio) {
 
-        last_tima_increment = current_cycles - (current_cycles % static_cast<int>(ratio));
-        if(!is_set(timer_control, 2)) {
-            return false;
-        }
+        m_tima_cycles -= ratio;
         return true;
     }
+
     return false;
 }

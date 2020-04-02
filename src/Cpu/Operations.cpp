@@ -26,12 +26,26 @@ FetchResult STOP(Cpu& cpu) {
 
 FetchResult HALT(Cpu& cpu) {
 
-    throw UnimplementedOperation("HALT\n");
     constexpr auto cycles = 4;
     constexpr auto delta_pc = 1;
 
     return {cycles, delta_pc, [](Cpu& cpu) {
-        cpu.m_is_halted = true;
+        if(cpu.m_interrupts_enabled) {
+            cpu.m_is_halted = true;
+        } else {
+
+            const auto interrupt_request_addr = 0xFF0F;
+            const auto interrupt_enable_addr = 0xFFFF;
+
+            const auto interrupt_request = cpu.m_memory_controller->read(interrupt_request_addr);
+            const auto interrupt_enable = cpu.m_memory_controller->read(interrupt_enable_addr);
+
+            if((interrupt_request & interrupt_enable & 0x1F) == 0) {
+                cpu.m_is_halted = true;
+            } else {
+                throw UnimplementedOperation("HALT BUG");
+            }
+        }
     }};
 }
 
@@ -59,7 +73,7 @@ FetchResult DI(Cpu& cpu) {
     constexpr auto delta_pc = 1;
 
     return {cycles, delta_pc, [](Cpu& cpu) {
-        cpu.m_enabled_interrupts = false;
+        cpu.m_should_disable_interrupts = true;
     }};
 }
 
@@ -69,8 +83,7 @@ FetchResult EI(Cpu& cpu) {
     constexpr auto delta_pc = 1;
 
     return {cycles, delta_pc, [](Cpu& cpu) {
-        fetch(cpu);
-        cpu.m_enabled_interrupts = true;
+        cpu.m_should_enable_interrupts = true;
     }};
 }
 
@@ -216,14 +229,14 @@ FetchResult RET_C(Cpu& cpu) {
 FetchResult RETI(Cpu& cpu) {
 
     constexpr auto cycles = 16;
-    constexpr auto delta_pc = 0;
+    constexpr auto delta_pc = 1;
 
     return {cycles, delta_pc, [](Cpu& cpu) {
         const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
         const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
         cpu.m_program_counter = combine_bytes(pc_high, pc_low);    
         cpu.m_stack_ptr += 2;
-        cpu.m_enabled_interrupts = true;
+        cpu.m_interrupts_enabled = true;
     }};
 }
 
@@ -791,7 +804,7 @@ FetchResult LD_C_ADDR_HL(Cpu& cpu) {
 
 FetchResult LD_D_D8(Cpu& cpu) {
     constexpr auto cycles = 8;
-    constexpr auto delta_pc = 1;
+    constexpr auto delta_pc = 2;
 
     return {cycles, delta_pc, [](Cpu& cpu) {
         cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
@@ -871,8 +884,7 @@ FetchResult LD_E_D8(Cpu& cpu) {
     constexpr auto delta_pc = 2;
     
     return {cycles, delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
-        cpu.m_reg_e = value;
+        cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
     }};
 }
 
@@ -1182,6 +1194,18 @@ FetchResult LD_ADDR_HL_L(Cpu& cpu) {
         const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         cpu.m_memory_controller->write(address, cpu.m_reg_l);
     }};   
+}
+
+FetchResult LD_ADDR_HL_D8(Cpu& cpu) {
+
+    constexpr auto cycles = 12;
+    constexpr auto delta_pc = 2;
+
+    return {cycles, delta_pc, [](Cpu& cpu) {
+        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_memory_controller->write(address, value);
+    }};
 }
 
 FetchResult LD_ADDR_HL_ADDR_HL(Cpu& cpu) {    

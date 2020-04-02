@@ -2,6 +2,8 @@
 #include <iostream>
 #include "memory_controllers/MBC1.h"
 #include "memory_controllers/Memory.h"
+#include "Timer.h"
+#include "cpu/Interrupt_Handler.h"
 
 void GameBoy::run(const std::vector<uint8_t>& rom) {
     
@@ -10,16 +12,35 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
     MBC1 mbc1(internal_memory, rom_memory);
 
     Cpu cpu(&mbc1);
+    Timer timer(&mbc1);
+    Interrupt_Handler interrupt_handler(&mbc1);
     while(!cpu.should_stop)
     {
         try {
             
             auto [cycles, delta_pc, operation] = fetch(cpu);
-            cpu.m_program_counter += delta_pc;
-            //handle_interrupts(cpu);
-            operation(cpu);
-            //timer(cpu);
+            
+            if(!cpu.m_is_halted) {
+                cpu.m_program_counter += delta_pc;
+                operation(cpu);
+            } else {
+                cycles = 4;
+                cpu.m_is_halted = interrupt_handler.should_exit_halt();
+            }
+            
+            if(cpu.m_interrupts_enabled) {
+                cycles += interrupt_handler.interrupts(cpu);
+            }
 
+            if(cpu.m_should_enable_interrupts) {
+                cpu.m_interrupts_enabled = true;
+                cpu.m_should_enable_interrupts = false;
+            } else if(cpu.m_should_disable_interrupts) {
+                cpu.m_interrupts_enabled = false;
+                cpu.m_should_disable_interrupts = false;
+            }
+
+            timer.increment(cycles);
         }   
         catch (std::exception& err)  {
             std::cout << err.what();

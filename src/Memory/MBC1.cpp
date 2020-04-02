@@ -64,10 +64,7 @@ void MBC1::write(const uint16_t address, uint8_t value) {
         if(m_ram_enabled) {
             m_internal_memory.write(address, value);
         }
-    } else if (address == 0xFF04) {
-        m_internal_memory.write(address, 0);
-    }
-    else {
+    } else {
         m_internal_memory.write(address, value);
     }
 }
