@@ -9,7 +9,6 @@
 Cpu::Cpu(MemoryBankController* memory_controller)     
     : m_memory_controller(memory_controller) 
 {
-
     m_memory_controller->write(0xFF05, 0);
     m_memory_controller->write(0xFF06, 0);
     m_memory_controller->write(0xFF07, 0);

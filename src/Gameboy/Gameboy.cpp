@@ -12,7 +12,7 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
     MBC1 mbc1(internal_memory, rom_memory);
 
     Cpu cpu(&mbc1);
-    Timer timer(&mbc1);
+    Timer timer(&internal_memory);
     Interrupt_Handler interrupt_handler(&mbc1);
     while(!cpu.should_stop)
     {
@@ -27,9 +27,12 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
                 cycles = 4;
                 cpu.m_is_halted = interrupt_handler.should_exit_halt();
             }
+
+            timer.increment(cycles);
             
             if(cpu.m_interrupts_enabled) {
-                cycles += interrupt_handler.interrupts(cpu);
+                const auto interrupt_cycles = interrupt_handler.interrupts(cpu);
+                timer.increment(interrupt_cycles);
             }
 
             if(cpu.m_should_enable_interrupts) {
@@ -40,7 +43,6 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
                 cpu.m_should_disable_interrupts = false;
             }
 
-            timer.increment(cycles);
         }   
         catch (std::exception& err)  {
             std::cout << err.what();

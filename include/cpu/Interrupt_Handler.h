@@ -1,3 +1,5 @@
+#pragma once 
+
 #include "memory_controllers/MemoryBankController.h"
 #include "cpu/Cpu.h"
 

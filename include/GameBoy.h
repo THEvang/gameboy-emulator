@@ -1,8 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
 #include "memory_controllers/MemoryBankController.h"
 #include "cpu/Cpu.h"
 
