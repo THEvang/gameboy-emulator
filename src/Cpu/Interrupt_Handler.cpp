@@ -45,6 +45,18 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
     return 0;
 }
 
+void Interrupt_Handler::request_lcd_stat_interrupt() {
+    auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
+    set_bit(interrupt_request, static_cast<int>(Interrupts::LCD_STAT));
+    m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
+}
+
+void Interrupt_Handler::request_v_blank_interrupt() {
+    auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
+    set_bit(interrupt_request, static_cast<int>(Interrupts::V_Blank));
+    m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
+}
+
 bool Interrupt_Handler::should_exit_halt() {
 
     const auto interrupt_requests = m_memory_bank_controller->read(interrupt_request_address);

@@ -18,7 +18,7 @@ target_include_directories(graphics PRIVATE ../include)
 
 add_executable(Gameboy.out main.cpp Gui.h)
 target_include_directories(Gameboy.out PRIVATE ../include ../include/imgui)
-target_link_libraries(Gameboy.out PRIVATE gameboy imgui utilities memory cpu )
+target_link_libraries(Gameboy.out PRIVATE gameboy imgui utilities memory cpu graphics)
 
 add_subdirectory(Cpu)
 add_subdirectory(Gameboy)

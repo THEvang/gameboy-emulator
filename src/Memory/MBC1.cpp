@@ -13,9 +13,7 @@ uint8_t MBC1::read(const uint16_t address) {
         const auto read_addr = address + (m_rom_bank -1) * 0x4000;
         return m_rom_memory.read( read_addr);
     } else if (address >= 0xA000 && address <= 0xBFFF) {
-
         return m_internal_memory.read(address);
-        // throw std::runtime_error("RAM");
     } 
     else {
         return m_internal_memory.read(address);
@@ -66,6 +64,12 @@ void MBC1::write(const uint16_t address, uint8_t value) {
         }
     } else if(address == 0xFF04) {
             m_internal_memory.write(0xFF04, 0); 
+    } else if (address == 0xFF46) {
+        
+        for(int i = 0; i < 0xA0; i++) {
+            m_internal_memory.write(0xF300+i, m_internal_memory.read((address << 8) +i));
+        }
+
     } else {
         m_internal_memory.write(address, value);
     }

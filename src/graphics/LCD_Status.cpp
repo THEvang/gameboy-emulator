@@ -1,14 +1,13 @@
 #include "graphics/LCD_Status.h"
 #include "BitOperations.h"
 
-LCD_Status::LCD_Status(MemoryBankController* memory_controller, 
-    Interrupt_Handler interrupt_handler, LCD_Control lcd_control)
+LCD_Status::LCD_Status(MemoryBankController* memory_controller, LCD_Control lcd_control)
     : m_memory_controller(memory_controller)
-    , m_interrupt_handler(interrupt_handler)
+    , m_interrupt_handler(m_memory_controller)
     , m_lcd_control(lcd_control)
 {}
 
-void LCD_Status::set_status(int& current_scanline, int& scanline_counter) {
+void LCD_Status::set_status(uint8_t& current_scanline, int& scanline_counter) {
 
     if(!m_lcd_control.lcd_display_enabled()) {
         scanline_counter = 456;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "memory_controllers/MemoryBankController.h"
 #include "cpu/Interrupt_Handler.h"
 #include "graphics/LCD_Control.h"
@@ -5,10 +7,9 @@
 class LCD_Status {
 public:
     LCD_Status(MemoryBankController* memory_controller, 
-        Interrupt_Handler interrupt_handler,
         LCD_Control lcd_control);
 
-    void set_status(int& current_scanline, int& scanline_counter);
+    void set_status(uint8_t& current_scanline, int& scanline_counter);
 
     void set_horizontal_blank();
     void set_vertical_blank();

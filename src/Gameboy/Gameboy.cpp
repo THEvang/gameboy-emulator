@@ -4,6 +4,7 @@
 #include "memory_controllers/Memory.h"
 #include "Timer.h"
 #include "cpu/Interrupt_Handler.h"
+#include "graphics/PPU.h"
 
 void GameBoy::run(const std::vector<uint8_t>& rom) {
     
@@ -14,6 +15,8 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
     Cpu cpu(&mbc1);
     Timer timer(&internal_memory);
     Interrupt_Handler interrupt_handler(&mbc1);
+    PPU ppu(&mbc1);
+
     while(!cpu.should_stop)
     {
         try {
@@ -43,6 +46,10 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
                 cpu.m_should_disable_interrupts = false;
             }
 
+            ppu.step(cycles);
+
+
+
         }   
         catch (std::exception& err)  {
             std::cout << err.what();
@@ -53,5 +60,28 @@ void GameBoy::run(const std::vector<uint8_t>& rom) {
             std::cout << static_cast<char>(cpu.m_memory_controller->read(0xFF01));
             cpu.m_memory_controller->write(0xFF02, 0);
         }
+
+        
+        const auto screen = ppu.screen();
+
+        for(int i = 0; i < 160; i++) {
+            for (int j = 0; j < 144; j++) {
+                switch(screen[i][j]) {
+                    case 0:
+                        std::cout << "\033[1;40m\b";
+                        break;
+                    case 1:
+                        std::cout << "\033[1;41m";
+                    case 2:
+                        std::cout << "\033[1;42m";
+                    case 3:
+                        std::cout << "\033[1;43m";
+                    default:
+                        break;
+                }
+            }
+            std::cout << "\n";
+        }
+        std::cout << "\033c";
     }
 }

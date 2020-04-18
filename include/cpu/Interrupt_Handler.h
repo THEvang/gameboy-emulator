@@ -14,7 +14,7 @@ enum class Interrupts {
 class Interrupt_Handler {
 public: 
 
-    explicit Interrupt_Handler(MemoryBankController*);
+    explicit Interrupt_Handler(MemoryBankController* memory_controller);
 
     int interrupts(Cpu& cpu);
 
