@@ -6,7 +6,7 @@ MBC1::MBC1(Memory& internal_memory, Memory& rom_memory)
     
 }
 
-uint8_t MBC1::read(const uint16_t address) {
+uint8_t MBC1::read(const uint16_t address) const {
     if(address <= 0x3FFF) {
         return m_rom_memory.read(address);
     } else if (address >= 0x4000 && address <= 0x7FFF) {

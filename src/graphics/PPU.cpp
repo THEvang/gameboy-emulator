@@ -22,7 +22,7 @@ void PPU::step(int cycles) {
     if(m_scanline_counter <= 0) {
         
         current_scanline++;
-        m_memory_controller->write(current_scanline, 0xFF44);
+        m_memory_controller->raw()->write(0xFF44, current_scanline);
 
         m_scanline_counter = 456;
 
@@ -30,7 +30,7 @@ void PPU::step(int cycles) {
             m_interrupt_handler.request_v_blank_interrupt();
         } else if (current_scanline > 153) {
             current_scanline = 0;
-            m_memory_controller->write(current_scanline, 0xFF44);
+            m_memory_controller->write(0xFF44, current_scanline);
         } else if (current_scanline < 144) {
             draw_scanline();
         }
@@ -56,37 +56,25 @@ void PPU::draw_background() {
     constexpr auto window_scroll_x_address = 0xFF4B;
     constexpr auto current_scanline_address = 0xFF44;
 
-    constexpr auto memory_start = 0x8000;
-    constexpr auto tile_size = 16;
-
     const auto scanline = m_memory_controller->read(current_scanline_address);
     const auto y_pos = scanline + m_memory_controller->read(scroll_y_address);
     
     const auto x_scroll = m_memory_controller->read(scroll_x_address);
 
-    const auto tile_row = (y_pos / 8) * 32;
-
-    const auto background_address = m_lcd_control.tile_map_start_address();
-    const auto tile_data = m_lcd_control.tile_data_start_address();
-
     constexpr auto horizontal_pixels = 160;
-
     for(int pixel = 0; pixel < horizontal_pixels; pixel++) {
 
         const auto x_pos = x_scroll + pixel;
 
-        const auto tile_column = x_pos / 8;
-        const auto tile_address = background_address + tile_column + tile_row;
-        const auto tile_number = m_lcd_control.tile_data_signed() ? static_cast<int8_t>(m_memory_controller->read(tile_address)) :
-            m_memory_controller->read(tile_address);
-
-        auto tile_location = tile_data;
-        tile_location += m_lcd_control.tile_data_signed() ? ((tile_number + 128) * 16) : tile_number * 16; 
-
-        const auto tile_line = (y_pos % 8) * 2;
-        const auto data_1 = m_memory_controller->read(tile_location + tile_line);
-        const auto data_2 = m_memory_controller->read(tile_location + tile_line + 1);
-
+        const Screen_Position screen_coordinates {x_pos, y_pos};
+        const auto bg_tile_number = background_tile_number(screen_coordinates);
+        const auto bg_tile_identifier_address = background_tile_identifier_address(bg_tile_number);
+        const auto bg_tile_data_address = tile_data_address(bg_tile_identifier_address);    
+        
+        const auto tile_line = (screen_coordinates.y % 8) * 2;
+        const auto data_1 = m_memory_controller->read(bg_tile_data_address + tile_line);
+        const auto data_2 = m_memory_controller->read(bg_tile_data_address + tile_line + 1);
+        
         auto color_bit = x_pos % 8;
         color_bit -= 7;
         color_bit *= -1;
@@ -97,8 +85,9 @@ void PPU::draw_background() {
         auto color = 0;
         color += color_1 ? 2 : 0;
         color += color_2 ? 1 : 0;
-
-        m_screen[pixel][scanline] = color;
+        
+        Color pixel_color {0xA0, 0xA0, 0xA0, 0xAA};
+        m_pixels.set_pixel({pixel, scanline}, pixel_color);
     }
 }
 

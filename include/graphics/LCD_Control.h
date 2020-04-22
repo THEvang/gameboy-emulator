@@ -11,19 +11,19 @@ public:
 
     explicit LCD_Control(MemoryBankController* memory_controller);
 
-    bool lcd_display_enabled();
-    bool window_display_enabled();
-    bool background_display_enabled();
-    bool sprite_display_eanbled();
+    bool lcd_display_enabled() const;
+    bool window_display_enabled() const;
+    bool background_display_enabled() const;
+    bool sprite_display_eanbled() const;
 
-    int window_tile_select();
-    bool background_tile_map_select();
-    int sprite_size();
+    int window_tile_select() const;
+    bool background_tile_map_select() const;
+    int sprite_size() const;
 
-    bool tile_data_signed();
-    uint16_t tile_data_start_address();
-    uint16_t tile_map_start_address();
-    uint16_t window_tile_map_start_address();
+    bool tile_data_signed() const;
+    uint16_t tile_data_start_address() const;
+    uint16_t tile_map_start_address() const;
+    uint16_t window_tile_map_start_address() const;
 
 private:
 

@@ -6,12 +6,49 @@
 #include <vector>
 
 #include "BitOperations.h"
-#include "Gui.h"
+#include "gui/Gui.h"
 #include <File.h>
-
+#include <thread>
 #include <GameBoy.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include <GL/gl.h>
 
-void render_cpu(Cpu& cpu, std::vector<char> blarg)
+void render_ppu(GameBoy& gameboy) {
+
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    if(glGetError() != GL_NO_ERROR) {
+        std::cerr << "Failed to bind texture\n";
+    }
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    constexpr auto target = GL_TEXTURE_2D;
+    constexpr auto level = 0;
+    constexpr auto internal_format = GL_RGB;
+    constexpr auto width = 160;
+    constexpr auto height = 144;
+    constexpr auto border = 0;
+    constexpr auto format = GL_RGB;
+    constexpr auto type = GL_UNSIGNED_BYTE;
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+    glTexImage2D(target, level, internal_format, 
+        width, height, border, 
+        format, type, 
+        gameboy.ppu()->screen().data());
+
+    ImGui::Begin("PPU");
+    ImGui::ShowMetricsWindow();
+    ImGui::Image((void*)(intptr_t) texture, ImVec2(width, height)); 
+    ImGui::End();
+}
+
+void render_cpu(Cpu& cpu)
 {
     ImGui::Begin("Cpu!");
     ImGui::Text("Current Opcode: %i.", cpu.m_memory_controller->read(cpu.m_program_counter));
@@ -47,13 +84,6 @@ void render_cpu(Cpu& cpu, std::vector<char> blarg)
     ImGui::Checkbox("Carry flag: ", &carry_flag);
     ImGui::SameLine();
 
-    std::string s;
-    for (const auto e : blarg) {
-        s += e;
-    }
-
-    ImGui::Text("Serial Output: %s", s.c_str()); //(char)cpu.m_memory_controller->read(0xFF01));
-
     ImGui::End();
 }
 
@@ -70,6 +100,50 @@ void render_disassembly(Cpu& cpu)
     ImGui::End();
 }
 
+void render_main(GameBoy* gameboy) {
+
+    try {
+        Gui gui;
+
+        bool done = false;
+        while (!done) {
+            // Poll and handle events (inputs, window resize, etc.)
+            // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
+            // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
+            // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
+            // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+            SDL_Event event;
+            while (static_cast<bool>(SDL_PollEvent(&event)))
+            {
+                ImGui_ImplSDL2_ProcessEvent(&event);
+                switch (event.type)
+                {
+                case SDL_QUIT:
+                    done = true;
+                    break;
+                case SDL_WINDOWEVENT:
+                    if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window())) {
+                        done = true;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            // ImGui_ImplOpenGL3_NewFrame();
+            // ImGui_ImplSDL2_NewFrame(gui.window());
+            // ImGui::NewFrame();
+            render_cpu(*(gameboy->cpu()));
+            render_ppu(*gameboy);
+            gui.render();
+        }
+    } catch (const std::exception& err) {
+        std::cerr << err.what();
+        return;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
@@ -84,59 +158,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    GameBoy gameboy;
-    gameboy.run(*rom);
+    GameBoy gameboy(*rom);
+    std::thread render_thread(render_main, &gameboy);
+    while(true) {
+        gameboy.run();
+    }
 
+    render_thread.join();
     return 0;
-
-    // Gui gui;
-    // bool done = false;
-    // while (!done)
-    // {
-    //     // Poll and handle events (inputs, window resize, etc.)
-    //     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-    //     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-    //     // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-    //     // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
-    //     SDL_Event event;
-    //     while (SDL_PollEvent(&event))
-    //     {
-    //         ImGui_ImplSDL2_ProcessEvent(&event);
-    //         if (event.type == SDL_QUIT)
-    //             done = true;
-    //         if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window))
-    //             done = true;
-    //         if(event.type == SDL_KEYDOWN) {
-    //             switch(event.key.keysym.sym) {
-    //                 case SDLK_RETURN:
-    //                     step(cpu);
-    //                     break;
-    //             }
-    //         }
-    //     }
-
-    //     ImGui_ImplOpenGL3_NewFrame();
-    //     ImGui_ImplSDL2_NewFrame(gui.window);
-    //     ImGui::NewFrame();
-
-    //     try {
-    //         step(cpu);
-    //         if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-    //             blarg.push_back(cpu.m_memory_controller->read(0xFF01));
-    //         }
-    //         }
-    //         catch (std::exception& err)  {
-    //             std::cout << err.what();
-    //             return 1;
-    //         }
-
-    //     render_disassembly(cpu);
-
-    //     render_cpu(cpu, blarg);
-
-    //     gui.render();
-
-    // }
-
-    // return 0;
 }

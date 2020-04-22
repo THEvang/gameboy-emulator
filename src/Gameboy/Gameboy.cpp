@@ -1,87 +1,67 @@
 #include <GameBoy.h>
 #include <iostream>
 #include "memory_controllers/MBC1.h"
-#include "memory_controllers/Memory.h"
-#include "Timer.h"
-#include "cpu/Interrupt_Handler.h"
-#include "graphics/PPU.h"
 
-void GameBoy::run(const std::vector<uint8_t>& rom) {
+GameBoy::GameBoy(const std::vector<uint8_t>& rom) {
     
+
     Memory rom_memory(rom);
     Memory internal_memory(std::vector<uint8_t>(0xFFFF,0));
-    MBC1 mbc1(internal_memory, rom_memory);
+    
+    m_memory_bank_controller = std::make_unique<MBC1>(internal_memory, rom_memory);
 
-    Cpu cpu(&mbc1);
-    Timer timer(&internal_memory);
-    Interrupt_Handler interrupt_handler(&mbc1);
-    PPU ppu(&mbc1);
+    m_cpu = std::make_unique<Cpu>(m_memory_bank_controller.get());
+    m_timer = std::make_unique<Timer>(m_memory_bank_controller.get());
+    m_interrupt_handler = std::make_unique<Interrupt_Handler>(m_memory_bank_controller.get());
+    m_ppu = std::make_unique<PPU>(m_memory_bank_controller.get());
+}
 
-    while(!cpu.should_stop)
-    {
-        try {
-            
-            auto [cycles, delta_pc, operation] = fetch(cpu);
-            
-            if(!cpu.m_is_halted) {
-                cpu.m_program_counter += delta_pc;
-                operation(cpu);
-            } else {
-                cycles = 4;
-                cpu.m_is_halted = interrupt_handler.should_exit_halt();
-            }
+void GameBoy::run() {
 
-            timer.increment(cycles);
-            
-            if(cpu.m_interrupts_enabled) {
-                const auto interrupt_cycles = interrupt_handler.interrupts(cpu);
-                timer.increment(interrupt_cycles);
-            }
-
-            if(cpu.m_should_enable_interrupts) {
-                cpu.m_interrupts_enabled = true;
-                cpu.m_should_enable_interrupts = false;
-            } else if(cpu.m_should_disable_interrupts) {
-                cpu.m_interrupts_enabled = false;
-                cpu.m_should_disable_interrupts = false;
-            }
-
-            ppu.step(cycles);
-
-
-
-        }   
-        catch (std::exception& err)  {
-            std::cout << err.what();
-            return;
-        }
-
-        if(cpu.m_memory_controller->read(0xFF02) == 0x81) {
-            std::cout << static_cast<char>(cpu.m_memory_controller->read(0xFF01));
-            cpu.m_memory_controller->write(0xFF02, 0);
-        }
-
+    try {
         
-        const auto screen = ppu.screen();
-
-        for(int i = 0; i < 160; i++) {
-            for (int j = 0; j < 144; j++) {
-                switch(screen[i][j]) {
-                    case 0:
-                        std::cout << "\033[1;40m\b";
-                        break;
-                    case 1:
-                        std::cout << "\033[1;41m";
-                    case 2:
-                        std::cout << "\033[1;42m";
-                    case 3:
-                        std::cout << "\033[1;43m";
-                    default:
-                        break;
-                }
-            }
-            std::cout << "\n";
+        auto [cycles, delta_pc, operation] = fetch(*m_cpu);
+        
+        if(!m_cpu->m_is_halted) {
+            m_cpu->m_program_counter += delta_pc;
+            operation(*m_cpu);
+        } else {
+            cycles = 4;
+            m_cpu->m_is_halted = m_interrupt_handler->should_exit_halt();
         }
-        std::cout << "\033c";
+
+        m_timer->increment(cycles);
+        
+        if(m_cpu->m_interrupts_enabled) {
+            const auto interrupt_cycles = m_interrupt_handler->interrupts(*m_cpu);
+            m_timer->increment(interrupt_cycles);
+        }
+
+        if(m_cpu->m_should_enable_interrupts) {
+            m_cpu->m_interrupts_enabled = true;
+            m_cpu->m_should_enable_interrupts = false;
+        } else if(m_cpu->m_should_disable_interrupts) {
+            m_cpu->m_interrupts_enabled = false;
+            m_cpu->m_should_disable_interrupts = false;
+        }
+
+        m_ppu->step(cycles);
+    }   
+    catch (std::exception& err)  {
+        std::cout << err.what();
+        return;
     }
+
+    if(m_cpu->m_memory_controller->read(0xFF02) == 0x81) {
+        std::cout << static_cast<char>(m_cpu->m_memory_controller->read(0xFF01));
+        m_cpu->m_memory_controller->write(0xFF02, 0);
+    }
+}
+
+Cpu* GameBoy::cpu() {
+    return m_cpu.get();
+}
+
+PPU* GameBoy::ppu() {
+    return m_ppu.get();
 }

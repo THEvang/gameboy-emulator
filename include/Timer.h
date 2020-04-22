@@ -1,11 +1,11 @@
 #pragma once
 #include <cstdint>
-#include <memory_controllers/Memory.h>
+#include <memory_controllers/MemoryBankController.h>
 
 class Timer {
 public:
 
-    Timer(Memory* memory);
+    Timer(MemoryBankController* memory);
     void increment(uint8_t cycles);
 
 
@@ -32,5 +32,5 @@ private:
     const int m_cpu_speed = 4.194304e6;
     const int m_div_speed = 16384;
 
-    Memory* m_memory;
+    MemoryBankController* m_memory;
 };

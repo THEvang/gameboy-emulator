@@ -1,7 +1,7 @@
 #include <Timer.h>
 #include <BitOperations.h>
 
-Timer::Timer(Memory* memory) 
+Timer::Timer(MemoryBankController* memory) 
     : m_memory(memory)
 {}
 
