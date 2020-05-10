@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <vector>
+#include <chrono>
 
 #include "BitOperations.h"
 #include "gui/Gui.h"
@@ -27,23 +28,30 @@ void render_ppu(GameBoy& gameboy) {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);  //Always set the base and max mipmap levels of a texture.
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     constexpr auto target = GL_TEXTURE_2D;
     constexpr auto level = 0;
-    constexpr auto internal_format = GL_RGB;
+    constexpr auto internal_format = GL_RGBA8;
     constexpr auto width = 160;
     constexpr auto height = 144;
     constexpr auto border = 0;
-    constexpr auto format = GL_RGB;
-    constexpr auto type = GL_UNSIGNED_BYTE;
+    constexpr auto format = GL_RGBA;
+    constexpr auto type = GL_UNSIGNED_INT_8_8_8_8;
+    // Pixel_Array pixels;
+    // for(int i = 0; i < 160; i++) {
+    //     for(int j = 0; j < 144; j++) {
+    //         pixels.set_pixel({i, j}, {0x00, 0xFF, 0x00});
+    //     }
+    // }
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(target, level, internal_format, 
         width, height, border, 
         format, type, 
-        gameboy.ppu()->screen().data());
+        (GLvoid*) gameboy.ppu()->screen().data());//gameboy.ppu()->screen().data());
 
     ImGui::Begin("PPU");
-    ImGui::ShowMetricsWindow();
     ImGui::Image((void*)(intptr_t) texture, ImVec2(width, height)); 
     ImGui::End();
 }
@@ -102,6 +110,8 @@ void render_disassembly(Cpu& cpu)
 
 void render_main(GameBoy* gameboy) {
 
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
     try {
         Gui gui;
 
@@ -131,12 +141,18 @@ void render_main(GameBoy* gameboy) {
                 }
             }
 
-            // ImGui_ImplOpenGL3_NewFrame();
-            // ImGui_ImplSDL2_NewFrame(gui.window());
-            // ImGui::NewFrame();
+            gameboy->run();
+            std::chrono::duration<double, std::milli> dur = stop - start;
+            if(dur.count() > 32) {
+            start = std::chrono::high_resolution_clock::now();
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplSDL2_NewFrame(gui.window());
+            ImGui::NewFrame();
             render_cpu(*(gameboy->cpu()));
             render_ppu(*gameboy);
             gui.render();
+            }
+            stop = std::chrono::high_resolution_clock::now();
         }
     } catch (const std::exception& err) {
         std::cerr << err.what();
@@ -159,11 +175,6 @@ int main(int argc, char* argv[])
     }
 
     GameBoy gameboy(*rom);
-    std::thread render_thread(render_main, &gameboy);
-    while(true) {
-        gameboy.run();
-    }
-
-    render_thread.join();
+    render_main(&gameboy);
     return 0;
 }

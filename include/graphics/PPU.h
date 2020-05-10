@@ -16,39 +16,25 @@ public:
 
 private:
 
+    Color get_color(int color_id, uint16_t palette_address);
+
     void draw_scanline();
     void draw_background();
     void draw_sprites();
 
-    const static int pixels_in_tile = 8;
-    const static int vertical_tiles = 32;
-    const static int horizontal_tiles = 32;
+    const static auto scroll_y_address = 0xFF42; 
+    const static auto scroll_x_address = 0xFF43;
+    const static auto window_scroll_y_address = 0xFF4A;
+    const static auto window_scroll_x_address = 0xFF4B;
+    const static auto scanline_address = 0xFF44;
 
-    int background_tile_number(const Screen_Position& screen_position) const {
-        
-        const auto tile_row = (screen_position.y / pixels_in_tile) * horizontal_tiles;
-        const auto tile_column = screen_position.x / pixels_in_tile;
-        return tile_row + tile_column;
-    }
+    const static auto pixels_in_tile = 8;
+    const static auto vertical_tiles = 32;
+    const static auto horizontal_tiles = 32;
 
-    uint16_t background_tile_identifier_address(int tile_number) const {
-        
-        uint16_t tile_map_address = m_lcd_control.background_tile_map_select() ? 0x9C00 : 0x9800;
-        return tile_map_address + tile_number;
-    }
+    int tile_number(const Screen_Position& screen_position) const;
 
-    uint16_t tile_data_address(int tile_identifier_address) const {
-    
-        const auto tile_identifier = m_lcd_control.tile_data_signed() ? static_cast<int8_t>(m_memory_controller->read(tile_identifier_address)) :
-            m_memory_controller->read(tile_identifier_address);
-
-        const auto tile_data_start_address = m_lcd_control.tile_data_signed() ? 0x8800 : 0x9C00;
-        const auto tile_data_offset = m_lcd_control.tile_data_signed() ? ((tile_identifier + 128) * 16) : tile_identifier * 16; 
-
-        return tile_data_start_address + tile_data_offset;
-    }
-
-    const static int scanline_address = 0xFF44;
+    uint16_t tile_data_address(int tile_identifier_address) const;
 
     MemoryBankController* m_memory_controller;
 

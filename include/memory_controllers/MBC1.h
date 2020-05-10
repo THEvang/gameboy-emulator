@@ -9,4 +9,7 @@ public:
     void write(const uint16_t address, const uint8_t value) override;
     
 private:
+
+    static const int dma_address = 0xFF46;
+    void dma_transfer(uint8_t data);
 };

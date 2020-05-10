@@ -31,7 +31,8 @@ void GameBoy::run() {
         }
 
         m_timer->increment(cycles);
-        
+        m_ppu->step(cycles);
+            
         if(m_cpu->m_interrupts_enabled) {
             const auto interrupt_cycles = m_interrupt_handler->interrupts(*m_cpu);
             m_timer->increment(interrupt_cycles);
@@ -44,9 +45,7 @@ void GameBoy::run() {
             m_cpu->m_interrupts_enabled = false;
             m_cpu->m_should_disable_interrupts = false;
         }
-
-        m_ppu->step(cycles);
-    }   
+}   
     catch (std::exception& err)  {
         std::cout << err.what();
         return;
