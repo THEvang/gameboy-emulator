@@ -2,40 +2,38 @@
 #include <limits>
 
 auto combine_bytes(uint8_t upper, uint8_t lower) -> uint16_t {
-    const uint16_t a = upper;
-    const uint16_t b = lower;
-    const uint16_t result = (a << 8) | b;
+    const uint16_t result = (upper << 8U) | lower;
     return result;
 }
 
 auto half_carry_8bit(uint8_t a, uint8_t b) -> bool {
 
-    return ((a & 0xF) + (b & 0xF)) > 0xF;
+    return ((a & 0xFU) + (b & 0xFU)) > 0xFU;
 }
 
 auto half_carry_16bit(uint16_t a, uint16_t b) -> bool {
 
-    return ((a & 0xFFF) + (b & 0xFFF)) > 0xFFF;
+    return ((a & 0xFFFU) + (b & 0xFFFU)) > 0xFFFU;
 }
 
 auto half_borrow_8bit(uint8_t a, uint8_t b) -> bool {
-   return (a & 0xF) < (b & 0xF);
+   return (a & 0xFU) < (b & 0xFU);
 }
 
 auto half_borrow_16bit(uint16_t a, uint16_t b) -> bool {
-   return (a & 0xFFF) < (b & 0xFFF);
+   return (a & 0xFFFU) < (b & 0xFFFU);
 }
 
 void set_bit(uint8_t& b, int n) {
-    b |= (1 << n);
+    b |= (1U << n);
 }
 
 void clear_bit(uint8_t& b, int n) {
-    b &= ~(1 << n);
+    b &= ~(1U << n);
 }
 
 auto is_set(uint8_t b, int n) -> bool {
-    return ((1 << n) & b) != 0;
+    return ((1U << n) & b) != 0;
 }
 
 auto overflows_8bit(uint8_t a, uint8_t b) -> bool {
@@ -57,5 +55,5 @@ auto underflows_16bit(uint16_t a, uint16_t b) -> bool {
 }
 
 void swap_nibbles(uint8_t& a) {
-    a = ( (a & 0x0F) << 4 | (a & 0xF0) >> 4 );
+    a = ( (a & 0x0FU) << 4U | (a & 0xF0U) >> 4U );
 }

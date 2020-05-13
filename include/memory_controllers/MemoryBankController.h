@@ -18,8 +18,13 @@ public:
 
     virtual ~MemoryBankController() = default;
 
-    virtual uint8_t read(const uint16_t address) = 0;
+    virtual uint8_t read(const uint16_t address) const = 0;
     virtual void write(const uint16_t address, uint8_t value) = 0;
+
+    //Gets raw memory for modules that must bypass usual memory control;
+    Memory* raw() {
+        return &m_internal_memory;
+    };
 
 protected:
 

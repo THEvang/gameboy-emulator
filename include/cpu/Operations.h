@@ -5,7 +5,6 @@
 
 class UnimplementedOperation : public std::runtime_error {
 public:
-
     explicit UnimplementedOperation(const std::string& msg);
 };
 
