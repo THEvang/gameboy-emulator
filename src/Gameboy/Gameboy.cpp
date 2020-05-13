@@ -45,7 +45,7 @@ void GameBoy::run() {
             m_cpu->m_interrupts_enabled = false;
             m_cpu->m_should_disable_interrupts = false;
         }
-}   
+    }
     catch (std::exception& err)  {
         std::cout << err.what();
         return;

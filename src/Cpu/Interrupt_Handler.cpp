@@ -1,8 +1,8 @@
 #include "cpu/Interrupt_Handler.h"
 #include "BitOperations.h"
 
-Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_bank_controller)
-    : m_memory_bank_controller(memory_bank_controller)
+Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
+    : m_memory_bank_controller(memory_controller)
 {}
 
 int Interrupt_Handler::interrupts(Cpu& cpu) {
@@ -62,7 +62,7 @@ bool Interrupt_Handler::should_exit_halt() {
     const auto interrupt_requests = m_memory_bank_controller->read(interrupt_request_address);
     const auto interrupts_enabled = m_memory_bank_controller->read(interrupt_enabled_address);
 
-    return ((interrupt_requests & interrupts_enabled) & 0x1F) == 0;
+    return ((interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
 void Interrupt_Handler::clear_v_blank_request() {
@@ -145,12 +145,12 @@ bool Interrupt_Handler::joypad_interrupt_enabled() const {
     return is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad));
 }
 
-void Interrupt_Handler::call(Cpu& cpu, int interrupt_vector) {
+void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {
 
-    const auto pc_low = cpu.m_program_counter & 0xFF;
-    const auto pc_high = cpu.m_program_counter >> 8;
-    m_memory_bank_controller->write(cpu.m_stack_ptr - 1, pc_high);
-    m_memory_bank_controller->write(cpu.m_stack_ptr - 2, pc_low);
-    cpu.m_stack_ptr -= 2;
-    cpu.m_program_counter = interrupt_vector;
+    const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFU);
+    const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8U);
+    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
+    cpu.m_stack_ptr -= static_cast<uint16_t>(2);
+    cpu.m_program_counter = static_cast<uint16_t>(interrupt_vector);
 }

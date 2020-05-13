@@ -6,7 +6,7 @@ class Timer {
 public:
 
     Timer(MemoryBankController* memory);
-    void increment(uint8_t cycles);
+    void increment(int cycles);
 
 
     static const uint16_t div_address = 0xFF04;    

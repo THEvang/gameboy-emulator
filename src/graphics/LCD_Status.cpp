@@ -1,5 +1,4 @@
 #include "graphics/LCD_Status.h"
-#include "BitOperations.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
@@ -9,38 +8,37 @@ LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Contro
 
 void LCD_Status::set_status(int& scanline_counter) {
     
-    auto status = m_memory_controller->read(status_address);
-
+    constexpr uint16_t scanline_address = 0xFF44;
     if(!m_lcd_control.lcd_display_enabled()) {
         scanline_counter = 456;
-        status &= 252;
-        set_bit(status, 0);
-        m_memory_controller->write(status_address, status);
-        m_memory_controller->raw()->write(0xFF44, 0);
+        set_mode(LCD_Modes::V_Blank);
+        m_memory_controller->raw()->write(scanline_address, 0);
         return;   
     }
 
-    const auto current_mode = status & 0x3;
+    const auto current_mode = get_mode();
     const auto current_scanline = m_memory_controller->read(0xFF44);
 
     auto request_interrupt = false;
+    
+    auto status = m_memory_controller->read(status_address);
     if(current_scanline >= 144) {
-        set_vertical_blank();
+        set_mode(LCD_Modes::V_Blank);
         request_interrupt = is_set(status, 4);
     } else {
         
         if(scanline_counter >= (456 - 80)) {
-            set_searching_sprites();
+            set_mode(LCD_Modes::Searching_Sprite_Attributes);
             request_interrupt = is_set(status, 5);
         } else if(scanline_counter >= (456 - 80 - 172)) {
-            set_data_transfer();
+            set_mode(LCD_Modes::Transferring_Data);
         } else {
-            set_horizontal_blank();
+            set_mode(LCD_Modes::H_Blank);
             request_interrupt = is_set(status, 3);
         }
     }
 
-    const auto new_mode = m_memory_controller->read(status_address) & 0x3;
+    const auto new_mode = get_mode();
 
     if(request_interrupt && (current_mode != new_mode)) {
         m_interrupt_handler.request_lcd_stat_interrupt();

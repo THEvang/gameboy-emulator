@@ -5,7 +5,7 @@ Timer::Timer(MemoryBankController* memory)
     : m_memory(memory)
 {}
 
-void Timer::increment(uint8_t cycles) {
+void Timer::increment(int cycles) {
 
     m_div_cycles += cycles;
     if(should_increment_div()) {

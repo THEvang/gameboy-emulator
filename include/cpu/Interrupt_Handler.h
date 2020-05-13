@@ -46,7 +46,7 @@ private:
     bool serial_interrupt_enabled() const;
     bool joypad_interrupt_enabled() const;
 
-    void call(Cpu& cpu, int interrupt_vector);
+    void call(Cpu& cpu, uint8_t interrupt_vector);
 
     static const uint16_t interrupt_request_address = 0xFF0F;
     static const uint16_t interrupt_enabled_address = 0xFFFF;
@@ -56,6 +56,11 @@ private:
     static const uint8_t timer_vector = 0x50;
     static const uint8_t serial_vector = 0x58;
     static const uint8_t joypad_vector = 0x60;
+
+    static const int v_blank_interrupt_bit = 0;
+    static const int lcd_interrupt_bit = 1;
+    static const int timer_interrupt_bit = 2;
+    static const int joypad_interrupt_bit = 3;
 
     MemoryBankController* m_memory_bank_controller;
 };

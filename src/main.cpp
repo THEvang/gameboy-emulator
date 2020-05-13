@@ -33,26 +33,20 @@ void render_ppu(GameBoy& gameboy) {
 
     constexpr auto target = GL_TEXTURE_2D;
     constexpr auto level = 0;
-    constexpr auto internal_format = GL_RGBA8;
-    constexpr auto width = 160;
-    constexpr auto height = 144;
+    constexpr auto internal_format = GL_RGBA;
+    constexpr GLsizei width = 160;
+    constexpr GLsizei height = 144;
     constexpr auto border = 0;
     constexpr auto format = GL_RGBA;
     constexpr auto type = GL_UNSIGNED_INT_8_8_8_8;
-    // Pixel_Array pixels;
-    // for(int i = 0; i < 160; i++) {
-    //     for(int j = 0; j < 144; j++) {
-    //         pixels.set_pixel({i, j}, {0x00, 0xFF, 0x00});
-    //     }
-    // }
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(target, level, internal_format, 
         width, height, border, 
         format, type, 
-        (GLvoid*) gameboy.ppu()->screen().data());//gameboy.ppu()->screen().data());
+        (GLvoid*) gameboy.ppu()->screen().data());
 
     ImGui::Begin("PPU");
-    ImGui::Image((void*)(intptr_t) texture, ImVec2(width, height)); 
+    ImGui::Image((void*)(intptr_t) texture, ImVec2(width*3, height*3)); 
     ImGui::End();
 }
 

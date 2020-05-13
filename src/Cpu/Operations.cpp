@@ -2696,7 +2696,7 @@ FetchResult ADC_A_C(Cpu& cpu) {
     }};
 }
 
-FetchResult ADC_A_D(Cpu& cpu) {
+FetchResult ADC_A_D(Cpu&) {
     
     constexpr auto cycles = 4;
     constexpr auto delta_pc = 1;

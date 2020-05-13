@@ -2,8 +2,8 @@
 #include <GL/gl.h>
 
 struct Screen_Position {
-    int x = 0;
-    int y = 0;
+    uint8_t x = 0;
+    uint8_t y = 0;
 };
 
 struct Color {  
