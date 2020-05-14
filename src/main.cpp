@@ -6,6 +6,8 @@
 #include <vector>
 #include <chrono>
 
+#include "Memory/Cartridge.h"
+
 #include "BitOperations.h"
 #include "gui/Gui.h"
 #include <File.h>
@@ -102,6 +104,54 @@ void render_disassembly(Cpu& cpu)
     ImGui::End();
 }
 
+void render_cartridge_data(GameBoy& gameboy) {
+    
+    ImGui::Begin("Cartridge Header");
+    const auto mbc_identifier = gameboy.cpu()->m_memory_controller->read(0x0147);
+    const auto mbc_type = get_bank_type(mbc_identifier);
+    std::string mbc_render {};
+
+    switch(mbc_type) {
+        case Bank_Type::Rom_Only:
+            mbc_render = "Rom only";
+        break;
+        case Bank_Type::MBC_1:
+            mbc_render = "MBC 1";
+        break;
+
+        case Bank_Type::MBC_2:
+            mbc_render = "MBC 2";
+        break;
+
+        case Bank_Type::MBC_3:
+            mbc_render = "MBC 3";
+        break;
+
+        case Bank_Type::MBC_5:
+            mbc_render = "MBC 5";
+        break;
+
+        case Bank_Type::MBC_6:
+            mbc_render = "MBC 6";
+        break;
+
+        case Bank_Type::MBC_7:
+            mbc_render = "MBC 7";
+        break;
+
+        default:
+            mbc_render = "Unknown";
+        break;
+    }
+
+    ImGui::Text(mbc_render.c_str());
+
+    auto ram = has_ram(mbc_identifier);
+    ImGui::Checkbox("Ram: ", &ram);
+
+    ImGui::End();
+}
+
 void render_main(GameBoy* gameboy) {
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -130,6 +180,68 @@ void render_main(GameBoy* gameboy) {
                         done = true;
                     }
                     break;
+                case SDL_KEYDOWN:
+                    switch(event.key.keysym.sym) {
+                        case SDLK_LEFT:
+                            gameboy->joypad_controller()->press_button(Buttons::Left);
+                        break;
+                        
+                        case SDLK_RIGHT:
+                            gameboy->joypad_controller()->press_button(Buttons::Right);
+                        break;
+                        
+                        case SDLK_DOWN:
+                            gameboy->joypad_controller()->press_button(Buttons::Down);
+                        break;
+
+                        case SDLK_SPACE:
+                            gameboy->joypad_controller()->press_button(Buttons::Select);
+                        break;
+
+                        case SDLK_RETURN:
+                            gameboy->joypad_controller()->press_button(Buttons::Start);
+                        break;
+
+                        case SDLK_x:
+                            gameboy->joypad_controller()->press_button(Buttons::A);
+                        break;
+
+                        case SDLK_z:
+                            gameboy->joypad_controller()->press_button(Buttons::B);
+                        break;
+                    }
+                break;
+                case SDL_KEYUP:
+                    switch(event.key.keysym.sym) {
+                        case SDLK_LEFT:
+                            gameboy->joypad_controller()->release_button(Buttons::Left);
+                        break;
+                        
+                        case SDLK_RIGHT:
+                            gameboy->joypad_controller()->release_button(Buttons::Right);
+                        break;
+                        
+                        case SDLK_DOWN:
+                            gameboy->joypad_controller()->release_button(Buttons::Down);
+                        break;
+
+                        case SDLK_SPACE:
+                            gameboy->joypad_controller()->release_button(Buttons::Select);
+                        break;
+
+                        case SDLK_RETURN:
+                            gameboy->joypad_controller()->release_button(Buttons::Start);
+                        break;
+
+                        case SDLK_x:
+                            gameboy->joypad_controller()->release_button(Buttons::A);
+                        break;
+
+                        case SDLK_z:
+                            gameboy->joypad_controller()->release_button(Buttons::B);
+                        break;
+                    }
+                    break;
                 default:
                     break;
                 }
@@ -144,6 +256,7 @@ void render_main(GameBoy* gameboy) {
             ImGui::NewFrame();
             render_cpu(*(gameboy->cpu()));
             render_ppu(*gameboy);
+            render_cartridge_data(*gameboy);
             gui.render();
             }
             stop = std::chrono::high_resolution_clock::now();

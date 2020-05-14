@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "memory_controllers/MemoryBankController.h"
+#include "Memory/Memory_Controller.h"
 #include "cpu/Cpu.h"
 
 enum class Interrupts {

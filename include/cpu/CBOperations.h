@@ -1,6 +1,6 @@
 #pragma once 
+
 #include <cpu/Cpu.h>
-#include <cpu/CBOpcodes.h>
 
 FetchResult RLC_B(Cpu& cpu);
 FetchResult RLC_C(Cpu& cpu);

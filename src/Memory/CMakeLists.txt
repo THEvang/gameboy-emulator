@@ -3,7 +3,7 @@ target_sources(
     memory 
     PRIVATE
     Memory.cpp 
-    MBC1.cpp 
-    MBC2.cpp
+    Memory_Controller.cpp
+    Cartridge.cpp
 )
 target_link_libraries(memory PRIVATE project_warnings)

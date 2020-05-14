@@ -19,11 +19,15 @@ target_include_directories(graphics PRIVATE ../include)
 add_library(gui STATIC)
 target_include_directories(gui PRIVATE ../include)
 
+add_library(input STATIC)
+target_include_directories(input PRIVATE ../include)
+
 add_executable(Gameboy.out main.cpp)
 target_include_directories(Gameboy.out PRIVATE ../include ../include/imgui)
-target_link_libraries(Gameboy.out PRIVATE gameboy imgui utilities memory cpu graphics gui)
+target_link_libraries(Gameboy.out PRIVATE memory input gameboy imgui utilities cpu graphics gui)
 target_link_libraries(Gameboy.out PRIVATE SDL2 GLEW GL pthread)
 
+add_subdirectory(Input)
 add_subdirectory(Cpu)
 add_subdirectory(Gameboy)
 add_subdirectory(imgui)

@@ -1,7 +1,7 @@
 #pragma once
 #include "graphics/LCD_Status.h"
 #include "cpu/Interrupt_Handler.h"
-#include "memory_controllers/MBC1.h"
+#include "Memory/Memory_Controller.h"
 #include "graphics/Pixel.h"
 
 class PPU {

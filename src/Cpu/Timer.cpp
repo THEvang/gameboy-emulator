@@ -26,7 +26,7 @@ void Timer::increment(int cycles) {
                 auto if_register = m_memory->read(if_address);
 
                 set_bit(if_register, 2);
-                m_memory->write(0xFF0F, if_register);
+                m_memory->write(if_address, if_register);
                 
             } else {
                 tima_value++;
@@ -48,7 +48,7 @@ int Timer::div_ratio() {
 void Timer::increment_div() {
     auto current_div_value = m_memory->read(div_address);
     current_div_value++;
-    m_memory->write(div_address, current_div_value);
+    m_memory->raw()->write(div_address, current_div_value);
     m_div_cycles -= div_ratio();
 }
 
@@ -59,7 +59,7 @@ bool Timer::should_increment_tima() {
 int Timer::tima_ratio() {
     
     const auto timer_control = m_memory->read(tac_address);
-    const auto clock_select = timer_control & 0x03;
+    const uint8_t clock_select = timer_control & 0x03;
     auto clock_value = 0;
 
     switch(clock_select) {
