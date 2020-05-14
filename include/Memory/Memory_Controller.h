@@ -35,6 +35,7 @@ protected:
 
     uint8_t read_from_rom_bank(uint16_t address) const;
     uint8_t read_from_ram(uint16_t address) const;
+    uint8_t read_joypad_input() const;
 
     void switch_banking_mode(uint8_t data);
 
