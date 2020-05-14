@@ -1,15 +1,11 @@
 #include <GameBoy.h>
 #include <iostream>
-#include "memory_controllers/MBC1.h"
 
 GameBoy::GameBoy(const std::vector<uint8_t>& rom) {
     
-
-    Memory rom_memory(rom);
-    Memory internal_memory(std::vector<uint8_t>(0xFFFF,0));
+    Memory cartridge_memory(rom);
     
-    m_memory_bank_controller = std::make_unique<MBC1>(internal_memory, rom_memory);
-
+    m_memory_bank_controller = std::make_unique<MemoryBankController>(cartridge_memory);
     m_cpu = std::make_unique<Cpu>(m_memory_bank_controller.get());
     m_timer = std::make_unique<Timer>(m_memory_bank_controller.get());
     m_interrupt_handler = std::make_unique<Interrupt_Handler>(m_memory_bank_controller.get());
@@ -49,11 +45,6 @@ void GameBoy::run() {
     catch (std::exception& err)  {
         std::cout << err.what();
         return;
-    }
-
-    if(m_cpu->m_memory_controller->read(0xFF02) == 0x81) {
-        std::cout << static_cast<char>(m_cpu->m_memory_controller->read(0xFF01));
-        m_cpu->m_memory_controller->write(0xFF02, 0);
     }
 }
 

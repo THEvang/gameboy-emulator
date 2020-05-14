@@ -118,24 +118,25 @@ void PPU::draw_sprites() {
 
   bool use8x16 = false;
   if(m_lcd_control.sprite_size()) {
-    use8x16 = true ;
+    use8x16 = true;
   }
 
    for (int sprite = 0 ; sprite < 40; sprite++)
    {
-     // sprite occupies 4 bytes in the sprite attributes table
+    
+    // sprite occupies 4 bytes in the sprite attributes table
     const uint8_t index = sprite*4 ;
     const uint8_t yPos = m_memory_controller->read(0xFE00+index) - 16;
     const uint8_t xPos = m_memory_controller->read(0xFE00+index+1)-8;
-    const uint8_t tileLocation = m_memory_controller->read(0xFE00+index+2) ;
-    const uint8_t attributes = m_memory_controller->read(0xFE00+index+3) ;
+    const uint8_t tileLocation = m_memory_controller->read(0xFE00+index+2);
+    const uint8_t attributes = m_memory_controller->read(0xFE00+index+3);
 
     bool yFlip = is_set(attributes,6) ;
     bool xFlip = is_set(attributes,5) ;
 
-    auto scanline = m_memory_controller->read(0xFF44);
+    int scanline = m_memory_controller->read(scanline_address);
 
-    auto ysize = use8x16 ? 16 : 8;
+    int ysize = use8x16 ? 16 : 8;
 
      // does this sprite intercept with the scanline?
      if ((scanline >= yPos) && (scanline < (yPos+ysize)))
@@ -174,25 +175,18 @@ void PPU::draw_sprites() {
         const uint16_t colourAddress = is_set(attributes,4) ? 0xFF49 : 0xFF48;
         const auto col = get_color(colourNum, colourAddress);
 
-        //  // white is transparent for sprites.
-        //  if (col == Color{0x00, 0x00, 0x00}) {
-        //    continue ;
-        //
-
-         int xPix = 0 - tilePixel ;
-         xPix += 7 ;
-
-         int pixel = xPos+xPix ;
-
-         // sanity check
-         if ((scanline<0)||(scanline>143)||(pixel<0)||(pixel>159))
-         {
+         // white is transparent for sprites.
+         if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
            continue;
          }
+        
+            int xPix = 0 - tilePixel ;
+            xPix += 7 ;
+            int pixel = xPos+xPix ;
             m_pixels.set_pixel({pixel, scanline}, col);
-     }
-   }
-}
+            }
+        }
+    }
 }
 
 Color PPU::get_color(uint8_t color_id, uint16_t palette_address) {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "memory_controllers/MemoryBankController.h"
+#include "Memory/Memory_Controller.h"
 #include "cpu/Interrupt_Handler.h"
 #include "graphics/LCD_Control.h"
 #include "BitOperations.h"
@@ -19,16 +19,12 @@ public:
 
     void set_status(int& scanline_counter);
 
-    void set_horizontal_blank();
-    void set_vertical_blank();
-    void set_searching_sprites();
-    void set_data_transfer();
-
 private:
 
     LCD_Modes get_mode() {
-        const auto status = m_memory_controller->read(status_address);
-        switch (status) {
+        auto status = m_memory_controller->read(status_address);
+        status &= 0x03;
+        switch (status ) {
             case 0: 
                 return LCD_Modes::H_Blank;
             case 1:

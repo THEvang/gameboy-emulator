@@ -12,12 +12,12 @@ void LCD_Status::set_status(int& scanline_counter) {
     if(!m_lcd_control.lcd_display_enabled()) {
         scanline_counter = 456;
         set_mode(LCD_Modes::V_Blank);
-        m_memory_controller->raw()->write(scanline_address, 0);
+        m_memory_controller->write(scanline_address, 0);
         return;   
     }
 
     const auto current_mode = get_mode();
-    const auto current_scanline = m_memory_controller->read(0xFF44);
+    const auto current_scanline = m_memory_controller->read(scanline_address);
 
     auto request_interrupt = false;
     
@@ -46,38 +46,6 @@ void LCD_Status::set_status(int& scanline_counter) {
 
     should_set_coincidence_flag() ? set_coincidence_flag() :
         clear_coincidence_flag();
-}
-
-void LCD_Status::set_horizontal_blank() {
-    
-    auto status = m_memory_controller->read(status_address);
-    clear_bit(status, 0);
-    clear_bit(status, 1);
-    m_memory_controller->write(status_address, status);
-}
-
-void LCD_Status::set_vertical_blank() {
-
-    auto status = m_memory_controller->read(status_address);
-    set_bit(status, 0);
-    clear_bit(status, 1);
-    m_memory_controller->write(status_address, status);
-}
-
-void LCD_Status::set_searching_sprites() {
-    
-    auto status = m_memory_controller->read(status_address);
-    clear_bit(status, 0);
-    set_bit(status, 1);
-    m_memory_controller->write(status_address, status);
-}
-
-void LCD_Status::set_data_transfer() {
-    
-    auto status = m_memory_controller->read(status_address);
-    set_bit(status, 0);
-    set_bit(status, 1);
-    m_memory_controller->write(status_address, status);
 }
 
 bool LCD_Status::should_set_coincidence_flag() {

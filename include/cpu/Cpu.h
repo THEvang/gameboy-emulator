@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "memory_controllers/MemoryBankController.h"
+#include "Memory/Memory_Controller.h"
 #include <functional>
 
 struct Cpu {

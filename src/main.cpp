@@ -6,6 +6,8 @@
 #include <vector>
 #include <chrono>
 
+#include "Memory/Cartridge.h"
+
 #include "BitOperations.h"
 #include "gui/Gui.h"
 #include <File.h>
@@ -102,6 +104,54 @@ void render_disassembly(Cpu& cpu)
     ImGui::End();
 }
 
+void render_cartridge_data(GameBoy& gameboy) {
+    
+    ImGui::Begin("Cartridge Header");
+    const auto mbc_identifier = gameboy.cpu()->m_memory_controller->read(0x0147);
+    const auto mbc_type = get_bank_type(mbc_identifier);
+    std::string mbc_render {};
+
+    switch(mbc_type) {
+        case Bank_Type::Rom_Only:
+            mbc_render = "Rom only";
+        break;
+        case Bank_Type::MBC_1:
+            mbc_render = "MBC 1";
+        break;
+
+        case Bank_Type::MBC_2:
+            mbc_render = "MBC 2";
+        break;
+
+        case Bank_Type::MBC_3:
+            mbc_render = "MBC 3";
+        break;
+
+        case Bank_Type::MBC_5:
+            mbc_render = "MBC 5";
+        break;
+
+        case Bank_Type::MBC_6:
+            mbc_render = "MBC 6";
+        break;
+
+        case Bank_Type::MBC_7:
+            mbc_render = "MBC 7";
+        break;
+
+        default:
+            mbc_render = "Unknown";
+        break;
+    }
+
+    ImGui::Text(mbc_render.c_str());
+
+    auto ram = has_ram(mbc_identifier);
+    ImGui::Checkbox("Ram: ", &ram);
+
+    ImGui::End();
+}
+
 void render_main(GameBoy* gameboy) {
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -130,6 +180,49 @@ void render_main(GameBoy* gameboy) {
                         done = true;
                     }
                     break;
+                case SDL_KEYDOWN:
+                    switch(event.key.keysym.sym) {
+                        case SDLK_LEFT: {
+                        auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
+                        clear_bit(input_reg, 1);
+                        set_bit(input_reg, 4);
+                        gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
+                        gameboy->interrupt_handler()->request_joypad_interrupt();
+                        }
+                        break;
+                        
+                        case SDLK_RIGHT: {
+                        auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
+                        clear_bit(input_reg, 4);
+                        set_bit(input_reg, 5);
+                        clear_bit(input_reg, 1);
+
+                        gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
+                        gameboy->interrupt_handler()->request_joypad_interrupt();
+                        }
+                        break;
+                        
+                        
+                        case SDLK_DOWN: {
+                            auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
+                            clear_bit(input_reg, 4);
+                            set_bit(input_reg, 5);
+                            clear_bit(input_reg, 3);
+                            gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
+                            gameboy->interrupt_handler()->request_joypad_interrupt();
+                        }
+
+                        case SDLK_SPACE: {
+                            auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
+                            //clear_bit(input_reg, 5);
+
+                            clear_bit(input_reg, 3);
+                            gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
+                            gameboy->interrupt_handler()->request_joypad_interrupt();
+                        }
+                    }
+
+                    break;
                 default:
                     break;
                 }
@@ -144,6 +237,7 @@ void render_main(GameBoy* gameboy) {
             ImGui::NewFrame();
             render_cpu(*(gameboy->cpu()));
             render_ppu(*gameboy);
+            render_cartridge_data(*gameboy);
             gui.render();
             }
             stop = std::chrono::high_resolution_clock::now();

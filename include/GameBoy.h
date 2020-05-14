@@ -1,11 +1,14 @@
 #pragma once
 
-#include "memory_controllers/MemoryBankController.h"
+#include "Memory/Memory_Controller.h"
+#include "Memory/Memory.h"
+
 #include "cpu/Cpu.h"
-#include "memory_controllers/Memory.h"
 #include "Timer.h"
 #include "cpu/Interrupt_Handler.h"
 #include "graphics/PPU.h"
+
+#include <memory>
 
 class GameBoy {
 public:
@@ -15,6 +18,7 @@ public:
 
     Cpu* cpu();
     PPU* ppu();
+    Interrupt_Handler* interrupt_handler() { return m_interrupt_handler.get();}
 private:
 
     std::unique_ptr<MemoryBankController> m_memory_bank_controller;
