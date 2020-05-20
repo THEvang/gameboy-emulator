@@ -143,3 +143,17 @@ void render_cartridge_data(GameBoy const& gameboy) {
 
     ImGui::End();
 }
+
+void render_menu() {
+
+    if(ImGui::BeginMainMenuBar()) {
+        if(ImGui::BeginMenu("File")) {
+
+            if(ImGui::MenuItem("Open...", "Ctrl+O")) {
+
+            }
+            ImGui::EndMenu();
+        }
+      ImGui::EndMainMenuBar();
+    }
+}

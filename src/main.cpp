@@ -126,6 +126,7 @@ void render_main(GameBoy* gameboy) {
             render_ppu(*gameboy);
             render_cartridge_data(*gameboy);
             render_disassembly(*gameboy);
+            render_menu();
             gui.render();
             }
             stop = std::chrono::high_resolution_clock::now();
