@@ -1,7 +1,7 @@
 #pragma once
 #include <stdexcept>
 #include <string>
-#include <cpu/Cpu.h>
+#include <Cpu/Cpu.h>
 
 class UnimplementedOperation : public std::runtime_error {
 public:

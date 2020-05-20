@@ -1,4 +1,4 @@
-#include <cpu/Operations.h>
+#include <Cpu/Operations.h>
 #include <BitOperations.h>
 #include <string>
 #include <iostream>

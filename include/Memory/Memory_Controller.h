@@ -35,10 +35,7 @@ protected:
 
     uint8_t read_from_rom_bank(uint16_t address) const;
     uint8_t read_from_ram(uint16_t address) const;
-<<<<<<< HEAD
-=======
     uint8_t read_joypad_input() const;
->>>>>>> b2ebd6ab16410b3263668df57c417ca3cb30eb3b
 
     void switch_banking_mode(uint8_t data);
 

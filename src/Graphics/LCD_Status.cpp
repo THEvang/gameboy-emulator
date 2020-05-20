@@ -1,4 +1,4 @@
-#include "graphics/LCD_Status.h"
+#include "Graphics/LCD_Status.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
@@ -48,11 +48,7 @@ void LCD_Status::set_status(int& scanline_counter) {
         clear_coincidence_flag();
 }
 
-<<<<<<< HEAD
-bool LCD_Status::should_set_coincidence_flag() {
-=======
 bool LCD_Status::should_set_coincidence_flag() const {
->>>>>>> b2ebd6ab16410b3263668df57c417ca3cb30eb3b
     return m_memory_controller->read(0xFF44) 
         == m_memory_controller->read(0xFF45);
 }

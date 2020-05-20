@@ -1,9 +1,9 @@
 #include <BitOperations.h>
-#include <cpu/CBOpcodes.h>
-#include <cpu/CBOperations.h>
-#include <cpu/Cpu.h>
-#include <cpu/Opcodes.h>
-#include <cpu/Operations.h>
+#include <Cpu/CBOpcodes.h>
+#include <Cpu/CBOperations.h>
+#include <Cpu/Cpu.h>
+#include <Cpu/Opcodes.h>
+#include <Cpu/Operations.h>
 #include <iostream>
 
 Cpu::Cpu(MemoryBankController* memory_controller)

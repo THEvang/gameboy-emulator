@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Memory/Memory_Controller.h"
-#include "cpu/Interrupt_Handler.h"
-#include "graphics/LCD_Control.h"
+#include "Cpu/Interrupt_Handler.h"
+#include "Graphics/LCD_Control.h"
 #include "BitOperations.h"
 
 enum class LCD_Modes {

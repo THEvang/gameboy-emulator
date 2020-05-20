@@ -1,4 +1,4 @@
-#include "graphics/LCD_Control.h"
+#include "Graphics/LCD_Control.h"
 #include "BitOperations.h"
 
 LCD_Control::LCD_Control(MemoryBankController* memory_controller)

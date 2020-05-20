@@ -1,5 +1,5 @@
 #include <cinttypes>
-#include <cpu/Cpu.h>
+#include <Cpu/Cpu.h>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -9,7 +9,7 @@
 #include "Memory/Cartridge.h"
 
 #include "BitOperations.h"
-#include "gui/Gui.h"
+#include "Gui/Gui.h"
 #include <File.h>
 #include <thread>
 #include <GameBoy.h>

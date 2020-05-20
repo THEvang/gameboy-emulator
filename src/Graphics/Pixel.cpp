@@ -1,4 +1,4 @@
-#include "graphics/Pixel.h"
+#include "Graphics/Pixel.h"
 
 void Pixel_Array::set_pixel(const Screen_Position& screen_position, const Color& color) {
 
