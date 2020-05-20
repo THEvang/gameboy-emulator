@@ -2,14 +2,15 @@
 #include <iostream>
 
 GameBoy::GameBoy(const std::vector<uint8_t>& rom) {
-    
+
     Memory cartridge_memory(rom);
-    
+
     m_memory_bank_controller = std::make_unique<MemoryBankController>(cartridge_memory);
     m_cpu = std::make_unique<Cpu>(m_memory_bank_controller.get());
     m_timer = std::make_unique<Timer>(m_memory_bank_controller.get());
     m_interrupt_handler = std::make_unique<Interrupt_Handler>(m_memory_bank_controller.get());
     m_ppu = std::make_unique<PPU>(m_memory_bank_controller.get());
+    m_joypad_controller = std::make_unique<Joypad_Controller>(m_interrupt_handler.get());
 }
 
 void GameBoy::run() {

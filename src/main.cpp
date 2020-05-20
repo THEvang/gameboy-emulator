@@ -182,46 +182,65 @@ void render_main(GameBoy* gameboy) {
                     break;
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym) {
-                        case SDLK_LEFT: {
-                        auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
-                        clear_bit(input_reg, 1);
-                        set_bit(input_reg, 4);
-                        gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
-                        gameboy->interrupt_handler()->request_joypad_interrupt();
-                        }
+                        case SDLK_LEFT:
+                            gameboy->joypad_controller()->press_button(Buttons::Left);
                         break;
                         
-                        case SDLK_RIGHT: {
-                        auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
-                        clear_bit(input_reg, 4);
-                        set_bit(input_reg, 5);
-                        clear_bit(input_reg, 1);
-
-                        gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
-                        gameboy->interrupt_handler()->request_joypad_interrupt();
-                        }
+                        case SDLK_RIGHT:
+                            gameboy->joypad_controller()->press_button(Buttons::Right);
                         break;
                         
-                        
-                        case SDLK_DOWN: {
-                            auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
-                            clear_bit(input_reg, 4);
-                            set_bit(input_reg, 5);
-                            clear_bit(input_reg, 3);
-                            gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
-                            gameboy->interrupt_handler()->request_joypad_interrupt();
-                        }
+                        case SDLK_DOWN:
+                            gameboy->joypad_controller()->press_button(Buttons::Down);
+                        break;
 
-                        case SDLK_SPACE: {
-                            auto input_reg = gameboy->cpu()->m_memory_controller->read(0xFF00);
-                            //clear_bit(input_reg, 5);
+                        case SDLK_SPACE:
+                            gameboy->joypad_controller()->press_button(Buttons::Select);
+                        break;
 
-                            clear_bit(input_reg, 3);
-                            gameboy->cpu()->m_memory_controller->write(0xFF00, input_reg);
-                            gameboy->interrupt_handler()->request_joypad_interrupt();
-                        }
+                        case SDLK_RETURN:
+                            gameboy->joypad_controller()->press_button(Buttons::Start);
+                        break;
+
+                        case SDLK_x:
+                            gameboy->joypad_controller()->press_button(Buttons::A);
+                        break;
+
+                        case SDLK_z:
+                            gameboy->joypad_controller()->press_button(Buttons::B);
+                        break;
                     }
+                break;
+                case SDL_KEYUP:
+                    switch(event.key.keysym.sym) {
+                        case SDLK_LEFT:
+                            gameboy->joypad_controller()->release_button(Buttons::Left);
+                        break;
+                        
+                        case SDLK_RIGHT:
+                            gameboy->joypad_controller()->release_button(Buttons::Right);
+                        break;
+                        
+                        case SDLK_DOWN:
+                            gameboy->joypad_controller()->release_button(Buttons::Down);
+                        break;
 
+                        case SDLK_SPACE:
+                            gameboy->joypad_controller()->release_button(Buttons::Select);
+                        break;
+
+                        case SDLK_RETURN:
+                            gameboy->joypad_controller()->release_button(Buttons::Start);
+                        break;
+
+                        case SDLK_x:
+                            gameboy->joypad_controller()->release_button(Buttons::A);
+                        break;
+
+                        case SDLK_z:
+                            gameboy->joypad_controller()->release_button(Buttons::B);
+                        break;
+                    }
                     break;
                 default:
                     break;
