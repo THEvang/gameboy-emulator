@@ -19,11 +19,12 @@ public:
     explicit GameBoy(const std::vector<uint8_t>& rom);
     void run();
 
-    Cpu* cpu();
-    PPU* ppu();
-
-    Interrupt_Handler* interrupt_handler() { return m_interrupt_handler.get();}
-    Joypad_Controller* joypad_controller() { return m_joypad_controller.get();}
+    Cpu* cpu() const;
+    PPU* ppu() const;
+    Interrupt_Handler* interrupt_handler() const;
+    Joypad_Controller* joypad_controller() const;
+    MemoryBankController* memory_controller() const;
+    Timer* timer() const;
 
 private:
 

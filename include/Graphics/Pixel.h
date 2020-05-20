@@ -18,7 +18,7 @@ class Pixel_Array {
 public:
 
     void set_pixel(const Screen_Position& screen_position, const Color& color);    
-    uint32_t* data();
+    uint32_t const* data();
 
 private:
     static const int screen_width = 160;
