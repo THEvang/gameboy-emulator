@@ -109,16 +109,16 @@ void render_main(GameBoy* gameboy) {
             gameboy->run();
             std::chrono::duration<double, std::milli> dur = stop - start;
             if(dur.count() > 32) {
-            start = std::chrono::high_resolution_clock::now();
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplSDL2_NewFrame(gui.window());
-            ImGui::NewFrame();
-            render_cpu(*gameboy);
-            render_ppu(*gameboy);
-            render_cartridge_data(*gameboy);
-            render_disassembly(*gameboy);
-            render_menu();
-            gui.render();
+                start = std::chrono::high_resolution_clock::now();
+                ImGui_ImplOpenGL3_NewFrame();
+                ImGui_ImplSDL2_NewFrame(gui.window());
+                ImGui::NewFrame();
+                render_cpu(*gameboy);
+                render_ppu(*gameboy);
+                render_cartridge_data(*gameboy);
+                render_disassembly(*gameboy);
+                render_menu();
+                gui.render();
             }
             stop = std::chrono::high_resolution_clock::now();
         }

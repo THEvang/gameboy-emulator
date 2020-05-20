@@ -1,5 +1,8 @@
 #include "Memory/Memory_Controller.h"
 
+#include "BitOperations.h"
+#include "Input/Input.h"
+
 MemoryBankController::MemoryBankController(Memory& cartridge_memory) 
     :   m_internal_memory(0xFFFF), 
         m_cartridge_memory(cartridge_memory) 
@@ -19,6 +22,7 @@ uint8_t MemoryBankController::read(const uint16_t address) const {
     } 
 
     if(address == 0xFF00) {
+        return read_joypad_input();        
     }
 
     return m_internal_memory.read(address);
@@ -133,4 +137,23 @@ uint8_t MemoryBankController::read_from_rom_bank(uint16_t address) const {
 
 uint8_t MemoryBankController::read_from_ram(uint16_t address) const {   
     return m_internal_memory.read(address);
+}
+
+uint8_t MemoryBankController::read_joypad_input() const {
+
+    const auto data = m_internal_memory.read(0xFF00);
+
+    if(!is_set(data, 5)) {
+        return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
+    }
+
+    if(!is_set(data, 4)) {
+        return Joypad_Controller::read_input_as_byte(Button_Types::Direction_Key);
+    }
+
+    return data;
+
+
+
+
 }
