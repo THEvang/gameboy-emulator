@@ -1,8 +1,8 @@
 #pragma once
-#include "graphics/LCD_Status.h"
-#include "cpu/Interrupt_Handler.h"
+#include "Graphics/LCD_Status.h"
+#include "Cpu/Interrupt_Handler.h"
 #include "Memory/Memory_Controller.h"
-#include "graphics/Pixel.h"
+#include "Graphics/Pixel.h"
 
 class PPU {
 public:

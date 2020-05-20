@@ -49,10 +49,26 @@ void GameBoy::run() {
     }
 }
 
-Cpu* GameBoy::cpu() {
+Cpu* GameBoy::cpu() const {
     return m_cpu.get();
 }
 
-PPU* GameBoy::ppu() {
+PPU* GameBoy::ppu() const {
     return m_ppu.get();
+}
+
+Interrupt_Handler* GameBoy::interrupt_handler() const { 
+    return m_interrupt_handler.get();
+}
+
+Joypad_Controller* GameBoy::joypad_controller() const { 
+    return m_joypad_controller.get();
+}
+
+MemoryBankController* GameBoy::memory_controller() const {
+    return m_memory_bank_controller.get();
+}
+
+Timer* GameBoy::timer() const {
+    return m_timer.get();
 }

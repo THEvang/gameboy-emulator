@@ -1,7 +1,7 @@
 #pragma once 
 
 #include "Memory/Memory_Controller.h"
-#include "cpu/Cpu.h"
+#include "Cpu/Cpu.h"
 
 enum class Interrupts {
     V_Blank = 0,

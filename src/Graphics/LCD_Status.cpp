@@ -1,4 +1,4 @@
-#include "graphics/LCD_Status.h"
+#include "Graphics/LCD_Status.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)

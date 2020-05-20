@@ -1,16 +1,17 @@
 #include "Memory/Memory_Controller.h"
-#include "BitOperations.h"
 
+#include "BitOperations.h"
 #include "Input/Input.h"
 
 MemoryBankController::MemoryBankController(Memory& cartridge_memory) 
     :   m_internal_memory(0xFFFF), 
-        m_cartridge_memory(cartridge_memory)
+        m_cartridge_memory(cartridge_memory) 
 {
     m_bank_type = get_bank_type(m_cartridge_memory.read(0x0147));
-}
+};
 
 uint8_t MemoryBankController::read(const uint16_t address) const {
+
 
     if(address <= 0x7FFF) {
         return read_from_rom_bank(address);
@@ -21,7 +22,7 @@ uint8_t MemoryBankController::read(const uint16_t address) const {
     } 
 
     if(address == 0xFF00) {
-        return read_joypad_input();
+        return read_joypad_input();        
     }
 
     return m_internal_memory.read(address);
@@ -139,18 +140,20 @@ uint8_t MemoryBankController::read_from_ram(uint16_t address) const {
 }
 
 uint8_t MemoryBankController::read_joypad_input() const {
- 
-    const auto joypad_data = m_internal_memory.read(0xFF00);
 
-    if(!is_set(joypad_data, 4)) {
-        const auto input = Joypad_Controller::read_input_as_byte(Button_Types::Direction_Key);
-        return input;
+    const auto data = m_internal_memory.read(0xFF00);
+
+    if(!is_set(data, 5)) {
+        return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
     }
 
-    if(!is_set(joypad_data, 5)) {
-        const auto input = Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
-        return input;
+    if(!is_set(data, 4)) {
+        return Joypad_Controller::read_input_as_byte(Button_Types::Direction_Key);
     }
-    
-    return joypad_data;
+
+    return data;
+
+
+
+
 }

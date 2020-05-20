@@ -1,4 +1,4 @@
-#include "graphics/PPU.h"
+#include "Graphics/PPU.h"
 #include "BitOperations.h"
 
 PPU::PPU(MemoryBankController* memory_controller)
@@ -24,12 +24,12 @@ void PPU::step(int cycles) {
 
         auto current_scanline = m_memory_controller->read(scanline_address);    
         current_scanline++;
-        m_memory_controller->raw()->write(scanline_address, current_scanline);
+        m_memory_controller->raw()->write({scanline_address}, current_scanline);
 
         if(current_scanline == 144) {
             m_interrupt_handler.request_v_blank_interrupt();
         } else if (current_scanline > 153) {
-            m_memory_controller->raw()->write(scanline_address, 0);
+            m_memory_controller->raw()->write({scanline_address}, 0);
         } else if (current_scanline < 144) {
             draw_scanline();
         }

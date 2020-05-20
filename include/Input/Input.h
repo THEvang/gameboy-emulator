@@ -1,7 +1,7 @@
 #pragma once
 
 #include <bitset>
-#include "cpu/Interrupt_Handler.h"
+#include "Cpu/Interrupt_Handler.h"
 
 enum class Button_Types {
     Direction_Key,

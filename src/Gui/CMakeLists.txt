@@ -2,6 +2,7 @@ target_sources(gui
     PRIVATE
     
     Gui.cpp
+    Renderers.cpp
 )
 
 target_compile_options(gui PRIVATE -Wall)

@@ -3,11 +3,13 @@
 #include "Memory/Memory_Controller.h"
 #include "Memory/Memory.h"
 
-#include "cpu/Cpu.h"
+#include "Cpu/Cpu.h"
 #include "Timer.h"
-#include "cpu/Interrupt_Handler.h"
-#include "graphics/PPU.h"
+#include "Cpu/Interrupt_Handler.h"
+#include "Graphics/PPU.h"
 #include "Input/Input.h"
+
+#include <memory>
 
 #include <memory>
 
@@ -17,11 +19,13 @@ public:
     explicit GameBoy(const std::vector<uint8_t>& rom);
     void run();
 
-    Cpu* cpu();
-    PPU* ppu();
+    Cpu* cpu() const;
+    PPU* ppu() const;
+    Interrupt_Handler* interrupt_handler() const;
+    Joypad_Controller* joypad_controller() const;
+    MemoryBankController* memory_controller() const;
+    Timer* timer() const;
 
-    Interrupt_Handler* interrupt_handler() { return m_interrupt_handler.get();}
-    Joypad_Controller* joypad_controller() { return m_joypad_controller.get();}
 private:
 
     std::unique_ptr<Joypad_Controller> m_joypad_controller;

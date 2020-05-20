@@ -1,4 +1,4 @@
-#include <cpu/CBOperations.h>
+#include <Cpu/CBOperations.h>
 #include <BitOperations.h>
 
 uint8_t RLC(uint8_t value, uint8_t& flags) {

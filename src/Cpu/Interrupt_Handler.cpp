@@ -1,4 +1,4 @@
-#include "cpu/Interrupt_Handler.h"
+#include "Cpu/Interrupt_Handler.h"
 #include "BitOperations.h"
 
 Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
