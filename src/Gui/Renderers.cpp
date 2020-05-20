@@ -6,17 +6,26 @@
 #include "Cpu/Opcodes.h"
 #include "Disassembler/Disassembler.h"
 #include "Memory/Cartridge.h"
+#include "Disassembler/Ring_Buffer.h"
 
 void render_disassembly(GameBoy const& gameboy) {
 
+    static Ring_Buffer<Instruction, 20> history;
+    const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->m_program_counter);
+    const auto instruction = disassemble(static_cast<Opcode>(opcode));
+    history.write(instruction);
+
+    const auto sorted_history = history.get_sorted();
     ImGui::Begin("Disassembly");
     ImGui::BeginChild("Disassembly_List");
-        const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->m_program_counter);
-        const auto instruction = disassemble(static_cast<Opcode>(opcode));
+    for(const auto& element : sorted_history) {
+
         ImGui::Text("%d: %s, %d", 
-            gameboy.cpu()->m_program_counter,
-            instruction.name.c_str(),
-            instruction.cycles);
+            static_cast<int>(element.opcode),
+            element.name.c_str(),
+            element.cycles);
+    }
+
     ImGui::EndChild();
     ImGui::End();
 }

@@ -5,7 +5,7 @@
 
 struct Instruction {
     Opcode opcode;
-    const std::string name;
+    std::string name;
     int cycles;
 };
 
