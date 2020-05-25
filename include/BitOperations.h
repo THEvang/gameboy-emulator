@@ -2,23 +2,29 @@
 
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 template <typename T>
-T rotate_left(T value, int n) {
+T rotate_left(T value, std::size_t n) {
 
-    return (value << n) | (value >> (sizeof(T) * 8 - n));
+    static_assert(std::is_unsigned<T>(), "Bit rotation operands must be unsigned");
+
+    return static_cast<T>((value << n) | (value >> (sizeof(T) * 8 - n)));
 }
 
 template <typename T>
-T rotate_right(T value, int n) {
+T rotate_right(T value, std::size_t n) {
 
-    return (value >> n) | (value << (sizeof(T) * 8 - n));
+    static_assert(std::is_unsigned<T>(), "Bit rotation operands must be unsigned");
+
+    return static_cast<T>((value >> n) | (value << (sizeof(T) * 8 - n)));
 }
 
 void set_bit(uint8_t& b, int n);
 void clear_bit(uint8_t& b, int n);
 
 bool is_set(uint8_t b, int n);
+bool is_set(uint16_t b, int n);
 
 uint16_t combine_bytes(uint8_t upper, uint8_t lower);
 bool half_carry_8bit(uint8_t a, uint8_t b);

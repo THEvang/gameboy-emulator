@@ -1,6 +1,9 @@
 #pragma once
+
 #include <cstdint>
-#include <Memory/Memory_Controller.h>
+#include "Cpu/Interrupt_Handler.h"
+
+class MemoryBankController;
 
 class Timer {
 public:
@@ -9,28 +12,23 @@ public:
     void increment(int cycles);
 
 
-    static const uint16_t div_address = 0xFF04;    
+
+    static const uint16_t div_address = 0xFF04;
     static const uint16_t tima_address = 0xFF05;
     static const uint16_t tma_address = 0xFF06;
     static const uint16_t tac_address = 0xFF07;
 
 private: 
 
-    bool should_increment_div();
-    int div_ratio();
-    void increment_div();
 
     bool should_increment_tima();
-    int tima_ratio();
-    bool tima_enabled();
     void reset_tima();
-    
-    void increment_tima();
-
-    int m_div_cycles = 0;
-    int m_tima_cycles = 0;
-    const int m_cpu_speed = 4.194304e6;
-    const int m_div_speed = 16384;
+    void tick();
+    uint16_t m_div_value = 0xABCC;
 
     MemoryBankController* m_memory;
+    Interrupt_Handler m_interrupt_handler;
+
+    bool m_prev_delay = false;
+    bool m_tima_has_overflowed = false;
 };

@@ -1,5 +1,6 @@
 #include "Graphics/PPU.h"
 #include "BitOperations.h"
+#include "Memory/Memory_Controller.h"
 
 PPU::PPU(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
@@ -129,7 +130,7 @@ void PPU::draw_sprites() {
     const uint8_t yPos = m_memory_controller->read(0xFE00+index) - 16;
     const uint8_t xPos = m_memory_controller->read(0xFE00+index+1)-8;
     const uint8_t tileLocation = m_memory_controller->read(0xFE00+index+2);
-    const uint8_t attributes = m_memory_controller->read(0xFE00+index+3);
+    const uint8_t attributes = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+3));
 
     bool yFlip = is_set(attributes,6) ;
     bool xFlip = is_set(attributes,5) ;

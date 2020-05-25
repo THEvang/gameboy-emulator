@@ -1,7 +1,9 @@
 #pragma once 
 
-#include "Memory/Memory_Controller.h"
-#include "Cpu/Cpu.h"
+#include <cstdint>
+
+class Cpu;
+class MemoryBankController;
 
 enum class Interrupts {
     V_Blank = 0,
@@ -25,6 +27,7 @@ public:
     void request_joypad_interrupt();
 
     bool should_exit_halt();
+    bool timer_interrupt_enabled() const;
 
 private:
 
@@ -42,7 +45,6 @@ private:
 
     bool v_blank_interrupt_enabled() const;
     bool lcd_stat_interrupt_enabled() const;
-    bool timer_interrupt_enabled() const;
     bool serial_interrupt_enabled() const;
     bool joypad_interrupt_enabled() const;
 

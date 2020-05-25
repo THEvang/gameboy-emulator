@@ -1,91 +1,83 @@
-#include <Timer.h>
-#include <BitOperations.h>
+#include "Timer.h"
+#include "BitOperations.h"
+#include "Memory/Memory_Controller.h"
 
 Timer::Timer(MemoryBankController* memory) 
     : m_memory(memory)
+    , m_interrupt_handler(memory)
 {}
+
 
 void Timer::increment(int cycles) {
 
-    m_div_cycles += cycles;
-    if(should_increment_div()) {
-        increment_div();
+    while(cycles > 0) {
+        tick();
+        cycles -= 4;
     }
+}
+
+void Timer::tick() {
+
+    // if(m_memory->read(div_address) == 0) {
+    //     m_div_value = 0;
+    // }
     
-    if(tima_enabled()) {
-        m_tima_cycles += cycles;
-        if(should_increment_tima()) {
-
-            auto tima_value = m_memory->read(tima_address);
-
-            if(overflows_8bit(tima_value, 1)) {
-                
-                reset_tima();
-
-                constexpr auto if_address = 0xFF0F;
-                auto if_register = m_memory->read(if_address);
-
-                set_bit(if_register, 2);
-                m_memory->write(if_address, if_register);
-                
-            } else {
-                tima_value++;
-                m_memory->write(tima_address, tima_value);
-                m_tima_cycles -= tima_ratio();
-            }
-        }
+    m_div_value = static_cast<uint16_t>(m_div_value + 4);
+    m_memory->raw()->write(div_address, static_cast<uint8_t>(m_div_value >> 8)); 
+    
+    if(m_tima_has_overflowed) { 
+        reset_tima();
+        //if(m_interrupt_handler.timer_interrupt_enabled()) {
+            m_interrupt_handler.request_timer_interrupt();
+        //}
+        m_tima_has_overflowed = false;
     }
-}
 
-bool Timer::should_increment_div() {
-    return m_div_cycles >= div_ratio();
-}
+    if(should_increment_tima()) {
 
-int Timer::div_ratio() {
-    return m_cpu_speed / m_div_speed;
-}
+        auto tima_value = m_memory->read(tima_address);
+        if(overflows_8bit(tima_value, 1)) {
+            m_tima_has_overflowed = true;
+        }
+        
+        tima_value++;
+        m_memory->raw()->write(tima_address, tima_value);
+    }
 
-void Timer::increment_div() {
-    auto current_div_value = m_memory->read(div_address);
-    current_div_value++;
-    m_memory->raw()->write(div_address, current_div_value);
-    m_div_cycles -= div_ratio();
 }
 
 bool Timer::should_increment_tima() {
-    return m_tima_cycles >= tima_ratio();
-}
 
-int Timer::tima_ratio() {
-    
     const auto timer_control = m_memory->read(tac_address);
-    const uint8_t clock_select = timer_control & 0x03;
-    auto clock_value = 0;
+    const auto clock_select = static_cast<uint8_t>(timer_control & 0x03);
+    auto n = 0;
 
     switch(clock_select) {
-        case 0b00:
-            clock_value = 4096;
+        case 0:
+            n = 9;
             break;
-        case 0b01:
-            clock_value = 262144;
+        case 1:
+            n = 3;
             break;
-        case 0b10:
-            clock_value = 65536;
+        case 2:
+            n = 5;
             break;
-        case 0b11:
-            clock_value = 16384;
+        case 3:
+            n = 7;
             break;
         default:
-            clock_value = 4096;
+            n = 9;
             break;
     }
 
-    return m_cpu_speed / clock_value;
-}
+    auto value = is_set(m_div_value, n) && is_set(timer_control, 2);
+    if(!value && m_prev_delay) {
+        m_prev_delay = value;
+        return true;
+    }
 
-bool Timer::tima_enabled() {
-    const auto timer_control = m_memory->read(tac_address);
-    return is_set(timer_control, 2);
+    m_prev_delay = value;
+    return false;
 }
 
 void Timer::reset_tima() {

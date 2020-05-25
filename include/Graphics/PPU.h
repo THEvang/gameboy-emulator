@@ -1,8 +1,10 @@
 #pragma once
+
 #include "Graphics/LCD_Status.h"
 #include "Cpu/Interrupt_Handler.h"
-#include "Memory/Memory_Controller.h"
 #include "Graphics/Pixel.h"
+
+class MemoryBankController;
 
 class PPU {
 public:

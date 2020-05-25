@@ -1,4 +1,5 @@
-#include <GameBoy.h>
+#include "GameBoy.h"
+#include "Cpu/Opcodes.h"
 #include <iostream>
 
 GameBoy::GameBoy(const std::vector<uint8_t>& rom) {
@@ -17,11 +18,15 @@ void GameBoy::run() {
 
     try {
         
-        auto [cycles, delta_pc, operation] = fetch(*m_cpu);
+        const auto opcode = m_cpu->m_memory_controller->read(m_cpu->m_program_counter);
+
+        auto [delta_pc, operation] = fetch(static_cast<Opcode>(opcode));
         
+        auto cycles = 4;
+
         if(!m_cpu->m_is_halted) {
             m_cpu->m_program_counter += delta_pc;
-            operation(*m_cpu);
+            cycles = operation(*m_cpu);
         } else {
             cycles = 4;
             m_cpu->m_is_halted = m_interrupt_handler->should_exit_halt();

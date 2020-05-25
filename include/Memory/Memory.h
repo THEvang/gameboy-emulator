@@ -3,11 +3,6 @@
 #include <cstdint>
 #include <vector>
 
-struct Address {
-    uint16_t value;
-};
-
-
 class Memory {
 public:
 

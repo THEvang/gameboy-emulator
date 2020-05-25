@@ -1,5 +1,8 @@
 #pragma once
-#include "Memory/Memory_Controller.h"
+
+#include <cstdint>
+
+class MemoryBankController;
 
 class LCD_Control {
 public:

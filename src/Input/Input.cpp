@@ -1,4 +1,5 @@
 #include "Input/Input.h"
+#include "Cpu/Interrupt_Handler.h"
 
 std::bitset<4> Joypad_Controller::m_direction_keys = 0b1111;
 std::bitset<4> Joypad_Controller::m_button_keys = 0b1111;

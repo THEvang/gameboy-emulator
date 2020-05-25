@@ -1,8 +1,11 @@
 #pragma once
 
 #include <cstdint>
-#include "Memory/Memory_Controller.h"
 #include <functional>
+
+#include "Memory/Memory_Controller.h"
+#include "Cpu/Opcodes.h"
+#include "Cpu/CBOpcodes.h"
 
 struct Cpu {
 
@@ -37,14 +40,12 @@ struct Cpu {
     bool m_is_halted = false;
 };
 
+using Operation = std::function<int(Cpu&)>;
+
 struct FetchResult {
-    int cycles = 0;
     int delta_pc = 0;
-    std::function<void(Cpu&)> operation;
+    Operation operation;
 };
 
-FetchResult fetch(Cpu& cpu);
-FetchResult fetch_cb(Cpu& cpu);
-void timer(Cpu& cpu);
-
-uint8_t ADD(uint8_t value, uint8_t& flags);
+FetchResult fetch(Opcode opcode);
+FetchResult fetch_cb(CBCode opcode);

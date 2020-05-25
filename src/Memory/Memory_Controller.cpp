@@ -152,8 +152,4 @@ uint8_t MemoryBankController::read_joypad_input() const {
     }
 
     return data;
-
-
-
-
 }

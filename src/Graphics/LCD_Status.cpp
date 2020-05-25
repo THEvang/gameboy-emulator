@@ -1,5 +1,8 @@
 #include "Graphics/LCD_Status.h"
 
+#include "Memory/Memory_Controller.h"
+#include "BitOperations.h"
+
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
     , m_interrupt_handler(m_memory_controller)

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Memory/Memory_Controller.h"
 #include "Cpu/Interrupt_Handler.h"
 #include "Graphics/LCD_Control.h"
-#include "BitOperations.h"
+
+class MemoryBankController;
 
 enum class LCD_Modes {
     H_Blank,
