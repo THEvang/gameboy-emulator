@@ -87,7 +87,7 @@ bool Interrupt_Handler::should_exit_halt() {
     const auto interrupt_requests = m_memory_bank_controller->read(interrupt_request_address);
     const auto interrupts_enabled = m_memory_bank_controller->read(interrupt_enabled_address);
 
-    return ((interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
+    return (static_cast<uint8_t>(interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
 void Interrupt_Handler::clear_v_blank_request() {
@@ -176,6 +176,6 @@ void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {
     const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8U);
     m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
     m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-    cpu.m_stack_ptr -= static_cast<uint16_t>(2);
+    cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
     cpu.m_program_counter = static_cast<uint16_t>(interrupt_vector);
 }

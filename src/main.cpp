@@ -1,11 +1,10 @@
-#include <cinttypes>
-#include <chrono>
 #include <iostream>
+#include <chrono>
 
 #include "Gui/Gui.h"
 #include "Gui/Renderers.h"
-#include <File.h>
-#include <GameBoy.h>
+#include "File.h"
+#include "GameBoy.h"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"

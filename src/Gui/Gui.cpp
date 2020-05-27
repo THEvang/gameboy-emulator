@@ -63,9 +63,9 @@ std::unique_ptr<SDL_Window, std::function<void(SDL_Window*)>> make_sdl_window() 
         return nullptr;
     }
 
-    const auto window_deleter = [](SDL_Window* window) {
-        if(window != nullptr) {
-            SDL_DestroyWindow(window);
+    const auto window_deleter = [](SDL_Window* window_to_delete) {
+        if(window_to_delete != nullptr) {
+            SDL_DestroyWindow(window_to_delete);
         }
     };
 

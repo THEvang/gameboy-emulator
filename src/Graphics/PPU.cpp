@@ -68,7 +68,7 @@ void PPU::draw_background() {
     const auto y_pos = using_window ? static_cast<uint8_t>(scanline - window_y) : 
         static_cast<uint8_t>(scroll_y + scanline);
 
-    const uint16_t tile_row = static_cast<uint8_t>((y_pos / 8)) * 32; 
+    const auto tile_row = static_cast<uint16_t>(static_cast<uint8_t>((y_pos / 8)) * 32); 
 
     constexpr uint8_t horizontal_pixels = 160;
     for(uint8_t pixel = 0; pixel < horizontal_pixels; pixel++) {
@@ -80,24 +80,23 @@ void PPU::draw_background() {
             }
         }
 
-        const uint16_t tile_column = (x_pos / 8);
-        const uint16_t tile_map_address = tile_map_start_address + static_cast<uint16_t>(tile_row + tile_column);
+        const auto tile_column = static_cast<uint16_t>((x_pos / 8));
+        const auto tile_map_address = static_cast<uint16_t>(tile_map_start_address + tile_row + tile_column);
 
         uint16_t tile_data_address = tile_data_start_address;
 
         if(m_lcd_control.tile_data_signed()) {
             const auto tile_number = static_cast<int8_t>( m_memory_controller->read(tile_map_address));
-            tile_data_address += (tile_number + 128) * 16;
+            tile_data_address = static_cast<uint16_t>(tile_data_address + (tile_number + 128) * 16);
 
         } else {
             const auto tile_number = m_memory_controller->read(tile_map_address);
-            tile_data_address += static_cast<uint16_t>(tile_number) * 16;
+            tile_data_address = static_cast<uint16_t>(tile_number * 16 + tile_data_address);
         }
 
-        uint8_t line = (y_pos % 8);
-        line *= 2;
-        const auto data_1 = m_memory_controller->read(tile_data_address + static_cast<uint16_t>(line));
-        const auto data_2 = m_memory_controller->read(tile_data_address + line + static_cast<uint16_t>(1));
+        auto line = static_cast<uint8_t>((y_pos % 8) * 2);
+        const auto data_1 = m_memory_controller->read(static_cast<uint16_t>(tile_data_address + line));
+        const auto data_2 = m_memory_controller->read(static_cast<uint16_t>(tile_data_address + line + 1));
 
         auto color_bit = x_pos % 8;
         color_bit -= 7;
@@ -126,16 +125,16 @@ void PPU::draw_sprites() {
    {
     
     // sprite occupies 4 bytes in the sprite attributes table
-    const uint8_t index = sprite*4 ;
-    const uint8_t yPos = m_memory_controller->read(0xFE00+index) - 16;
-    const uint8_t xPos = m_memory_controller->read(0xFE00+index+1)-8;
-    const uint8_t tileLocation = m_memory_controller->read(0xFE00+index+2);
-    const uint8_t attributes = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+3));
+    const auto index = static_cast<uint8_t>(sprite*4);
+    const auto yPos = static_cast<uint8_t>(m_memory_controller->read(static_cast<uint16_t>(0xFE00+index)) - 16);
+    const auto xPos = static_cast<uint8_t>(m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+1)) - 8);
+    const auto tileLocation = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+2));
+    const auto attributes = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+3));
 
     bool yFlip = is_set(attributes,6) ;
     bool xFlip = is_set(attributes,5) ;
 
-    int scanline = m_memory_controller->read(scanline_address);
+    auto scanline = m_memory_controller->read(scanline_address);
 
     int ysize = use8x16 ? 16 : 8;
 
@@ -152,9 +151,9 @@ void PPU::draw_sprites() {
        }
 
        line *= 2; // same as for tiles
-       const uint16_t dataAddress = (0x8000 + (tileLocation * 16)) + line ;
+       const auto dataAddress = static_cast<uint16_t>((0x8000 + (tileLocation * 16)) + line);
        const auto data1 = m_memory_controller->read( dataAddress ) ;
-       const auto data2 = m_memory_controller->read( dataAddress +1 ) ;
+       const auto data2 = m_memory_controller->read(static_cast<uint16_t>(dataAddress +1)) ;
 
        // its easier to read in from right to left as pixel 0 is
        // bit 7 in the colour data, pixel 1 is bit 6 etc...
@@ -174,7 +173,7 @@ void PPU::draw_sprites() {
          colourNum += is_set(data1,colourbit) ? 1 : 0;
 
         const uint16_t colourAddress = is_set(attributes,4) ? 0xFF49 : 0xFF48;
-        const auto col = get_color(colourNum, colourAddress);
+        const auto col = get_color(static_cast<uint8_t>(colourNum), colourAddress);
 
          // white is transparent for sprites.
          if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
@@ -184,7 +183,7 @@ void PPU::draw_sprites() {
             int xPix = 0 - tilePixel ;
             xPix += 7 ;
             int pixel = xPos+xPix ;
-            m_pixels.set_pixel({pixel, scanline}, col);
+            m_pixels.set_pixel({static_cast<uint8_t>(pixel), scanline}, col);
             }
         }
     }
@@ -205,8 +204,8 @@ Color PPU::get_color(uint8_t color_id, uint16_t palette_address) {
 
     // use the palette to get the colour
     uint8_t color = 0;
-    color = is_set(palette, hi_bit) << 1U;
-    color |= is_set(palette, lo_bit);
+    color = static_cast<uint8_t>(static_cast<uint>(is_set(palette, hi_bit)) << 1U);
+    color = static_cast<uint8_t>(color | static_cast<uint>(is_set(palette, lo_bit)));
 
    // convert the game colour to emulator colour
    switch (color)

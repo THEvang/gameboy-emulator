@@ -1,11 +1,11 @@
 #include "Memory/Memory.h"
 
-Memory::Memory(const std::vector<uint8_t>& memory) 
-    : m_memory(memory)
+Memory::Memory(std::vector<uint8_t> memory) 
+    : m_memory(std::move(memory))
 {
 }
 
-Memory::Memory(const int size) 
+Memory::Memory(std::size_t size) 
     : m_memory(size, 0)
 {}
 

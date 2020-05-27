@@ -15,11 +15,11 @@ public:
 
     MemoryBankController(Memory& cartridge_memory);
 
-    [[nodiscard]] uint8_t read(const uint16_t address) const;
-    void write(const uint16_t address, uint8_t value);
+    [[nodiscard]] uint8_t read(uint16_t address) const;
+    void write(uint16_t address, uint8_t data);
 
     //Gets raw memory for modules that must bypass usual memory control;
-    constexpr auto& raw() {
+    constexpr auto& raw() noexcept {
         return m_internal_memory;
     };
 

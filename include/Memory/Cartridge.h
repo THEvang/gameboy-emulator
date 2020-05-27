@@ -30,8 +30,5 @@ Bank_Type bank_type();
 bool is_sgb();
 
 struct Header {
-
-    
-
     std::array<uint8_t, 0x14F - 0x100> m_data;
 };

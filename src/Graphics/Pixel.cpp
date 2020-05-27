@@ -7,7 +7,7 @@ void Pixel_Array::set_pixel(const Screen_Position& screen_position, const Color&
 
     auto index = x_pos + y_pos * screen_width;
 
-    m_pixels[index] = color.red << 24 | color.green << 16 | color.blue << 8 | 0xFF;
+    m_pixels[index] = static_cast<GLuint>(color.red << 24u | color.green << 16u | color.blue << 8u | 0xFFu);
 }
     
 uint32_t const* Pixel_Array::data() {

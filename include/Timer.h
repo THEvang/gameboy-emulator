@@ -11,8 +11,6 @@ public:
     Timer(MemoryBankController* memory);
     void increment(int cycles);
 
-
-
     static const uint16_t div_address = 0xFF04;
     static const uint16_t tima_address = 0xFF05;
     static const uint16_t tma_address = 0xFF06;

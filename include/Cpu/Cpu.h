@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-#include "Memory/Memory_Controller.h"
-
 class MemoryBankController;
 
 struct Cpu {

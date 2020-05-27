@@ -78,3 +78,7 @@ constexpr auto underflows_16bit(uint16_t a, uint16_t b) -> bool {
 constexpr void swap_nibbles(uint8_t& a) {
     a = static_cast<uint8_t>(( (a & 0x0FU) << 4U | (a & 0xF0U) >> 4U));
 }
+
+constexpr uint8_t get_value(uint8_t a, int n) {
+    return static_cast<uint8_t>(a & (1 << n));
+}

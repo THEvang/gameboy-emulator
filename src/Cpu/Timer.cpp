@@ -23,7 +23,7 @@ void Timer::tick() {
     // }
     
     m_div_value = static_cast<uint16_t>(m_div_value + 4);
-    m_memory->raw()[div_address] = static_cast<uint8_t>(m_div_value >> 8); 
+    m_memory->raw()[div_address] = static_cast<uint8_t>(m_div_value >> 8u); 
     
     if(m_tima_has_overflowed) { 
         reset_tima();
@@ -49,7 +49,7 @@ void Timer::tick() {
 bool Timer::should_increment_tima() {
 
     const auto timer_control = m_memory->read(tac_address);
-    const auto clock_select = static_cast<uint8_t>(timer_control & 0x03);
+    const auto clock_select = static_cast<uint8_t>(timer_control & 0x03u);
     auto n = 0;
 
     switch(clock_select) {

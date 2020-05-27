@@ -3,7 +3,8 @@
 #include "BitOperations.h"
 #include "Cpu/Cpu.h"
 #include "Cpu/Interpreter.h"
-#include <Cpu/CBOpcodes.h>
+#include "Cpu/CBOpcodes.h"
+#include "Memory/Memory_Controller.h"
 
 FetchResult NOP() {
 
@@ -36,13 +37,13 @@ FetchResult HALT() {
             cpu.m_is_halted = true;
         } else {
 
-            const auto interrupt_request_addr = 0xFF0F;
-            const auto interrupt_enable_addr = 0xFFFF;
+            const uint16_t interrupt_request_addr = 0xFF0F;
+            const uint16_t interrupt_enable_addr = 0xFFFF;
 
             const auto interrupt_request = cpu.m_memory_controller->read(interrupt_request_addr);
             const auto interrupt_enable = cpu.m_memory_controller->read(interrupt_enable_addr);
 
-            if((interrupt_request & interrupt_enable & 0x1F) == 0) {
+            if((interrupt_request & interrupt_enable & 0x1Fu) == 0) {
                 cpu.m_is_halted = true;
             } else {
                 throw UnimplementedOperation("HALT BUG");
@@ -59,14 +60,14 @@ FetchResult RST(uint8_t address) {
 
     return {delta_pc, [address](Cpu& cpu){
 
-        const auto pc_high = (cpu.m_program_counter >> 8);
-        const auto pc_low = (cpu.m_program_counter & 0xFF);
+        const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+        const auto pc_low =  static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
-        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
 
         cpu.m_program_counter = combine_bytes(0x00, address);
-        cpu.m_stack_ptr -= 2;
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
         constexpr auto cycles = 16;
         return cycles;
     }};
@@ -99,8 +100,8 @@ FetchResult JR() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
-        cpu.m_program_counter += distance;
+        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+        cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
         constexpr auto cycles = 12;
         return cycles;
     }};
@@ -112,8 +113,8 @@ FetchResult JR_NZ() {
     
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
-            cpu.m_program_counter += distance;
+            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
             return 12;
         }
         return 8;
@@ -126,8 +127,8 @@ FetchResult JR_Z() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
-            cpu.m_program_counter += distance;
+            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
             return 12;
         }
         return 8;
@@ -140,8 +141,8 @@ FetchResult JR_NC() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
-            cpu.m_program_counter += distance;
+            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
             return 12;
         }
         return 8;
@@ -154,8 +155,8 @@ FetchResult JR_C() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
-            cpu.m_program_counter += distance;
+            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
             return 12;
         }
         return 8;
@@ -169,10 +170,10 @@ FetchResult RET() {
     return {delta_pc, [](Cpu& cpu) {
         
         const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-        const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+        const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
         
         cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-        cpu.m_stack_ptr += 2;
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
         constexpr auto cycles = 16;
         return cycles;
     }};
@@ -186,9 +187,9 @@ FetchResult RET_NZ() {
         
         if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
             const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
             cpu.m_program_counter = combine_bytes(pc_high, pc_low);            
-            cpu.m_stack_ptr += 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
             return 20;
         }
         return 8;
@@ -202,9 +203,9 @@ FetchResult RET_Z() {
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
             const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
             cpu.m_program_counter = combine_bytes(pc_high, pc_low);        
-            cpu.m_stack_ptr += 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
             return 20;
         }
         return 8;
@@ -219,9 +220,9 @@ FetchResult RET_NC() {
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
             const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
             cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-            cpu.m_stack_ptr += 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
             return 20;
         }
         return 8;
@@ -235,9 +236,9 @@ FetchResult RET_C() {
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
             const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
             cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-            cpu.m_stack_ptr += 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
             return 20;
         }
         return 8;
@@ -250,9 +251,9 @@ FetchResult RETI() {
 
     return {delta_pc, [](Cpu& cpu) {
         const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-        const auto pc_high = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
+        const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
         cpu.m_program_counter = combine_bytes(pc_high, pc_low);    
-        cpu.m_stack_ptr += 2;
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
         cpu.m_interrupts_enabled = true;
         constexpr auto cycles = 16;
         return cycles;
@@ -264,8 +265,8 @@ FetchResult JUMP() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto low = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto high = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto low = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         const auto address = combine_bytes(high, low);
         cpu.m_program_counter = address; 
         constexpr auto cycles = 16;
@@ -279,8 +280,8 @@ FetchResult JUMP_NZ() {
 
     return {delta_pc, [](Cpu& cpu) {        
         if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             cpu.m_program_counter = address;
             return 16;
@@ -295,8 +296,8 @@ FetchResult JUMP_Z() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             cpu.m_program_counter = address;
             return 16;
@@ -311,8 +312,8 @@ FetchResult JUMP_NC() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             cpu.m_program_counter = address;
             return 16;
@@ -327,8 +328,8 @@ FetchResult JUMP_C() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             cpu.m_program_counter = address;
             return 16;
@@ -356,15 +357,20 @@ FetchResult CALL() {
 
     return {delta_pc, [](Cpu& cpu) {
         
-        const uint8_t pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8);
-        const uint8_t pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFF);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
-        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+        const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
+        
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
+        
+        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+        
         const auto address = combine_bytes(upper, lower);
+        
         cpu.m_program_counter = address;
-        cpu.m_stack_ptr -= 2;
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
+        
         constexpr auto cycles = 24;
         return cycles;
     }};
@@ -376,19 +382,19 @@ FetchResult CALL_NZ() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8);
-            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFF);
+            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
 
         
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
         
             cpu.m_program_counter = address;
-            cpu.m_stack_ptr -= 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
 
             return 24;
         }
@@ -402,19 +408,19 @@ FetchResult CALL_Z() {
     
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_high = (cpu.m_program_counter >> 8);
-            const auto pc_low = (cpu.m_program_counter & 0xFF);
+            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
 
             
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             
             cpu.m_program_counter = address;
-            cpu.m_stack_ptr -= 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
 
             return 24;
         }
@@ -428,19 +434,19 @@ FetchResult CALL_NC() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_high = (cpu.m_program_counter >> 8);
-            const auto pc_low = (cpu.m_program_counter & 0xFF);
+            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
 
             
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             
             cpu.m_program_counter = address;
-            cpu.m_stack_ptr -= 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
 
             return 24;
             }
@@ -454,19 +460,19 @@ FetchResult CALL_C() {
 
     return {delta_pc, [](Cpu& cpu) {
         if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_high = (cpu.m_program_counter >> 8);
-            const auto pc_low = (cpu.m_program_counter & 0xFF);
+            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+            const auto pc_low =  static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 1, pc_high);
-            cpu.m_memory_controller->write(cpu.m_stack_ptr - 2, pc_low);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
 
             
-            const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-            const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
             const auto address = combine_bytes(upper, lower);
             
             cpu.m_program_counter = address;
-            cpu.m_stack_ptr -= 2;
+            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
             return 24;
         }
         return 12;
@@ -478,7 +484,7 @@ FetchResult LD_A_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_a = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         constexpr auto cycles = 8;
         return cycles;
     }};
@@ -604,8 +610,8 @@ FetchResult LD_A_ADDR_A16() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto low = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto high = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto low = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         const auto address = combine_bytes(high, low);
 
         cpu.m_reg_a = cpu.m_memory_controller->read(address);
@@ -620,7 +626,7 @@ FetchResult LD_A_ADDR_C() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto address = 0xFF00 + cpu.m_reg_c;
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
         cpu.m_reg_a = cpu.m_memory_controller->read(address);
 
         constexpr auto cycles = 8;
@@ -633,11 +639,11 @@ FetchResult LD_ADDR_A16_SP() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {        
-        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         const auto address = combine_bytes(upper, lower);
-        cpu.m_memory_controller->write(address, static_cast<uint8_t>(cpu.m_stack_ptr & 0xFF));
-        cpu.m_memory_controller->write(address + 1, static_cast<uint8_t>(cpu.m_stack_ptr >> 8));
+        cpu.m_memory_controller->write(address, static_cast<uint8_t>(cpu.m_stack_ptr & 0xFFu));
+        cpu.m_memory_controller->write(static_cast<uint16_t>(address + 1), static_cast<uint8_t>(cpu.m_stack_ptr >> 8u));
 
         constexpr auto cycles = 20;
         return cycles;
@@ -654,8 +660,8 @@ FetchResult LDI_ADDR_HL_A() {
         cpu.m_memory_controller->write(address, cpu.m_reg_a);
 
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -671,8 +677,8 @@ FetchResult LDI_A_ADDR_HL() {
         cpu.m_reg_a = cpu.m_memory_controller->read(address);
         
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -710,7 +716,7 @@ FetchResult LD_B_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -809,7 +815,7 @@ FetchResult LD_C_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_c = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -906,7 +912,7 @@ FetchResult LD_D_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1001,7 +1007,7 @@ FetchResult LD_E_D8() {
     constexpr auto delta_pc = 2;
     
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_e = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1095,7 +1101,7 @@ FetchResult LD_H_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1194,7 +1200,7 @@ FetchResult LD_L_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_l = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1382,7 +1388,7 @@ FetchResult LD_ADDR_HL_D8() {
 
     return {delta_pc, [](Cpu& cpu) {
         const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 12;
@@ -1399,8 +1405,8 @@ FetchResult LD_ADDR_A16_A() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         const auto address = combine_bytes(upper, lower);
 
         cpu.m_memory_controller->write(address, cpu.m_reg_a);
@@ -1415,8 +1421,8 @@ FetchResult LD_BC_D16() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_c = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 12;
         return cycles;
@@ -1428,8 +1434,8 @@ FetchResult LD_DE_D16() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_e = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 12;
         return cycles;
@@ -1441,8 +1447,8 @@ FetchResult LD_HL_D16() {
     constexpr auto delta_pc = 3;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        cpu.m_reg_l = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
         constexpr auto cycles = 12;
         return cycles;
@@ -1454,20 +1460,20 @@ FetchResult LD_HL_SPR8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto distance = (cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
-        half_carry_8bit(cpu.m_stack_ptr, distance)     ?
+        half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
             set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
             clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
 
-        overflows_8bit(cpu.m_stack_ptr, distance)  ? 
+        overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
             set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
             clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
-        const auto result = cpu.m_stack_ptr + static_cast<int8_t>(distance);
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFF);
+        const auto result = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
+        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
 
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
         clear_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -1483,8 +1489,8 @@ FetchResult LD_SP_D16() {
 
     return {delta_pc, [](Cpu& cpu) {
         
-        const auto lower = cpu.m_memory_controller->read(cpu.m_program_counter - 2);
-        const auto upper = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
+        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         const auto value = combine_bytes(upper, lower);
 
         cpu.m_stack_ptr = value;
@@ -1518,7 +1524,7 @@ uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
 
-    first += second;
+    first = static_cast<uint8_t>(first + second);
 
     first == 0 ? set_bit(flags, Cpu::zero_flag) :
         clear_bit(flags, Cpu::zero_flag);
@@ -1533,7 +1539,7 @@ FetchResult ADD_A_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -1649,7 +1655,7 @@ uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
         set_bit(flags, Cpu::half_carry_flag)  :
         clear_bit(flags, Cpu::half_carry_flag);
 
-    first += second;
+    first = static_cast<uint16_t>(first + second);
 
     clear_bit(flags, Cpu::sub_flag);
 
@@ -1667,8 +1673,8 @@ FetchResult ADD_HL_BC() {
 
         const auto result = ADD_16bit(hl, bc, cpu.m_reg_f);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1686,8 +1692,8 @@ FetchResult ADD_HL_DE() {
 
         const auto result = ADD_16bit(hl, de, cpu.m_reg_f);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1703,8 +1709,8 @@ FetchResult ADD_HL_HL() {
         const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         const auto result = ADD_16bit(hl, hl, cpu.m_reg_f);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1720,8 +1726,8 @@ FetchResult ADD_HL_SP() {
         const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         const auto result = ADD_16bit(hl, cpu.m_stack_ptr, cpu.m_reg_f);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1738,7 +1744,7 @@ uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
 
-    first -= second;
+    first = static_cast<uint8_t>(first - second);
 
     first == 0 ? set_bit(flags, Cpu::zero_flag) :
         clear_bit(flags, Cpu::zero_flag);
@@ -1753,7 +1759,7 @@ FetchResult SUB_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = SUB(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -1967,8 +1973,8 @@ FetchResult INC_BC() {
         auto value = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
         value++;
 
-        cpu.m_reg_b = static_cast<uint8_t>((value >> 8));
-        cpu.m_reg_c = static_cast<uint8_t>((value & 0xFF));
+        cpu.m_reg_b = static_cast<uint8_t>(value >> 8u);
+        cpu.m_reg_c = static_cast<uint8_t>(value & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1983,8 +1989,8 @@ FetchResult INC_DE() {
         auto value = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
         value++;
 
-        cpu.m_reg_d = static_cast<uint8_t>((value >> 8));
-        cpu.m_reg_e = static_cast<uint8_t>((value & 0xFF));
+        cpu.m_reg_d = static_cast<uint8_t>(value >> 8u);
+        cpu.m_reg_e = static_cast<uint8_t>(value & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1999,8 +2005,8 @@ FetchResult INC_HL() {
         auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         value++;
 
-        cpu.m_reg_h = static_cast<uint8_t>((value >> 8));
-        cpu.m_reg_l = static_cast<uint8_t>((value & 0xFF));
+        cpu.m_reg_h = static_cast<uint8_t>(value >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(value & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -2145,8 +2151,8 @@ FetchResult DEC_BC() {
         auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
         bc--;
 
-        cpu.m_reg_b = static_cast<uint8_t>((bc >> 8));
-        cpu.m_reg_c = static_cast<uint8_t>((bc & 0xFF));
+        cpu.m_reg_b = static_cast<uint8_t>(bc >> 8u);
+        cpu.m_reg_c = static_cast<uint8_t>(bc & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -2162,8 +2168,8 @@ FetchResult DEC_DE() {
         auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
         de--;
 
-        cpu.m_reg_d = static_cast<uint8_t>((de >> 8));
-        cpu.m_reg_e = static_cast<uint8_t>((de & 0xFF));
+        cpu.m_reg_d = static_cast<uint8_t>(de >> 8u);
+        cpu.m_reg_e = static_cast<uint8_t>(de & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -2179,8 +2185,8 @@ FetchResult DEC_HL() {
         auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         hl--;
 
-        cpu.m_reg_h = static_cast<uint8_t>((hl >> 8));
-        cpu.m_reg_l = static_cast<uint8_t>((hl & 0xFF));
+        cpu.m_reg_h = static_cast<uint8_t>(hl >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(hl & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -2272,7 +2278,7 @@ FetchResult RRA() {
     return {delta_pc, [](Cpu& cpu) {
         
         const auto new_carry_flag = is_set(cpu.m_reg_a, 0);
-        cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a >> 1);
+        cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a >> 1u);
 
         is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 7) 
             : clear_bit(cpu.m_reg_a, 7);
@@ -2295,7 +2301,7 @@ FetchResult RLA() {
 
     return {delta_pc, [](Cpu& cpu) {
         const auto new_carry_flag = is_set(cpu.m_reg_a, 7);
-        cpu.m_reg_a =  static_cast<uint8_t>(cpu.m_reg_a << 1);
+        cpu.m_reg_a =  static_cast<uint8_t>(cpu.m_reg_a << 1u);
 
         is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 0)
             : clear_bit(cpu.m_reg_a, 0);
@@ -2339,19 +2345,19 @@ FetchResult DAA() {
 
         if(!is_set(cpu.m_reg_f, Cpu::sub_flag)) {
             if(is_set(cpu.m_reg_f, Cpu::carry_flag) || cpu.m_reg_a > 0x99) {
-                cpu.m_reg_a += 0x60;
+                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x60);
                 set_bit(cpu.m_reg_f, Cpu::carry_flag);
             }
 
-            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag) || (cpu.m_reg_a & 0x0F) > 0x09) {
-                cpu.m_reg_a += 0x06;
+            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag) || (cpu.m_reg_a & 0x0Fu) > 0x09) {
+                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x06);
             }
         } else {
             if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-                cpu.m_reg_a -= 0x60;
+                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x60);
             }
             if(is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
-                cpu.m_reg_a -= 0x6;
+                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x06);
             }
         }
 
@@ -2370,19 +2376,19 @@ FetchResult ADD_SP_R8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto distance = (cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
 
-        half_carry_8bit(cpu.m_stack_ptr, distance)     ?
+        half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
             set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
             clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
 
 
-        overflows_8bit(cpu.m_stack_ptr, distance)  ? 
+        overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
             set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
             clear_bit(cpu.m_reg_f, Cpu::carry_flag);
 
 
-        cpu.m_stack_ptr += static_cast<int8_t>(distance);
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
 
         clear_bit(cpu.m_reg_f, Cpu::zero_flag);
         clear_bit(cpu.m_reg_f, Cpu::sub_flag);
@@ -2411,7 +2417,7 @@ FetchResult AND_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = AND(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -2535,7 +2541,7 @@ FetchResult XOR_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = XOR(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -2659,7 +2665,7 @@ FetchResult OR_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = OR(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -2786,7 +2792,7 @@ FetchResult CP_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         CP(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -2899,9 +2905,9 @@ FetchResult PUSH_AF() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_a);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_f);
-        cpu.m_stack_ptr -= 2;
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_a);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_f);
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -2913,9 +2919,9 @@ FetchResult PUSH_BC() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_b);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_c);
-        cpu.m_stack_ptr -= 2;
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_b);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_c);
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -2927,9 +2933,9 @@ FetchResult PUSH_DE() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_d);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_e);
-        cpu.m_stack_ptr -= 2;
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_d);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_e);
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -2941,9 +2947,9 @@ FetchResult PUSH_HL() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-1, cpu.m_reg_h);
-        cpu.m_memory_controller->write(cpu.m_stack_ptr-2, cpu.m_reg_l);
-        cpu.m_stack_ptr -= 2;
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_h);
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_l);
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -2955,9 +2961,9 @@ FetchResult POP_AF() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0;
-        cpu.m_reg_a = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
-        cpu.m_stack_ptr += 2;
+        cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0u;
+        cpu.m_reg_a = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -2970,8 +2976,8 @@ FetchResult POP_BC() {
 
     return {delta_pc, [](Cpu& cpu) {
         cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_b = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
-        cpu.m_stack_ptr += 2;
+        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -2984,8 +2990,8 @@ FetchResult POP_DE() {
 
     return {delta_pc, [](Cpu& cpu) {
         cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_d = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
-        cpu.m_stack_ptr += 2;
+        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -2998,8 +3004,8 @@ FetchResult POP_HL() {
 
     return {delta_pc, [](Cpu& cpu) {
         cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_h = cpu.m_memory_controller->read(cpu.m_stack_ptr + 1);
-        cpu.m_stack_ptr += 2;
+        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -3018,21 +3024,21 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)               :
         clear_bit(flags, Cpu::carry_flag);
 
-    first += second;
+    first = static_cast<uint8_t>(first + second);
 
     if(!is_set(flags, Cpu::half_carry_flag)) {
-        half_carry_8bit(first, carry_value)       ?
+        half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
         set_bit(flags, Cpu::half_carry_flag)          :
         clear_bit(flags, Cpu::half_carry_flag);
     }
 
     if(!is_set(flags, Cpu::carry_flag)) {
-        overflows_8bit(first, carry_value)        ?
+        overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
             set_bit(flags, Cpu::carry_flag)               :
             clear_bit(flags, Cpu::carry_flag);
     }
 
-    first += carry_value;
+    first = static_cast<uint8_t>(first + carry_value);
 
     first == 0 ? set_bit(flags, Cpu::zero_flag) :
         clear_bit(flags, Cpu::zero_flag);
@@ -3047,7 +3053,7 @@ FetchResult ADC_A_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = ADC(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -3158,8 +3164,8 @@ FetchResult LDH_ADDR_A8_A() {
     constexpr auto delta_pc = 2;
 
     return  {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
-        const uint16_t address = 0xFF00 + value;
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+        const auto address = static_cast<uint16_t>(0xFF00 + value);
         cpu.m_memory_controller->write(address, cpu.m_reg_a);    
 
         constexpr auto cycles = 12;
@@ -3172,7 +3178,7 @@ FetchResult LDH_A_ADDR_A8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const uint16_t address = 0xFF00 + cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
         cpu.m_reg_a = cpu.m_memory_controller->read(address);             
 
         constexpr auto cycles = 12;
@@ -3185,7 +3191,7 @@ FetchResult LD_ADDR_C_A() {
     constexpr auto delta_pc = 1;
 
     return {delta_pc, [](Cpu& cpu) {        
-        const auto address = 0xFF00 + cpu.m_reg_c;
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
         cpu.m_memory_controller->write(address, cpu.m_reg_a);
 
         constexpr auto cycles = 8;
@@ -3205,21 +3211,21 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
     
-    first -= second;
+    first = static_cast<uint8_t>(first - second);
 
     if(!is_set(flags, Cpu::half_carry_flag)) {
-        half_borrow_8bit(first, carry_value)       ?
+        half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
             set_bit(flags, Cpu::half_carry_flag)  :
             clear_bit(flags, Cpu::half_carry_flag);
     }
 
     if(!is_set(flags, Cpu::carry_flag)) {
-        underflows_8bit(first, carry_value)         ?
+        underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
             set_bit(flags, Cpu::carry_flag)   :
             clear_bit(flags, Cpu::carry_flag);
     }
 
-    first -= carry_value;
+    first = static_cast<uint8_t>(first - carry_value);
 
     first == 0 ? set_bit(flags, Cpu::zero_flag) :
         clear_bit(flags, Cpu::zero_flag);
@@ -3234,7 +3240,7 @@ FetchResult SBC_A_D8() {
     constexpr auto delta_pc = 2;
 
     return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(cpu.m_program_counter - 1);
+        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
         cpu.m_reg_a = SBC(cpu.m_reg_a, value, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
@@ -3341,7 +3347,7 @@ FetchResult PREFIX_CB() {
     auto delta_pc = 2;
     return {delta_pc, [](Cpu& cpu) {
 
-        const auto cb_opcode = static_cast<CBCode>(cpu.m_memory_controller->read(cpu.m_program_counter - 1));
+        const auto cb_opcode = static_cast<CBCode>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
         const auto result = fetch_cb(cb_opcode);
         return result.operation(cpu);
     }};
@@ -3358,8 +3364,8 @@ FetchResult LD_ADDR_HLD_A() {
 
         address--;
 
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFF);
+        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
         
         constexpr auto cycles = 8;
         return cycles;
@@ -3376,8 +3382,8 @@ FetchResult LD_A_ADDR_HLD() {
         cpu.m_reg_a = cpu.m_memory_controller->read(address);
 
         address--;
-        cpu.m_reg_h = static_cast<uint8_t>((address >> 8));
-        cpu.m_reg_l = static_cast<uint8_t>((address & 0xFF));
+        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
+        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
 
         constexpr auto cycles = 8;
         return cycles;

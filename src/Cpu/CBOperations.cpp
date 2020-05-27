@@ -1,5 +1,6 @@
 #include "Cpu/CBOperations.h"
 
+#include "Memory/Memory_Controller.h"
 #include "Cpu/Interpreter.h"
 #include "BitOperations.h"
 #include "Cpu/Cpu.h"
@@ -237,7 +238,7 @@ FetchResult RRC_A() {
 uint8_t RL(uint8_t value, uint8_t& flags) {
     
     const auto new_carry_flag = is_set(value, 7);
-    value = static_cast<uint8_t>(value << 1);
+    value = static_cast<uint8_t>(value << 1u);
 
     is_set(flags, Cpu::carry_flag) ? set_bit(value, 0)
         : clear_bit(value, 0);
@@ -359,7 +360,7 @@ uint8_t SRL(uint8_t value, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
     
-    value = static_cast<uint8_t>(value >> 1);
+    value = static_cast<uint8_t>(value >> 1u);
     clear_bit(value, 7);
 
     value == 0                            ?
@@ -477,7 +478,7 @@ uint8_t SLA(uint8_t value, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
     
-    value = static_cast<uint8_t>(value << 1);
+    value = static_cast<uint8_t>(value << 1u);
     clear_bit(value, 0);
 
     value == 0                            ?
@@ -597,7 +598,7 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
     
     const auto old_msb = is_set(value, 7);
 
-    value = static_cast<uint8_t>(value >> 1);
+    value = static_cast<uint8_t>(value >> 1u);
 
     old_msb ? set_bit(value, 7) : clear_bit(value, 7);
 
@@ -718,7 +719,7 @@ uint8_t RR(uint8_t value, uint8_t& flags) {
         set_bit(flags, Cpu::carry_flag)   :
         clear_bit(flags, Cpu::carry_flag);
 
-    value = static_cast<uint8_t>(value >> 1);
+    value = static_cast<uint8_t>(value >> 1u);
     carry_status ? set_bit(value, 7) : clear_bit(value, 7);
 
     value == 0 ? 

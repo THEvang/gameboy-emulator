@@ -6,8 +6,8 @@
 class Memory {
 public:
 
-    explicit Memory(const std::vector<uint8_t>& memory);
-    explicit Memory(const int size);
+    explicit Memory(std::vector<uint8_t> memory);
+    explicit Memory(std::size_t size);
 
     [[nodiscard]] uint8_t read(uint16_t address) const noexcept;
     void write(uint16_t address, uint8_t value);

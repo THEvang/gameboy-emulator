@@ -26,7 +26,7 @@ void GameBoy::run() {
         auto cycles = 4;
 
         if(!m_cpu->m_is_halted) {
-            m_cpu->m_program_counter += static_cast<uint16_t>(delta_pc);
+            m_cpu->m_program_counter = static_cast<uint16_t>(m_cpu->m_program_counter + delta_pc);
             cycles = operation(*m_cpu);
         } else {
             cycles = 4;

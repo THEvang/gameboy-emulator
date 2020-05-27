@@ -1,7 +1,7 @@
 #pragma once
+
 #include <string>
 #include <stdexcept>
-
 #include <memory>
 #include <functional>
 
@@ -14,7 +14,9 @@ public:
     Graphics_Init_Error(const std::string& msg) : runtime_error(msg.c_str()) {}
 };
 
-std::unique_ptr<SDL_Window, std::function<void(SDL_Window*)>> make_sdl_window();
+using Window_Deleter = std::function<void(SDL_Window*)>;
+using Window_Ptr = std::unique_ptr<SDL_Window, Window_Deleter>;
+Window_Ptr make_sdl_window();
 
 class Gui {
 public:
@@ -31,8 +33,6 @@ private:
     void init_glew();
     void init_imgui();
     
-    using Window_Deleter = std::function<void(SDL_Window*)>;
-
-    std::unique_ptr<SDL_Window, Window_Deleter> m_window;
+    Window_Ptr m_window;
     SDL_GLContext m_gl_context;
 };

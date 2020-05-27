@@ -21,8 +21,8 @@ public:
     uint32_t const* data();
 
 private:
-    static const int screen_width = 160;
-    static const int screen_height = 144;
+    static const std::size_t screen_width = 160;
+    static const std::size_t screen_height = 144;
     std::array<GLuint, screen_height*screen_width> m_pixels;
 };
 
