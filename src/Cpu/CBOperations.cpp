@@ -1,4 +1,6 @@
 #include "Cpu/CBOperations.h"
+
+#include "Cpu/Interpreter.h"
 #include "BitOperations.h"
 #include "Cpu/Cpu.h"
 

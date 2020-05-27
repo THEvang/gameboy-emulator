@@ -4,14 +4,12 @@
 #include "Input/Input.h"
 
 MemoryBankController::MemoryBankController(Memory& cartridge_memory) 
-    :   m_internal_memory(0xFFFF), 
-        m_cartridge_memory(cartridge_memory) 
+    : m_cartridge_memory(cartridge_memory) 
 {
     m_bank_type = get_bank_type(m_cartridge_memory.read(0x0147));
-};
+}
 
 uint8_t MemoryBankController::read(const uint16_t address) const {
-
 
     if(address <= 0x7FFF) {
         return read_from_rom_bank(address);
@@ -25,7 +23,7 @@ uint8_t MemoryBankController::read(const uint16_t address) const {
         return read_joypad_input();        
     }
 
-    return m_internal_memory.read(address);
+    return m_internal_memory[address];
 }
 
 void MemoryBankController::write(const uint16_t address, uint8_t data) {
@@ -49,21 +47,21 @@ void MemoryBankController::write(const uint16_t address, uint8_t data) {
         set_banking_mode(data);
     } else if (address >= 0xA000 && address <= 0xBFFF) {
         if(m_ram_enabled) {
-            m_internal_memory.write(address, data);
+            m_internal_memory[address] = data;
         }
     } else if (address >= 0xE000 && address < 0xFE00) {
-        m_internal_memory.write(address, data);
+        m_internal_memory[address] = data;
         write(address - 0x2000, data);
     } else if (address >= 0xFEA0 && address < 0xFEFF) {
 
     } else if(address == 0xFF04) {
-        m_internal_memory.write(0xFF04, 0);
+        m_internal_memory[0xFF04] = 0;
     } else if (address == 0xFF44) {
-        m_internal_memory.write(0xFF44, 0);
+        m_internal_memory[0xFF44] = 0;
     } else if (address == 0xFF46) {
         dma_transfer(data);
     } else {
-        m_internal_memory.write(address, data);
+        m_internal_memory[address] = data;
     }
 }
 
@@ -136,12 +134,12 @@ uint8_t MemoryBankController::read_from_rom_bank(uint16_t address) const {
 }
 
 uint8_t MemoryBankController::read_from_ram(uint16_t address) const {   
-    return m_internal_memory.read(address);
+    return m_internal_memory[address];
 }
 
 uint8_t MemoryBankController::read_joypad_input() const {
 
-    const auto data = m_internal_memory.read(0xFF00);
+    const auto data = m_internal_memory[0xFF00];
 
     if(!is_set(data, 5)) {
         return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);

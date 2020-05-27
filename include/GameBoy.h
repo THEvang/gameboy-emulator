@@ -11,8 +11,6 @@
 
 #include <memory>
 
-#include <memory>
-
 class GameBoy {
 public:
 

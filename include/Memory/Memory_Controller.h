@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include "Memory/Memory.h"
 #include "Memory/Cartridge.h"
 
@@ -13,15 +15,15 @@ public:
 
     MemoryBankController(Memory& cartridge_memory);
 
-    uint8_t read(const uint16_t address) const;
+    [[nodiscard]] uint8_t read(const uint16_t address) const;
     void write(const uint16_t address, uint8_t value);
 
     //Gets raw memory for modules that must bypass usual memory control;
-    Memory* raw() {
-        return &m_internal_memory;
+    constexpr auto& raw() {
+        return m_internal_memory;
     };
 
-protected:
+private:
 
     Bank_Type m_bank_type = Bank_Type::Uknown;
 
@@ -45,6 +47,6 @@ protected:
     void set_ram_bank_number(uint8_t data);
     void set_banking_mode(uint8_t data);
 
-    Memory m_internal_memory;
+    std::array<uint8_t, 0xFFFF> m_internal_memory;
     Memory m_cartridge_memory;
 };

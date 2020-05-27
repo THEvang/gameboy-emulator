@@ -1,11 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <functional>
 
 #include "Memory/Memory_Controller.h"
-#include "Cpu/Opcodes.h"
-#include "Cpu/CBOpcodes.h"
+
+class MemoryBankController;
 
 struct Cpu {
 
@@ -39,13 +38,3 @@ struct Cpu {
 
     bool m_is_halted = false;
 };
-
-using Operation = std::function<int(Cpu&)>;
-
-struct FetchResult {
-    int delta_pc = 0;
-    Operation operation;
-};
-
-FetchResult fetch(Opcode opcode);
-FetchResult fetch_cb(CBCode opcode);

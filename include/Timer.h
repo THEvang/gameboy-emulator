@@ -20,10 +20,10 @@ public:
 
 private: 
 
-
     bool should_increment_tima();
     void reset_tima();
     void tick();
+
     uint16_t m_div_value = 0xABCC;
 
     MemoryBankController* m_memory;

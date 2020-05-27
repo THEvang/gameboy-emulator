@@ -12,7 +12,7 @@ public:
 
     void step(int cycles);
 
-    auto screen() {
+    [[nodiscard]] constexpr auto screen() const noexcept {
         return m_pixels;
     }
 

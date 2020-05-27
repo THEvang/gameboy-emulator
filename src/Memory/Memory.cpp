@@ -9,10 +9,10 @@ Memory::Memory(const int size)
     : m_memory(size, 0)
 {}
 
-uint8_t Memory::read(const uint16_t address) const {
+uint8_t Memory::read(uint16_t address) const noexcept {
     return m_memory[address];
 }
 
-void Memory::write(const uint16_t address, const uint8_t value) {
+void Memory::write(uint16_t address, uint8_t value) {
     m_memory[address] = value;
 }

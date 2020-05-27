@@ -1,7 +1,7 @@
 #include <string>
-#include <vector>
 
 #include "Cpu/Opcodes.h"
+#include "Cpu/CBOpcodes.h"
 
 struct Instruction {
     Opcode opcode;
@@ -9,6 +9,5 @@ struct Instruction {
     int cycles;
 };
 
-
 Instruction disassemble(Opcode const& opcode);
-Instruction disassemble_cb(Opcode const& opcode);
+Instruction disassemble_cb(CBCode const& opcode);

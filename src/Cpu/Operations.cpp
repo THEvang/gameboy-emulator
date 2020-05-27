@@ -1,13 +1,9 @@
 #include "Cpu/Operations.h"
+
 #include "BitOperations.h"
-#include <string>
-
 #include "Cpu/Cpu.h"
-
-UnimplementedOperation::UnimplementedOperation(const std::string& msg)
-    : runtime_error(msg) {
-
-}
+#include "Cpu/Interpreter.h"
+#include <Cpu/CBOpcodes.h>
 
 FetchResult NOP() {
 

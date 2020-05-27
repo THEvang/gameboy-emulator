@@ -1,6 +1,8 @@
 #pragma once 
 
-enum class CBCode {
+#include <cstdint>
+
+enum class CBCode : uint8_t {
     RLC_B = 0x00,
     RLC_C,
     RLC_D,

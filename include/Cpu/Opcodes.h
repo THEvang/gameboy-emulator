@@ -1,6 +1,8 @@
 #pragma once
 
-enum class Opcode {
+#include <cstdint>
+
+enum class Opcode : uint8_t {
     NOP = 0x00,
     LD_BC_D16,
     LD_ADDR_BC_A,

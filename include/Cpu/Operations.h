@@ -1,14 +1,8 @@
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include <cstdint>
 
-#include "Cpu/Cpu.h"
-
-class UnimplementedOperation : public std::runtime_error {
-public:
-    explicit UnimplementedOperation(const std::string& msg);
-};
+class FetchResult;
 
 FetchResult NOP();
 FetchResult STOP();

@@ -11,6 +11,8 @@ Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
 int Interrupt_Handler::interrupts(Cpu& cpu) {
 
     if(v_blank_interrupt_enabled() && v_blank_interrupt_requested()) {
+        
+        const uint8_t v_blank_vector = 0x40;
         call(cpu, v_blank_vector);
         clear_v_blank_request();
         cpu.m_interrupts_enabled = false;
@@ -18,6 +20,8 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
     }
 
     if(lcd_stat_interrupt_enabled() && lcd_stat_interrupt_requested()) {
+
+        const uint8_t lcd_stat_vector = 0x48;
         call(cpu, lcd_stat_vector);
         clear_lcd_stat_request();
         cpu.m_interrupts_enabled = false;
@@ -25,6 +29,8 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
     } 
 
     if(timer_interrupt_enabled() && timer_interrupt_requested()) {
+
+        const uint8_t timer_vector = 0x50;
         call(cpu, timer_vector);
         clear_timer_request();
         cpu.m_interrupts_enabled = false;
@@ -32,6 +38,8 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
     }
 
     if(serial_interrupt_enabled() && serial_interrupt_requested()) {
+        
+        const uint8_t serial_vector = 0x58;
         call(cpu, serial_vector);
         clear_serial_request();
         cpu.m_interrupts_enabled = false;
@@ -39,6 +47,8 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
     }
     
     if(joypad_interrupt_enabled() && joypad_interrupt_requested()) {
+
+        const uint8_t joypad_vector = 0x60;
         call(cpu, joypad_vector);
         clear_joypad_request();
         cpu.m_interrupts_enabled = false;
