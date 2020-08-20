@@ -1,4 +1,4 @@
-#include "Memory/Memory.h"
+#include "Memory/Memory.hpp"
 
 Memory::Memory(std::vector<uint8_t> memory) 
     : m_memory(std::move(memory))

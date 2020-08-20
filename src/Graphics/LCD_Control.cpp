@@ -1,7 +1,7 @@
-#include "Graphics/LCD_Control.h"
-#include "BitOperations.h"
+#include "Graphics/LCD_Control.hpp"
+#include "BitOperations.hpp"
 
-#include "Memory/Memory_Controller.h"
+#include "Memory/Memory_Controller.hpp"
 
 LCD_Control::LCD_Control(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)

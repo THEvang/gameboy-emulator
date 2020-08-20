@@ -1,6 +1,6 @@
-#include "Graphics/PPU.h"
-#include "BitOperations.h"
-#include "Memory/Memory_Controller.h"
+#include "Graphics/PPU.hpp"
+#include "BitOperations.hpp"
+#include "Memory/Memory_Controller.hpp"
 
 PPU::PPU(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)

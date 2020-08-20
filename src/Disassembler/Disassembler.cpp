@@ -1,4 +1,4 @@
-#include "Disassembler/Disassembler.h"
+#include "Disassembler/Disassembler.hpp"
 
 Instruction disassemble(Opcode const& opcode) {
 

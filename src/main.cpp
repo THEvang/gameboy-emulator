@@ -1,10 +1,10 @@
 #include <iostream>
 #include <chrono>
 
-#include "Gui/Gui.h"
-#include "Gui/Renderers.h"
-#include "File.h"
-#include "GameBoy.h"
+#include "Gui/Gui.hpp"
+#include "Gui/Renderers.hpp"
+#include "Utilities/File.hpp"
+#include "GameBoy.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"

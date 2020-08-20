@@ -1,7 +1,7 @@
-#include "Cpu/Interpreter.h"
+#include "Cpu/Interpreter.hpp"
 
-#include "Cpu/Operations.h"
-#include "Cpu/CBOperations.h"
+#include "Cpu/Operations.hpp"
+#include "Cpu/CBOperations.hpp"
 
 FetchResult fetch(Opcode opcode) {
     

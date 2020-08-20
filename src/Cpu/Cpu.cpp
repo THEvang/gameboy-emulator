@@ -1,6 +1,6 @@
-#include "Cpu/Cpu.h"
+#include "Cpu/Cpu.hpp"
 
-#include "Memory/Memory_Controller.h"
+#include "Memory/Memory_Controller.hpp"
 
 Cpu::Cpu(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)

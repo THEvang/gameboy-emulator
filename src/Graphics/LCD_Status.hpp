@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Cpu/Interrupt_Handler.h"
-#include "Graphics/LCD_Control.h"
+#include "Cpu/Interrupt_Handler.hpp"
+#include "Graphics/LCD_Control.hpp"
 
 class MemoryBankController;
 

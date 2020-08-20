@@ -2,8 +2,8 @@
 
 #include <array>
 
-#include "Memory/Memory.h"
-#include "Memory/Cartridge.h"
+#include "Memory/Memory.hpp"
+#include "Memory/Cartridge.hpp"
 
 enum class BankingMode {
     ROM,

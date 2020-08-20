@@ -1,6 +1,6 @@
-#include "Timer.h"
-#include "BitOperations.h"
-#include "Memory/Memory_Controller.h"
+#include "Timer.hpp"
+#include "BitOperations.hpp"
+#include "Memory/Memory_Controller.hpp"
 
 Timer::Timer(MemoryBankController* memory) 
     : m_memory(memory)

@@ -4,10 +4,10 @@
 #include <exception>
 #include <string>
 
-#include "Cpu/Cpu.h"
+#include "Cpu/Cpu.hpp"
 
-#include "Cpu/Opcodes.h"
-#include "Cpu/CBOpcodes.h"
+#include "Cpu/Opcodes.hpp"
+#include "Cpu/CBOpcodes.hpp"
 
 class UnimplementedOperation : public std::runtime_error {
 public:

@@ -1,4 +1,4 @@
-#include "Gui/Gui.h"
+#include "Gui/Gui.hpp"
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"

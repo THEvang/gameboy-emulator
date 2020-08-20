@@ -1,7 +1,7 @@
-#include "GameBoy.h"
-#include "Cpu/Opcodes.h"
+#include "GameBoy.hpp"
+#include "Cpu/Opcodes.hpp"
 #include <iostream>
-#include "Cpu/Interpreter.h"
+#include "Cpu/Interpreter.hpp"
 
 GameBoy::GameBoy(const std::vector<uint8_t>& rom) {
 

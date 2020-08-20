@@ -1,8 +1,8 @@
-#include "Cpu/Interrupt_Handler.h"
+#include "Cpu/Interrupt_Handler.hpp"
 
-#include <Memory/Memory_Controller.h>
-#include "Cpu/Cpu.h"
-#include "BitOperations.h"
+#include "Memory/Memory_Controller.hpp"
+#include "Cpu/Cpu.hpp"
+#include "BitOperations.hpp"
 
 Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
     : m_memory_bank_controller(memory_controller)
