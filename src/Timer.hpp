@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "Cpu/Interrupt_Handler.h"
+#include "Cpu/Interrupt_Handler.hpp"
 
 class MemoryBankController;
 

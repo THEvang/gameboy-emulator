@@ -1,13 +1,12 @@
-#include "Gui/Renderers.h"
-
 #include <iostream>
 
+#include "Gui/Renderers.hpp"
 #include "imgui/imgui.h"
-#include "Cpu/Opcodes.h"
-#include "Disassembler/Disassembler.h"
-#include "Memory/Cartridge.h"
-#include "Disassembler/Ring_Buffer.h"
-#include "BitOperations.h"
+#include "Cpu/Opcodes.hpp"
+#include "Disassembler/Disassembler.hpp"
+#include "Memory/Cartridge.hpp"
+#include "Disassembler/Ring_Buffer.hpp"
+#include "BitOperations.hpp"
 
 void render_disassembly(GameBoy const& gameboy) {
 

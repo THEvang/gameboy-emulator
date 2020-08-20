@@ -1,17 +1,18 @@
 #pragma once
 
-#include "Memory/Memory_Controller.h"
-#include "Memory/Memory.h"
+#include <memory>
 
-#include "Cpu/Cpu.h"
-#include "Timer.h"
-#include "Cpu/Interrupt_Handler.h"
-#include "Graphics/PPU.h"
+#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory.hpp"
+
+#include "Cpu/Cpu.hpp"
+#include "Timer.hpp"
+#include "Cpu/Interrupt_Handler.hpp"
+#include "Graphics/PPU.hpp"
 
 #include "Input/Keyboard.hpp"
 #include "Input/Joypad_Controller.hpp"
 
-#include <memory>
 
 class GameBoy {
 public:

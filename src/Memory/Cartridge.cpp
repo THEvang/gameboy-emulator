@@ -1,4 +1,4 @@
-#include "Memory/Cartridge.h"
+#include "Memory/Cartridge.hpp"
 
 Bank_Type get_bank_type(uint8_t type_number) {
     switch(type_number) {

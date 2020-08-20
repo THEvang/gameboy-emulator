@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Graphics/LCD_Status.h"
-#include "Cpu/Interrupt_Handler.h"
-#include "Graphics/Pixel.h"
+#include "Graphics/LCD_Status.hpp"
+#include "Cpu/Interrupt_Handler.hpp"
+#include "Graphics/Pixel.hpp"
 
 class MemoryBankController;
 

@@ -1,10 +1,10 @@
-#include "Input/Keyboard.hpp"
-#include "Cpu/Interrupt_Handler.h"
 #include <bitset>
 #include <map>
 #include <queue>
 #include <SDL2/SDL_events.h>
 
+#include "Input/Keyboard.hpp"
+#include "Cpu/Interrupt_Handler.hpp"
 
 Keyboard_Queue::Keyboard_Queue(const Key_Map& key_map) 
     : key_map(key_map) 
@@ -79,7 +79,7 @@ Keyboard_Emitter::Observer_Handle Keyboard_Emitter::add_observer(Keyboard_Observ
     }
 
     return handle;
-};
+}
 
 void Keyboard_Emitter::remove_observer(Observer_Handle handle) {
     if(auto it = m_observers.find(handle) != m_observers.end()) {
@@ -97,7 +97,7 @@ void Keyboard_Emitter::emitt() {
 
         m_input_queue.pop();
     }
-};
+}
 
 Keyboard_Queue* Keyboard_Emitter::get_queue() {
     return &m_input_queue;

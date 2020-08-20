@@ -1,10 +1,10 @@
-#include "Cpu/Operations.h"
+#include "Cpu/Operations.hpp"
 
-#include "BitOperations.h"
-#include "Cpu/Cpu.h"
-#include "Cpu/Interpreter.h"
-#include "Cpu/CBOpcodes.h"
-#include "Memory/Memory_Controller.h"
+#include "BitOperations.hpp"
+#include "Cpu/Cpu.hpp"
+#include "Cpu/Interpreter.hpp"
+#include "Cpu/CBOpcodes.hpp"
+#include "Memory/Memory_Controller.hpp"
 
 FetchResult NOP() {
 

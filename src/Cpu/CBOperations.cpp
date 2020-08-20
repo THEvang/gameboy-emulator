@@ -1,9 +1,9 @@
-#include "Cpu/CBOperations.h"
+#include "Cpu/CBOperations.hpp"
 
-#include "Memory/Memory_Controller.h"
-#include "Cpu/Interpreter.h"
-#include "BitOperations.h"
-#include "Cpu/Cpu.h"
+#include "Memory/Memory_Controller.hpp"
+#include "Cpu/Interpreter.hpp"
+#include "BitOperations.hpp"
+#include "Cpu/Cpu.hpp"
 
 uint8_t RLC(uint8_t value, uint8_t& flags) {
 
