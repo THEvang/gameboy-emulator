@@ -1,7 +1,8 @@
 #include "Memory/Memory_Controller.h"
 
 #include "BitOperations.h"
-#include "Input/Input.h"
+
+#include "Input/Joypad_Controller.hpp"
 
 MemoryBankController::MemoryBankController(Memory& cartridge_memory) 
     : m_cartridge_memory(cartridge_memory) 

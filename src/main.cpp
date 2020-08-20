@@ -8,9 +8,14 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
-
+#include "Input/Keyboard.hpp"
 
 void render_main(GameBoy* gameboy) {
+
+    Keyboard_Emitter keyboard_emitter;
+    keyboard_emitter.add_observer(gameboy->joypad_controller());
+
+    SDL_SetEventFilter(keyboard_filter, static_cast<void*>(keyboard_emitter.get_queue()));
 
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
@@ -38,72 +43,12 @@ void render_main(GameBoy* gameboy) {
                         done = true;
                     }
                     break;
-                case SDL_KEYDOWN:
-                    switch(event.key.keysym.sym) {
-                        case SDLK_LEFT:
-                            gameboy->joypad_controller()->press_button(Buttons::Left);
-                        break;
-                        
-                        case SDLK_RIGHT:
-                            gameboy->joypad_controller()->press_button(Buttons::Right);
-                        break;
-                        
-                        case SDLK_DOWN:
-                            gameboy->joypad_controller()->press_button(Buttons::Down);
-                        break;
-
-                        case SDLK_SPACE:
-                            gameboy->joypad_controller()->press_button(Buttons::Select);
-                        break;
-
-                        case SDLK_RETURN:
-                            gameboy->joypad_controller()->press_button(Buttons::Start);
-                        break;
-
-                        case SDLK_x:
-                            gameboy->joypad_controller()->press_button(Buttons::A);
-                        break;
-
-                        case SDLK_z:
-                            gameboy->joypad_controller()->press_button(Buttons::B);
-                        break;
-                    }
-                break;
-                case SDL_KEYUP:
-                    switch(event.key.keysym.sym) {
-                        case SDLK_LEFT:
-                            gameboy->joypad_controller()->release_button(Buttons::Left);
-                        break;
-                        
-                        case SDLK_RIGHT:
-                            gameboy->joypad_controller()->release_button(Buttons::Right);
-                        break;
-                        
-                        case SDLK_DOWN:
-                            gameboy->joypad_controller()->release_button(Buttons::Down);
-                        break;
-
-                        case SDLK_SPACE:
-                            gameboy->joypad_controller()->release_button(Buttons::Select);
-                        break;
-
-                        case SDLK_RETURN:
-                            gameboy->joypad_controller()->release_button(Buttons::Start);
-                        break;
-
-                        case SDLK_x:
-                            gameboy->joypad_controller()->release_button(Buttons::A);
-                        break;
-
-                        case SDLK_z:
-                            gameboy->joypad_controller()->release_button(Buttons::B);
-                        break;
-                    }
-                    break;
                 default:
                     break;
                 }
             }
+
+            keyboard_emitter.emitt();
 
             gameboy->run();
             std::chrono::duration<double, std::milli> dur = stop - start;

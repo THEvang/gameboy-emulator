@@ -1,4 +1,5 @@
-#include "Input/Input.h"
+#include "Input/Joypad_Controller.hpp"
+
 #include "Cpu/Interrupt_Handler.h"
 
 std::bitset<4> Joypad_Controller::m_direction_keys = 0b1111;
@@ -17,68 +18,80 @@ uint8_t Joypad_Controller::read_input_as_byte(Button_Types button_type) {
     return static_cast<uint8_t>(m_button_keys.to_ulong());
 }
 
-void Joypad_Controller::press_button(const Buttons& button) {
+void Joypad_Controller::key_down(const Button& button) {
     switch(button) {
-        case Buttons::Right:
+        case Button::Right:
             m_direction_keys.reset(0);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::Left:
+        case Button::Left:
             m_direction_keys.reset(1);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::Up:
+        case Button::Up:
             m_direction_keys.reset(2);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::Down:
+        case Button::Down:
             m_direction_keys.reset(3);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::A:
+        case Button::A:
             m_button_keys.reset(0);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::B:
+        case Button::B:
             m_button_keys.reset(1);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::Select:
+        case Button::Select:
             m_button_keys.reset(2);
             m_interrupt_handler->request_joypad_interrupt();
             break;
-        case Buttons::Start:
+        case Button::Start:
             m_button_keys.reset(3);
             m_interrupt_handler->request_joypad_interrupt();
             break;
     }
 }
 
-void Joypad_Controller::release_button(const Buttons& button) {
+void Joypad_Controller::key_up(const Button& button) {
     switch(button) {
-        case Buttons::Right:
+        case Button::Right:
             m_direction_keys.set(0);
             break;
-        case Buttons::Left:
+        case Button::Left:
             m_direction_keys.set(1);
             break;
-        case Buttons::Up:
+        case Button::Up:
             m_direction_keys.set(2);
             break;
-        case Buttons::Down:
+        case Button::Down:
             m_direction_keys.set(3);
             break;
-        case Buttons::A:
+        case Button::A:
             m_button_keys.set(0);
             break;
-        case Buttons::B:
+        case Button::B:
             m_button_keys.set(1);
             break;
-        case Buttons::Select:
+        case Button::Select:
             m_button_keys.set(2);
             break;
-        case Buttons::Start:
+        case Button::Start:
             m_button_keys.set(3);
+            break;
+    }
+}
+
+
+void Joypad_Controller::input(Key_Input input) {
+    switch(input.key_press) {
+        case Key_Press::Key_Down:
+            key_down(input.button);
+            break;
+        case Key_Press::Key_Up:
+            key_up(input.button);
             break;
     }
 }

@@ -7,7 +7,9 @@
 #include "Timer.h"
 #include "Cpu/Interrupt_Handler.h"
 #include "Graphics/PPU.h"
-#include "Input/Input.h"
+
+#include "Input/Keyboard.hpp"
+#include "Input/Joypad_Controller.hpp"
 
 #include <memory>
 

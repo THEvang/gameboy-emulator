@@ -1,35 +1,30 @@
-#pragma once
+#pragma once 
 
 #include <bitset>
+#include <cstdint>
 
-class Interrupt_Handler;
+#include "Keyboard_Observer.hpp"
 
 enum class Button_Types {
     Direction_Key,
     Button_Key
 };
 
-enum class Buttons {
-    Start,
-    Select,
-    A,
-    B,
-    Up,
-    Down,
-    Right,
-    Left
-};
+class Interrupt_Handler;
 
-class Joypad_Controller {
+class Joypad_Controller : public Keyboard_Observer {
 public:
   
     explicit Joypad_Controller(Interrupt_Handler* interrupt_handler);
     
     static uint8_t read_input_as_byte(Button_Types button_type);
-    void press_button(const Buttons& button);
-    void release_button(const Buttons& button);
+
+    void input(Key_Input) override;
 
 private:
+
+    void key_down(const Button& button);
+    void key_up(const Button& button);
 
     Interrupt_Handler* m_interrupt_handler;
 
