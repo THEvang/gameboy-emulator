@@ -24,6 +24,6 @@ struct Key_Input {
 
 class Keyboard_Observer {
 public:
-
+    virtual ~Keyboard_Observer() = default;
     virtual void input(Key_Input) = 0;
 };
