@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "GameBoy.hpp"
+#include "Gameboy/GameBoy.hpp"
 
 void render_disassembly(GameBoy const& gameboy);
 void render_ppu(GameBoy const& gameboy);

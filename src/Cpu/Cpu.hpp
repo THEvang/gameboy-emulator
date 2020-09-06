@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <variant>
+#include <functional>
 
 class MemoryBankController;
 
@@ -29,6 +31,7 @@ struct Cpu {
 
     MemoryBankController* m_memory_controller;
 
+
     static const int zero_flag = 7;
     static const int sub_flag = 6;
     static const int half_carry_flag = 5;
@@ -36,3 +39,15 @@ struct Cpu {
 
     bool m_is_halted = false;
 };
+
+using Operand = std::variant<uint8_t, uint16_t, int8_t>;
+
+//Addressing Modes
+Operand immediate(Cpu&);
+Operand immediate_extended(Cpu&);
+Operand hl_addressing(Cpu&);
+Operand relative_address(Cpu&);
+Operand extended_address(Cpu&);
+Operand implied(Cpu&);
+Operand indexed_address(Cpu&);
+Operand extended_addressing(Cpu&);

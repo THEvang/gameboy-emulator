@@ -21,83 +21,57 @@ uint8_t RLC(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult RLC_B() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-
+Instruction RLC_B() {
+    return {[](Cpu& cpu, Operand&) {
         constexpr auto cycles = 8;
         cpu.m_reg_b = RLC(cpu.m_reg_b, cpu.m_reg_f);
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_C() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_C() {
+    return {[](Cpu& cpu, Operation&) {
         cpu.m_reg_c = RLC(cpu.m_reg_c, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_D() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_D() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_d = RLC(cpu.m_reg_d, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_E() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_E() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_e = RLC(cpu.m_reg_e, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_H() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_H() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_h = RLC(cpu.m_reg_h, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_L() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_L() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_l = RLC(cpu.m_reg_l, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_ADDR_HL() {
+    return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
         auto value = cpu.m_memory_controller->read(address);
         value = RLC(value, cpu.m_reg_f);
@@ -105,19 +79,15 @@ FetchResult RLC_ADDR_HL() {
 
         constexpr auto cycles = 16;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLC_A() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RLC_A() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_a = RLC(cpu.m_reg_a, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t RRC(uint8_t value, uint8_t& flags) {
@@ -136,43 +106,32 @@ uint8_t RRC(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult RRC_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RRC_B() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_b = RRC(cpu.m_reg_b, cpu.m_reg_f);
 
         constexpr auto cycles = 8;
         return cycles;
-    }}; 
+    }, implied}; 
 }
 
-FetchResult RRC_C() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RRC_C() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_c = RRC(cpu.m_reg_c, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }}; 
+    }, implied}; 
 }
 
-FetchResult RRC_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction RRC_D() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_reg_d = RRC(cpu.m_reg_d, cpu.m_reg_f);
-
         constexpr auto cycles = 8;
         return cycles;
-    }}; 
+    }, implied}; 
 }
 
-FetchResult RRC_E() {
+Instruction RRC_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -184,7 +143,7 @@ FetchResult RRC_E() {
     }}; 
 }
 
-FetchResult RRC_H() {
+Instruction RRC_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -196,7 +155,7 @@ FetchResult RRC_H() {
     }}; 
 }
 
-FetchResult RRC_L() {
+Instruction RRC_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -208,7 +167,7 @@ FetchResult RRC_L() {
     }}; 
 }
 
-FetchResult RRC_ADDR_HL() {
+Instruction RRC_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -223,7 +182,7 @@ FetchResult RRC_ADDR_HL() {
     }}; 
 }
 
-FetchResult RRC_A() {
+Instruction RRC_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -255,7 +214,7 @@ uint8_t RL(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult RL_B() {
+Instruction RL_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -267,7 +226,7 @@ FetchResult RL_B() {
     }};
 }
 
-FetchResult RL_C() {
+Instruction RL_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -279,7 +238,7 @@ FetchResult RL_C() {
     }};
 }
 
-FetchResult RL_D() {
+Instruction RL_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -291,7 +250,7 @@ FetchResult RL_D() {
     }};
 }
 
-FetchResult RL_E() {
+Instruction RL_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -303,7 +262,7 @@ FetchResult RL_E() {
     }};
 }
 
-FetchResult RL_H() {
+Instruction RL_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -315,7 +274,7 @@ FetchResult RL_H() {
     }};
 }
 
-FetchResult RL_L() {
+Instruction RL_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -327,7 +286,7 @@ FetchResult RL_L() {
     }};
 }
 
-FetchResult RL_ADDR_HL() {
+Instruction RL_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -342,7 +301,7 @@ FetchResult RL_ADDR_HL() {
     }};
 }
 
-FetchResult RL_A() {
+Instruction RL_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -373,7 +332,7 @@ uint8_t SRL(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult SRL_A() {
+Instruction SRL_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -385,7 +344,7 @@ FetchResult SRL_A() {
     }};
 }
 
-FetchResult SRL_B() {
+Instruction SRL_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -397,7 +356,7 @@ FetchResult SRL_B() {
     }};
 }
 
-FetchResult SRL_C() {
+Instruction SRL_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -409,7 +368,7 @@ FetchResult SRL_C() {
     }};
 }
 
-FetchResult SRL_D() {
+Instruction SRL_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -421,7 +380,7 @@ FetchResult SRL_D() {
     }};
 }
 
-FetchResult SRL_E() {
+Instruction SRL_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -433,7 +392,7 @@ FetchResult SRL_E() {
     }};
 }
 
-FetchResult SRL_H() {
+Instruction SRL_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -445,7 +404,7 @@ FetchResult SRL_H() {
     }};
 }
 
-FetchResult SRL_L() {
+Instruction SRL_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -457,7 +416,7 @@ FetchResult SRL_L() {
     }};
 }
 
-FetchResult SRL_ADDR_HL() {
+Instruction SRL_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -491,7 +450,7 @@ uint8_t SLA(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult SLA_B() {
+Instruction SLA_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -503,7 +462,7 @@ FetchResult SLA_B() {
     }};
 }
 
-FetchResult SLA_C() {
+Instruction SLA_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -515,7 +474,7 @@ FetchResult SLA_C() {
     }};
 }
 
-FetchResult SLA_D() {
+Instruction SLA_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -527,7 +486,7 @@ FetchResult SLA_D() {
     }};
 }
 
-FetchResult SLA_E() {
+Instruction SLA_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -539,7 +498,7 @@ FetchResult SLA_E() {
     }};
 }
 
-FetchResult SLA_H() {
+Instruction SLA_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -551,7 +510,7 @@ FetchResult SLA_H() {
     }};
 }
 
-FetchResult SLA_L() {
+Instruction SLA_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -563,7 +522,7 @@ FetchResult SLA_L() {
     }};
 }
 
-FetchResult SLA_ADDR_HL() {
+Instruction SLA_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -578,7 +537,7 @@ FetchResult SLA_ADDR_HL() {
     }};
 }
 
-FetchResult SLA_A() {
+Instruction SLA_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -612,7 +571,7 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult SRA_B() {
+Instruction SRA_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -624,7 +583,7 @@ FetchResult SRA_B() {
     }};
 }
 
-FetchResult SRA_C() {
+Instruction SRA_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -636,7 +595,7 @@ FetchResult SRA_C() {
     }};
 }
 
-FetchResult SRA_D() {
+Instruction SRA_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -648,7 +607,7 @@ FetchResult SRA_D() {
     }};
 }
 
-FetchResult SRA_E() {
+Instruction SRA_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -660,7 +619,7 @@ FetchResult SRA_E() {
     }};
 }
 
-FetchResult SRA_H() {
+Instruction SRA_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -672,7 +631,7 @@ FetchResult SRA_H() {
     }};
 }
 
-FetchResult SRA_L() {
+Instruction SRA_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -684,7 +643,7 @@ FetchResult SRA_L() {
     }};
 }
 
-FetchResult SRA_ADDR_HL() {
+Instruction SRA_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -699,7 +658,7 @@ FetchResult SRA_ADDR_HL() {
     }};
 }
 
-FetchResult SRA_A() {
+Instruction SRA_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -732,7 +691,7 @@ uint8_t RR(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult RR_B() {
+Instruction RR_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -745,7 +704,7 @@ FetchResult RR_B() {
 }
 
 
-FetchResult RR_C() {
+Instruction RR_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -757,7 +716,7 @@ FetchResult RR_C() {
     }};
 }
 
-FetchResult RR_D() {
+Instruction RR_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -769,7 +728,7 @@ FetchResult RR_D() {
     }};
 }
 
-FetchResult RR_E() {
+Instruction RR_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -781,7 +740,7 @@ FetchResult RR_E() {
     }};
 }
 
-FetchResult RR_H() {
+Instruction RR_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -793,7 +752,7 @@ FetchResult RR_H() {
     }};
 }
 
-FetchResult RR_L() {
+Instruction RR_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -805,7 +764,7 @@ FetchResult RR_L() {
     }};
 }
 
-FetchResult RR_ADDR_HL() {
+Instruction RR_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -820,7 +779,7 @@ FetchResult RR_ADDR_HL() {
     }};
 }
 
-FetchResult RR_A() {
+Instruction RR_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -847,7 +806,7 @@ uint8_t SWAP(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-FetchResult SWAP_B() {
+Instruction SWAP_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -859,7 +818,7 @@ FetchResult SWAP_B() {
     }};
 }
 
-FetchResult SWAP_C() {
+Instruction SWAP_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -871,7 +830,7 @@ FetchResult SWAP_C() {
     }};
 }
 
-FetchResult SWAP_D() {
+Instruction SWAP_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -883,7 +842,7 @@ FetchResult SWAP_D() {
     }};
 }
 
-FetchResult SWAP_E() {
+Instruction SWAP_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -895,7 +854,7 @@ FetchResult SWAP_E() {
     }};
 }
 
-FetchResult SWAP_H() {
+Instruction SWAP_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -907,7 +866,7 @@ FetchResult SWAP_H() {
     }};
 }
 
-FetchResult SWAP_L() {
+Instruction SWAP_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -919,7 +878,7 @@ FetchResult SWAP_L() {
     }};
 }
 
-FetchResult SWAP_ADDR_HL() {
+Instruction SWAP_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -934,7 +893,7 @@ FetchResult SWAP_ADDR_HL() {
     }};
 }
 
-FetchResult SWAP_A() {
+Instruction SWAP_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -955,7 +914,25 @@ void BIT(uint8_t value, int n, uint8_t& flags) {
     set_bit(flags, Cpu::half_carry_flag);
 }
 
-FetchResult BIT_0_B() {
+template<int n>
+Instruction BIT_B() {
+    return {[](Cpu& cpu, Operand&) {
+        BIT(cpu.m_reg_b, n)
+        return 8;
+    }, implied}
+}
+
+template Instruction BIT_B<0>();
+template Instruction BIT_B<1>();
+template Instruction BIT_B<2>();
+template Instruction BIT_B<3>();
+template Instruction BIT_B<4>();
+template Instruction BIT_B<5>();
+template Instruction BIT_B<6>();
+template Instruction BIT_B<7>();
+
+
+Instruction BIT_0_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -967,7 +944,7 @@ FetchResult BIT_0_B() {
     }};
 }
 
-FetchResult BIT_0_C() {
+Instruction BIT_0_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -979,7 +956,7 @@ FetchResult BIT_0_C() {
     }};
 }
 
-FetchResult BIT_0_D() {
+Instruction BIT_0_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -990,7 +967,7 @@ FetchResult BIT_0_D() {
         return cycles;
     }};
 }
-FetchResult BIT_0_E() {
+Instruction BIT_0_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1002,7 +979,7 @@ FetchResult BIT_0_E() {
     }};
 }
 
-FetchResult BIT_0_H() {
+Instruction BIT_0_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1014,7 +991,7 @@ FetchResult BIT_0_H() {
     }};
 }
 
-FetchResult BIT_0_L() {
+Instruction BIT_0_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1026,7 +1003,7 @@ FetchResult BIT_0_L() {
     }};
 }
 
-FetchResult BIT_0_ADDR_HL() {
+Instruction BIT_0_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1040,7 +1017,7 @@ FetchResult BIT_0_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_0_A() {
+Instruction BIT_0_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1052,7 +1029,7 @@ FetchResult BIT_0_A() {
     }};
 }
 
-FetchResult BIT_1_B() {
+Instruction BIT_1_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1064,7 +1041,7 @@ FetchResult BIT_1_B() {
     }};
 }
 
-FetchResult BIT_1_C() {
+Instruction BIT_1_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1076,7 +1053,7 @@ FetchResult BIT_1_C() {
     }};
 }
 
-FetchResult BIT_1_D() {
+Instruction BIT_1_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1088,7 +1065,7 @@ FetchResult BIT_1_D() {
     }};
 }
 
-FetchResult BIT_1_E() {
+Instruction BIT_1_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1100,7 +1077,7 @@ FetchResult BIT_1_E() {
     }};
 }
 
-FetchResult BIT_1_H() {
+Instruction BIT_1_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1112,7 +1089,7 @@ FetchResult BIT_1_H() {
     }};
 }
 
-FetchResult BIT_1_L() {
+Instruction BIT_1_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1124,7 +1101,7 @@ FetchResult BIT_1_L() {
     }};
 }
 
-FetchResult BIT_1_ADDR_HL() {
+Instruction BIT_1_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1138,7 +1115,7 @@ FetchResult BIT_1_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_1_A() {
+Instruction BIT_1_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1150,7 +1127,7 @@ FetchResult BIT_1_A() {
     }};
 }
 
-FetchResult BIT_2_B() {
+Instruction BIT_2_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1162,7 +1139,7 @@ FetchResult BIT_2_B() {
     }};
 }
 
-FetchResult BIT_2_C() {
+Instruction BIT_2_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1174,7 +1151,7 @@ FetchResult BIT_2_C() {
     }};
 }
 
-FetchResult BIT_2_D() {
+Instruction BIT_2_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1186,7 +1163,7 @@ FetchResult BIT_2_D() {
     }};
 }
 
-FetchResult BIT_2_E() {
+Instruction BIT_2_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1198,7 +1175,7 @@ FetchResult BIT_2_E() {
     }};
 }
 
-FetchResult BIT_2_H() {
+Instruction BIT_2_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1210,7 +1187,7 @@ FetchResult BIT_2_H() {
     }};
 }
 
-FetchResult BIT_2_L() {
+Instruction BIT_2_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1222,7 +1199,7 @@ FetchResult BIT_2_L() {
     }};
 }
 
-FetchResult BIT_2_ADDR_HL() {
+Instruction BIT_2_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1237,7 +1214,7 @@ FetchResult BIT_2_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_2_A() {
+Instruction BIT_2_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1249,7 +1226,7 @@ FetchResult BIT_2_A() {
     }};
 }
 
-FetchResult BIT_3_B() {
+Instruction BIT_3_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1261,7 +1238,7 @@ FetchResult BIT_3_B() {
     }};
 }
 
-FetchResult BIT_3_C() {
+Instruction BIT_3_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1273,7 +1250,7 @@ FetchResult BIT_3_C() {
     }};
 }
 
-FetchResult BIT_3_D() {
+Instruction BIT_3_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1285,7 +1262,7 @@ FetchResult BIT_3_D() {
     }};
 }
 
-FetchResult BIT_3_E() {
+Instruction BIT_3_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1297,7 +1274,7 @@ FetchResult BIT_3_E() {
     }};
 }
 
-FetchResult BIT_3_H() {
+Instruction BIT_3_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1309,7 +1286,7 @@ FetchResult BIT_3_H() {
     }};
 }
 
-FetchResult BIT_3_L() {
+Instruction BIT_3_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1321,7 +1298,7 @@ FetchResult BIT_3_L() {
     }};
 }
 
-FetchResult BIT_3_ADDR_HL() {
+Instruction BIT_3_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1335,7 +1312,7 @@ FetchResult BIT_3_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_3_A() {
+Instruction BIT_3_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1347,7 +1324,7 @@ FetchResult BIT_3_A() {
     }};
 }
 
-FetchResult BIT_4_B() {
+Instruction BIT_4_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1359,7 +1336,7 @@ FetchResult BIT_4_B() {
     }};
 }
 
-FetchResult BIT_4_C() {
+Instruction BIT_4_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1371,7 +1348,7 @@ FetchResult BIT_4_C() {
     }};
 }
 
-FetchResult BIT_4_D() {
+Instruction BIT_4_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1383,7 +1360,7 @@ FetchResult BIT_4_D() {
     }};
 }
 
-FetchResult BIT_4_E() {
+Instruction BIT_4_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1395,7 +1372,7 @@ FetchResult BIT_4_E() {
     }};
 }
 
-FetchResult BIT_4_H() {
+Instruction BIT_4_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1407,7 +1384,7 @@ FetchResult BIT_4_H() {
     }};
 }
 
-FetchResult BIT_4_L() {
+Instruction BIT_4_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1419,7 +1396,7 @@ FetchResult BIT_4_L() {
     }};
 }
 
-FetchResult BIT_4_ADDR_HL() {
+Instruction BIT_4_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1433,7 +1410,7 @@ FetchResult BIT_4_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_4_A() {
+Instruction BIT_4_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1445,7 +1422,7 @@ FetchResult BIT_4_A() {
     }};
 }
 
-FetchResult BIT_5_B() {
+Instruction BIT_5_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1457,7 +1434,7 @@ FetchResult BIT_5_B() {
     }};
 }
 
-FetchResult BIT_5_C() {
+Instruction BIT_5_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1469,7 +1446,7 @@ FetchResult BIT_5_C() {
     }};
 }
 
-FetchResult BIT_5_D() {
+Instruction BIT_5_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1481,7 +1458,7 @@ FetchResult BIT_5_D() {
     }};
 }
 
-FetchResult BIT_5_E() {
+Instruction BIT_5_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1493,7 +1470,7 @@ FetchResult BIT_5_E() {
     }};
 }
 
-FetchResult BIT_5_H() {
+Instruction BIT_5_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1505,7 +1482,7 @@ FetchResult BIT_5_H() {
     }};
 }
 
-FetchResult BIT_5_L() {
+Instruction BIT_5_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1517,7 +1494,7 @@ FetchResult BIT_5_L() {
     }};
 }
 
-FetchResult BIT_5_ADDR_HL() {
+Instruction BIT_5_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1531,7 +1508,7 @@ FetchResult BIT_5_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_5_A() {
+Instruction BIT_5_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1543,7 +1520,7 @@ FetchResult BIT_5_A() {
     }};
 }
 
-FetchResult BIT_6_B() {
+Instruction BIT_6_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1555,7 +1532,7 @@ FetchResult BIT_6_B() {
     }};
 }
 
-FetchResult BIT_6_C() {
+Instruction BIT_6_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1567,7 +1544,7 @@ FetchResult BIT_6_C() {
     }};
 }
 
-FetchResult BIT_6_D() {
+Instruction BIT_6_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1579,7 +1556,7 @@ FetchResult BIT_6_D() {
     }};
 }
 
-FetchResult BIT_6_E() {
+Instruction BIT_6_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1591,7 +1568,7 @@ FetchResult BIT_6_E() {
     }};
 }
 
-FetchResult BIT_6_H() {
+Instruction BIT_6_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1603,7 +1580,7 @@ FetchResult BIT_6_H() {
     }};
 }
 
-FetchResult BIT_6_L() {
+Instruction BIT_6_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1615,7 +1592,7 @@ FetchResult BIT_6_L() {
     }};
 }
 
-FetchResult BIT_6_ADDR_HL() {
+Instruction BIT_6_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1629,7 +1606,7 @@ FetchResult BIT_6_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_6_A() {
+Instruction BIT_6_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1641,7 +1618,7 @@ FetchResult BIT_6_A() {
     }};
 }
 
-FetchResult BIT_7_B() {
+Instruction BIT_7_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -1653,7 +1630,7 @@ FetchResult BIT_7_B() {
     }};
 }
 
-FetchResult BIT_7_C() {
+Instruction BIT_7_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -1665,7 +1642,7 @@ FetchResult BIT_7_C() {
     }};
 }
 
-FetchResult BIT_7_D() {
+Instruction BIT_7_D() {
     
     constexpr auto delta_pc = 1;
 
@@ -1677,7 +1654,7 @@ FetchResult BIT_7_D() {
     }};
 }
 
-FetchResult BIT_7_E() {
+Instruction BIT_7_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1689,7 +1666,7 @@ FetchResult BIT_7_E() {
     }};
 }
 
-FetchResult BIT_7_H() {
+Instruction BIT_7_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1701,7 +1678,7 @@ FetchResult BIT_7_H() {
     }};
 }
 
-FetchResult BIT_7_L() {
+Instruction BIT_7_L() {
     
     constexpr auto delta_pc = 1;
 
@@ -1713,7 +1690,7 @@ FetchResult BIT_7_L() {
     }};
 }
 
-FetchResult BIT_7_ADDR_HL() {
+Instruction BIT_7_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1727,7 +1704,7 @@ FetchResult BIT_7_ADDR_HL() {
     }};
 }
 
-FetchResult BIT_7_A() {
+Instruction BIT_7_A() {
     
     constexpr auto delta_pc = 1;
 
@@ -1739,7 +1716,7 @@ FetchResult BIT_7_A() {
     }};
 }
 
-FetchResult RES_0_B() {
+Instruction RES_0_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -1751,7 +1728,7 @@ FetchResult RES_0_B() {
     }};
 }
 
-FetchResult RES_0_C() {
+Instruction RES_0_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -1763,7 +1740,7 @@ FetchResult RES_0_C() {
     }};
 }
 
-FetchResult RES_0_D() {
+Instruction RES_0_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -1775,7 +1752,7 @@ FetchResult RES_0_D() {
     }};
 }
 
-FetchResult RES_0_E() {
+Instruction RES_0_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -1787,7 +1764,7 @@ FetchResult RES_0_E() {
     }};
 }
 
-FetchResult RES_0_H() {
+Instruction RES_0_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -1799,7 +1776,7 @@ FetchResult RES_0_H() {
     }};
 }
 
-FetchResult RES_0_L() {
+Instruction RES_0_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -1811,7 +1788,7 @@ FetchResult RES_0_L() {
     }};
 }
 
-FetchResult RES_0_ADDR_HL() {
+Instruction RES_0_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1826,7 +1803,7 @@ FetchResult RES_0_ADDR_HL() {
     }};
 }
 
-FetchResult RES_0_A() {
+Instruction RES_0_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -1838,7 +1815,7 @@ FetchResult RES_0_A() {
     }};
 }
 
-FetchResult RES_1_B() {
+Instruction RES_1_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -1850,7 +1827,7 @@ FetchResult RES_1_B() {
     }};
 }
 
-FetchResult RES_1_C() {
+Instruction RES_1_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -1862,7 +1839,7 @@ FetchResult RES_1_C() {
     }};
 }
 
-FetchResult RES_1_D() {
+Instruction RES_1_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -1874,7 +1851,7 @@ FetchResult RES_1_D() {
     }};
 }
 
-FetchResult RES_1_E() {
+Instruction RES_1_E() {
     
     constexpr auto delta_pc = 1;
 
@@ -1886,7 +1863,7 @@ FetchResult RES_1_E() {
     }};
 }
 
-FetchResult RES_1_H() {
+Instruction RES_1_H() {
     
     constexpr auto delta_pc = 1;
 
@@ -1898,7 +1875,7 @@ FetchResult RES_1_H() {
     }};
 }
 
-FetchResult RES_1_L() {
+Instruction RES_1_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -1910,7 +1887,7 @@ FetchResult RES_1_L() {
     }};
 }
 
-FetchResult RES_1_ADDR_HL() {
+Instruction RES_1_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -1925,7 +1902,7 @@ FetchResult RES_1_ADDR_HL() {
     }};
 }
 
-FetchResult RES_1_A() {
+Instruction RES_1_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -1937,7 +1914,7 @@ FetchResult RES_1_A() {
     }};
 }
 
-FetchResult RES_2_B() {
+Instruction RES_2_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -1949,7 +1926,7 @@ FetchResult RES_2_B() {
     }};
 }
 
-FetchResult RES_2_C() {
+Instruction RES_2_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -1961,7 +1938,7 @@ FetchResult RES_2_C() {
     }};
 }
 
-FetchResult RES_2_D() {
+Instruction RES_2_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -1973,7 +1950,7 @@ FetchResult RES_2_D() {
     }};
 }
 
-FetchResult RES_2_E() {
+Instruction RES_2_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -1985,7 +1962,7 @@ FetchResult RES_2_E() {
     }};
 }
 
-FetchResult RES_2_H() {
+Instruction RES_2_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -1997,7 +1974,7 @@ FetchResult RES_2_H() {
     }};
 }
 
-FetchResult RES_2_L() {
+Instruction RES_2_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2009,7 +1986,7 @@ FetchResult RES_2_L() {
     }};
 }
 
-FetchResult RES_2_ADDR_HL() {
+Instruction RES_2_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -2024,7 +2001,7 @@ FetchResult RES_2_ADDR_HL() {
     }};
 }
 
-FetchResult RES_2_A() {
+Instruction RES_2_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -2036,7 +2013,7 @@ FetchResult RES_2_A() {
     }};
 }
 
-FetchResult RES_3_B() {
+Instruction RES_3_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2048,7 +2025,7 @@ FetchResult RES_3_B() {
     }};
 }
 
-FetchResult RES_3_C() {
+Instruction RES_3_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -2060,7 +2037,7 @@ FetchResult RES_3_C() {
     }};
 }
 
-FetchResult RES_3_D() {
+Instruction RES_3_D() {
 
     constexpr auto delta_pc = 1;
     
@@ -2072,7 +2049,7 @@ FetchResult RES_3_D() {
     }};
 }
 
-FetchResult RES_3_E() {
+Instruction RES_3_E() {
 
     constexpr auto delta_pc = 1;
     
@@ -2084,7 +2061,7 @@ FetchResult RES_3_E() {
     }};
 }
 
-FetchResult RES_3_H() {
+Instruction RES_3_H() {
 
     constexpr auto delta_pc = 1;
     
@@ -2096,7 +2073,7 @@ FetchResult RES_3_H() {
     }};
 }
 
-FetchResult RES_3_L() {
+Instruction RES_3_L() {
 
     constexpr auto delta_pc = 1;
     
@@ -2108,7 +2085,7 @@ FetchResult RES_3_L() {
     }};
 }
 
-FetchResult RES_3_ADDR_HL() {
+Instruction RES_3_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
     
@@ -2123,7 +2100,7 @@ FetchResult RES_3_ADDR_HL() {
     }};
 }
 
-FetchResult RES_3_A() {
+Instruction RES_3_A() {
 
     constexpr auto delta_pc = 1;
     
@@ -2135,7 +2112,7 @@ FetchResult RES_3_A() {
     }};
 }
 
-FetchResult RES_4_B() {
+Instruction RES_4_B() {
 
     constexpr auto delta_pc = 1;
     
@@ -2147,7 +2124,7 @@ FetchResult RES_4_B() {
     }};
 }
 
-FetchResult RES_4_C() {
+Instruction RES_4_C() {
 
     constexpr auto delta_pc = 1;
     
@@ -2159,7 +2136,7 @@ FetchResult RES_4_C() {
     }};
 }
 
-FetchResult RES_4_D() {
+Instruction RES_4_D() {
 
     constexpr auto delta_pc = 1;
     
@@ -2171,7 +2148,7 @@ FetchResult RES_4_D() {
     }};
 }
 
-FetchResult RES_4_E() {
+Instruction RES_4_E() {
 
     constexpr auto delta_pc = 1;
     
@@ -2183,7 +2160,7 @@ FetchResult RES_4_E() {
     }};
 }
 
-FetchResult RES_4_H() {
+Instruction RES_4_H() {
 
     constexpr auto delta_pc = 1;
     
@@ -2195,7 +2172,7 @@ FetchResult RES_4_H() {
     }};
 }
 
-FetchResult RES_4_L() {
+Instruction RES_4_L() {
 
     constexpr auto delta_pc = 1;
     
@@ -2207,7 +2184,7 @@ FetchResult RES_4_L() {
     }};
 }
 
-FetchResult RES_4_ADDR_HL() {
+Instruction RES_4_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
     
@@ -2222,7 +2199,7 @@ FetchResult RES_4_ADDR_HL() {
     }};
 }
 
-FetchResult RES_4_A() {
+Instruction RES_4_A() {
 
     constexpr auto delta_pc = 1;
     
@@ -2234,7 +2211,7 @@ FetchResult RES_4_A() {
     }};
 }
 
-FetchResult RES_5_B() {
+Instruction RES_5_B() {
 
     constexpr auto delta_pc = 1;
     
@@ -2246,7 +2223,7 @@ FetchResult RES_5_B() {
     }};
 }
 
-FetchResult RES_5_C() {
+Instruction RES_5_C() {
 
     constexpr auto delta_pc = 1;
     
@@ -2258,7 +2235,7 @@ FetchResult RES_5_C() {
     }};
 }
 
-FetchResult RES_5_D() {
+Instruction RES_5_D() {
 
     constexpr auto delta_pc = 1;
     
@@ -2270,7 +2247,7 @@ FetchResult RES_5_D() {
     }};
 }
 
-FetchResult RES_5_E() {
+Instruction RES_5_E() {
 
     constexpr auto delta_pc = 1;
     
@@ -2282,7 +2259,7 @@ FetchResult RES_5_E() {
     }};
 }
 
-FetchResult RES_5_H() {
+Instruction RES_5_H() {
 
     constexpr auto delta_pc = 1;
     
@@ -2294,7 +2271,7 @@ FetchResult RES_5_H() {
     }};
 }
 
-FetchResult RES_5_L() {
+Instruction RES_5_L() {
     
     constexpr auto delta_pc = 1;
     
@@ -2306,7 +2283,7 @@ FetchResult RES_5_L() {
     }};
 }
 
-FetchResult RES_5_ADDR_HL() {
+Instruction RES_5_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
     
@@ -2321,7 +2298,7 @@ FetchResult RES_5_ADDR_HL() {
     }};
 }
 
-FetchResult RES_5_A() {
+Instruction RES_5_A() {
 
     constexpr auto delta_pc = 1;
     
@@ -2333,7 +2310,7 @@ FetchResult RES_5_A() {
     }};
 }
 
-FetchResult RES_6_B() {
+Instruction RES_6_B() {
 
     constexpr auto delta_pc = 1;
     
@@ -2345,7 +2322,7 @@ FetchResult RES_6_B() {
     }};
 }
 
-FetchResult RES_6_C() {
+Instruction RES_6_C() {
 
     constexpr auto delta_pc = 1;
     
@@ -2357,7 +2334,7 @@ FetchResult RES_6_C() {
     }};
 }
 
-FetchResult RES_6_D() {
+Instruction RES_6_D() {
 
     constexpr auto delta_pc = 1;
     
@@ -2369,7 +2346,7 @@ FetchResult RES_6_D() {
     }};
 }
 
-FetchResult RES_6_E() {
+Instruction RES_6_E() {
 
     constexpr auto delta_pc = 1;
     
@@ -2381,7 +2358,7 @@ FetchResult RES_6_E() {
     }};
 }
 
-FetchResult RES_6_H() {
+Instruction RES_6_H() {
 
     constexpr auto delta_pc = 1;
     
@@ -2393,7 +2370,7 @@ FetchResult RES_6_H() {
     }};
 }
 
-FetchResult RES_6_L() {
+Instruction RES_6_L() {
 
     constexpr auto delta_pc = 1;
     
@@ -2405,7 +2382,7 @@ FetchResult RES_6_L() {
     }};
 }
 
-FetchResult RES_6_ADDR_HL() {
+Instruction RES_6_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
     
@@ -2420,7 +2397,7 @@ FetchResult RES_6_ADDR_HL() {
     }};
 }
 
-FetchResult RES_6_A() {
+Instruction RES_6_A() {
 
     constexpr auto delta_pc = 1;
     
@@ -2432,7 +2409,7 @@ FetchResult RES_6_A() {
     }};
 }
 
-FetchResult RES_7_B() {
+Instruction RES_7_B() {
 
     constexpr auto delta_pc = 1;
     
@@ -2444,7 +2421,7 @@ FetchResult RES_7_B() {
     }};
 }
 
-FetchResult RES_7_C() {
+Instruction RES_7_C() {
 
     constexpr auto delta_pc = 1;
     
@@ -2456,7 +2433,7 @@ FetchResult RES_7_C() {
     }};
 }
 
-FetchResult RES_7_D() {
+Instruction RES_7_D() {
 
     constexpr auto delta_pc = 1;
     
@@ -2468,7 +2445,7 @@ FetchResult RES_7_D() {
     }};
 }
 
-FetchResult RES_7_E() {
+Instruction RES_7_E() {
 
     constexpr auto delta_pc = 1;
     
@@ -2480,7 +2457,7 @@ FetchResult RES_7_E() {
     }};
 }
 
-FetchResult RES_7_H() {
+Instruction RES_7_H() {
 
     constexpr auto delta_pc = 1;
     
@@ -2492,7 +2469,7 @@ FetchResult RES_7_H() {
     }};
 }
 
-FetchResult RES_7_L() {
+Instruction RES_7_L() {
 
     constexpr auto delta_pc = 1;
     
@@ -2504,7 +2481,7 @@ FetchResult RES_7_L() {
     }};
 }
 
-FetchResult RES_7_ADDR_HL() {
+Instruction RES_7_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
     
@@ -2519,7 +2496,7 @@ FetchResult RES_7_ADDR_HL() {
     }};
 }
 
-FetchResult RES_7_A() {
+Instruction RES_7_A() {
 
     constexpr auto delta_pc = 1;
     
@@ -2531,7 +2508,7 @@ FetchResult RES_7_A() {
     }};
 }
 
-FetchResult SET_0_B() {
+Instruction SET_0_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2543,7 +2520,7 @@ FetchResult SET_0_B() {
     }};
 }
 
-FetchResult SET_0_C() {
+Instruction SET_0_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -2554,7 +2531,7 @@ FetchResult SET_0_C() {
         return cycles;
     }};
 }
-FetchResult SET_0_D() {
+Instruction SET_0_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -2565,7 +2542,7 @@ FetchResult SET_0_D() {
         return cycles;
     }};
 }
-FetchResult SET_0_E() {
+Instruction SET_0_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -2576,7 +2553,7 @@ FetchResult SET_0_E() {
         return cycles;
     }};
 }
-FetchResult SET_0_H() {
+Instruction SET_0_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -2587,7 +2564,7 @@ FetchResult SET_0_H() {
         return cycles;
     }};
 }
-FetchResult SET_0_L() {
+Instruction SET_0_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2599,7 +2576,7 @@ FetchResult SET_0_L() {
     }};
 }
 
-FetchResult SET_0_ADDR_HL() {
+Instruction SET_0_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -2614,7 +2591,7 @@ FetchResult SET_0_ADDR_HL() {
     }};
 }
 
-FetchResult SET_0_A() {
+Instruction SET_0_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -2626,7 +2603,7 @@ FetchResult SET_0_A() {
     }};
 }
 
-FetchResult SET_1_B() {
+Instruction SET_1_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2638,7 +2615,7 @@ FetchResult SET_1_B() {
     }};
 }
 
-FetchResult SET_1_C() {
+Instruction SET_1_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -2650,7 +2627,7 @@ FetchResult SET_1_C() {
     }};
 }
 
-FetchResult SET_1_D() {
+Instruction SET_1_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -2662,7 +2639,7 @@ FetchResult SET_1_D() {
     }};
 }
 
-FetchResult SET_1_E() {
+Instruction SET_1_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -2674,7 +2651,7 @@ FetchResult SET_1_E() {
     }};
 }
 
-FetchResult SET_1_H() {
+Instruction SET_1_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -2686,7 +2663,7 @@ FetchResult SET_1_H() {
     }};
 }
 
-FetchResult SET_1_L() {
+Instruction SET_1_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2698,7 +2675,7 @@ FetchResult SET_1_L() {
     }};
 }
 
-FetchResult SET_1_ADDR_HL() {
+Instruction SET_1_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -2713,7 +2690,7 @@ FetchResult SET_1_ADDR_HL() {
     }};
 }
 
-FetchResult SET_1_A() {
+Instruction SET_1_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -2725,7 +2702,7 @@ FetchResult SET_1_A() {
     }};
 }
 
-FetchResult SET_2_B() {
+Instruction SET_2_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2737,7 +2714,7 @@ FetchResult SET_2_B() {
     }};
 }
 
-FetchResult SET_2_C() {
+Instruction SET_2_C() {
     
     constexpr auto delta_pc = 1;
 
@@ -2749,7 +2726,7 @@ FetchResult SET_2_C() {
     }};
 }
 
-FetchResult SET_2_D() {
+Instruction SET_2_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -2761,7 +2738,7 @@ FetchResult SET_2_D() {
     }};
 }
 
-FetchResult SET_2_E() {
+Instruction SET_2_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -2773,7 +2750,7 @@ FetchResult SET_2_E() {
     }};
 }
 
-FetchResult SET_2_H() {
+Instruction SET_2_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -2785,7 +2762,7 @@ FetchResult SET_2_H() {
     }};
 }
 
-FetchResult SET_2_L() {
+Instruction SET_2_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2797,7 +2774,7 @@ FetchResult SET_2_L() {
     }};
 }
 
-FetchResult SET_2_ADDR_HL() {
+Instruction SET_2_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -2812,7 +2789,7 @@ FetchResult SET_2_ADDR_HL() {
     }};
 }
 
-FetchResult SET_2_A() {
+Instruction SET_2_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -2824,7 +2801,7 @@ FetchResult SET_2_A() {
     }};
 }
 
-FetchResult SET_3_B() {
+Instruction SET_3_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2836,7 +2813,7 @@ FetchResult SET_3_B() {
     }};
 }
 
-FetchResult SET_3_C() {
+Instruction SET_3_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -2848,7 +2825,7 @@ FetchResult SET_3_C() {
     }};
 }
 
-FetchResult SET_3_D() {
+Instruction SET_3_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -2860,7 +2837,7 @@ FetchResult SET_3_D() {
     }};
 }
 
-FetchResult SET_3_E() {
+Instruction SET_3_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -2872,7 +2849,7 @@ FetchResult SET_3_E() {
     }};
 }
 
-FetchResult SET_3_H() {
+Instruction SET_3_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -2884,7 +2861,7 @@ FetchResult SET_3_H() {
     }};
 }
 
-FetchResult SET_3_L() {
+Instruction SET_3_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2896,7 +2873,7 @@ FetchResult SET_3_L() {
     }};
 }
 
-FetchResult SET_3_ADDR_HL() {
+Instruction SET_3_ADDR_HL() {
     
     constexpr auto delta_pc = 1;
 
@@ -2911,7 +2888,7 @@ FetchResult SET_3_ADDR_HL() {
     }};
 }
 
-FetchResult SET_3_A() {
+Instruction SET_3_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -2923,7 +2900,7 @@ FetchResult SET_3_A() {
     }};
 }
 
-FetchResult SET_4_B() {
+Instruction SET_4_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -2935,7 +2912,7 @@ FetchResult SET_4_B() {
     }};
 }
 
-FetchResult SET_4_C() {
+Instruction SET_4_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -2947,7 +2924,7 @@ FetchResult SET_4_C() {
     }};
 }
 
-FetchResult SET_4_D() {
+Instruction SET_4_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -2959,7 +2936,7 @@ FetchResult SET_4_D() {
     }};
 }
 
-FetchResult SET_4_E() {
+Instruction SET_4_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -2971,7 +2948,7 @@ FetchResult SET_4_E() {
     }};
 }
 
-FetchResult SET_4_H() {
+Instruction SET_4_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -2983,7 +2960,7 @@ FetchResult SET_4_H() {
     }};
 }
 
-FetchResult SET_4_L() {
+Instruction SET_4_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -2995,7 +2972,7 @@ FetchResult SET_4_L() {
     }};
 }
 
-FetchResult SET_4_ADDR_HL() {
+Instruction SET_4_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -3010,7 +2987,7 @@ FetchResult SET_4_ADDR_HL() {
     }};
 }
 
-FetchResult SET_4_A() {
+Instruction SET_4_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -3022,7 +2999,7 @@ FetchResult SET_4_A() {
     }};
 }
 
-FetchResult SET_5_B() {
+Instruction SET_5_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -3034,7 +3011,7 @@ FetchResult SET_5_B() {
     }};
 }
 
-FetchResult SET_5_C() {
+Instruction SET_5_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -3046,7 +3023,7 @@ FetchResult SET_5_C() {
     }};
 }
 
-FetchResult SET_5_D() {
+Instruction SET_5_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -3058,7 +3035,7 @@ FetchResult SET_5_D() {
     }};
 }
 
-FetchResult SET_5_E() {
+Instruction SET_5_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -3070,7 +3047,7 @@ FetchResult SET_5_E() {
     }};
 }
 
-FetchResult SET_5_H() {
+Instruction SET_5_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -3082,7 +3059,7 @@ FetchResult SET_5_H() {
     }};
 }
 
-FetchResult SET_5_L() {
+Instruction SET_5_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -3094,7 +3071,7 @@ FetchResult SET_5_L() {
     }};
 }
 
-FetchResult SET_5_ADDR_HL() {
+Instruction SET_5_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -3109,7 +3086,7 @@ FetchResult SET_5_ADDR_HL() {
     }};
 }
 
-FetchResult SET_5_A() {
+Instruction SET_5_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -3121,7 +3098,7 @@ FetchResult SET_5_A() {
     }};
 }
 
-FetchResult SET_6_B() {
+Instruction SET_6_B() {
 
     constexpr auto delta_pc = 1;
 
@@ -3133,7 +3110,7 @@ FetchResult SET_6_B() {
     }};
 }
 
-FetchResult SET_6_C() {
+Instruction SET_6_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -3145,7 +3122,7 @@ FetchResult SET_6_C() {
     }};
 }
 
-FetchResult SET_6_D() {
+Instruction SET_6_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -3157,7 +3134,7 @@ FetchResult SET_6_D() {
     }};
 }
 
-FetchResult SET_6_E() {
+Instruction SET_6_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -3169,7 +3146,7 @@ FetchResult SET_6_E() {
     }};
 }
 
-FetchResult SET_6_H() {
+Instruction SET_6_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -3181,7 +3158,7 @@ FetchResult SET_6_H() {
     }};
 }
 
-FetchResult SET_6_L() {
+Instruction SET_6_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -3193,7 +3170,7 @@ FetchResult SET_6_L() {
     }};
 }
 
-FetchResult SET_6_ADDR_HL() {
+Instruction SET_6_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -3208,7 +3185,7 @@ FetchResult SET_6_ADDR_HL() {
     }};
 }
 
-FetchResult SET_6_A() {
+Instruction SET_6_A() {
 
     constexpr auto delta_pc = 1;
 
@@ -3220,7 +3197,7 @@ FetchResult SET_6_A() {
     }};
 }
 
-FetchResult SET_7_B() {
+Instruction SET_7_B() {
     
     constexpr auto delta_pc = 1;
 
@@ -3232,7 +3209,7 @@ FetchResult SET_7_B() {
     }};
 }
 
-FetchResult SET_7_C() {
+Instruction SET_7_C() {
 
     constexpr auto delta_pc = 1;
 
@@ -3244,7 +3221,7 @@ FetchResult SET_7_C() {
     }};
 }
 
-FetchResult SET_7_D() {
+Instruction SET_7_D() {
 
     constexpr auto delta_pc = 1;
 
@@ -3256,7 +3233,7 @@ FetchResult SET_7_D() {
     }};
 }
 
-FetchResult SET_7_E() {
+Instruction SET_7_E() {
 
     constexpr auto delta_pc = 1;
 
@@ -3268,7 +3245,7 @@ FetchResult SET_7_E() {
     }};
 }
 
-FetchResult SET_7_H() {
+Instruction SET_7_H() {
 
     constexpr auto delta_pc = 1;
 
@@ -3280,7 +3257,7 @@ FetchResult SET_7_H() {
     }};
 }
 
-FetchResult SET_7_L() {
+Instruction SET_7_L() {
 
     constexpr auto delta_pc = 1;
 
@@ -3292,7 +3269,7 @@ FetchResult SET_7_L() {
     }};
 }
 
-FetchResult SET_7_ADDR_HL() {
+Instruction SET_7_ADDR_HL() {
 
     constexpr auto delta_pc = 1;
 
@@ -3307,7 +3284,7 @@ FetchResult SET_7_ADDR_HL() {
     }};
 }
 
-FetchResult SET_7_A() {
+Instruction SET_7_A() {
 
     constexpr auto delta_pc = 1;
 

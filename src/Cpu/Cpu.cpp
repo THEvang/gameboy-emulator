@@ -1,5 +1,5 @@
 #include "Cpu/Cpu.hpp"
-
+#include "BitOperations.hpp"
 #include "Memory/Memory_Controller.hpp"
 
 Cpu::Cpu(MemoryBankController* memory_controller)
@@ -42,4 +42,44 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFF4A, 0x00);
     m_memory_controller->write(0xFF4B, 0x00);
     m_memory_controller->write(0xFFFF, 0x00);
+}
+
+//Addressing Modes
+Operand immediate(Cpu& cpu) {
+    cpu.m_program_counter += 2;
+    return {cpu.m_memory_controller->read(cpu.m_program_counter-1)};
+}
+
+Operand immediate_extended(Cpu& cpu) {
+    cpu.m_program_counter += 3;
+    const auto pc = cpu.m_program_counter;
+    return cpu.m_memory_controller->read(pc-1) << 8 | cpu.m_memory_controller->read(pc-2);
+}
+
+Operand hl_addressing(Cpu& cpu) {
+    cpu.m_program_counter++;
+    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    return cpu.m_memory_controller->read(address);
+}
+
+Operand relative_address(Cpu& cpu) {
+    cpu.m_program_counter += 2;
+    const auto pc = cpu.m_program_counter;
+    return pc + static_cast<int8_t>(cpu.m_memory_controller->read(pc-1));
+}
+
+Operand extended_address(Cpu& cpu) {
+    cpu.m_program_counter += 3;
+    const auto pc = cpu.m_program_counter;
+    const auto address = combine_bytes(cpu.m_memory_controller->read(pc-1), cpu.m_memory_controller->read(pc-2));
+    return cpu.m_memory_controller->read(address);
+}
+
+Operand implied(Cpu& cpu) {
+    cpu.m_program_counter++;
+    
+}
+
+Operand indexed_address(Cpu& cpu) {
+
 }

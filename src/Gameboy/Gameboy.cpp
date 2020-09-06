@@ -21,13 +21,11 @@ void GameBoy::run() {
         
         const auto opcode = m_cpu->m_memory_controller->read(m_cpu->m_program_counter);
 
-        auto [delta_pc, operation] = fetch(static_cast<Opcode>(opcode));
-        
-        auto cycles = 4;
+        auto instruction = fetch(static_cast<Opcode>(opcode));
 
         if(!m_cpu->m_is_halted) {
-            m_cpu->m_program_counter = static_cast<uint16_t>(m_cpu->m_program_counter + delta_pc);
-            cycles = operation(*m_cpu);
+            const auto operand = instruction.address_mode(*cpu);
+            const auto cycles = instruction.operation(*cpu, operand);
         } else {
             cycles = 4;
             m_cpu->m_is_halted = m_interrupt_handler->should_exit_halt();

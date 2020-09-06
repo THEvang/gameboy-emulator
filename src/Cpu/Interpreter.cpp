@@ -3,7 +3,7 @@
 #include "Cpu/Operations.hpp"
 #include "Cpu/CBOperations.hpp"
 
-FetchResult fetch(Opcode opcode) {
+Instruction fetch(Opcode opcode) {
     
     switch (opcode) {
     case Opcode::NOP:
@@ -747,7 +747,7 @@ FetchResult fetch(Opcode opcode) {
     }
 }
 
-FetchResult fetch_cb(CBCode opcode)
+Instruction fetch_cb(CBCode opcode)
 {
     switch (opcode) {
     case CBCode::RLC_B:

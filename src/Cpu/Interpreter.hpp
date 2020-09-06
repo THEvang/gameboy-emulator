@@ -16,12 +16,13 @@ public:
     }
 };
 
-using Operation = std::function<int(Cpu&)>;
+using Operand = std::variant<uint8_t, uint16_t, int8_t>;
+using Operation = std::function<int(Cpu&, Operand)>;
 
-struct FetchResult {
-    int delta_pc = 0;
-    Operation operation;
+struct Instruction {
+    Address_Mode read_operand;
+    Operation execute;
 };
 
-FetchResult fetch(Opcode opcode);
-FetchResult fetch_cb(CBCode opcode);
+Instruction fetch(Opcode opcode);
+Instruction fetch_cb(CBCode opcode);

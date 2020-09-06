@@ -20,4 +20,6 @@ set_project_warnings(project_warnings)
 include(cmake/StaticAnalyzers.cmake)
 add_subdirectory(src)
 
+add_executable(tests tests/Test_Main.cpp)
+target_include_directories(tests PRIVATE ${CMAKE_INCLUDE_DIRS_CATCH2})
 # target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)
