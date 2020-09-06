@@ -28,7 +28,7 @@ target_include_directories(disassembler PRIVATE ./)
 add_executable(Gameboy.out main.cpp)
 target_include_directories(Gameboy.out PRIVATE ./ ./)
 target_link_libraries(Gameboy.out PRIVATE gui memory input gameboy imgui utilities cpu graphics disassembler)
-target_link_libraries(Gameboy.out PRIVATE SDL2 GLEW GL pthread)
+target_link_libraries(Gameboy.out PRIVATE SDL2 GLEW GL pthread  ${CMAKE_DL_LIBS})
 
 add_subdirectory(Input)
 add_subdirectory(Cpu)
