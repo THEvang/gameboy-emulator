@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <variant>
 #include <functional>
+#include <array>
+#include <BitOperations.hpp>
 
 class MemoryBankController;
 
@@ -10,14 +12,50 @@ struct Cpu {
 
     explicit Cpu(MemoryBankController* memory_controller);
 
-    uint8_t m_reg_a = 0x01;
-    uint8_t m_reg_b = 0x00;
-    uint8_t m_reg_c = 0x13;
-    uint8_t m_reg_d = 0x00;
-    uint8_t m_reg_e = 0xD8;
-    uint8_t m_reg_f = 0xB0;
-    uint8_t m_reg_h = 0x01;
-    uint8_t m_reg_l = 0x4D;
+    enum class Register {
+        A,
+        B,
+        C,
+        D,
+        E,
+        F,
+        H,
+        L,
+    };
+
+    enum class Flag {
+        Carry = 4,
+        Half_Carry,
+        Sub,
+        Zero
+    };
+
+    static int to_index(Cpu::Flag f) {
+        return static_cast<int>(f);
+    }
+
+
+
+    void set(Register r, uint8_t value) {
+        m_registers[static_cast<size_t>(r)] = value;
+    }
+
+    uint8_t get(Register r) const {
+        return m_registers[static_cast<size_t>(r)];
+    }
+
+    bool test_flag(const Flag& flag) const {
+        return is_set(get(Register::F), static_cast<int>(flag));
+    }
+
+    void set_flag(const Cpu::Flag& flag) {
+        set_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+    }
+
+    void clear_flag(const Cpu::Flag& flag) {
+        clear_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+    }
+
 
     uint16_t m_stack_ptr = 0xFFFE;
     uint16_t m_program_counter = 0x0100;
@@ -31,13 +69,9 @@ struct Cpu {
 
     MemoryBankController* m_memory_controller;
 
-
-    static const int zero_flag = 7;
-    static const int sub_flag = 6;
-    static const int half_carry_flag = 5;
-    static const int carry_flag = 4;
-
     bool m_is_halted = false;
+private:
+    std::array<uint8_t, 8> m_registers;
 };
 
 using Operand = std::variant<uint8_t, uint16_t, int8_t>;

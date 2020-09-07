@@ -5,6 +5,15 @@
 Cpu::Cpu(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
 {
+    set(Register::A, 0x01);
+    set(Register::B, 0x00);
+    set(Register::C, 0x13);
+    set(Register::D, 0x00);
+    set(Register::E, 0xD8);
+    set(Register::F, 0xB0);
+    set(Register::H, 0x01);
+    set(Register::L, 0x4D);
+
     m_memory_controller->write(0xFF05, 0);
     m_memory_controller->write(0xFF06, 0);
     m_memory_controller->write(0xFF07, 0);
@@ -53,20 +62,20 @@ Operand immediate(Cpu& cpu) {
 Operand immediate_extended(Cpu& cpu) {
     cpu.m_program_counter += 3;
     const auto pc = cpu.m_program_counter;
-    return cpu.m_memory_controller->read(pc-1) << 8 | cpu.m_memory_controller->read(pc-2);
+    return combine_bytes(cpu.m_memory_controller->read(pc-1), cpu.m_memory_controller->read(pc-2));
 }
 
 Operand hl_addressing(Cpu& cpu) {
     cpu.m_program_counter++;
-    const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+    const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
     return cpu.m_memory_controller->read(address);
 }
 
-Operand relative_address(Cpu& cpu) {
-    cpu.m_program_counter += 2;
-    const auto pc = cpu.m_program_counter;
-    return pc + static_cast<int8_t>(cpu.m_memory_controller->read(pc-1));
-}
+// Operand relative_address(Cpu& cpu) {
+//     cpu.m_program_counter += 2;
+//     const auto pc = cpu.m_program_counter;
+//     return pc + static_cast<int8_t>(cpu.m_memory_controller->read(pc-1));
+// }
 
 Operand extended_address(Cpu& cpu) {
     cpu.m_program_counter += 3;

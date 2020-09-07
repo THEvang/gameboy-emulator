@@ -1,3 +1,4 @@
+#include <tuple>
 #include "Cpu/Operations.hpp"
 
 #include "BitOperations.hpp"
@@ -7,15 +8,15 @@
 #include "Memory/Memory_Controller.hpp"
 
 Instruction NOP() {
-    return {[](Cpu&, Operand&) { return 4;}, immediate};
+    return {[](Cpu&, Operand&) { return 4;}, implied};
 }
 
 Instruction STOP() {
-    return {[](Cpu&, Operand&){ return 4;}};
+    return {[](Cpu&, Operand&){ return 4;}, implied};
 }
 
 Instruction HALT() {
-    return {[](Cpu& cpu, Operand& op) {
+    return {[](Cpu& cpu, Operand&) {
         
         constexpr auto cycles = 4;
         if(cpu.m_interrupts_enabled) {
@@ -39,7 +40,7 @@ Instruction HALT() {
 }
 
 Instruction RST(uint8_t address) {
-    return {[address](Cpu& cpu, Operand& op){
+    return {[address](Cpu& cpu, Operand&){
         
         const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
         const auto pc_low =  static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
@@ -55,87 +56,54 @@ Instruction RST(uint8_t address) {
 }
 
 Instruction DI() {
-    return {[](Cpu& cpu, Operand& op) {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_should_disable_interrupts = true;
         return 4;
     }, implied};
 }
 
 Instruction EI() {
-    return {[](Cpu& cpu, Operand& op) {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_should_enable_interrupts = true;
         return 4;
     }, implied};
 }
 
 
-void jump_relative(Cpu& cpu) {
-    const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
+int jump_relative(Cpu& cpu, Operand& op) {
+    const auto distance = static_cast<int8_t>(std::get<uint8_t>(op));
     cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
+    return 12;
 }
 
 Instruction JR() {
     return {[](Cpu& cpu, Operand& op) {
-        jump_relative(cpu);
-        constexpr auto cycles = 12;
-        return cycles;
-    }, };
+        return jump_relative(cpu, op);
+    }, immediate};
 }
 
 Instruction JR_NZ() {
-    
-    constexpr auto delta_pc = 2;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+    }, immediate};
 }
 
 Instruction JR_Z() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+    }, immediate};
 }
 
 Instruction JR_NC() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+    }, immediate};
 }
 
 Instruction JR_C() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+    }, immediate};
 }
 
 int ret(Cpu& cpu) {            
@@ -149,37 +117,37 @@ int ret(Cpu& cpu) {
 }
 
 Instruction RET() {
-    return {[](Cpu& cpu, Operand& op) {
+    return {[](Cpu& cpu, Operand&) {
         return ret(cpu);
     }, implied};
 }
 
 Instruction RET_NZ() {
-    return {[](Cpu& cpu, Operand& op) {        
-        return !is_set(cpu.m_reg_f, Cpu::zero_flag) ? ret(cpu) : 8;
+    return {[](Cpu& cpu, Operand&) {        
+        return !cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_Z() {
     return {[](Cpu& cpu, Operand&) {
-        is_set(cpu.m_reg_f, Cpu::zero_flag) ? ret(cpu) : 8; 
+        return cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8; 
     }, implied};
 }
 
 Instruction RET_NC() {
-    return {[](Cpu& cpu, Operand& op) {
-        !is_set(cpu.m_reg_f, Cpu::carry_flag) ? ret(cpu) : 8;
+    return {[](Cpu& cpu, Operand&) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_C() {
-    return {[](Cpu& cpu, Operand& op) {
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? ret(cpu) : 8;
+    return {[](Cpu& cpu, Operand&) {
+       return cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RETI() {
-    return {[](Cpu& cpu, Operand& op) {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_interrupts_enabled = true;
         return ret(cpu);
     }, implied};
@@ -200,31 +168,31 @@ Instruction JUMP() {
 
 Instruction JUMP_NZ() {
     return {[](Cpu& cpu, Operand& op) {        
-        return !is_set(cpu.m_reg_f, Cpu::zero_flag) ? jump(cpu, op) : 12;
+        return !cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return is_set(cpu.m_reg_f, Cpu::zero_flag) ? jump(cpu, op) : 12;
+        return cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        !is_set(cpu.m_reg_f, Cpu::carry_flag) ? jump(cpu, op) : 12;
+        return !cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_C() {
     return {[](Cpu& cpu, Operand& op) {
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? jump(cpu, op) : 12;
+        return cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         cpu.m_program_counter = address;
         constexpr auto cycles = 4;
         return cycles;
@@ -254,120 +222,64 @@ Instruction CALL() {
 
 Instruction CALL_NZ() {
     return {[](Cpu& cpu, Operand& op) {
-        return !is_set(cpu.m_reg_f, Cpu::zero_flag) ? call(cpu, op) : 12;
+        return !cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return is_set(cpu.m_reg_f, Cpu::zero_flag) ? call(cpu, op) : 12;
+        return cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !is_set(cpu.m_reg_f, Cpu::carry_flag) ? call(cpu, op) : 12;
+        return !cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return is_set(cpu.m_reg_f, Cpu::carry_flag) ? call(cpu, op) : 12;
+        return cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
-Instruction LD_A_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_a = std::get<uint8_t>(op);
+Instruction LD_R_R(Cpu::Register dst, Cpu::Register src) {
+    return {[dst, src](Cpu& cpu, Operand&){
+        cpu.set(dst, cpu.get(src));
+        return 4;
+    }, implied};
+}
+
+Instruction LD_R_D8(Cpu::Register dst) {
+    return {[dst](Cpu& cpu, Operand& op) {
+        cpu.set(dst, std::get<uint8_t>(op));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction LD_A_A() {
-    return {[](Cpu&, Operand&){ return 4; }, implied};
-}
-
-Instruction LD_A_B() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_a = cpu.m_reg_b;
-        return 4;
-    }, implied};
-}
-
-Instruction LD_A_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = cpu.m_reg_c;
-        return 4;
-    }, implied};
-}
-
-Instruction LD_A_D() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_a = cpu.m_reg_d;
-    }, implied};
-}
-
-Instruction LD_A_E() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_a = cpu.m_reg_e;
-        return 4;
-    }, implied};
-}
-
-Instruction LD_A_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = cpu.m_reg_h;
-        return 4;
-    }, implied};
-}
-
-Instruction LD_A_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-Instruction LD_A_ADDR_BC() {
-    return {[](Cpu& cpu, Operand& op) {        
-        const auto address = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+Instruction LD_A_ADDR_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {        
+        const auto address = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
-}
-
-Instruction LD_A_ADDR_DE() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_A_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {    
-        cpu.m_reg_a = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, hl_addressing};
 }
 
 Instruction LD_A_ADDR_A16() {
     return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_a = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, std::get<uint8_t>(op));
         constexpr auto cycles = 16;
         return cycles;
     }, extended_address};
 }
 
 Instruction LD_A_ADDR_C() {
-    return {[](Cpu& cpu, Operand& op) {
-        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+    return {[](Cpu& cpu, Operand&) {
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.get(Cpu::Register::C));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -386,12 +298,12 @@ Instruction LD_ADDR_A16_SP() {
 
 Instruction LDI_ADDR_HL_A() {
     return {[](Cpu& cpu, Operand&) {
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -400,12 +312,12 @@ Instruction LDI_ADDR_HL_A() {
 
 Instruction LDI_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
         
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -414,9 +326,8 @@ Instruction LDI_A_ADDR_HL() {
 
 Instruction LD_ADDR_BC_A() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);   
-
+        const auto address = combine_bytes(cpu.get(Cpu::Register::B), cpu.get(Cpu::Register::C));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));   
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -424,505 +335,34 @@ Instruction LD_ADDR_BC_A() {
 
 Instruction LD_ADDR_DE_A() {
     return {[](Cpu& cpu, Operand&){
-        const auto address = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);    
+        const auto address = combine_bytes(cpu.get(Cpu::Register::D), cpu.get(Cpu::Register::E));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));    
 
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
 }
 
-Instruction LD_B_D8() {
-    return {delta_pc, [](Cpu& cpu, Operand& op) {
-        cpu.m_reg_b = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_B_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }}, implied;
-}
-
-Instruction LD_B_B() {
-    return {[](Cpu&, Operand&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_c;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_B_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_b = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_c = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_C_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_C() {
-    return {[](Cpu&, Operand&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_C_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {        
-        cpu.m_reg_c = std::get<uint8_t>(op);
+Instruction LD_R_ADDR_HL(Cpu::Register dst) {
+    return {[dst](Cpu& cpu, Operand& op) {
+        cpu.set(dst, std::get<uint8_t>(op));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-Instruction LD_D_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_d = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_D_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_c;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_D() {
-    return {[](Cpu&, Operand&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-Instruction LD_D_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_D_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_d = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, hl_addressing};
-}
-
-Instruction LD_E_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_e = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_E_A() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_B() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_C() {    
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_c;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_D() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_E() {
-    return {[](Cpu&, Operand&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_H() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_L() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_e = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_E_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_e = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, hl_addressing};
-}
-
-Instruction LD_H_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_h = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_H_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_c;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_H() {
-    return {[](Cpu&, Operand&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_H_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_h = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, hl_addressing};    
-}
-
-Instruction LD_L_D8() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_l = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, immediate};
-}
-
-Instruction LD_L_A() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_a;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_L_B() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_L_C() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_c;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_L_D() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_L_E() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_L_H() {
-    return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_l = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_L_L() {
-    return {[](Cpu&, Operand&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_L_ADDR_HL() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_l = std::get<uint8_t>(op);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, hl_addressing};
-}
-
-Instruction LD_ADDR_HL_A() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+Instruction LD_ADDR_HL_R(Cpu::Register r) {
+    return {[r](Cpu& cpu, Operand&) {
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.m_memory_controller->write(address, cpu.get(r));
         constexpr auto cycles = 8;
         return cycles;
     }, implied};    
-}
-
-Instruction LD_ADDR_HL_B() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_b);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_ADDR_HL_C() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_c);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_ADDR_HL_D() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_d);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_ADDR_HL_E() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_e);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_ADDR_HL_H() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_h);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};    
-}
-
-Instruction LD_ADDR_HL_L() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_l);
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};   
 }
 
 Instruction LD_ADDR_HL_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         const auto value = std::get<uint8_t>(op);
         cpu.m_memory_controller->write(address, value);
         constexpr auto cycles = 12;
@@ -937,76 +377,47 @@ Instruction LD_ADDR_HL_ADDR_HL() {
 Instruction LD_ADDR_A16_A() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = std::get<uint16_t>(op);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
         constexpr auto cycles = 16;
         return cycles;
     }, immediate_extended};
 }
 
-Instruction LD_BC_D16() {
-    constexpr auto delta_pc = 3;
+Instruction LD_RR_D16(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint16_t>(op);
 
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
-}
-
-Instruction LD_DE_D16() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
 
         constexpr auto cycles = 12;
         return cycles;
-    }};
-}
-
-Instruction LD_HL_D16() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
+    }, immediate_extended};
 }
 
 Instruction LD_HL_SPR8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+    return {[](Cpu& cpu, Operand& op) {
+        const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
-            clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+            cpu.set_flag(Cpu::Flag::Half_Carry)  :
+            cpu.clear_flag(Cpu::Flag::Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+            cpu.set_flag(Cpu::Flag::Carry)   :
+            cpu.clear_flag(Cpu::Flag::Carry);
 
         const auto result = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
 
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate};
 }
 
 Instruction LD_SP_D16() {
@@ -1019,7 +430,7 @@ Instruction LD_SP_D16() {
 
 Instruction LD_SP_HL() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.m_stack_ptr =  combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        cpu.m_stack_ptr =  combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -1028,83 +439,45 @@ Instruction LD_SP_HL() {
 uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_carry_8bit(first, second)             ? 
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     overflows_8bit(first, second)          ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first + second);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
 Instruction ADD_A_D8() {
     return {[](Cpu& cpu, Operand& op) {
+        auto flags = cpu.get(Cpu::Register::F);
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, value, cpu.m_reg_f);
+
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction ADD_A_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction ADD_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
 
-Instruction ADD_A_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, ADD_8bit(a, r, flags));
+        cpu.set(Cpu::Register::F, flags);
 
-Instruction ADD_A_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADD_A_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADD_A_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADD_A_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADD_A_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1112,8 +485,12 @@ Instruction ADD_A_L() {
 
 Instruction ADD_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
+        auto flags = cpu.get(Cpu::Register::F);
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, value, cpu.m_reg_f);
+
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
+
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1122,74 +499,48 @@ Instruction ADD_A_ADDR_HL() {
 uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
     
     overflows_16bit(first, second)                     ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     half_carry_16bit(first, second)                        ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     first = static_cast<uint16_t>(first + second);
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
-Instruction ADD_HL_BC() {
-    return {[](Cpu& cpu, Operand&) {
+Instruction ADD_HL_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
         
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
+        const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
 
-        const auto result = ADD_16bit(hl, bc, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto result = ADD_16bit(hl, value, flags);
+        cpu.set(Cpu::Register::F, flags);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
-}
-
-Instruction ADD_HL_DE() {
-    return {[](Cpu& cpu, Operand&) {
-        
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-
-        const auto result = ADD_16bit(hl, de, cpu.m_reg_f);
-
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADD_HL_HL() {
-    return {[](Cpu& cpu, Operand&) {
-        
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto result = ADD_16bit(hl, hl, cpu.m_reg_f);
-
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
+    }, implied}; 
 }
 
 Instruction ADD_HL_SP() {
     return {[](Cpu& cpu, Operand&) {
         
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, cpu.m_reg_f);
+        const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, flags);
+        cpu.set(Cpu::Register::F, flags);
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1199,19 +550,19 @@ Instruction ADD_HL_SP() {
 uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,   Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags,   Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first - second);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags,        Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
@@ -1219,63 +570,23 @@ uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction SUB_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = SUB(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction SUB_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction SUB_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto acc = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, SUB(acc, r, flags));
+        cpu.set(Cpu::Register::F, flags);
 
-Instruction SUB_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SUB_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SUB_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SUB_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SUB_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SUB_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1284,7 +595,9 @@ Instruction SUB_L() {
 Instruction SUB_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = SUB(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1293,108 +606,38 @@ Instruction SUB_ADDR_HL() {
 uint8_t INC(uint8_t value, uint8_t& flags) {
     
     half_carry_8bit(value, 1)                 ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     value++;
 
-    value == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return value;
 }
 
-Instruction INC_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = INC(cpu.m_reg_a, cpu.m_reg_f);
+Instruction INC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto flags = cpu.get(Cpu::Register::F);
+        auto r = cpu.get(src);
+
+        cpu.set(src, INC(r, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
 }
 
-Instruction INC_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = INC(cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles; 
-    }, implied};
-}
-
-Instruction INC_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = INC(cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = INC(cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_e = INC(cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_h = INC(cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_l = INC(cpu.m_reg_l, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_BC() {
-    return {[](Cpu& cpu, Operand&) {        
-        auto value = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
+Instruction INC_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {        
+        auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
         value++;
 
-        cpu.m_reg_b = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_c = static_cast<uint8_t>(value & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_DE() {
-    return {[](Cpu& cpu, Operand&) {
-        auto value = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        value++;
-
-        cpu.m_reg_d = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_e = static_cast<uint8_t>(value & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction INC_HL() {
-    return {[](Cpu& cpu, Operand&) {
-        auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        value++;
-
-        cpu.m_reg_h = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(value & 0xFFu);
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1404,11 +647,13 @@ Instruction INC_HL() {
 Instruction INC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
 
-        value = INC(value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        value = INC(value, flags);
         cpu.m_memory_controller->write(address, value);
+        cpu.set(Cpu::Register::F, flags);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -1426,112 +671,39 @@ Instruction INC_SP() {
 uint8_t DEC(uint8_t value, uint8_t& flags) {
     
     half_borrow_8bit(value, 1)                ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     value--;
     
-    value == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return value;
 }
 
-Instruction DEC_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = DEC(cpu.m_reg_a, cpu.m_reg_f);
+Instruction DEC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto r = cpu.get(src);
+        cpu.set(src, DEC(r, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
 }
 
-Instruction DEC_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_b = DEC(cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction DEC_RR(std::pair<Cpu::Register, Cpu::Register> rr) { 
+    return {[rr](Cpu& cpu, Operand&) {
 
-Instruction DEC_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = DEC(cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
+        value--;
 
-Instruction DEC_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_d = DEC(cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_E() {    
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_e = DEC(cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_H() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_reg_h = DEC(cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_l = DEC(cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_BC() {
-    return {[](Cpu& cpu, Operand&) {
-        
-        auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        bc--;
-
-        cpu.m_reg_b = static_cast<uint8_t>(bc >> 8u);
-        cpu.m_reg_c = static_cast<uint8_t>(bc & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_DE() {
-    return {[](Cpu& cpu, Operand&) {
-        
-        auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        de--;
-
-        cpu.m_reg_d = static_cast<uint8_t>(de >> 8u);
-        cpu.m_reg_e = static_cast<uint8_t>(de & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction DEC_HL() {
-    return {[](Cpu& cpu, Operand&) {
-        
-        auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        hl--;
-
-        cpu.m_reg_h = static_cast<uint8_t>(hl >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(hl & 0xFFu);
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -1540,11 +712,12 @@ Instruction DEC_HL() {
 
 Instruction DEC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = DEC(value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        value = DEC(value, flags);
         cpu.m_memory_controller->write(address, value);
-
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 12;
         return cycles;
     }, implied};
@@ -1560,9 +733,9 @@ Instruction DEC_SP() {
 
 Instruction SCF() {
     return {[](Cpu& cpu, Operand&) {
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.set_flag(Cpu::Flag::Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1570,10 +743,10 @@ Instruction SCF() {
 
 Instruction CCF() {
     return {[](Cpu& cpu, Operand&) {
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? 
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag) : set_bit(cpu.m_reg_f, Cpu::carry_flag);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.test_flag(Cpu::Flag::Carry) ? 
+            cpu.clear_flag(Cpu::Flag::Carry) : cpu.set_flag(Cpu::Flag::Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1581,15 +754,15 @@ Instruction CCF() {
 
 Instruction RRCA() {
     return {[](Cpu& cpu, Operand&) {
-        is_set(cpu.m_reg_a, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-        
-        cpu.m_reg_a = rotate_right<uint8_t>(cpu.m_reg_a, 1);
 
+        is_set(cpu.get(Cpu::Register::A), 0) ? cpu.set_flag(Cpu::Flag::Carry)
+            : cpu.clear_flag(Cpu::Flag::Carry);
         
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.set(Cpu::Register::A, rotate_right<uint8_t>(cpu.get(Cpu::Register::A), 1));
+
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -1599,18 +772,22 @@ Instruction RRCA() {
 Instruction RRA() {
     return {[](Cpu& cpu, Operand&) {
         
-        const auto new_carry_flag = is_set(cpu.m_reg_a, 0);
-        cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a >> 1u);
+        auto a = cpu.get(Cpu::Register::A);
 
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 7) 
-            : clear_bit(cpu.m_reg_a, 7);
+        const auto new_carry_flag = is_set(a, 0);
+        a = static_cast<uint8_t>(a >> 1u);
 
-        new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag) 
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 7) 
+            : clear_bit(a, 7);
+        
+        cpu.set(Cpu::Register::A, a);
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry) 
+            : cpu.clear_flag(Cpu::Flag::Carry);
+        
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
     
         constexpr auto cycles = 4;
         return cycles;
@@ -1619,18 +796,23 @@ Instruction RRA() {
 
 Instruction RLA() {
     return {[](Cpu& cpu, Operand&) {
-        const auto new_carry_flag = is_set(cpu.m_reg_a, 7);
-        cpu.m_reg_a =  static_cast<uint8_t>(cpu.m_reg_a << 1u);
-
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 0)
-            : clear_bit(cpu.m_reg_a, 0);
         
-        new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        auto a = cpu.get(Cpu::Register::A);
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        const auto new_carry_flag = is_set(a, 7);
+        a =  static_cast<uint8_t>(a << 1u);
+
+        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 0)
+            : clear_bit(a, 0);
+        
+        cpu.set(Cpu::Register::A, a);
+
+        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry)
+            : cpu.clear_flag(Cpu::Flag::Carry);
+
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
@@ -1639,14 +821,15 @@ Instruction RLA() {
 
 Instruction RLCA() {
     return {[](Cpu& cpu, Operand&) {
-        is_set(cpu.m_reg_a, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        auto a = cpu.get(Cpu::Register::A);
+        is_set(a, 7) ? cpu.clear_flag(Cpu::Flag::Carry) : 
+            cpu.clear_flag(Cpu::Flag::Carry);
 
-        cpu.m_reg_a = rotate_left<uint8_t>(cpu.m_reg_a, 1);
+        cpu.set(Cpu::Register::A, rotate_left<uint8_t>(a, 1));
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -1656,28 +839,31 @@ Instruction RLCA() {
 Instruction DAA() {    
     return {[](Cpu& cpu, Operand&) {
 
-        if(!is_set(cpu.m_reg_f, Cpu::sub_flag)) {
-            if(is_set(cpu.m_reg_f, Cpu::carry_flag) || cpu.m_reg_a > 0x99) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x60);
-                set_bit(cpu.m_reg_f, Cpu::carry_flag);
+        auto a = cpu.get(Cpu::Register::A);
+        if(!cpu.test_flag(Cpu::Flag::Sub)) {
+            if(cpu.test_flag(Cpu::Flag::Carry) || a > 0x99) {
+                a += 0x60;
+                cpu.set_flag(Cpu::Flag::Carry);
             }
 
-            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag) || (cpu.m_reg_a & 0x0Fu) > 0x09) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x06);
+            if(cpu.test_flag(Cpu::Flag::Half_Carry) || (a & 0x0Fu) > 0x09) {
+                a += 0x06;
             }
         } else {
-            if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x60);
+            if(cpu.test_flag(Cpu::Flag::Carry)) {
+                a -= 0x60;
             }
-            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x06);
+            if(cpu.test_flag(Cpu::Flag::Half_Carry)) {
+                a -= 0x06;
             }
         }
 
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
-        cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-            clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        a == 0 ? cpu.set_flag(Cpu::Flag::Zero) :
+            cpu.clear_flag(Cpu::Flag::Zero);
+
+        cpu.set(Cpu::Register::A, a);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -1685,105 +871,63 @@ Instruction DAA() {
 }
 
 Instruction ADD_SP_R8() {
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+    return {[](Cpu& cpu, Operand& op) {
+        const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
-            clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+            cpu.set_flag(Cpu::Flag::Half_Carry)  :
+            cpu.clear_flag(Cpu::Flag::Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+            cpu.set_flag(Cpu::Flag::Carry)   :
+            cpu.clear_flag(Cpu::Flag::Carry);
 
 
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
 
         constexpr auto cycles = 16;
         return cycles;
-    }};    
+    }, immediate};    
 }
 
 uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first &= second;
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    set_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
 
 Instruction AND_D8() {
-    return {[](Cpu& cpu, Operand&) {
+    return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = AND(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction AND_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction AND_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, AND(a, r, flags));
+        cpu.set(Cpu::Register::F, flags);
 
-Instruction AND_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction AND_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction AND_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction AND_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction AND_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction AND_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1792,7 +936,9 @@ Instruction AND_L() {
 Instruction AND_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = AND(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1801,12 +947,12 @@ Instruction AND_ADDR_HL() {
 uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first ^= second;
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    clear_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
@@ -1814,63 +960,25 @@ uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction XOR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = XOR(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
 }
 
-Instruction XOR_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction XOR_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        auto flags = cpu.get(Cpu::Register::F);
 
-Instruction XOR_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        a = XOR(a, r, flags);
 
-Instruction XOR_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        cpu.set(Cpu::Register::A, a);
+        cpu.set(Cpu::Register::F, flags);
 
-Instruction XOR_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction XOR_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction XOR_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction XOR_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1879,7 +987,9 @@ Instruction XOR_L() {
 Instruction XOR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = XOR(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);        
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1888,12 +998,12 @@ Instruction XOR_ADDR_HL() {
 uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first |= second;
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    clear_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
@@ -1901,63 +1011,19 @@ uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction OR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = OR(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction OR_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction OR_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
+Instruction OR_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), cpu.get(src), flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1966,7 +1032,9 @@ Instruction OR_L() {
 Instruction OR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = OR(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);        
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1975,79 +1043,41 @@ Instruction OR_ADDR_HL() {
 void CP(uint8_t first, uint8_t second, uint8_t& flags) {
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, static_cast<int>(Cpu::Flag::Carry))   :
+        clear_bit(flags, static_cast<int>(Cpu::Flag::Carry));
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
 
-    (first == second) ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    (first == second) ? 
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 }
 
 Instruction CP_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        CP(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        CP(cpu.get(Cpu::Register::A), value, flags);
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction CP_A() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction CP_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        auto flags = cpu.get(Cpu::Register::F);
 
-Instruction CP_B() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        CP(a, r, flags);
 
-Instruction CP_C() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction CP_D() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction CP_E() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction CP_H() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction CP_L() {
-    return {[](Cpu& cpu, Operand&) {
-        CP(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
+        cpu.set(Cpu::Register::F, flags);
+        
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -2056,46 +1086,18 @@ Instruction CP_L() {
 Instruction CP_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        CP(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        CP(cpu.get(Cpu::Register::A), value, flags);
+        cpu.set(Cpu::Register::F, flags);        
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-Instruction PUSH_AF() {
-    return {[](Cpu& cpu, Operand& op) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_a);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_f);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-        constexpr auto cycles = 16;
-        return cycles;
-    }, implied};
-}
-
-Instruction PUSH_BC() {
-    return {[](Cpu& cpu, Operand& operand) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_b);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_c);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-        constexpr auto cycles = 16;
-        return cycles;
-    }, implied};
-}
-
-Instruction PUSH_DE() {
-    return {[](Cpu& cpu, Operand& operand) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_d);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_e);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-        constexpr auto cycles = 16;
-        return cycles;
-    }, implied};
-}
-
-Instruction PUSH_HL() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_h);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_l);
+Instruction PUSH_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.get(rr.first));
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.get(rr.second));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
         constexpr auto cycles = 16;
         return cycles;
@@ -2104,38 +1106,18 @@ Instruction PUSH_HL() {
 
 Instruction POP_AF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0u;
-        cpu.m_reg_a = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+        cpu.set(Cpu::Register::F, cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0u);
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1)));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
         constexpr auto cycles = 12;
         return cycles;
     }, implied};
 }
 
-Instruction POP_BC() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-        constexpr auto cycles = 12;
-        return cycles;
-    }, implied};
-}
-
-Instruction POP_DE() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-        constexpr auto cycles = 12;
-        return cycles;
-    }, implied};
-}
-
-Instruction POP_HL() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+Instruction POP_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        cpu.set(rr.second, cpu.m_memory_controller->read(cpu.m_stack_ptr));
+        cpu.set(rr.first, cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1)));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
         constexpr auto cycles = 12;
         return cycles;
@@ -2144,36 +1126,36 @@ Instruction POP_HL() {
 
 uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
 
     half_carry_8bit(first, second)       ?
-        set_bit(flags, Cpu::half_carry_flag)          :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
 
     overflows_8bit(first, second)        ?
-        set_bit(flags, Cpu::carry_flag)               :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first + second);
 
-    if(!is_set(flags, Cpu::half_carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
         half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
-        set_bit(flags, Cpu::half_carry_flag)          :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
     }
-
-    if(!is_set(flags, Cpu::carry_flag)) {
+    
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
         overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
-            set_bit(flags, Cpu::carry_flag)               :
-            clear_bit(flags, Cpu::carry_flag);
+            set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
+            clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
     }
 
     first = static_cast<uint8_t>(first + carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
     
     return first;
 }
@@ -2181,63 +1163,23 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction ADC_A_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = ADC(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction ADC_A_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction ADC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto flags = cpu.get(Cpu::Register::F);
+        const auto r = cpu.get(src);
+        const auto a = cpu.get(Cpu::Register::A);
 
-Instruction ADC_A_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADC_A_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADC_A_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADC_A_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADC_A_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction ADC_A_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
+        cpu.set(Cpu::Register::A, ADC(a, r, flags));
+        cpu.set(Cpu::Register::F, flags);
+        
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -2246,7 +1188,9 @@ Instruction ADC_A_L() {
 Instruction ADC_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = ADC(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, flags));
+        cpu.set(Cpu::Register::F, flags);        
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -2256,16 +1200,16 @@ Instruction LDH_ADDR_A8_A() {
     return  {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
         const auto address = static_cast<uint16_t>(0xFF00 + value);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);    
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));    
         constexpr auto cycles = 12;
         return cycles;
     }, immediate};
 }
 
 Instruction LDH_A_ADDR_A8() {
-    return {[](Cpu& cpu, Operation& op) {
+    return {[](Cpu& cpu, Operand& op) {
         const auto address = static_cast<uint16_t>(0xFF00 + std::get<uint8_t>(op));
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);             
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));             
         constexpr auto cycles = 12;
         return cycles;
     }, immediate};
@@ -2273,8 +1217,8 @@ Instruction LDH_A_ADDR_A8() {
 
 Instruction LD_ADDR_C_A() {
     return {[](Cpu& cpu, Operand&) {        
-        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.get(Cpu::Register::C));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -2282,36 +1226,36 @@ Instruction LD_ADDR_C_A() {
 
 uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
     
     first = static_cast<uint8_t>(first - second);
 
-    if(!is_set(flags, Cpu::half_carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
         half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
-            set_bit(flags, Cpu::half_carry_flag)  :
-            clear_bit(flags, Cpu::half_carry_flag);
+            set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+            clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
     }
 
-    if(!is_set(flags, Cpu::carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
         underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
-            set_bit(flags, Cpu::carry_flag)   :
-            clear_bit(flags, Cpu::carry_flag);
+            set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+            clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
     }
 
     first = static_cast<uint8_t>(first - carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
@@ -2319,63 +1263,26 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction SBC_A_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = SBC(cpu.m_reg_a, value, cpu.m_reg_f);
+        const auto a = cpu.get(Cpu::Register::A);
+        auto f = cpu.get(Cpu::Register::F);
+
+        cpu.set(Cpu::Register::A, SBC(a, value, f));
+        cpu.set(Cpu::Register::F, f);
+
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
 }
 
-Instruction SBC_A_A() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+Instruction SBC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        auto flags = cpu.get(Cpu::Register::F);
 
-Instruction SBC_A_B() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
+        cpu.set(Cpu::Register::A, SBC(a, r, flags));
 
-Instruction SBC_A_C() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SBC_A_D() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SBC_A_E() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SBC_A_H() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }, implied};
-}
-
-Instruction SBC_A_L() {
-    return {[](Cpu& cpu, Operand&) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -2384,33 +1291,34 @@ Instruction SBC_A_L() {
 Instruction SBC_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.m_reg_a = SBC(cpu.m_reg_a, value, cpu.m_reg_f);
+        auto flags = cpu.get(Cpu::Register::F);
+        auto a = cpu.get(Cpu::Register::A);
+        cpu.set(Cpu::Register::A, SBC(a, value, flags));
+        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
 Instruction PREFIX_CB() {
-
-    auto delta_pc = 2;
-    return {delta_pc, [](Cpu& cpu) {
-
+    return {[](Cpu& cpu, Operand&) {
         const auto cb_opcode = static_cast<CBCode>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-        const auto result = fetch_cb(cb_opcode);
-        return result.operation(cpu);
-    }};
+        const auto instruction = fetch_cb(cb_opcode);
+        auto operand = instruction.read_operand(cpu);
+        return instruction.execute(cpu, operand);
+    }, implied};
 }
 
 Instruction LD_ADDR_HLD_A() {
     return {[](Cpu& cpu, Operand&) {
             
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address--;
 
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
         
         constexpr auto cycles = 8;
         return cycles;
@@ -2420,12 +1328,12 @@ Instruction LD_ADDR_HLD_A() {
 Instruction LD_A_ADDR_HLD() {
     return {[](Cpu& cpu, Operand&) {
         
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
 
         address--;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
@@ -2434,10 +1342,12 @@ Instruction LD_A_ADDR_HLD() {
 
 Instruction CPL() {
     return {[](Cpu& cpu, Operand&){
-        cpu.m_reg_a ^= 0xFF;
+        auto a = cpu.get(Cpu::Register::A);
+        a ^= 0xFF;
+        cpu.set(Cpu::Register::A, a);
 
-        set_bit(cpu.m_reg_f, Cpu::sub_flag);
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.set_flag(Cpu::Flag::Sub);
+        cpu.set_flag(Cpu::Flag::Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;

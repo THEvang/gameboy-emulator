@@ -3,6 +3,7 @@
 #include <functional>
 #include <exception>
 #include <string>
+#include <variant>
 
 #include "Cpu/Cpu.hpp"
 
@@ -17,11 +18,12 @@ public:
 };
 
 using Operand = std::variant<uint8_t, uint16_t, int8_t>;
-using Operation = std::function<int(Cpu&, Operand)>;
+using Address_Mode = std::function<Operand(Cpu&)>;
+using Operation = std::function<int(Cpu&, Operand&)>;
 
 struct Instruction {
-    Address_Mode read_operand;
     Operation execute;
+    Address_Mode read_operand;
 };
 
 Instruction fetch(Opcode opcode);
