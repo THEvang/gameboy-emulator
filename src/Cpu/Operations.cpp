@@ -52,7 +52,7 @@ Instruction RST(uint8_t address) {
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
         constexpr auto cycles = 16;
         return cycles;
-    }, immediate};
+    }, implied};
 }
 
 Instruction DI() {
@@ -192,7 +192,7 @@ Instruction JUMP_C() {
 
 Instruction JUMP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
         cpu.m_program_counter = address;
         constexpr auto cycles = 4;
         return cycles;
@@ -261,7 +261,7 @@ Instruction LD_R_D8(Cpu::Register dst) {
 
 Instruction LD_A_ADDR_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
     return {[rr](Cpu& cpu, Operand&) {        
-        const auto address = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
+        const auto address = cpu.get(rr);
         cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
         constexpr auto cycles = 8;
         return cycles;
@@ -298,7 +298,7 @@ Instruction LD_ADDR_A16_SP() {
 
 Instruction LDI_ADDR_HL_A() {
     return {[](Cpu& cpu, Operand&) {
-        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
         cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address++;
@@ -312,7 +312,7 @@ Instruction LDI_ADDR_HL_A() {
 
 Instruction LDI_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
         cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
         
         address++;
@@ -324,20 +324,10 @@ Instruction LDI_A_ADDR_HL() {
     }, implied};
 }
 
-Instruction LD_ADDR_BC_A() {
-    return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::B), cpu.get(Cpu::Register::C));
+Instruction LD_ADDR_RR_A(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        const auto address = cpu.get(rr);
         cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));   
-        constexpr auto cycles = 8;
-        return cycles;
-    }, implied};
-}
-
-Instruction LD_ADDR_DE_A() {
-    return {[](Cpu& cpu, Operand&){
-        const auto address = combine_bytes(cpu.get(Cpu::Register::D), cpu.get(Cpu::Register::E));
-        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));    
-
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -456,13 +446,11 @@ uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
     return first;
 }
 
-Instruction ADD_A_D8() {
+Instruction ADD_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        auto flags = cpu.get(Cpu::Register::F);
         const auto value = std::get<uint8_t>(op);
 
-        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -471,26 +459,20 @@ Instruction ADD_A_D8() {
 Instruction ADD_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
 
-        auto flags = cpu.get(Cpu::Register::F);
         const auto a = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
         
-        cpu.set(Cpu::Register::A, ADD_8bit(a, r, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, ADD_8bit(a, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
 }
 
-Instruction ADD_A_ADDR_HL() {
+Instruction ADD_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        auto flags = cpu.get(Cpu::Register::F);
         const auto value = std::get<uint8_t>(op);
-
-        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
-
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -519,9 +501,7 @@ Instruction ADD_HL_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
         const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         const auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
 
-        auto flags = cpu.get(Cpu::Register::F);
-        const auto result = ADD_16bit(hl, value, flags);
-        cpu.set(Cpu::Register::F, flags);
+        const auto result = ADD_16bit(hl, value, cpu.get(Cpu::Register::F));
 
         cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
         cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
@@ -535,9 +515,7 @@ Instruction ADD_HL_SP() {
     return {[](Cpu& cpu, Operand&) {
         
         const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
-        auto flags = cpu.get(Cpu::Register::F);
-        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, flags);
-        cpu.set(Cpu::Register::F, flags);
+        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, cpu.get(Cpu::Register::F));
 
         cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
         cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
@@ -570,9 +548,7 @@ uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction SUB_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -580,12 +556,10 @@ Instruction SUB_D8() {
 
 Instruction SUB_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
         const auto acc = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
         
-        cpu.set(Cpu::Register::A, SUB(acc, r, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, SUB(acc, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
@@ -595,9 +569,7 @@ Instruction SUB_R(Cpu::Register src) {
 Instruction SUB_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -621,11 +593,8 @@ uint8_t INC(uint8_t value, uint8_t& flags) {
 
 Instruction INC_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
         auto r = cpu.get(src);
-
-        cpu.set(src, INC(r, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(src, INC(r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -650,10 +619,8 @@ Instruction INC_ADDR_HL() {
         const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
 
-        auto flags = cpu.get(Cpu::Register::F);
-        value = INC(value, flags);
+        value = INC(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
-        cpu.set(Cpu::Register::F, flags);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -686,11 +653,8 @@ uint8_t DEC(uint8_t value, uint8_t& flags) {
 
 Instruction DEC_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-
-        auto flags = cpu.get(Cpu::Register::F);
         const auto r = cpu.get(src);
-        cpu.set(src, DEC(r, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(src, DEC(r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -714,10 +678,8 @@ Instruction DEC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        auto flags = cpu.get(Cpu::Register::F);
-        value = DEC(value, flags);
+        value = DEC(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
-        cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 12;
         return cycles;
     }, implied};
@@ -822,7 +784,8 @@ Instruction RLA() {
 Instruction RLCA() {
     return {[](Cpu& cpu, Operand&) {
         auto a = cpu.get(Cpu::Register::A);
-        is_set(a, 7) ? cpu.clear_flag(Cpu::Flag::Carry) : 
+
+        is_set(a, 7) ? cpu.set_flag(Cpu::Flag::Carry) : 
             cpu.clear_flag(Cpu::Flag::Carry);
 
         cpu.set(Cpu::Register::A, rotate_left<uint8_t>(a, 1));
@@ -911,9 +874,7 @@ uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction AND_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -921,12 +882,10 @@ Instruction AND_D8() {
 
 Instruction AND_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
         const auto a = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
         
-        cpu.set(Cpu::Register::A, AND(a, r, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, AND(a, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
@@ -936,9 +895,7 @@ Instruction AND_R(Cpu::Register src) {
 Instruction AND_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -960,24 +917,20 @@ uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction XOR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, immediate};
 }
 
 Instruction XOR_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
         auto a = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
-        auto flags = cpu.get(Cpu::Register::F);
 
-        a = XOR(a, r, flags);
+        a = XOR(a, r, cpu.get(Cpu::Register::F));
 
         cpu.set(Cpu::Register::A, a);
-        cpu.set(Cpu::Register::F, flags);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -987,9 +940,7 @@ Instruction XOR_R(Cpu::Register src) {
 Instruction XOR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);        
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1011,9 +962,7 @@ uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction OR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1021,9 +970,7 @@ Instruction OR_D8() {
 
 Instruction OR_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), cpu.get(src), flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), cpu.get(src), cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1032,9 +979,7 @@ Instruction OR_R(Cpu::Register src) {
 Instruction OR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);        
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1060,9 +1005,7 @@ void CP(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction CP_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        CP(cpu.get(Cpu::Register::A), value, flags);
-        cpu.set(Cpu::Register::F, flags);
+        CP(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1072,12 +1015,7 @@ Instruction CP_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto a = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
-        auto flags = cpu.get(Cpu::Register::F);
-
-        CP(a, r, flags);
-
-        cpu.set(Cpu::Register::F, flags);
-        
+        CP(a, r, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1086,9 +1024,7 @@ Instruction CP_R(Cpu::Register src) {
 Instruction CP_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        CP(cpu.get(Cpu::Register::A), value, flags);
-        cpu.set(Cpu::Register::F, flags);        
+        CP(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1160,12 +1096,10 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
     return first;
 }
 
-Instruction ADC_A_D8() {
+Instruction ADC_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1173,24 +1107,18 @@ Instruction ADC_A_D8() {
 
 Instruction ADC_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
         const auto r = cpu.get(src);
         const auto a = cpu.get(Cpu::Register::A);
-
-        cpu.set(Cpu::Register::A, ADC(a, r, flags));
-        cpu.set(Cpu::Register::F, flags);
-        
+        cpu.set(Cpu::Register::A, ADC(a, r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
 }
 
-Instruction ADC_A_ADDR_HL() {
+Instruction ADC_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, flags));
-        cpu.set(Cpu::Register::F, flags);        
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1260,15 +1188,11 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     return first;
 }
 
-Instruction SBC_A_D8() {
+Instruction SBC_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
         const auto a = cpu.get(Cpu::Register::A);
-        auto f = cpu.get(Cpu::Register::F);
-
-        cpu.set(Cpu::Register::A, SBC(a, value, f));
-        cpu.set(Cpu::Register::F, f);
-
+        cpu.set(Cpu::Register::A, SBC(a, value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1278,11 +1202,7 @@ Instruction SBC_R(Cpu::Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto a = cpu.get(Cpu::Register::A);
         const auto r = cpu.get(src);
-        auto flags = cpu.get(Cpu::Register::F);
-
-        cpu.set(Cpu::Register::A, SBC(a, r, flags));
-
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, SBC(a, r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1291,10 +1211,8 @@ Instruction SBC_R(Cpu::Register src) {
 Instruction SBC_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        auto flags = cpu.get(Cpu::Register::F);
         auto a = cpu.get(Cpu::Register::A);
-        cpu.set(Cpu::Register::A, SBC(a, value, flags));
-        cpu.set(Cpu::Register::F, flags);
+        cpu.set(Cpu::Register::A, SBC(a, value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1306,13 +1224,16 @@ Instruction PREFIX_CB() {
         const auto instruction = fetch_cb(cb_opcode);
         auto operand = instruction.read_operand(cpu);
         return instruction.execute(cpu, operand);
-    }, implied};
+    }, [](Cpu& cpu) -> Operand {
+        cpu.m_program_counter += 2;
+        return {static_cast<uint8_t>(0)};
+    }};
 }
 
 Instruction LD_ADDR_HLD_A() {
     return {[](Cpu& cpu, Operand&) {
             
-        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
         cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address--;

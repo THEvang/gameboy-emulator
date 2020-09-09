@@ -30,7 +30,7 @@ Instruction RLC_R(Cpu::Register r) {
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction RLC_ADDR_HL() {
@@ -46,7 +46,7 @@ Instruction RLC_ADDR_HL() {
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t RRC(uint8_t value, uint8_t& flags) {
@@ -72,7 +72,7 @@ Instruction RRC_R(Cpu::Register r) {
         cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};   
+    }, none};   
 }
 
 Instruction RRC_ADDR_HL() {
@@ -87,7 +87,7 @@ Instruction RRC_ADDR_HL() {
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied}; 
+    }, none}; 
 }
 
 uint8_t RL(uint8_t value, uint8_t& flags) {
@@ -117,19 +117,20 @@ Instruction RL_R(Cpu::Register r) {
         cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction RL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = RL(value, cpu.m_reg_f);
+
+        value = RL(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t SRL(uint8_t value, uint8_t& flags) {
@@ -158,19 +159,19 @@ Instruction SRL_R(Cpu::Register r) {
         cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction SRL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = SRL(value, cpu.m_reg_f);
+        value = SRL(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t SLA(uint8_t value, uint8_t& flags) {
@@ -199,19 +200,19 @@ Instruction SLA_R(Cpu::Register r) {
         cpu.set(Cpu::Register::F, flags);
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction SLA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&){
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = SLA(value, cpu.m_reg_f);
+        value = SLA(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t SRA(uint8_t value, uint8_t& flags) {
@@ -244,19 +245,19 @@ Instruction SRA_R(Cpu::Register r) {
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied}; 
+    }, none}; 
 }
 
 Instruction SRA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = SRA(value, cpu.m_reg_f);
+        value = SRA(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t RR(uint8_t value, uint8_t& flags) {
@@ -288,19 +289,19 @@ Instruction RR_R(Cpu::Register r) {
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction RR_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = RR(value, cpu.m_reg_f);
+        value = RR(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 uint8_t SWAP(uint8_t value, uint8_t& flags) {
@@ -326,19 +327,19 @@ Instruction SWAP_R(Cpu::Register r) {
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};   
+    }, none};   
 }
 
 Instruction SWAP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = SWAP(value, cpu.m_reg_f);
+        value = SWAP(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 void BIT(uint8_t value, int n, uint8_t& flags) {
@@ -356,7 +357,7 @@ Instruction BIT_R(Cpu::Register r, int n) {
         BIT(cpu.get(r), n, flags);
         cpu.set(Cpu::Register::F, flags);
         return 8;
-    }, implied};
+    }, none};
 }
 
 Instruction BIT_ADDR_HL(int n) {
@@ -371,7 +372,7 @@ Instruction BIT_ADDR_HL(int n) {
 
         constexpr auto cycles = 12;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction RES_R(Cpu::Register r, int n) {
@@ -382,7 +383,7 @@ Instruction RES_R(Cpu::Register r, int n) {
 
         constexpr auto cycles = 8;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction RES_ADDR_HL(int n) {
@@ -394,7 +395,7 @@ Instruction RES_ADDR_HL(int n) {
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied};
+    }, none};
 }
 
 Instruction SET_R(Cpu::Register r, int n) {
@@ -404,7 +405,7 @@ Instruction SET_R(Cpu::Register r, int n) {
         cpu.set(r, value);
         constexpr auto cycles = 8;
         return cycles;
-    }, implied}; 
+    }, none}; 
 }
 
 Instruction SET_ADDR_HL(int n) {
@@ -416,5 +417,5 @@ Instruction SET_ADDR_HL(int n) {
 
         constexpr auto cycles = 16;
         return cycles;
-    }, implied}; 
+    }, none}; 
 }

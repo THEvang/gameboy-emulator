@@ -1,8 +1,6 @@
 #include "Disassembler/Disassembler.hpp"
 
-Instruction disassemble(Opcode const& opcode) {
-
-    Instruction instruction;
+Instruction_Info disassemble(Opcode const& opcode) {
 
     switch (opcode) {
     case Opcode::NOP:

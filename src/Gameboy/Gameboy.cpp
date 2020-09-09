@@ -23,11 +23,11 @@ void GameBoy::run() {
 
         auto instruction = fetch(static_cast<Opcode>(opcode));
 
+        auto cycles = 4;
         if(!m_cpu->m_is_halted) {
-            const auto operand = instruction.address_mode(*cpu);
-            const auto cycles = instruction.operation(*cpu, operand);
+            auto operand = instruction.read_operand(*m_cpu);
+            cycles = instruction.execute(*m_cpu, operand);
         } else {
-            cycles = 4;
             m_cpu->m_is_halted = m_interrupt_handler->should_exit_halt();
         }
 
@@ -48,8 +48,8 @@ void GameBoy::run() {
         }
     }
     catch (std::exception& err)  {
-        std::cout << err.what();
-        return;
+        std::cerr << err.what();
+        exit(0);
     }
 }
 

@@ -32,5 +32,10 @@ Instruction SWAP_R(Cpu::Register);
 Instruction SWAP_ADDR_HL();
 
 Instruction BIT_R(Cpu::Register, int);
+Instruction BIT_ADDR_HL(int);
+
 Instruction SET_R(Cpu::Register, int);
+Instruction SET_ADDR_HL(int);
+
 Instruction RES_R(Cpu::Register, int);
+Instruction RES_ADDR_HL(int);

@@ -34,14 +34,20 @@ struct Cpu {
         return static_cast<int>(f);
     }
 
-
-
     void set(Register r, uint8_t value) {
         m_registers[static_cast<size_t>(r)] = value;
     }
 
     uint8_t get(Register r) const {
         return m_registers[static_cast<size_t>(r)];
+    }
+
+    uint8_t& get(Register r) {
+        return m_registers[static_cast<size_t>(r)];
+    }
+
+    uint16_t get(std::pair<Register, Register> r_pair) const {
+        return combine_bytes(get(r_pair.first), get(r_pair.second));
     }
 
     bool test_flag(const Flag& flag) const {
@@ -85,3 +91,4 @@ Operand extended_address(Cpu&);
 Operand implied(Cpu&);
 Operand indexed_address(Cpu&);
 Operand extended_addressing(Cpu&);
+Operand none(Cpu&);

@@ -5,14 +5,14 @@
 Cpu::Cpu(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
 {
-    set(Register::A, 0x01);
-    set(Register::B, 0x00);
-    set(Register::C, 0x13);
-    set(Register::D, 0x00);
-    set(Register::E, 0xD8);
-    set(Register::F, 0xB0);
-    set(Register::H, 0x01);
-    set(Register::L, 0x4D);
+    m_registers[static_cast<int>(Register::A)] = 0x01;
+    m_registers[static_cast<int>(Register::B)] = 0x00;
+    m_registers[static_cast<int>(Register::C)] = 0x13;
+    m_registers[static_cast<int>(Register::D)] = 0x00;
+    m_registers[static_cast<int>(Register::E)] = 0xD8;
+    m_registers[static_cast<int>(Register::F)] = 0xB0;
+    m_registers[static_cast<int>(Register::H)] = 0x01;
+    m_registers[static_cast<int>(Register::L)] = 0x4D;
 
     m_memory_controller->write(0xFF05, 0);
     m_memory_controller->write(0xFF06, 0);
@@ -86,9 +86,9 @@ Operand extended_address(Cpu& cpu) {
 
 Operand implied(Cpu& cpu) {
     cpu.m_program_counter++;
-    
+    return {static_cast<uint8_t>(0)};   
 }
 
-Operand indexed_address(Cpu& cpu) {
-
+Operand none(Cpu& cpu) {
+    return {static_cast<uint8_t>(0)};
 }
