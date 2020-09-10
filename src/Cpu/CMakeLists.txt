@@ -9,5 +9,6 @@ target_sources(cpu
     Interpreter.cpp
 )
 
-target_compile_options(cpu PRIVATE -Wall)
+target_compile_features(cpu PRIVATE cxx_std_17)
 target_link_libraries(cpu PRIVATE project_warnings)
+set_target_properties(cpu PROPERTIES CXX_STANDARD 17)

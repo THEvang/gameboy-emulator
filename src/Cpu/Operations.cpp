@@ -1,3 +1,4 @@
+#include <tuple>
 #include "Cpu/Operations.hpp"
 
 #include "BitOperations.hpp"
@@ -6,31 +7,16 @@
 #include "Cpu/CBOpcodes.hpp"
 #include "Memory/Memory_Controller.hpp"
 
-FetchResult NOP() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&){
-        constexpr auto cycles = 4; 
-        return cycles;
-    }};
+Instruction NOP() {
+    return {[](Cpu&, Operand&) { return 4;}, implied};
 }
 
-FetchResult STOP() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
+Instruction STOP() {
+    return {[](Cpu&, Operand&){ return 4;}, implied};
 }
 
-FetchResult HALT() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction HALT() {
+    return {[](Cpu& cpu, Operand&) {
         
         constexpr auto cycles = 4;
         if(cpu.m_interrupts_enabled) {
@@ -50,16 +36,12 @@ FetchResult HALT() {
             }
         }
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RST(uint8_t address) {
-
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [address](Cpu& cpu){
-
+Instruction RST(uint8_t address) {
+    return {[address](Cpu& cpu, Operand&){
+        
         const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
         const auto pc_low =  static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
 
@@ -70,3337 +52,1225 @@ FetchResult RST(uint8_t address) {
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
         constexpr auto cycles = 16;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult DI() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction DI() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_should_disable_interrupts = true;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
+        return 4;
+    }, implied};
 }
 
-FetchResult EI() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction EI() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_should_enable_interrupts = true;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
+        return 4;
+    }, implied};
 }
 
-FetchResult JR() {
 
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-        cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
+int jump_relative(Cpu& cpu, Operand& op) {
+    const auto distance = static_cast<int8_t>(std::get<uint8_t>(op));
+    cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
+    return 12;
 }
 
-FetchResult JR_NZ() {
+Instruction JR() {
+    return {[](Cpu& cpu, Operand& op) {
+        return jump_relative(cpu, op);
+    }, immediate};
+}
+
+Instruction JR_NZ() {
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+    }, immediate};
+}
+
+Instruction JR_Z() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+    }, immediate};
+}
+
+Instruction JR_NC() {
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+    }, immediate};
+}
+
+Instruction JR_C() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+    }, immediate};
+}
+
+int ret(Cpu& cpu) {            
+    const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
+    const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
     
-    constexpr auto delta_pc = 2;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+    cpu.m_program_counter = combine_bytes(pc_high, pc_low);
+    cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
+    constexpr auto cycles = 16;
+    return cycles;
 }
 
-FetchResult JR_Z() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+Instruction RET() {
+    return {[](Cpu& cpu, Operand&) {
+        return ret(cpu);
+    }, implied};
 }
 
-FetchResult JR_NC() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+Instruction RET_NZ() {
+    return {[](Cpu& cpu, Operand&) {        
+        return !cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8;
+    }, implied};
 }
 
-FetchResult JR_C() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto distance = static_cast<int8_t>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-            cpu.m_program_counter = static_cast<uint16_t>(cpu.m_program_counter + distance);
-            return 12;
-        }
-        return 8;
-    }};
+Instruction RET_Z() {
+    return {[](Cpu& cpu, Operand&) {
+        return cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8; 
+    }, implied};
 }
 
-FetchResult RET() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-        const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        
-        cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
+Instruction RET_NC() {
+    return {[](Cpu& cpu, Operand&) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
+    }, implied};
 }
 
-FetchResult RET_NZ() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-            cpu.m_program_counter = combine_bytes(pc_high, pc_low);            
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-            return 20;
-        }
-        return 8;
-    }};
+Instruction RET_C() {
+    return {[](Cpu& cpu, Operand&) {
+       return cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
+    }, implied};
 }
 
-FetchResult RET_Z() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-            cpu.m_program_counter = combine_bytes(pc_high, pc_low);        
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-            return 20;
-        }
-        return 8;
-
-    }};
-}
-
-FetchResult RET_NC() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-            cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-            return 20;
-        }
-        return 8;
-    }};
-}
-
-FetchResult RET_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-            const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-            cpu.m_program_counter = combine_bytes(pc_high, pc_low);
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-            return 20;
-        }
-        return 8;
-    }};
-}
-
-FetchResult RETI() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto pc_low = cpu.m_memory_controller->read(cpu.m_stack_ptr);
-        const auto pc_high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        cpu.m_program_counter = combine_bytes(pc_high, pc_low);    
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
+Instruction RETI() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_interrupts_enabled = true;
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
+        return ret(cpu);
+    }, implied};
 }
 
-FetchResult JUMP() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto low = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        const auto address = combine_bytes(high, low);
-        cpu.m_program_counter = address; 
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
+int jump(Cpu& cpu, Operand& op) {
+    const auto address = std::get<uint16_t>(op);
+    cpu.m_program_counter = address; 
+    constexpr auto cycles = 16;
+    return cycles;
 }
 
-FetchResult JUMP_NZ() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            cpu.m_program_counter = address;
-            return 16;
-        }
-        return 12;
-    }};
+Instruction JUMP() {
+    return {[](Cpu& cpu, Operand& op) {
+        return jump(cpu, op);
+    }, immediate_extended};
 }
 
-FetchResult JUMP_Z() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            cpu.m_program_counter = address;
-            return 16;
-        }
-        return 12;
-    }};
+Instruction JUMP_NZ() {
+    return {[](Cpu& cpu, Operand& op) {        
+        return !cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
+    }, immediate_extended};
 }
 
-FetchResult JUMP_NC() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            cpu.m_program_counter = address;
-            return 16;
-        }
-        return 12;
-    }};
+Instruction JUMP_Z() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
+    }, immediate_extended};
 }
 
-FetchResult JUMP_C() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            cpu.m_program_counter = address;
-            return 16;
-        }
-        return 12;
-    }};
+Instruction JUMP_NC() {
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
+    }, immediate_extended};
 }
 
-FetchResult JUMP_ADDR_HL() {
+Instruction JUMP_C() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
+    }, immediate_extended};
+}
 
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+Instruction JUMP_ADDR_HL() {
+    return {[](Cpu& cpu, Operand&) {
+        const auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
         cpu.m_program_counter = address;
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
+int call(Cpu& cpu, Operand& op) {
 
-FetchResult CALL() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
-        const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
-        
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-        
-        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        
-        const auto address = combine_bytes(upper, lower);
-        
-        cpu.m_program_counter = address;
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
-        
-        constexpr auto cycles = 24;
-        return cycles;
-    }};
-}
-
-FetchResult CALL_NZ() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
-            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
-
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-
-        
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-        
-            cpu.m_program_counter = address;
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
-
-            return 24;
-        }
-        return 12;
-    }};
-}
-
-FetchResult CALL_Z() {
-
-    constexpr auto delta_pc = 3;
+    const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
+    const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
     
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::zero_flag)) {
-            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
-            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
-
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-
-            
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            
-            cpu.m_program_counter = address;
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
-
-            return 24;
-        }
-        return 12;
-    }};
-}
-
-FetchResult CALL_NC() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(!is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
-            const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
-
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-
-            
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            
-            cpu.m_program_counter = address;
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
-
-            return 24;
-            }
-        return 12;
-    }};
-}
-
-FetchResult CALL_C() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-            const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8u);
-            const auto pc_low =  static_cast<uint8_t>(cpu.m_program_counter & 0xFFu);
-
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-            cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-
-            
-            const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-            const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-            const auto address = combine_bytes(upper, lower);
-            
-            cpu.m_program_counter = address;
-            cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
-            return 24;
-        }
-        return 12;
-    }};
-}
-
-FetchResult LD_A_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_a = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_reg_d;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_reg_e;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_reg_h;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = cpu.m_reg_l;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_ADDR_BC() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        const auto address = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_A_ADDR_DE() {
-
-    constexpr auto delta_pc = 1;
+    cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
+    cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
+    cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr -2);
     
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+     cpu.m_program_counter = std::get<uint16_t>(op);
 
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
+    constexpr auto cycles = 24;
+    return cycles;
 }
 
-FetchResult LD_A_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {    
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
+Instruction CALL() {
+    return {[](Cpu& cpu, Operand& op) {
+        return call(cpu, op);
+    }, immediate_extended};
 }
 
-FetchResult LD_A_ADDR_A16() {
+Instruction CALL_NZ() {
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
+    }, immediate_extended};
+}
 
-    constexpr auto delta_pc = 3;
+Instruction CALL_Z() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
+    }, immediate_extended};
+}
 
-    return {delta_pc, [](Cpu& cpu) {
-        const auto low = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto high = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        const auto address = combine_bytes(high, low);
+Instruction CALL_NC() {
+    return {[](Cpu& cpu, Operand& op) {
+        return !cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
+    }, immediate_extended};
+}
 
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+Instruction CALL_C() {
+    return {[](Cpu& cpu, Operand& op) {
+        return cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
+    }, immediate_extended};
+}
 
+Instruction LD_R_R(Cpu::Register dst, Cpu::Register src) {
+    return {[dst, src](Cpu& cpu, Operand&){
+        cpu.set(dst, cpu.get(src));
+        return 4;
+    }, implied};
+}
+
+Instruction LD_R_D8(Cpu::Register dst) {
+    return {[dst](Cpu& cpu, Operand& op) {
+        cpu.set(dst, std::get<uint8_t>(op));
+        constexpr auto cycles = 8;
+        return cycles;
+    }, immediate};
+}
+
+Instruction LD_A_ADDR_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {        
+        const auto address = cpu.get(rr);
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
+        constexpr auto cycles = 8;
+        return cycles;
+    }, implied};
+}
+
+Instruction LD_A_ADDR_A16() {
+    return {[](Cpu& cpu, Operand& op) {
+        cpu.set(Cpu::Register::A, std::get<uint8_t>(op));
         constexpr auto cycles = 16;
         return cycles;
-    }};
+    }, extended_address};
 }
 
-FetchResult LD_A_ADDR_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+Instruction LD_A_ADDR_C() {
+    return {[](Cpu& cpu, Operand&) {
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.get(Cpu::Register::C));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult LD_ADDR_A16_SP() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        const auto address = combine_bytes(upper, lower);
+Instruction LD_ADDR_A16_SP() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto address = std::get<uint16_t>(op);        
         cpu.m_memory_controller->write(address, static_cast<uint8_t>(cpu.m_stack_ptr & 0xFFu));
         cpu.m_memory_controller->write(static_cast<uint16_t>(address + 1), static_cast<uint8_t>(cpu.m_stack_ptr >> 8u));
-
         constexpr auto cycles = 20;
         return cycles;
-    }};
+    }, immediate_extended};
 }
 
-FetchResult LDI_ADDR_HL_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+Instruction LDI_ADDR_HL_A() {
+    return {[](Cpu& cpu, Operand&) {
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult LDI_A_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+Instruction LDI_A_ADDR_HL() {
+    return {[](Cpu& cpu, Operand&) {
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
         
         address++;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult LD_ADDR_BC_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);   
-
+Instruction LD_ADDR_RR_A(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        const auto address = cpu.get(rr);
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));   
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult LD_ADDR_DE_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        const auto address = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);    
-
+Instruction LD_R_ADDR_HL(Cpu::Register dst) {
+    return {[dst](Cpu& cpu, Operand& op) {
+        cpu.set(dst, std::get<uint8_t>(op));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
-FetchResult LD_B_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
+Instruction LD_ADDR_HL_R(Cpu::Register r) {
+    return {[r](Cpu& cpu, Operand&) {
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.m_memory_controller->write(address, cpu.get(r));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};    
 }
 
-FetchResult LD_B_A() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_C() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_e;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_h;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = cpu.m_reg_l;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_B_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_b = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_D8() {
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_A() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_b;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_C() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_d;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_e;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_h;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_reg_l;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_C_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_c = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_D8() {
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_A() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_b;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};}
-
-FetchResult LD_D_C() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};}
-
-FetchResult LD_D_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_e;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_h;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-FetchResult LD_D_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = cpu.m_reg_l;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_D_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_d = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_D8() {
-    constexpr auto delta_pc = 2;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_A() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_b;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_C() {    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_d;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_h;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_e = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_E_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_e = cpu.m_memory_controller->read(address);
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_D8() {
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_A() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_b;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-
-}
-
-FetchResult LD_H_C() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-
-}
-
-FetchResult LD_H_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_d;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_e;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&) {
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = cpu.m_reg_l;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_H_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_h = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_L_D8() {
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_A() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_a;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_B() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_b;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_C() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_c;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_D() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_d;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_L_E() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_e;
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_H() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_l = cpu.m_reg_h;
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult LD_L_L() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu&){
-        constexpr auto cycles = 4;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_L_ADDR_HL() {
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_l = cpu.m_memory_controller->read(address);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult LD_ADDR_HL_A() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_B() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_b);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_C() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_c);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_D() {
-
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_d);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_E() {
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_e);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_H() {
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_h);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};    
-}
-
-FetchResult LD_ADDR_HL_L() {
-    
-    constexpr auto delta_pc = 1;
-    
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_l);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};   
-}
-
-FetchResult LD_ADDR_HL_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+Instruction LD_ADDR_HL_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto value = std::get<uint8_t>(op);
         cpu.m_memory_controller->write(address, value);
-
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult LD_ADDR_HL_ADDR_HL() {    
+Instruction LD_ADDR_HL_ADDR_HL() {    
     throw UnimplementedOperation("Unimplemented operation: LD ADDR HL ADDR HL");
 }
 
-FetchResult LD_ADDR_A16_A() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        const auto address = combine_bytes(upper, lower);
-
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
-
+Instruction LD_ADDR_A16_A() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto address = std::get<uint16_t>(op);
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
         constexpr auto cycles = 16;
         return cycles;
-    }};
+    }, immediate_extended};
 }
 
-FetchResult LD_BC_D16() {
+Instruction LD_RR_D16(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint16_t>(op);
 
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
 
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate_extended};
 }
 
-FetchResult LD_DE_D16() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
-}
-
-FetchResult LD_HL_D16() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
-}
-
-FetchResult LD_HL_SPR8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+Instruction LD_HL_SPR8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
-            clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+            cpu.set_flag(Cpu::Flag::Half_Carry)  :
+            cpu.clear_flag(Cpu::Flag::Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+            cpu.set_flag(Cpu::Flag::Carry)   :
+            cpu.clear_flag(Cpu::Flag::Carry);
 
         const auto result = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
-}
-
-FetchResult LD_SP_D16() {
-
-    constexpr auto delta_pc = 3;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto lower = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 2));
-        const auto upper = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        const auto value = combine_bytes(upper, lower);
-
-        cpu.m_stack_ptr = value;
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
 
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult LD_SP_HL() {
+Instruction LD_SP_D16() {
+    return {[](Cpu& cpu, Operand& op) {
+        cpu.m_stack_ptr = std::get<uint16_t>(op);
+        constexpr auto cycles = 12;
+        return cycles;
+    }, immediate_extended};
+}
 
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_stack_ptr = value;
-
+Instruction LD_SP_HL() {
+    return {[](Cpu& cpu, Operand&) {
+        cpu.m_stack_ptr =  combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_carry_8bit(first, second)             ? 
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     overflows_8bit(first, second)          ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first + second);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
-FetchResult ADD_A_D8() {
+Instruction ADD_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
 
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, value, cpu.m_reg_f);
-
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult ADD_A_A() {
+Instruction ADD_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
 
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, ADD_8bit(a, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult ADD_A_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_H() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_L() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_A_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = ADD_8bit(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction ADD_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, ADD_8bit(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
 uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
     
     overflows_16bit(first, second)                     ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     half_carry_16bit(first, second)                        ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     first = static_cast<uint16_t>(first + second);
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
-FetchResult ADD_HL_BC() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction ADD_HL_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
         
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
+        const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
 
-        const auto result = ADD_16bit(hl, bc, cpu.m_reg_f);
+        const auto result = ADD_16bit(hl, value, cpu.get(Cpu::Register::F));
 
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied}; 
 }
 
-FetchResult ADD_HL_DE() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction ADD_HL_SP() {
+    return {[](Cpu& cpu, Operand&) {
         
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
+        const auto hl = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, cpu.get(Cpu::Register::F));
 
-        const auto result = ADD_16bit(hl, de, cpu.m_reg_f);
-
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(result >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(result & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
-}
-
-FetchResult ADD_HL_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto result = ADD_16bit(hl, hl, cpu.m_reg_f);
-
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult ADD_HL_SP() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto result = ADD_16bit(hl, cpu.m_stack_ptr, cpu.m_reg_f);
-
-        cpu.m_reg_h = static_cast<uint8_t>(result >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(result & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,   Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags,   Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first - second);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags,        Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
-FetchResult SUB_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = SUB(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction SUB_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult SUB_A() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
+Instruction SUB_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto acc = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, SUB(acc, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult SUB_B() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_D() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_H() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_L() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SUB(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SUB_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = SUB(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction SUB_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, SUB(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
 uint8_t INC(uint8_t value, uint8_t& flags) {
     
     half_carry_8bit(value, 1)                 ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     value++;
 
-    value == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return value;
 }
 
-FetchResult INC_A() {
+Instruction INC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto r = cpu.get(src);
+        cpu.set(src, INC(r, cpu.get(Cpu::Register::F)));
+        constexpr auto cycles = 4;
+        return cycles;
+    }, implied};
+}
 
-    constexpr auto delta_pc = 1;
+Instruction INC_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {        
+        auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
+        value++;
 
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = INC(cpu.m_reg_a, cpu.m_reg_f);
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
+
+        constexpr auto cycles = 8;
+        return cycles;
+    }, implied};
+}
+
+Instruction INC_ADDR_HL() {
+    return {[](Cpu& cpu, Operand&) {
         
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_B() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = INC(cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles; 
-    }};
-}
-
-FetchResult INC_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = INC(cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_D() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = INC(cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_E() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = INC(cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_H() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = INC(cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = INC(cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult INC_BC() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        auto value = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        value++;
-
-        cpu.m_reg_b = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_c = static_cast<uint8_t>(value & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult INC_DE() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        auto value = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        value++;
-
-        cpu.m_reg_d = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_e = static_cast<uint8_t>(value & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult INC_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        auto value = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        value++;
-
-        cpu.m_reg_h = static_cast<uint8_t>(value >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(value & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult INC_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
 
-        value = INC(value, cpu.m_reg_f);
+        value = INC(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult INC_SP() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction INC_SP() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_stack_ptr++;
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t DEC(uint8_t value, uint8_t& flags) {
     
     half_borrow_8bit(value, 1)                ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     value--;
     
-    value == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return value;
 }
 
-FetchResult DEC_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = DEC(cpu.m_reg_a, cpu.m_reg_f);
-
+Instruction DEC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto r = cpu.get(src);
+        cpu.set(src, DEC(r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult DEC_B() {
+Instruction DEC_RR(std::pair<Cpu::Register, Cpu::Register> rr) { 
+    return {[rr](Cpu& cpu, Operand&) {
 
-    constexpr auto delta_pc = 1;
+        auto value = combine_bytes(cpu.get(rr.first), cpu.get(rr.second));
+        value--;
 
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_b = DEC(cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = DEC(cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_D() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_d = DEC(cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_E() {    
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = DEC(cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_H() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_h = DEC(cpu.m_reg_h, cpu.m_reg_f);
-        
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = DEC(cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_BC() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        auto bc = combine_bytes(cpu.m_reg_b, cpu.m_reg_c);
-        bc--;
-
-        cpu.m_reg_b = static_cast<uint8_t>(bc >> 8u);
-        cpu.m_reg_c = static_cast<uint8_t>(bc & 0xFFu);
+        cpu.set(rr.first, static_cast<uint8_t>(value >> 8u));
+        cpu.set(rr.second, static_cast<uint8_t>(value & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult DEC_DE() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        auto de = combine_bytes(cpu.m_reg_d, cpu.m_reg_e);
-        de--;
-
-        cpu.m_reg_d = static_cast<uint8_t>(de >> 8u);
-        cpu.m_reg_e = static_cast<uint8_t>(de & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        
-        auto hl = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        hl--;
-
-        cpu.m_reg_h = static_cast<uint8_t>(hl >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(hl & 0xFFu);
-
-        constexpr auto cycles = 8;
-        return cycles;
-    }};
-}
-
-FetchResult DEC_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
+Instruction DEC_ADDR_HL() {
+    return {[](Cpu& cpu, Operand&) {
+        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
         auto value = cpu.m_memory_controller->read(address);
-        value = DEC(value, cpu.m_reg_f);
+        value = DEC(value, cpu.get(Cpu::Register::F));
         cpu.m_memory_controller->write(address, value);
-
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult DEC_SP() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction DEC_SP() {
+    return {[](Cpu& cpu, Operand&) {
         cpu.m_stack_ptr--;
-
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult SCF() {
+Instruction SCF() {
+    return {[](Cpu& cpu, Operand&) {
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.set_flag(Cpu::Flag::Carry);
+        constexpr auto cycles = 4;
+        return cycles;
+    }, implied};
+}
 
-    constexpr auto delta_pc = 1;
+Instruction CCF() {
+    return {[](Cpu& cpu, Operand&) {
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.test_flag(Cpu::Flag::Carry) ? 
+            cpu.clear_flag(Cpu::Flag::Carry) : cpu.set_flag(Cpu::Flag::Carry);
+        constexpr auto cycles = 4;
+        return cycles;
+    }, implied};
+}
 
-    return {delta_pc, [](Cpu& cpu) {
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-        set_bit(cpu.m_reg_f, Cpu::carry_flag);
+Instruction RRCA() {
+    return {[](Cpu& cpu, Operand&) {
+
+        is_set(cpu.get(Cpu::Register::A), 0) ? cpu.set_flag(Cpu::Flag::Carry)
+            : cpu.clear_flag(Cpu::Flag::Carry);
+        
+        cpu.set(Cpu::Register::A, rotate_right<uint8_t>(cpu.get(Cpu::Register::A), 1));
+
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult CCF() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-    
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
-
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? 
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag) : set_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult RRCA() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        is_set(cpu.m_reg_a, 0) ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+Instruction RRA() {
+    return {[](Cpu& cpu, Operand&) {
         
-        cpu.m_reg_a = rotate_right<uint8_t>(cpu.m_reg_a, 1);
+        auto a = cpu.get(Cpu::Register::A);
 
+        const auto new_carry_flag = is_set(a, 0);
+        a = static_cast<uint8_t>(a >> 1u);
+
+        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 7) 
+            : clear_bit(a, 7);
         
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.set(Cpu::Register::A, a);
 
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult RRA() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry) 
+            : cpu.clear_flag(Cpu::Flag::Carry);
         
-        const auto new_carry_flag = is_set(cpu.m_reg_a, 0);
-        cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a >> 1u);
-
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 7) 
-            : clear_bit(cpu.m_reg_a, 7);
-
-        new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag) 
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
-
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
     
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLA() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto new_carry_flag = is_set(cpu.m_reg_a, 7);
-        cpu.m_reg_a =  static_cast<uint8_t>(cpu.m_reg_a << 1u);
-
-        is_set(cpu.m_reg_f, Cpu::carry_flag) ? set_bit(cpu.m_reg_a, 0)
-            : clear_bit(cpu.m_reg_a, 0);
+Instruction RLA() {
+    return {[](Cpu& cpu, Operand&) {
         
-        new_carry_flag ? set_bit(cpu.m_reg_f, Cpu::carry_flag)
-            : clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        auto a = cpu.get(Cpu::Register::A);
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        const auto new_carry_flag = is_set(a, 7);
+        a =  static_cast<uint8_t>(a << 1u);
+
+        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 0)
+            : clear_bit(a, 0);
+        
+        cpu.set(Cpu::Register::A, a);
+
+        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry)
+            : cpu.clear_flag(Cpu::Flag::Carry);
+
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult RLCA() {
+Instruction RLCA() {
+    return {[](Cpu& cpu, Operand&) {
+        auto a = cpu.get(Cpu::Register::A);
 
-    constexpr auto delta_pc = 1;
+        is_set(a, 7) ? cpu.set_flag(Cpu::Flag::Carry) : 
+            cpu.clear_flag(Cpu::Flag::Carry);
 
-    return {delta_pc, [](Cpu& cpu) {
-        is_set(cpu.m_reg_a, 7) ? set_bit(cpu.m_reg_f, Cpu::carry_flag) : 
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+        cpu.set(Cpu::Register::A, rotate_left<uint8_t>(a, 1));
 
-        cpu.m_reg_a = rotate_left<uint8_t>(cpu.m_reg_a, 1);
-
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult DAA() {    
+Instruction DAA() {    
+    return {[](Cpu& cpu, Operand&) {
 
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-
-        if(!is_set(cpu.m_reg_f, Cpu::sub_flag)) {
-            if(is_set(cpu.m_reg_f, Cpu::carry_flag) || cpu.m_reg_a > 0x99) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x60);
-                set_bit(cpu.m_reg_f, Cpu::carry_flag);
+        auto a = cpu.get(Cpu::Register::A);
+        if(!cpu.test_flag(Cpu::Flag::Sub)) {
+            if(cpu.test_flag(Cpu::Flag::Carry) || a > 0x99) {
+                a += 0x60;
+                cpu.set_flag(Cpu::Flag::Carry);
             }
 
-            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag) || (cpu.m_reg_a & 0x0Fu) > 0x09) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a + 0x06);
+            if(cpu.test_flag(Cpu::Flag::Half_Carry) || (a & 0x0Fu) > 0x09) {
+                a += 0x06;
             }
         } else {
-            if(is_set(cpu.m_reg_f, Cpu::carry_flag)) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x60);
+            if(cpu.test_flag(Cpu::Flag::Carry)) {
+                a -= 0x60;
             }
-            if(is_set(cpu.m_reg_f, Cpu::half_carry_flag)) {
-                cpu.m_reg_a = static_cast<uint8_t>(cpu.m_reg_a - 0x06);
+            if(cpu.test_flag(Cpu::Flag::Half_Carry)) {
+                a -= 0x06;
             }
         }
 
-        clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.clear_flag(Cpu::Flag::Half_Carry);
 
-        cpu.m_reg_a == 0 ? set_bit(cpu.m_reg_f, Cpu::zero_flag) :
-            clear_bit(cpu.m_reg_f, Cpu::zero_flag);
+        a == 0 ? cpu.set_flag(Cpu::Flag::Zero) :
+            cpu.clear_flag(Cpu::Flag::Zero);
+
+        cpu.set(Cpu::Register::A, a);
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult ADD_SP_R8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto distance = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+Instruction ADD_SP_R8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            set_bit(cpu.m_reg_f, Cpu::half_carry_flag)  :
-            clear_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+            cpu.set_flag(Cpu::Flag::Half_Carry)  :
+            cpu.clear_flag(Cpu::Flag::Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            set_bit(cpu.m_reg_f, Cpu::carry_flag)   :
-            clear_bit(cpu.m_reg_f, Cpu::carry_flag);
+            cpu.set_flag(Cpu::Flag::Carry)   :
+            cpu.clear_flag(Cpu::Flag::Carry);
 
 
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
 
-        clear_bit(cpu.m_reg_f, Cpu::zero_flag);
-        clear_bit(cpu.m_reg_f, Cpu::sub_flag);
+        cpu.clear_flag(Cpu::Flag::Zero);
+        cpu.clear_flag(Cpu::Flag::Sub);
 
         constexpr auto cycles = 16;
         return cycles;
-    }};    
+    }, immediate};    
 }
 
 uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first &= second;
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    set_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
 
-FetchResult AND_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = AND(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction AND_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult AND_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
+Instruction AND_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        
+        cpu.set(Cpu::Register::A, AND(a, r, cpu.get(Cpu::Register::F)));
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult AND_B() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_H() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = AND(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult AND_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = AND(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction AND_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, AND(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
 uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first ^= second;
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    clear_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
 
-FetchResult XOR_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = XOR(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction XOR_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult XOR_A() {
-    
-    constexpr auto delta_pc = 1;
+Instruction XOR_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
 
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
+        a = XOR(a, r, cpu.get(Cpu::Register::F));
+
+        cpu.set(Cpu::Register::A, a);
 
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult XOR_B() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-    
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_H() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_L() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = XOR(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult XOR_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = XOR(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction XOR_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, XOR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
 uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first |= second;
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
-    clear_bit(flags, Cpu::half_carry_flag);
-    clear_bit(flags, Cpu::carry_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
 
     return first;
 }
 
-FetchResult OR_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = OR(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction OR_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult OR_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-        
+Instruction OR_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), cpu.get(src), cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult OR_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_H() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = OR(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult OR_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = OR(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction OR_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, OR(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
 void CP(uint8_t first, uint8_t second, uint8_t& flags) {
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, static_cast<int>(Cpu::Flag::Carry))   :
+        clear_bit(flags, static_cast<int>(Cpu::Flag::Carry));
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
 
-    (first == second) ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    (first == second) ? 
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 }
 
-FetchResult CP_D8() {
-    
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        CP(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction CP_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        CP(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult CP_A() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-
+Instruction CP_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        CP(a, r, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult CP_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult CP_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult CP_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-    
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult CP_E() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-
-
-FetchResult CP_H() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult CP_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        CP(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult CP_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        CP(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction CP_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        CP(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
-FetchResult PUSH_AF() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_a);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_f);
+Instruction PUSH_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.get(rr.first));
+        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.get(rr.second));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-
         constexpr auto cycles = 16;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult PUSH_BC() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_b);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_c);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
-}
-
-FetchResult PUSH_DE() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_d);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_e);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
-}
-
-FetchResult PUSH_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-1), cpu.m_reg_h);
-        cpu.m_memory_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr-2), cpu.m_reg_l);
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-
-        constexpr auto cycles = 16;
-        return cycles;
-    }};
-}
-
-FetchResult POP_AF() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_f = cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0u;
-        cpu.m_reg_a = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+Instruction POP_AF() {
+    return {[](Cpu& cpu, Operand&) {
+        cpu.set(Cpu::Register::F, cpu.m_memory_controller->read(cpu.m_stack_ptr) & 0xF0u);
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1)));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult POP_BC() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_c = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_b = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
+Instruction POP_RR(std::pair<Cpu::Register, Cpu::Register> rr) {
+    return {[rr](Cpu& cpu, Operand&) {
+        cpu.set(rr.second, cpu.m_memory_controller->read(cpu.m_stack_ptr));
+        cpu.set(rr.first, cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1)));
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-
         constexpr auto cycles = 12;
         return cycles;
-    }};
-}
-
-FetchResult POP_DE() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_e = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_d = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
-}
-
-FetchResult POP_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_l = cpu.m_memory_controller->read(cpu.m_stack_ptr) ;
-        cpu.m_reg_h = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_stack_ptr + 1));
-        cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + 2);
-
-        constexpr auto cycles = 12;
-        return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
 
     half_carry_8bit(first, second)       ?
-        set_bit(flags, Cpu::half_carry_flag)          :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
 
     overflows_8bit(first, second)        ?
-        set_bit(flags, Cpu::carry_flag)               :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
 
     first = static_cast<uint8_t>(first + second);
 
-    if(!is_set(flags, Cpu::half_carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
         half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
-        set_bit(flags, Cpu::half_carry_flag)          :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
+        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
     }
-
-    if(!is_set(flags, Cpu::carry_flag)) {
+    
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
         overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
-            set_bit(flags, Cpu::carry_flag)               :
-            clear_bit(flags, Cpu::carry_flag);
+            set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
+            clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
     }
 
     first = static_cast<uint8_t>(first + carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    clear_bit(flags, Cpu::sub_flag);
+    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
     
     return first;
 }
 
-FetchResult ADC_A_D8() {
-    
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = ADC(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction ADC_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult ADC_A_A() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-
+Instruction ADC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto r = cpu.get(src);
+        const auto a = cpu.get(Cpu::Register::A);
+        cpu.set(Cpu::Register::A, ADC(a, r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult ADC_A_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_D() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_H() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-        
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_L() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = ADC(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-    
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult ADC_A_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = ADC(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction ADC_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        cpu.set(Cpu::Register::A, ADC(cpu.get(Cpu::Register::A), value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
-FetchResult LDH_ADDR_A8_A() {
-
-    constexpr auto delta_pc = 2;
-
-    return  {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
+Instruction LDH_ADDR_A8_A() {
+    return  {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
         const auto address = static_cast<uint16_t>(0xFF00 + value);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);    
-
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));    
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult LDH_A_ADDR_A8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);             
-
+Instruction LDH_A_ADDR_A8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto address = static_cast<uint16_t>(0xFF00 + std::get<uint8_t>(op));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));             
         constexpr auto cycles = 12;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult LD_ADDR_C_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {        
-        const auto address = static_cast<uint16_t>(0xFF00 + cpu.m_reg_c);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
-
+Instruction LD_ADDR_C_A() {
+    return {[](Cpu& cpu, Operand&) {        
+        const auto address = static_cast<uint16_t>(0xFF00 + cpu.get(Cpu::Register::C));
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
 uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::carry_flag) ? 1 : 0;
+    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::half_carry_flag)  :
-        clear_bit(flags, Cpu::half_carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::carry_flag)   :
-        clear_bit(flags, Cpu::carry_flag);
+        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
     
     first = static_cast<uint8_t>(first - second);
 
-    if(!is_set(flags, Cpu::half_carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
         half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
-            set_bit(flags, Cpu::half_carry_flag)  :
-            clear_bit(flags, Cpu::half_carry_flag);
+            set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
+            clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
     }
 
-    if(!is_set(flags, Cpu::carry_flag)) {
+    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
         underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
-            set_bit(flags, Cpu::carry_flag)   :
-            clear_bit(flags, Cpu::carry_flag);
+            set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
+            clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
     }
 
     first = static_cast<uint8_t>(first - carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::zero_flag) :
-        clear_bit(flags, Cpu::zero_flag);
+    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
+        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
 
-    set_bit(flags, Cpu::sub_flag);
+    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
 
     return first;
 }
 
-FetchResult SBC_A_D8() {
-
-    constexpr auto delta_pc = 2;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto value = cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1));
-        cpu.m_reg_a = SBC(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction SBC_D8() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        const auto a = cpu.get(Cpu::Register::A);
+        cpu.set(Cpu::Register::A, SBC(a, value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, immediate};
 }
 
-FetchResult SBC_A_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_a, cpu.m_reg_f);
-
+Instruction SBC_R(Cpu::Register src) {
+    return {[src](Cpu& cpu, Operand&) {
+        const auto a = cpu.get(Cpu::Register::A);
+        const auto r = cpu.get(src);
+        cpu.set(Cpu::Register::A, SBC(a, r, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult SBC_A_B() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_b, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_C() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_c, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_D() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_d, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_E() {
-    
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_e, cpu.m_reg_f);
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_H() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_h, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_L() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        cpu.m_reg_a = SBC(cpu.m_reg_a, cpu.m_reg_l, cpu.m_reg_f);
-
-        constexpr auto cycles = 4;
-        return cycles;
-    }};
-}
-
-FetchResult SBC_A_ADDR_HL() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
-        const auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        const auto value = cpu.m_memory_controller->read(address);
-        cpu.m_reg_a = SBC(cpu.m_reg_a, value, cpu.m_reg_f);
-
+Instruction SBC_A_ADDR_HL() {
+    return {[](Cpu& cpu, Operand& op) {
+        const auto value = std::get<uint8_t>(op);
+        auto a = cpu.get(Cpu::Register::A);
+        cpu.set(Cpu::Register::A, SBC(a, value, cpu.get(Cpu::Register::F)));
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, hl_addressing};
 }
 
-FetchResult PREFIX_CB() {
-
-    auto delta_pc = 2;
-    return {delta_pc, [](Cpu& cpu) {
-
+Instruction PREFIX_CB() {
+    return {[](Cpu& cpu, Operand&) {
         const auto cb_opcode = static_cast<CBCode>(cpu.m_memory_controller->read(static_cast<uint16_t>(cpu.m_program_counter - 1)));
-        const auto result = fetch_cb(cb_opcode);
-        return result.operation(cpu);
+        const auto instruction = fetch_cb(cb_opcode);
+        auto operand = instruction.read_operand(cpu);
+        return instruction.execute(cpu, operand);
+    }, [](Cpu& cpu) -> Operand {
+        cpu.m_program_counter += 2;
+        return {static_cast<uint8_t>(0)};
     }};
 }
 
-FetchResult LD_ADDR_HLD_A() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction LD_ADDR_HLD_A() {
+    return {[](Cpu& cpu, Operand&) {
             
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_memory_controller->write(address, cpu.m_reg_a);
+        auto address = cpu.get({Cpu::Register::H, Cpu::Register::L});
+        cpu.m_memory_controller->write(address, cpu.get(Cpu::Register::A));
 
         address--;
 
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
         
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult LD_A_ADDR_HLD() {
-
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu) {
+Instruction LD_A_ADDR_HLD() {
+    return {[](Cpu& cpu, Operand&) {
         
-        auto address = combine_bytes(cpu.m_reg_h, cpu.m_reg_l);
-        cpu.m_reg_a = cpu.m_memory_controller->read(address);
+        auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        cpu.set(Cpu::Register::A, cpu.m_memory_controller->read(address));
 
         address--;
-        cpu.m_reg_h = static_cast<uint8_t>(address >> 8u);
-        cpu.m_reg_l = static_cast<uint8_t>(address & 0xFFu);
+        cpu.set(Cpu::Register::H, static_cast<uint8_t>(address >> 8u));
+        cpu.set(Cpu::Register::L, static_cast<uint8_t>(address & 0xFFu));
 
         constexpr auto cycles = 8;
         return cycles;
-    }};
+    }, implied};
 }
 
-FetchResult CPL() {
+Instruction CPL() {
+    return {[](Cpu& cpu, Operand&){
+        auto a = cpu.get(Cpu::Register::A);
+        a ^= 0xFF;
+        cpu.set(Cpu::Register::A, a);
 
-    constexpr auto delta_pc = 1;
-
-    return {delta_pc, [](Cpu& cpu){
-        cpu.m_reg_a ^= 0xFF;
-
-        set_bit(cpu.m_reg_f, Cpu::sub_flag);
-        set_bit(cpu.m_reg_f, Cpu::half_carry_flag);
+        cpu.set_flag(Cpu::Flag::Sub);
+        cpu.set_flag(Cpu::Flag::Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
-    }};
+    }, implied};
 }

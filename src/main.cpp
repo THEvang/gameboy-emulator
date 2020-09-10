@@ -4,7 +4,7 @@
 #include "Gui/Gui.hpp"
 #include "Gui/Renderers.hpp"
 #include "Utilities/File.hpp"
-#include "GameBoy.hpp"
+#include "Gameboy/GameBoy.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -60,7 +60,7 @@ void render_main(GameBoy* gameboy) {
                 render_cpu(*gameboy);
                 render_ppu(*gameboy);
                 render_cartridge_data(*gameboy);
-                render_disassembly(*gameboy);
+                //render_disassembly(*gameboy);
                 render_menu();
                 gui.render();
             }

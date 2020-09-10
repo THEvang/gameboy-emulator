@@ -10,7 +10,7 @@
 
 void render_disassembly(GameBoy const& gameboy) {
 
-    static Ring_Buffer<Instruction, 20> history;
+    static Ring_Buffer<Instruction_Info, 20> history;
     const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->m_program_counter);
     const auto instruction = disassemble(static_cast<Opcode>(opcode));
     history.write(instruction);
@@ -64,44 +64,59 @@ void render_ppu(GameBoy const& gameboy) {
     ImGui::End();
 }
 
+std::string to_name(Cpu::Register reg) {
+    switch(reg) {
+        case Cpu::Register::A:
+            return {"A"};
+        case Cpu::Register::B:
+            return {"B"};
+        case Cpu::Register::C:
+            return {"C"};
+        case Cpu::Register::D:
+            return {"D"};
+        case Cpu::Register::E:
+            return {"E"};
+        case Cpu::Register::H:
+            return {"H"};
+        case Cpu::Register::L:
+            return {"L"};
+    }
+}
+
+std::string to_name(Cpu::Flag flag) {
+    switch(flag) {
+        case Cpu::Flag::Carry:
+            return {"Carry"};
+        case Cpu::Flag::Half_Carry:
+            return {"Half Carry"};
+        case Cpu::Flag::Zero:
+            return {"Zero"};
+        case Cpu::Flag::Sub:
+            return {"Sub"};
+    }
+}
+
 void render_cpu(GameBoy const& gameboy) {
     
     const auto cpu = gameboy.cpu();
 
     ImGui::Begin("Cpu!");
     ImGui::Text("Current Opcode: %i.", cpu->m_memory_controller->read(cpu->m_program_counter));
-    ImGui::Text("Register A: %i.", cpu->m_reg_a);
-    ImGui::SameLine();
-    ImGui::Text("Register F: %i.", cpu->m_reg_f);
 
-    ImGui::Text("Register B: %i.", cpu->m_reg_b);
-    ImGui::SameLine();
-    ImGui::Text("Register C: %i.", cpu->m_reg_c);
+    for(auto reg_index = 0; reg_index < 7; reg_index++) {
+        const auto reg = static_cast<Cpu::Register>(reg_index);
+        const auto register_name = to_name(reg);
+        ImGui::Text("Register %s: %i.", register_name.c_str(), cpu->get(reg));
+    }
 
-    ImGui::Text("Register D: %i.", cpu->m_reg_d);
-    ImGui::SameLine();
-    ImGui::Text("Register E: %i.", cpu->m_reg_e);
-
-    ImGui::Text("Register H: %i.", cpu->m_reg_h);
-    ImGui::SameLine();
-    ImGui::Text("Register L: %i.", cpu->m_reg_l);
-
-    bool zero_flag = is_set(cpu->m_reg_f, 7);
-    ImGui::Checkbox("Zero Flag: ", &zero_flag);
-    ImGui::SameLine();
-
-    bool subtract_flag = is_set(cpu->m_reg_f, 6);
-    ImGui::Checkbox("Subtract Flag: ", &subtract_flag);
-    ImGui::SameLine();
-
-    bool half_carry = is_set(cpu->m_reg_f, 5);
-    ImGui::Checkbox("Half Carry Flag", &half_carry);
-    ImGui::SameLine();
-
-    bool carry_flag = is_set(cpu->m_reg_f, 4);
-    ImGui::Checkbox("Carry flag: ", &carry_flag);
-    ImGui::SameLine();
-
+    for(auto flag_index = 4; flag_index < 7; flag_index++) {
+        const auto flag = static_cast<Cpu::Flag>(flag_index);
+        const auto flag_name = to_name(flag);
+        auto flag_status = cpu->test_flag(flag);
+        ImGui::Text("%s Flag: ", flag_name.c_str());
+        ImGui::SameLine();
+        ImGui::Checkbox("", &flag_status);
+    }
     ImGui::End();
 }
 
