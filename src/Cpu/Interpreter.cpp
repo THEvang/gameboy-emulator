@@ -776,6 +776,28 @@ Cpu::Register get_cb_register(CBCode opcode) {
     }
 }
 
+int get_bit_index(CBCode opcode) {
+    
+    auto get_column_index = [](CBCode opcode) -> int {
+        auto lower = static_cast<uint8_t>(opcode) & 0x0F;
+        return lower <= 0x07 ? 0 : 1;
+    };
+
+    auto get_row_index = [](CBCode opcode) -> int {
+        auto upper = static_cast<uint8_t>(opcode) & 0xF0;
+        if(upper == 0x40 || upper == 0x80 || upper == 0xC0) {
+            return 0;
+        } else if(upper == 0x50 || upper == 0x90 || upper == 0xD0) {
+            return 2;
+        } else if(upper == 0x60 || upper == 0xA0 || upper == 0xE0) {
+            return 4;
+        }  
+        return 6;
+    };
+
+    return get_column_index(opcode) + get_row_index(opcode);
+}
+
 Instruction fetch_cb(CBCode opcode)
 {
     const auto reg = get_cb_register(opcode);
@@ -883,12 +905,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_0_H:
     case CBCode::BIT_0_L:
     case CBCode::BIT_0_A:
-        return BIT_R(reg, 0);
-
-    case CBCode::BIT_0_ADDR_HL:
-        return BIT_ADDR_HL(0);
-
-
     case CBCode::BIT_1_B:
     case CBCode::BIT_1_C:
     case CBCode::BIT_1_D:
@@ -896,11 +912,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_1_H:
     case CBCode::BIT_1_L:
     case CBCode::BIT_1_A:
-        return BIT_R(reg, 1);
-
-    case CBCode::BIT_1_ADDR_HL:
-        return BIT_ADDR_HL(1);
-
     case CBCode::BIT_2_B:
     case CBCode::BIT_2_C:
     case CBCode::BIT_2_D:
@@ -908,11 +919,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_2_H:
     case CBCode::BIT_2_L:
     case CBCode::BIT_2_A:
-        return BIT_R(reg, 2);
-
-    case CBCode::BIT_2_ADDR_HL:
-        return BIT_ADDR_HL(2);
-
     case CBCode::BIT_3_B:
     case CBCode::BIT_3_C:
     case CBCode::BIT_3_D:
@@ -920,11 +926,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_3_H:
     case CBCode::BIT_3_L:
     case CBCode::BIT_3_A:
-        return BIT_R(reg, 3);
-
-    case CBCode::BIT_3_ADDR_HL:
-        return BIT_ADDR_HL(3);
-
     case CBCode::BIT_4_B:
     case CBCode::BIT_4_C:
     case CBCode::BIT_4_D:
@@ -932,11 +933,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_4_H:
     case CBCode::BIT_4_L:
     case CBCode::BIT_4_A:
-        return BIT_R(reg, 4);
-
-    case CBCode::BIT_4_ADDR_HL:
-        return BIT_ADDR_HL(4);
-
     case CBCode::BIT_5_B:
     case CBCode::BIT_5_C:
     case CBCode::BIT_5_D:
@@ -944,11 +940,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_5_H:
     case CBCode::BIT_5_L:
     case CBCode::BIT_5_A:
-        return BIT_R(reg, 5);
-
-    case CBCode::BIT_5_ADDR_HL:
-        return BIT_ADDR_HL(5);
-
     case CBCode::BIT_6_B:
     case CBCode::BIT_6_C:
     case CBCode::BIT_6_D:
@@ -956,11 +947,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_6_H:
     case CBCode::BIT_6_L:
     case CBCode::BIT_6_A:
-        return BIT_R(reg, 6);
-
-    case CBCode::BIT_6_ADDR_HL:
-        return BIT_ADDR_HL(6);
-
     case CBCode::BIT_7_B:
     case CBCode::BIT_7_C:
     case CBCode::BIT_7_D:
@@ -968,10 +954,17 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::BIT_7_H:
     case CBCode::BIT_7_L:
     case CBCode::BIT_7_A:
-        return BIT_R(reg, 7);
+        return BIT_R(reg, get_bit_index(opcode));
 
+    case CBCode::BIT_0_ADDR_HL:
+    case CBCode::BIT_1_ADDR_HL:
+    case CBCode::BIT_2_ADDR_HL:
+    case CBCode::BIT_3_ADDR_HL:
+    case CBCode::BIT_4_ADDR_HL:
+    case CBCode::BIT_5_ADDR_HL:
+    case CBCode::BIT_6_ADDR_HL:
     case CBCode::BIT_7_ADDR_HL:
-        return BIT_ADDR_HL(7);
+        return BIT_ADDR_HL(get_bit_index(opcode));
 
     case CBCode::RES_0_B:
     case CBCode::RES_0_C:
@@ -980,11 +973,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_0_H:
     case CBCode::RES_0_L:
     case CBCode::RES_0_A:
-        return RES_R(reg, 0);
-
-    case CBCode::RES_0_ADDR_HL:
-        return RES_ADDR_HL(0);
-
     case CBCode::RES_1_B:
     case CBCode::RES_1_C:
     case CBCode::RES_1_D:
@@ -992,11 +980,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_1_H:
     case CBCode::RES_1_L:
     case CBCode::RES_1_A:
-        return RES_R(reg, 1);
-
-    case CBCode::RES_1_ADDR_HL:
-        return RES_ADDR_HL(1);
-
     case CBCode::RES_2_B:
     case CBCode::RES_2_C:
     case CBCode::RES_2_D:
@@ -1004,11 +987,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_2_H:
     case CBCode::RES_2_L:
     case CBCode::RES_2_A:
-        return RES_R(reg, 2);
-
-    case CBCode::RES_2_ADDR_HL:
-        return RES_ADDR_HL(2);
-
     case CBCode::RES_3_B:
     case CBCode::RES_3_C:
     case CBCode::RES_3_D:
@@ -1016,11 +994,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_3_H:
     case CBCode::RES_3_L:
     case CBCode::RES_3_A:
-        return RES_R(reg, 3);
-
-    case CBCode::RES_3_ADDR_HL:
-        return RES_ADDR_HL(3);
-
     case CBCode::RES_4_B:
     case CBCode::RES_4_C:
     case CBCode::RES_4_D:
@@ -1028,11 +1001,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_4_H:
     case CBCode::RES_4_L:
     case CBCode::RES_4_A:
-        return RES_R(reg, 4);
-
-    case CBCode::RES_4_ADDR_HL:
-        return RES_ADDR_HL(4);
-
     case CBCode::RES_5_B:
     case CBCode::RES_5_C:
     case CBCode::RES_5_D:
@@ -1040,11 +1008,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_5_H:
     case CBCode::RES_5_L:
     case CBCode::RES_5_A:
-        return RES_R(reg, 5);
-
-    case CBCode::RES_5_ADDR_HL:
-        return RES_ADDR_HL(5);
-
     case CBCode::RES_6_B:
     case CBCode::RES_6_C:
     case CBCode::RES_6_D:
@@ -1052,11 +1015,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_6_H:
     case CBCode::RES_6_L:
     case CBCode::RES_6_A:
-        return RES_R(reg, 6);
-
-    case CBCode::RES_6_ADDR_HL:
-        return RES_ADDR_HL(6);
-
     case CBCode::RES_7_B:
     case CBCode::RES_7_C:
     case CBCode::RES_7_D:
@@ -1064,10 +1022,17 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::RES_7_H:
     case CBCode::RES_7_L:
     case CBCode::RES_7_A:
-        return RES_R(reg, 7);
+        return RES_R(reg, get_bit_index(opcode));
 
+    case CBCode::RES_0_ADDR_HL:
+    case CBCode::RES_1_ADDR_HL:
+    case CBCode::RES_2_ADDR_HL:
+    case CBCode::RES_3_ADDR_HL:
+    case CBCode::RES_4_ADDR_HL:
+    case CBCode::RES_5_ADDR_HL:
+    case CBCode::RES_6_ADDR_HL:
     case CBCode::RES_7_ADDR_HL:
-        return RES_ADDR_HL(7);
+        return RES_ADDR_HL(get_bit_index(opcode));
 
     case CBCode::SET_0_B:
     case CBCode::SET_0_C:
@@ -1076,11 +1041,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_0_H:
     case CBCode::SET_0_L:
     case CBCode::SET_0_A:
-        return SET_R(reg, 0);
-
-    case CBCode::SET_0_ADDR_HL:
-        return SET_ADDR_HL(0);
-
     case CBCode::SET_1_B:
     case CBCode::SET_1_C:
     case CBCode::SET_1_D:
@@ -1088,11 +1048,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_1_H:
     case CBCode::SET_1_L:
     case CBCode::SET_1_A:
-        return SET_R(reg, 1);
-
-    case CBCode::SET_1_ADDR_HL:
-        return SET_ADDR_HL(1);
-
     case CBCode::SET_2_B:
     case CBCode::SET_2_C:
     case CBCode::SET_2_D:
@@ -1100,11 +1055,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_2_H:
     case CBCode::SET_2_L:
     case CBCode::SET_2_A:
-        return SET_R(reg, 2);
-
-    case CBCode::SET_2_ADDR_HL:
-        return SET_ADDR_HL(2);
-
     case CBCode::SET_3_B:
     case CBCode::SET_3_C:
     case CBCode::SET_3_D:
@@ -1112,11 +1062,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_3_H:
     case CBCode::SET_3_L:
     case CBCode::SET_3_A:
-        return SET_R(reg, 3);
-
-    case CBCode::SET_3_ADDR_HL:
-        return SET_ADDR_HL(3);
-
     case CBCode::SET_4_B:
     case CBCode::SET_4_C:
     case CBCode::SET_4_D:
@@ -1124,11 +1069,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_4_H:
     case CBCode::SET_4_L:
     case CBCode::SET_4_A:
-        return SET_R(reg, 4);
-
-    case CBCode::SET_4_ADDR_HL:
-        return SET_ADDR_HL(4);
-
     case CBCode::SET_5_B:
     case CBCode::SET_5_C:
     case CBCode::SET_5_D:
@@ -1136,11 +1076,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_5_H:
     case CBCode::SET_5_L:
     case CBCode::SET_5_A:
-        return SET_R(reg, 5);
-
-    case CBCode::SET_5_ADDR_HL:
-        return SET_ADDR_HL(5);
-
     case CBCode::SET_6_B:
     case CBCode::SET_6_C:
     case CBCode::SET_6_D:
@@ -1148,11 +1083,6 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_6_H:
     case CBCode::SET_6_L:
     case CBCode::SET_6_A:
-        return SET_R(reg, 6);
-
-    case CBCode::SET_6_ADDR_HL:
-        return SET_ADDR_HL(6);
-
     case CBCode::SET_7_B:
     case CBCode::SET_7_C:
     case CBCode::SET_7_D:
@@ -1160,10 +1090,17 @@ Instruction fetch_cb(CBCode opcode)
     case CBCode::SET_7_H:
     case CBCode::SET_7_L:
     case CBCode::SET_7_A:
-        return SET_R(reg, 7);
+        return SET_R(reg, get_bit_index(opcode));
 
+    case CBCode::SET_0_ADDR_HL:
+    case CBCode::SET_1_ADDR_HL:
+    case CBCode::SET_2_ADDR_HL:
+    case CBCode::SET_3_ADDR_HL:
+    case CBCode::SET_4_ADDR_HL:
+    case CBCode::SET_5_ADDR_HL:
+    case CBCode::SET_6_ADDR_HL:
     case CBCode::SET_7_ADDR_HL:
-        return SET_ADDR_HL(7);
+        return SET_ADDR_HL(get_bit_index(opcode));
 
     default:
         throw UnimplementedOperation("Unimplemented CB Code\n");
