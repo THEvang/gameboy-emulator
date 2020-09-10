@@ -10,76 +10,36 @@ Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
 
 int Interrupt_Handler::interrupts(Cpu& cpu) {
 
-    if(v_blank_interrupt_enabled() && v_blank_interrupt_requested()) {
-        
-        const uint8_t v_blank_vector = 0x40;
-        call(cpu, v_blank_vector);
-        clear_v_blank_request();
-        cpu.m_interrupts_enabled = false;
-        return 20;
+    auto handle = [this](Cpu& cpu, Interrupts interrupt) -> bool {
+        if(is_enabled(interrupt) && is_requested(interrupt)) {
+            const auto vector = get_vector(interrupt);
+            call(cpu, vector);
+            clear(interrupt);
+            cpu.m_interrupts_enabled = false;
+            return true;
+        }
+        return false;
+    };
+
+    for(auto i = 0; i <= static_cast<int>(Interrupts::Joypad); i++) {
+        if(handle(cpu, static_cast<Interrupts>(i))) {
+            return 20;
+        };
     }
 
-    if(lcd_stat_interrupt_enabled() && lcd_stat_interrupt_requested()) {
-
-        const uint8_t lcd_stat_vector = 0x48;
-        call(cpu, lcd_stat_vector);
-        clear_lcd_stat_request();
-        cpu.m_interrupts_enabled = false;
-        return 20;
-    } 
-
-    if(timer_interrupt_enabled() && timer_interrupt_requested()) {
-
-        const uint8_t timer_vector = 0x50;
-        call(cpu, timer_vector);
-        clear_timer_request();
-        cpu.m_interrupts_enabled = false;
-        return 20;
-    }
-
-    if(serial_interrupt_enabled() && serial_interrupt_requested()) {
-        
-        const uint8_t serial_vector = 0x58;
-        call(cpu, serial_vector);
-        clear_serial_request();
-        cpu.m_interrupts_enabled = false;
-        return 20;
-    }
-    
-    if(joypad_interrupt_enabled() && joypad_interrupt_requested()) {
-
-        const uint8_t joypad_vector = 0x60;
-        call(cpu, joypad_vector);
-        clear_joypad_request();
-        cpu.m_interrupts_enabled = false;
-        return 20;
-    }
-
-    return 0;
+    return  4;
 }
 
-void Interrupt_Handler::request_lcd_stat_interrupt() {
+void Interrupt_Handler::request(Interrupts interrupt) {
     auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
-    set_bit(interrupt_request, static_cast<int>(Interrupts::LCD_STAT));
+    set_bit(interrupt_request, static_cast<int>(interrupt));
     m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
 }
 
-void Interrupt_Handler::request_v_blank_interrupt() {
-    auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
-    set_bit(interrupt_request, static_cast<int>(Interrupts::V_Blank));
-    m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
-}
-
-void Interrupt_Handler::request_joypad_interrupt() {
-    auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
-    set_bit(interrupt_request, static_cast<int>(Interrupts::Joypad));
-    m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
-}
-
-void Interrupt_Handler::request_timer_interrupt() {
-    auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
-    set_bit(interrupt_request, static_cast<int>(Interrupts::Timer));
-    m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
+void Interrupt_Handler::clear(Interrupts interrupt) {
+    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
+    clear_bit(request_register, static_cast<int>(interrupt));
+    m_memory_bank_controller->write(interrupt_request_address, request_register);
 }
 
 bool Interrupt_Handler::should_exit_halt() {
@@ -90,84 +50,14 @@ bool Interrupt_Handler::should_exit_halt() {
     return (static_cast<uint8_t>(interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
-void Interrupt_Handler::clear_v_blank_request() {
-    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(Interrupts::V_Blank));
-    m_memory_bank_controller->write(interrupt_request_address, request_register);
-}
-
-void Interrupt_Handler::clear_lcd_stat_request() {
-    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(Interrupts::LCD_STAT));
-    m_memory_bank_controller->write(interrupt_request_address, request_register);
-}
-
-void Interrupt_Handler::clear_timer_request() {
-    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(Interrupts::Timer));
-    m_memory_bank_controller->write(interrupt_request_address, request_register);
-}
-
-void Interrupt_Handler::clear_serial_request() {
-    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(Interrupts::Serial));
-    m_memory_bank_controller->write(interrupt_request_address, request_register);
-}
-
-void Interrupt_Handler::clear_joypad_request() {
-    auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(Interrupts::Joypad));
-    m_memory_bank_controller->write(interrupt_request_address, request_register);
-}
-
-bool Interrupt_Handler::v_blank_interrupt_requested() const {
+bool Interrupt_Handler::is_requested(Interrupts interrupt) const {
     const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(Interrupts::V_Blank));
+    return is_set(request_register, static_cast<int>(interrupt));
 }
 
-bool Interrupt_Handler::lcd_stat_interrupt_requested() const {
-    const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(Interrupts::LCD_STAT));
-}
-
-bool Interrupt_Handler::timer_interrupt_requested() const {
-    const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(Interrupts::Timer));
-}
-
-bool Interrupt_Handler::serial_interrupt_requested() const {
-    const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(Interrupts::Serial));
-}
-
-bool Interrupt_Handler::joypad_interrupt_requested() const {
-    const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(Interrupts::Joypad));
-}
-
-bool Interrupt_Handler::v_blank_interrupt_enabled() const {
+bool Interrupt_Handler::is_enabled(Interrupts interrupt) const {
     const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(Interrupts::V_Blank));
-}
-
-bool Interrupt_Handler::lcd_stat_interrupt_enabled() const {
-    const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(Interrupts::LCD_STAT));
-}
-
-bool Interrupt_Handler::timer_interrupt_enabled() const {
-    const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(Interrupts::Timer));
-}
-
-bool Interrupt_Handler::serial_interrupt_enabled() const {
-    const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(Interrupts::Serial));
-}
-
-bool Interrupt_Handler::joypad_interrupt_enabled() const {
-    const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(Interrupts::Joypad));
+    return is_set(interrupt_enable_register, static_cast<int>(interrupt));
 }
 
 void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {
@@ -178,4 +68,19 @@ void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {
     m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
     cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
     cpu.m_program_counter = static_cast<uint16_t>(interrupt_vector);
+}
+
+uint16_t Interrupt_Handler::get_vector(Interrupts interrupt) const {
+    switch(interrupt) {
+        case Interrupts::V_Blank:
+            return 0x40;
+        case Interrupts::LCD_STAT:
+            return 0x48;
+        case Interrupts::Timer:
+            return 0x50;
+        case Interrupts::Serial:
+            return 0x58;
+        case Interrupts::Joypad:
+            return 0x60;
+    }
 }

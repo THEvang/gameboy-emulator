@@ -28,7 +28,7 @@ void Timer::tick() {
     if(m_tima_has_overflowed) { 
         reset_tima();
         //if(m_interrupt_handler.timer_interrupt_enabled()) {
-            m_interrupt_handler.request_timer_interrupt();
+            m_interrupt_handler.request(Interrupts::Timer);
         //}
         m_tima_has_overflowed = false;
     }

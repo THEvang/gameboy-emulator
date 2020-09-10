@@ -28,7 +28,7 @@ void PPU::step(int cycles) {
         m_memory_controller->raw()[scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
-            m_interrupt_handler.request_v_blank_interrupt();
+            m_interrupt_handler.request(Interrupts::V_Blank);
         } else if (current_scanline > 153) {
             m_memory_controller->raw()[scanline_address] = 0;
         } else if (current_scanline < 144) {
