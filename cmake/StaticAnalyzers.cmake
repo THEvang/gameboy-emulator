@@ -1,4 +1,4 @@
-option(ENABLE_CLANG_TIDY "Enables Clang Tidy" ON)
+option(ENABLE_CLANG_TIDY "Enables Clang Tidy" OFF)
 option(ENABLE_CPP_CHECK "Enables CPPCheck" OFF)
 
 if(ENABLE_CLANG_TIDY)

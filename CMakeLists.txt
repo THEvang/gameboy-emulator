@@ -9,8 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-##include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#conan_basic_setup()
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
 
 add_library(project_warnings INTERFACE)
 
@@ -22,4 +22,4 @@ add_subdirectory(src)
 
 add_executable(tests tests/Test_Main.cpp)
 target_include_directories(tests PRIVATE ${CMAKE_INCLUDE_DIRS_CATCH2})
-# target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(Gameboy.out PUBLIC ${CMAKE_SOURCE_DIR}/include)

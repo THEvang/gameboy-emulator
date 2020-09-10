@@ -53,6 +53,39 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFFFF, 0x00);
 }
 
+int Cpu::to_index(Cpu::Flag f) {
+    return static_cast<int>(f);
+}
+
+void Cpu::set(Register r, uint8_t value) {
+    m_registers[static_cast<size_t>(r)] = value;
+}
+
+uint8_t Cpu::get(Register r) const {
+    return m_registers[static_cast<size_t>(r)];
+}
+
+uint8_t& Cpu::get(Register r) {
+    return m_registers[static_cast<size_t>(r)];
+}
+
+uint16_t Cpu::get(std::pair<Register, Register> r_pair) const {
+    return combine_bytes(get(r_pair.first), get(r_pair.second));
+}
+
+bool Cpu::test_flag(const Flag& flag) const {
+    return is_set(get(Register::F), static_cast<int>(flag));
+}
+
+void Cpu::set_flag(const Cpu::Flag& flag) {
+    set_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+}
+
+void Cpu::clear_flag(const Cpu::Flag& flag) {
+    clear_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+}
+
+
 //Addressing Modes
 Operand immediate(Cpu& cpu) {
     cpu.m_program_counter += 2;
@@ -89,6 +122,6 @@ Operand implied(Cpu& cpu) {
     return {static_cast<uint8_t>(0)};   
 }
 
-Operand none(Cpu& cpu) {
+Operand none(Cpu&) {
     return {static_cast<uint8_t>(0)};
 }

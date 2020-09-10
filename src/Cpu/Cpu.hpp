@@ -30,38 +30,21 @@ struct Cpu {
         Zero
     };
 
-    static int to_index(Cpu::Flag f) {
-        return static_cast<int>(f);
-    }
+    static int to_index(Cpu::Flag f);
 
-    void set(Register r, uint8_t value) {
-        m_registers[static_cast<size_t>(r)] = value;
-    }
+    void set(Register r, uint8_t value);
 
-    uint8_t get(Register r) const {
-        return m_registers[static_cast<size_t>(r)];
-    }
+    uint8_t get(Register r) const;
 
-    uint8_t& get(Register r) {
-        return m_registers[static_cast<size_t>(r)];
-    }
+    uint8_t& get(Register r);
 
-    uint16_t get(std::pair<Register, Register> r_pair) const {
-        return combine_bytes(get(r_pair.first), get(r_pair.second));
-    }
+    uint16_t get(std::pair<Register, Register> r_pair) const;
 
-    bool test_flag(const Flag& flag) const {
-        return is_set(get(Register::F), static_cast<int>(flag));
-    }
+    bool test_flag(const Flag& flag) const;
 
-    void set_flag(const Cpu::Flag& flag) {
-        set_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
-    }
+    void set_flag(const Cpu::Flag& flag);
 
-    void clear_flag(const Cpu::Flag& flag) {
-        clear_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
-    }
-
+    void clear_flag(const Cpu::Flag& flag);
 
     uint16_t m_stack_ptr = 0xFFFE;
     uint16_t m_program_counter = 0x0100;
@@ -70,8 +53,6 @@ struct Cpu {
     bool m_should_enable_interrupts = false;
     bool m_should_disable_interrupts = false;
     bool should_stop = false;
-
-    int m_cycles = 0;
 
     MemoryBankController* m_memory_controller;
 
