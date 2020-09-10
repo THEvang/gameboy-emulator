@@ -6,7 +6,7 @@
 #include "Memory/Memory.hpp"
 
 #include "Cpu/Cpu.hpp"
-#include "Timer.hpp"
+#include "Cpu/Timer.hpp"
 #include "Cpu/Interrupt_Handler.hpp"
 #include "Graphics/PPU.hpp"
 
