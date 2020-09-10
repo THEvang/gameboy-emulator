@@ -44,7 +44,7 @@ void LCD_Status::set_status(int& scanline_counter) {
     const auto new_mode = get_mode();
 
     if(request_interrupt && (current_mode != new_mode)) {
-        m_interrupt_handler.request_lcd_stat_interrupt();
+        m_interrupt_handler.request(Interrupts::LCD_STAT);
     }
 
     should_set_coincidence_flag() ? set_coincidence_flag() :
@@ -62,7 +62,7 @@ void LCD_Status::set_coincidence_flag() {
     set_bit(status, coincidence_bit);
     m_memory_controller->write(status_address, status);
     if(is_set(status, 6)) {
-        m_interrupt_handler.request_lcd_stat_interrupt();
+        m_interrupt_handler.request(Interrupts::LCD_STAT);
     }
 }
 
