@@ -1,4 +1,4 @@
-target_sources(disassembler PRIVATE
-    Disassembler.cpp)
-
-target_link_libraries(cpu PRIVATE project_warnings)
+target_sources(gb-core PRIVATE
+    Disassembler.hpp    
+    Disassembler.cpp
+)

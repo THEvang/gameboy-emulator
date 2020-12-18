@@ -3,9 +3,9 @@
 #include <fstream>
 #include <iterator>
 
-std::experimental::optional<std::vector<uint8_t>> load_rom(const std::experimental::filesystem::path& path) {
+std::optional<std::vector<uint8_t>> load_rom(const std::filesystem::path& path) {
     
-    if(!std::experimental::filesystem::exists(path)) {
+    if(!std::filesystem::exists(path)) {
         return {};
     }
 

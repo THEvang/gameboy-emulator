@@ -1,5 +1,4 @@
-target_sources(
-    imgui 
+target_sources(gb-gui 
     PRIVATE
     imgui_demo.cpp 
     imgui_draw.cpp 
@@ -8,5 +7,3 @@ target_sources(
     imgui_impl_sdl.cpp 
     imgui_impl_opengl3.cpp
 )
-
-set_target_properties(imgui PROPERTIES CXX_CLANG_TIDY "")

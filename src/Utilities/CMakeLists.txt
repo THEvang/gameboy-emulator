@@ -1,6 +1,5 @@
-target_sources(utilities 
+target_sources(gb-core 
     PRIVATE
-    File.cpp
+    "File.hpp"
+    "File.cpp"
 )
-target_link_libraries(utilities PRIVATE project_warnings "-lstdc++fs")
-target_compile_features(utilities PRIVATE cxx_std_17)

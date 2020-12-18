@@ -1,7 +1,9 @@
-target_sources(
-    input 
+target_sources(gb-core 
     PRIVATE
+    
+    Joypad_Controller.hpp
     Joypad_Controller.cpp
+
+    Keyboard.hpp
     Keyboard.cpp
 )
-target_link_libraries(input PRIVATE project_warnings)
