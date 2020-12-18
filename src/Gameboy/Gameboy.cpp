@@ -1,4 +1,4 @@
-#include "GameBoy.hpp"
+#include "Gameboy.hpp"
 #include "Cpu/Opcodes.hpp"
 #include <iostream>
 #include "Cpu/Interpreter.hpp"

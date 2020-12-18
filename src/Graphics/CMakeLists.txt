@@ -1,8 +1,11 @@
-target_sources(graphics 
+target_sources(gb-core 
     PRIVATE
+    LCD_Control.hpp
     LCD_Control.cpp
+    LCD_Status.hpp
     LCD_Status.cpp
+    PPU.hpp
     PPU.cpp
+    Pixel.hpp
     Pixel.cpp
 )
-target_link_libraries(graphics PRIVATE project_warnings)

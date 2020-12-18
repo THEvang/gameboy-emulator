@@ -1,9 +1,12 @@
-
-target_sources(
-    memory 
+target_sources(gb-core
     PRIVATE
-    Memory.cpp 
+    
+    Memory.hpp 
+    Memory.cpp
+    
+    Memory_Controller.hpp
     Memory_Controller.cpp
+
+    Cartridge.hpp
     Cartridge.cpp
 )
-target_link_libraries(memory PRIVATE project_warnings)

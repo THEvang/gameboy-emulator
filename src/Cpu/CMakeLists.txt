@@ -1,14 +1,17 @@
-target_sources(cpu
+target_sources(gb-core
     PRIVATE
-    
+    Opcodes.hpp
+    Cpu.hpp
     Cpu.cpp
+    CBOpcodes.hpp
+    CBOperations.hpp
+    CBOperations.cpp
+    Operations.hpp
     Operations.cpp 
-    CBOperations.cpp 
+    Timer.hpp
     Timer.cpp
+    Interrupt_Handler.hpp
     Interrupt_Handler.cpp
+    Interpreter.hpp
     Interpreter.cpp
 )
-
-target_compile_features(cpu PRIVATE cxx_std_17)
-target_link_libraries(cpu PRIVATE project_warnings)
-set_target_properties(cpu PROPERTIES CXX_STANDARD 17)

@@ -1,5 +1,5 @@
-target_sources(gameboy 
+target_sources(gb-core
     PRIVATE
+    Gameboy.hpp
     Gameboy.cpp
 )
-target_link_libraries(gameboy PRIVATE project_warnings)

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <experimental/optional>
-#include <experimental/filesystem>
+#include <optional>
+#include <filesystem>
 
-std::experimental::optional<std::vector<uint8_t>> load_rom(const std::experimental::filesystem::path& path);
+std::optional<std::vector<uint8_t>> load_rom(const std::filesystem::path& path);

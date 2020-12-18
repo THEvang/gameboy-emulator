@@ -4,7 +4,7 @@
 #include "Gui/Gui.hpp"
 #include "Gui/Renderers.hpp"
 #include "Utilities/File.hpp"
-#include "Gameboy/GameBoy.hpp"
+#include "Gameboy/Gameboy.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
