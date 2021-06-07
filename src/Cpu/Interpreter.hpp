@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include <exception>
+#include <stdexcept>
 #include <string>
 #include <variant>
 
