@@ -2,6 +2,7 @@
 
 #include <array>
 #include <GL/gl.h>
+#include <stdint.h>
 
 struct Screen_Position {
     uint8_t x = 0;
