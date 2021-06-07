@@ -1,4 +1,7 @@
-#include <iostream>
+#define SDL_MAIN_HANDLED
+
+#include <stdio.h>
+
 #include <chrono>
 
 #include "Gui/Gui.hpp"
@@ -24,11 +27,6 @@ void render_main(GameBoy* gameboy) {
 
         bool done = false;
         while (!done) {
-            // Poll and handle events (inputs, window resize, etc.)
-            // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-            // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application.
-            // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application.
-            // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
             SDL_Event event;
             while (static_cast<bool>(SDL_PollEvent(&event)))
             {
@@ -67,23 +65,23 @@ void render_main(GameBoy* gameboy) {
             stop = std::chrono::high_resolution_clock::now();
         }
     } catch (const std::exception& err) {
-        std::cerr << err.what();
-        return;
+        printf("%s\n", err.what());
+        exit(2);
     }
 }
 
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        std::cerr << "Please provide rom\n";
-        return 1;
+        printf("Error: No input rom\n");
+        exit(1);
     }
 
     const auto rom_path = argv[1];
     const auto rom = load_rom(rom_path);
     if (rom.empty()) {
-        std::cerr << "Unable to find Rom: " << rom_path << "\n";
-        return 1;
+        printf("Unable to find Rom: %s\n", rom_path);
+        exit(1);
     }
 
     GameBoy gameboy(rom);
