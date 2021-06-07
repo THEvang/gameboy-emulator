@@ -81,12 +81,12 @@ int main(int argc, char* argv[])
 
     const auto rom_path = argv[1];
     const auto rom = load_rom(rom_path);
-    if (!rom) {
+    if (rom.empty()) {
         std::cerr << "Unable to find Rom: " << rom_path << "\n";
         return 1;
     }
 
-    GameBoy gameboy(*rom);
+    GameBoy gameboy(rom);
     render_main(&gameboy);
     return 0;
 }
