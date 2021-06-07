@@ -1,8 +1,7 @@
 #define SDL_MAIN_HANDLED
 
 #include <stdio.h>
-
-#include <chrono>
+#include <time.h>
 
 #include "Gui/Gui.hpp"
 #include "Gui/Renderers.hpp"
@@ -20,8 +19,8 @@ void render_main(GameBoy* gameboy) {
 
     SDL_SetEventFilter(keyboard_filter, static_cast<void*>(keyboard_emitter.get_queue()));
 
-    auto start = std::chrono::high_resolution_clock::now();
-    auto stop = std::chrono::high_resolution_clock::now();
+    clock_t start = clock(); 
+    clock_t stop = clock();
     try {
         Gui gui;
 
@@ -49,9 +48,9 @@ void render_main(GameBoy* gameboy) {
             keyboard_emitter.emitt();
 
             gameboy->run();
-            std::chrono::duration<double, std::milli> dur = stop - start;
-            if(dur.count() > 32) {
-                start = std::chrono::high_resolution_clock::now();
+            double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
+            if( duration >= 16e-3) {
+                start = clock();
                 ImGui_ImplOpenGL3_NewFrame();
                 ImGui_ImplSDL2_NewFrame(gui.window());
                 ImGui::NewFrame();
@@ -62,7 +61,7 @@ void render_main(GameBoy* gameboy) {
                 render_menu();
                 gui.render();
             }
-            stop = std::chrono::high_resolution_clock::now();
+            stop = clock();
         }
     } catch (const std::exception& err) {
         printf("%s\n", err.what());
