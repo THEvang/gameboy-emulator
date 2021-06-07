@@ -1,8 +1,6 @@
 [requires]
 glew/2.1.0
 sdl2/2.0.12@bincrafters/stable
-imgui/1.78
-catch2/2.13.0
 
 [generators]
 cmake
