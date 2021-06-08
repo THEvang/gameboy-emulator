@@ -43,7 +43,7 @@ Instruction LD_R_R(Cpu_Register, Cpu_Register);
 Instruction LD_R_ADDR_HL(Cpu_Register);
 Instruction LD_ADDR_HL_R(Cpu_Register);
 
-Instruction LD_A_ADDR_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction LD_A_ADDR_RR(Cpu_Register, Cpu_Register);
 Instruction LD_A_ADDR_C();
 Instruction LD_A_ADDR_A16();
 Instruction LD_ADDR_A16_SP();
@@ -51,13 +51,13 @@ Instruction LD_ADDR_A16_SP();
 Instruction LDI_ADDR_HL_A();
 Instruction LDI_A_ADDR_HL();
 
-Instruction LD_ADDR_RR_A(std::pair<Cpu_Register, Cpu_Register>);
+Instruction LD_ADDR_RR_A(Cpu_Register, Cpu_Register);
 
 Instruction LD_ADDR_HL_D8();
 Instruction LD_ADDR_HL_ADDR_HL();
 Instruction LD_ADDR_A16_A();
 
-Instruction LD_RR_D16(std::pair<Cpu_Register, Cpu_Register>);
+Instruction LD_RR_D16(Cpu_Register, Cpu_Register);
 Instruction LD_HL_SPR8();
 
 Instruction LD_SP_D16();
@@ -66,7 +66,7 @@ Instruction LD_SP_HL();
 Instruction ADD_D8();
 Instruction ADD_R(Cpu_Register);
 Instruction ADD_ADDR_HL();
-Instruction ADD_HL_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction ADD_HL_RR(Cpu_Register, Cpu_Register);
 Instruction ADD_HL_SP();
 
 Instruction SUB_D8();
@@ -74,12 +74,12 @@ Instruction SUB_R(Cpu_Register);
 Instruction SUB_ADDR_HL();
 
 Instruction INC_R(Cpu_Register);
-Instruction INC_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction INC_RR(Cpu_Register, Cpu_Register);
 Instruction INC_ADDR_HL();
 Instruction INC_SP();
 
 Instruction DEC_R(Cpu_Register);
-Instruction DEC_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction DEC_RR(Cpu_Register, Cpu_Register);
 Instruction DEC_ADDR_HL();
 Instruction DEC_SP();
 
@@ -112,10 +112,10 @@ Instruction CP_D8();
 Instruction CP_R(Cpu_Register);
 Instruction CP_ADDR_HL();
 
-Instruction PUSH_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction PUSH_RR(Cpu_Register, Cpu_Register);
 
 Instruction POP_AF();
-Instruction POP_RR(std::pair<Cpu_Register, Cpu_Register>);
+Instruction POP_RR(Cpu_Register, Cpu_Register);
 
 Instruction ADC_D8();
 Instruction ADC_R(Cpu_Register);
