@@ -1,12 +1,12 @@
 #include "Gui/Gui.hpp"
 
+#include <stdio.h>
+
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
 #include <SDL2/SDL.h>
 #include <GL/glew.h>    // Initialize with glewInit()
-#include <iostream>
-#include <string>
 
 Gui::Gui() {
 
@@ -33,7 +33,8 @@ Gui::~Gui() {
 void Gui::init_sdl() {
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
-        throw Graphics_Init_Error(SDL_GetError());        
+        printf("SDL ERROR: %s\n", SDL_GetError());
+        exit(1);        
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -59,7 +60,7 @@ std::unique_ptr<SDL_Window, std::function<void(SDL_Window*)>> make_sdl_window() 
     
 
     if(window == nullptr) {
-        std::cerr << "Failed to create SDL Window: " << SDL_GetError() << "\n";
+        printf("Failed to create SDL Window: %s\n", SDL_GetError());
         return nullptr;
     }
 
@@ -77,8 +78,8 @@ void Gui::init_glew() {
     auto err = glewInit();
     if (err != GLEW_OK)
     {   
-        glewGetErrorString(err);
-        throw Graphics_Init_Error(std::to_string(err));
+        printf("GLEW ERROR: %s\n", glewGetErrorString(err));
+        exit(1);
     }
 }
 
