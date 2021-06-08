@@ -64,21 +64,21 @@ void render_ppu(GameBoy const& gameboy) {
     ImGui::End();
 }
 
-std::string to_name(Cpu::Register reg) {
+std::string to_name(Cpu_Register reg) {
     switch(reg) {
-        case Cpu::Register::A:
+        case Register_A:
             return {"A"};
-        case Cpu::Register::B:
+        case Register_B:
             return {"B"};
-        case Cpu::Register::C:
+        case Register_C:
             return {"C"};
-        case Cpu::Register::D:
+        case Register_D:
             return {"D"};
-        case Cpu::Register::E:
+        case Register_E:
             return {"E"};
-        case Cpu::Register::H:
+        case Register_H:
             return {"H"};
-        case Cpu::Register::L:
+        case Register_L:
             return {"L"};
     }
 }
@@ -104,9 +104,9 @@ void render_cpu(GameBoy const& gameboy) {
     ImGui::Text("Current Opcode: %i.", cpu->m_memory_controller->read(cpu->m_program_counter));
 
     for(auto reg_index = 0; reg_index < 7; reg_index++) {
-        const auto reg = static_cast<Cpu::Register>(reg_index);
+        const auto reg = static_cast<Cpu_Register>(reg_index);
         const auto register_name = to_name(reg);
-        ImGui::Text("Register %s: %i.", register_name.c_str(), cpu->get(reg));
+        ImGui::Text("Register %s: %i.", register_name.c_str(), cpu->registers[reg]);
     }
 
     for(auto flag_index = 4; flag_index < 7; flag_index++) {

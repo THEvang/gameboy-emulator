@@ -10,22 +10,22 @@ Instruction fetch(Opcode opcode) {
         return NOP();
 
     case Opcode::LD_BC_D16:
-        return LD_RR_D16({Cpu::Register::B, Cpu::Register::C});
+        return LD_RR_D16({Register_B, Register_C});
 
     case Opcode::LD_ADDR_BC_A:
-        return LD_ADDR_RR_A({Cpu::Register::B, Cpu::Register::C});
+        return LD_ADDR_RR_A({Register_B, Register_C});
 
     case Opcode::INC_BC:
-        return INC_RR({Cpu::Register::B, Cpu::Register::C});
+        return INC_RR({Register_B, Register_C});
 
     case Opcode::INC_B:
-        return INC_R(Cpu::Register::B);
+        return INC_R(Register_B);
 
     case Opcode::DEC_B:
-        return DEC_R(Cpu::Register::B);
+        return DEC_R(Register_B);
 
     case Opcode::LD_B_D8:
-        return LD_R_D8(Cpu::Register::B);
+        return LD_R_D8(Register_B);
 
     case Opcode::RLCA:
         return RLCA();
@@ -34,22 +34,22 @@ Instruction fetch(Opcode opcode) {
         return LD_ADDR_A16_SP();
 
     case Opcode::ADD_HL_BC:
-        return ADD_HL_RR({Cpu::Register::B, Cpu::Register::C});
+        return ADD_HL_RR({Register_B, Register_C});
 
     case Opcode::LD_A_ADDR_BC:
-        return LD_A_ADDR_RR({Cpu::Register::B, Cpu::Register::C});
+        return LD_A_ADDR_RR({Register_B, Register_C});
 
     case Opcode::DEC_BC:
-        return DEC_RR({Cpu::Register::B, Cpu::Register::C});
+        return DEC_RR({Register_B, Register_C});
 
     case Opcode::INC_C:
-        return INC_R(Cpu::Register::C);
+        return INC_R(Register_C);
 
     case Opcode::DEC_C:
-        return DEC_R(Cpu::Register::C);
+        return DEC_R(Register_C);
 
     case Opcode::LD_C_D8:
-        return LD_R_D8(Cpu::Register::C);
+        return LD_R_D8(Register_C);
 
     case Opcode::RRCA:
         return RRCA();
@@ -58,22 +58,22 @@ Instruction fetch(Opcode opcode) {
         return STOP();
 
     case Opcode::LD_DE_D16:
-        return LD_RR_D16({Cpu::Register::D, Cpu::Register::E});
+        return LD_RR_D16({Register_D, Register_E});
 
     case Opcode::LD_ADDR_DE_A:
-        return LD_ADDR_RR_A({Cpu::Register::D, Cpu::Register::E});
+        return LD_ADDR_RR_A({Register_D, Register_E});
 
     case Opcode::INC_DE:
-        return INC_RR({Cpu::Register::D, Cpu::Register::E});
+        return INC_RR({Register_D, Register_E});
 
     case Opcode::INC_D:
-        return INC_R(Cpu::Register::D);
+        return INC_R(Register_D);
 
     case Opcode::DEC_D:
-        return DEC_R(Cpu::Register::D);
+        return DEC_R(Register_D);
 
     case Opcode::LD_D_D8:
-        return LD_R_D8(Cpu::Register::D);
+        return LD_R_D8(Register_D);
 
     case Opcode::RLA:
         return RLA();
@@ -82,22 +82,22 @@ Instruction fetch(Opcode opcode) {
         return JR();
 
     case Opcode::ADD_HL_DE:
-        return ADD_HL_RR({Cpu::Register::D, Cpu::Register::E});
+        return ADD_HL_RR({Register_D, Register_E});
 
     case Opcode::LD_A_ADDR_DE:
-        return LD_A_ADDR_RR({Cpu::Register::D, Cpu::Register::E});
+        return LD_A_ADDR_RR({Register_D, Register_E});
 
     case Opcode::DEC_DE:
-        return DEC_RR({Cpu::Register::D, Cpu::Register::E});
+        return DEC_RR({Register_D, Register_E});
 
     case Opcode::INC_E:
-        return INC_R(Cpu::Register::E);
+        return INC_R(Register_E);
 
     case Opcode::DEC_E:
-        return DEC_R(Cpu::Register::E);
+        return DEC_R(Register_E);
 
     case Opcode::LD_E_D8:
-        return LD_R_D8(Cpu::Register::E);
+        return LD_R_D8(Register_E);
 
     case Opcode::RRA:
         return RRA();
@@ -106,22 +106,22 @@ Instruction fetch(Opcode opcode) {
         return JR_NZ();
 
     case Opcode::LD_HL_D16:
-        return LD_RR_D16({Cpu::Register::H, Cpu::Register::L});
+        return LD_RR_D16({Register_H, Register_L});
 
     case Opcode::LD_ADDR_HLI_A:
         return LDI_ADDR_HL_A();
 
     case Opcode::INC_HL:
-        return INC_RR({Cpu::Register::H, Cpu::Register::L});
+        return INC_RR({Register_H, Register_L});
 
     case Opcode::INC_H:
-        return INC_R(Cpu::Register::H);
+        return INC_R(Register_H);
 
     case Opcode::DEC_H:
-        return DEC_R(Cpu::Register::H);
+        return DEC_R(Register_H);
 
     case Opcode::LD_H_D8:
-        return LD_R_D8(Cpu::Register::H);
+        return LD_R_D8(Register_H);
 
     case Opcode::DAA:
         return DAA();
@@ -130,22 +130,22 @@ Instruction fetch(Opcode opcode) {
         return JR_Z();
 
     case Opcode::ADD_HL_HL:
-        return ADD_HL_RR({Cpu::Register::H, Cpu::Register::L});
+        return ADD_HL_RR({Register_H, Register_L});
 
     case Opcode::LD_A_ADDR_HLI:
         return LDI_A_ADDR_HL();
 
     case Opcode::DEC_HL:
-        return DEC_RR({Cpu::Register::H, Cpu::Register::L});
+        return DEC_RR({Register_H, Register_L});
 
     case Opcode::INC_L:
-        return INC_R(Cpu::Register::L);
+        return INC_R(Register_L);
 
     case Opcode::DEC_L:
-        return DEC_R(Cpu::Register::L);
+        return DEC_R(Register_L);
 
     case Opcode::LD_L_D8:
-        return LD_R_D8(Cpu::Register::L);
+        return LD_R_D8(Register_L);
 
     case Opcode::CPL:
         return CPL();
@@ -187,406 +187,406 @@ Instruction fetch(Opcode opcode) {
         return DEC_SP();
 
     case Opcode::INC_A:
-        return INC_R(Cpu::Register::A);
+        return INC_R(Register_A);
 
     case Opcode::DEC_A:
-        return DEC_R(Cpu::Register::A);
+        return DEC_R(Register_A);
 
     case Opcode::LD_A_D8:
-        return LD_R_D8(Cpu::Register::A);
+        return LD_R_D8(Register_A);
 
     case Opcode::CCF:
         return CCF();
 
     case Opcode::LD_B_B:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::B);
+        return LD_R_R(Register_B, Register_B);
 
     case Opcode::LD_B_C:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::C);
+        return LD_R_R(Register_B, Register_C);
 
     case Opcode::LD_B_D:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::D);
+        return LD_R_R(Register_B, Register_D);
 
     case Opcode::LD_B_E:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::E);
+        return LD_R_R(Register_B, Register_E);
 
     case Opcode::LD_B_H:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::H);
+        return LD_R_R(Register_B, Register_H);
 
     case Opcode::LD_B_L:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::L);
+        return LD_R_R(Register_B, Register_L);
 
     case Opcode::LD_B_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::B);
+        return LD_R_ADDR_HL(Register_B);
 
     case Opcode::LD_B_A:
-        return LD_R_R(Cpu::Register::B, Cpu::Register::A);
+        return LD_R_R(Register_B, Register_A);
 
     case Opcode::LD_C_B:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::B);
+        return LD_R_R(Register_C, Register_B);
 
     case Opcode::LD_C_C:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::C);
+        return LD_R_R(Register_C, Register_C);
 
     case Opcode::LD_C_D:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::D);
+        return LD_R_R(Register_C, Register_D);
 
     case Opcode::LD_C_E:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::E);
+        return LD_R_R(Register_C, Register_E);
 
     case Opcode::LD_C_H:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::H);
+        return LD_R_R(Register_C, Register_H);
 
     case Opcode::LD_C_L:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::L);
+        return LD_R_R(Register_C, Register_L);
 
     case Opcode::LD_C_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::C);
+        return LD_R_ADDR_HL(Register_C);
 
     case Opcode::LD_C_A:
-        return LD_R_R(Cpu::Register::C, Cpu::Register::A);
+        return LD_R_R(Register_C, Register_A);
 
     case Opcode::LD_D_B:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::B);
+        return LD_R_R(Register_D, Register_B);
 
     case Opcode::LD_D_C:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::C);
+        return LD_R_R(Register_D, Register_C);
 
     case Opcode::LD_D_D:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::D);
+        return LD_R_R(Register_D, Register_D);
 
     case Opcode::LD_D_E:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::E);
+        return LD_R_R(Register_D, Register_E);
 
     case Opcode::LD_D_H:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::H);
+        return LD_R_R(Register_D, Register_H);
 
     case Opcode::LD_D_L:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::L);
+        return LD_R_R(Register_D, Register_L);
 
     case Opcode::LD_D_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::D);
+        return LD_R_ADDR_HL(Register_D);
 
     case Opcode::LD_D_A:
-        return LD_R_R(Cpu::Register::D, Cpu::Register::A);
+        return LD_R_R(Register_D, Register_A);
 
     case Opcode::LD_E_B:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::B);
+        return LD_R_R(Register_E, Register_B);
 
     case Opcode::LD_E_C:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::C);
+        return LD_R_R(Register_E, Register_C);
 
     case Opcode::LD_E_D:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::D);
+        return LD_R_R(Register_E, Register_D);
 
     case Opcode::LD_E_E:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::E);
+        return LD_R_R(Register_E, Register_E);
 
     case Opcode::LD_E_H:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::H);
+        return LD_R_R(Register_E, Register_H);
 
     case Opcode::LD_E_L:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::L);
+        return LD_R_R(Register_E, Register_L);
 
     case Opcode::LD_E_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::E);
+        return LD_R_ADDR_HL(Register_E);
 
     case Opcode::LD_E_A:
-        return LD_R_R(Cpu::Register::E, Cpu::Register::A);
+        return LD_R_R(Register_E, Register_A);
 
     case Opcode::LD_H_B:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::B);
+        return LD_R_R(Register_H, Register_B);
 
     case Opcode::LD_H_C:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::C);
+        return LD_R_R(Register_H, Register_C);
 
     case Opcode::LD_H_D:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::D);
+        return LD_R_R(Register_H, Register_D);
 
     case Opcode::LD_H_E:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::E);
+        return LD_R_R(Register_H, Register_E);
 
     case Opcode::LD_H_H:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::H);
+        return LD_R_R(Register_H, Register_H);
 
     case Opcode::LD_H_L:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::L);
+        return LD_R_R(Register_H, Register_L);
 
     case Opcode::LD_H_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::H);
+        return LD_R_ADDR_HL(Register_H);
 
     case Opcode::LD_H_A:
-        return LD_R_R(Cpu::Register::H, Cpu::Register::A);
+        return LD_R_R(Register_H, Register_A);
 
     case Opcode::LD_L_B:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::B);
+        return LD_R_R(Register_L, Register_B);
 
     case Opcode::LD_L_C:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::C);
+        return LD_R_R(Register_L, Register_C);
 
     case Opcode::LD_L_D:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::D);
+        return LD_R_R(Register_L, Register_D);
 
     case Opcode::LD_L_E:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::E);
+        return LD_R_R(Register_L, Register_E);
 
     case Opcode::LD_L_H:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::H);
+        return LD_R_R(Register_L, Register_H);
 
     case Opcode::LD_L_L:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::L);
+        return LD_R_R(Register_L, Register_L);
 
     case Opcode::LD_L_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::L);
+        return LD_R_ADDR_HL(Register_L);
 
     case Opcode::LD_L_A:
-        return LD_R_R(Cpu::Register::L, Cpu::Register::A);
+        return LD_R_R(Register_L, Register_A);
 
     case Opcode::LD_ADDR_HL_B:
-        return LD_ADDR_HL_R(Cpu::Register::B);
+        return LD_ADDR_HL_R(Register_B);
 
     case Opcode::LD_ADDR_HL_C:
-        return LD_ADDR_HL_R(Cpu::Register::C);
+        return LD_ADDR_HL_R(Register_C);
 
     case Opcode::LD_ADDR_HL_D:
-        return LD_ADDR_HL_R(Cpu::Register::D);
+        return LD_ADDR_HL_R(Register_D);
 
     case Opcode::LD_ADDR_HL_E:
-        return LD_ADDR_HL_R(Cpu::Register::E);
+        return LD_ADDR_HL_R(Register_E);
 
     case Opcode::LD_ADDR_HL_H:
-        return LD_ADDR_HL_R(Cpu::Register::H);
+        return LD_ADDR_HL_R(Register_H);
 
     case Opcode::LD_ADDR_HL_L:
-        return LD_ADDR_HL_R(Cpu::Register::L);
+        return LD_ADDR_HL_R(Register_L);
 
     case Opcode::HALT:
         return HALT();
 
     case Opcode::LD_ADDR_HL_A:
-        return LD_ADDR_HL_R(Cpu::Register::A);
+        return LD_ADDR_HL_R(Register_A);
 
     case Opcode::LD_A_B:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::B);
+        return LD_R_R(Register_A, Register_B);
 
     case Opcode::LD_A_C:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::C);
+        return LD_R_R(Register_A, Register_C);
 
     case Opcode::LD_A_D:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::D);
+        return LD_R_R(Register_A, Register_D);
 
     case Opcode::LD_A_E:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::E);
+        return LD_R_R(Register_A, Register_E);
 
     case Opcode::LD_A_H:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::H);
+        return LD_R_R(Register_A, Register_H);
 
     case Opcode::LD_A_L:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::L);
+        return LD_R_R(Register_A, Register_L);
 
     case Opcode::LD_A_ADDR_HL:
-        return LD_R_ADDR_HL(Cpu::Register::A);
+        return LD_R_ADDR_HL(Register_A);
 
     case Opcode::LD_A_A:
-        return LD_R_R(Cpu::Register::A, Cpu::Register::A);
+        return LD_R_R(Register_A, Register_A);
 
     case Opcode::ADD_A_B:
-        return ADD_R(Cpu::Register::B);
+        return ADD_R(Register_B);
 
     case Opcode::ADD_A_C:
-        return ADD_R(Cpu::Register::C);
+        return ADD_R(Register_C);
 
     case Opcode::ADD_A_D:
-        return ADD_R(Cpu::Register::D);
+        return ADD_R(Register_D);
 
     case Opcode::ADD_A_E:
-        return ADD_R(Cpu::Register::E);
+        return ADD_R(Register_E);
 
     case Opcode::ADD_A_H:
-        return ADD_R(Cpu::Register::H);
+        return ADD_R(Register_H);
 
     case Opcode::ADD_A_L:
-        return ADD_R(Cpu::Register::L);
+        return ADD_R(Register_L);
 
     case Opcode::ADD_A_ADDR_HL:
         return ADD_ADDR_HL();
 
     case Opcode::ADD_A_A:
-        return ADD_R(Cpu::Register::A);
+        return ADD_R(Register_A);
 
     case Opcode::ADC_A_B:
-        return ADC_R(Cpu::Register::B);
+        return ADC_R(Register_B);
 
     case Opcode::ADC_A_C:
-        return ADC_R(Cpu::Register::C);
+        return ADC_R(Register_C);
 
     case Opcode::ADC_A_D:
-        return ADC_R(Cpu::Register::D);
+        return ADC_R(Register_D);
 
     case Opcode::ADC_A_E:
-        return ADC_R(Cpu::Register::E);
+        return ADC_R(Register_E);
 
     case Opcode::ADC_A_H:
-        return ADC_R(Cpu::Register::H);
+        return ADC_R(Register_H);
 
     case Opcode::ADC_A_L:
-        return ADC_R(Cpu::Register::L);
+        return ADC_R(Register_L);
 
     case Opcode::ADC_A_ADDR_HL:
         return ADC_ADDR_HL();
 
     case Opcode::ADC_A_A:
-        return ADC_R(Cpu::Register::A);
+        return ADC_R(Register_A);
 
     case Opcode::SUB_B:
-        return SUB_R(Cpu::Register::B);
+        return SUB_R(Register_B);
 
     case Opcode::SUB_C:
-        return SUB_R(Cpu::Register::C);
+        return SUB_R(Register_C);
 
     case Opcode::SUB_D:
-        return SUB_R(Cpu::Register::D);
+        return SUB_R(Register_D);
 
     case Opcode::SUB_E:
-        return SUB_R(Cpu::Register::E);
+        return SUB_R(Register_E);
 
     case Opcode::SUB_H:
-        return SUB_R(Cpu::Register::H);
+        return SUB_R(Register_H);
 
     case Opcode::SUB_L:
-        return SUB_R(Cpu::Register::L);
+        return SUB_R(Register_L);
 
     case Opcode::SUB_ADDR_HL:
         return SUB_ADDR_HL();
 
     case Opcode::SUB_A:
-        return SUB_R(Cpu::Register::A);
+        return SUB_R(Register_A);
 
     case Opcode::SBC_A_B:
-        return SBC_R(Cpu::Register::B);
+        return SBC_R(Register_B);
 
     case Opcode::SBC_A_C:
-        return SBC_R(Cpu::Register::C);
+        return SBC_R(Register_C);
 
     case Opcode::SBC_A_D:
-        return SBC_R(Cpu::Register::D);
+        return SBC_R(Register_D);
 
     case Opcode::SBC_A_E:
-        return SBC_R(Cpu::Register::E);
+        return SBC_R(Register_E);
 
     case Opcode::SBC_A_H:
-        return SBC_R(Cpu::Register::H);
+        return SBC_R(Register_H);
 
     case Opcode::SBC_A_L:
-        return SBC_R(Cpu::Register::L);
+        return SBC_R(Register_L);
 
     case Opcode::SBC_A_ADDR_HL:
         return SBC_A_ADDR_HL();
 
     case Opcode::SBC_A_A:
-        return SBC_R(Cpu::Register::A);
+        return SBC_R(Register_A);
 
     case Opcode::AND_B:
-        return AND_R(Cpu::Register::B);
+        return AND_R(Register_B);
 
     case Opcode::AND_C:
-        return AND_R(Cpu::Register::C);
+        return AND_R(Register_C);
 
     case Opcode::AND_D:
-        return AND_R(Cpu::Register::D);
+        return AND_R(Register_D);
 
     case Opcode::AND_E:
-        return AND_R(Cpu::Register::E);
+        return AND_R(Register_E);
 
     case Opcode::AND_H:
-        return AND_R(Cpu::Register::H);
+        return AND_R(Register_H);
 
     case Opcode::AND_L:
-        return AND_R(Cpu::Register::L);
+        return AND_R(Register_L);
 
     case Opcode::AND_ADDR_HL:
         return AND_ADDR_HL();
 
     case Opcode::AND_A:
-        return AND_R(Cpu::Register::A);
+        return AND_R(Register_A);
 
     case Opcode::XOR_B:
-        return XOR_R(Cpu::Register::B);
+        return XOR_R(Register_B);
 
     case Opcode::XOR_C:
-        return XOR_R(Cpu::Register::C);
+        return XOR_R(Register_C);
 
     case Opcode::XOR_D:
-        return XOR_R(Cpu::Register::D);
+        return XOR_R(Register_D);
 
     case Opcode::XOR_E:
-        return XOR_R(Cpu::Register::E);
+        return XOR_R(Register_E);
 
     case Opcode::XOR_H:
-        return XOR_R(Cpu::Register::H);
+        return XOR_R(Register_H);
 
     case Opcode::XOR_L:
-        return XOR_R(Cpu::Register::L);
+        return XOR_R(Register_L);
 
     case Opcode::XOR_ADDR_HL:
         return XOR_ADDR_HL();
 
     case Opcode::XOR_A:
-        return XOR_R(Cpu::Register::A);
+        return XOR_R(Register_A);
 
     case Opcode::OR_B:
-        return OR_R(Cpu::Register::B);
+        return OR_R(Register_B);
 
     case Opcode::OR_C:
-        return OR_R(Cpu::Register::C);
+        return OR_R(Register_C);
 
     case Opcode::OR_D:
-        return OR_R(Cpu::Register::D);
+        return OR_R(Register_D);
 
     case Opcode::OR_E:
-        return OR_R(Cpu::Register::E);
+        return OR_R(Register_E);
 
     case Opcode::OR_H:
-        return OR_R(Cpu::Register::H);
+        return OR_R(Register_H);
 
     case Opcode::OR_L:
-        return OR_R(Cpu::Register::L);
+        return OR_R(Register_L);
 
     case Opcode::OR_ADDR_HL:
         return OR_ADDR_HL();
 
     case Opcode::OR_A:
-        return OR_R(Cpu::Register::A);
+        return OR_R(Register_A);
 
     case Opcode::CP_B:
-        return CP_R(Cpu::Register::B);
+        return CP_R(Register_B);
 
     case Opcode::CP_C:
-        return CP_R(Cpu::Register::C);
+        return CP_R(Register_C);
 
     case Opcode::CP_D:
-        return CP_R(Cpu::Register::D);
+        return CP_R(Register_D);
 
     case Opcode::CP_E:
-        return CP_R(Cpu::Register::E);
+        return CP_R(Register_E);
 
     case Opcode::CP_H:
-        return CP_R(Cpu::Register::H);
+        return CP_R(Register_H);
 
     case Opcode::CP_L:
-        return CP_R(Cpu::Register::L);
+        return CP_R(Register_L);
 
     case Opcode::CP_ADDR_HL:
         return CP_ADDR_HL();
 
     case Opcode::CP_A:
-        return CP_R(Cpu::Register::A);
+        return CP_R(Register_A);
 
     case Opcode::RET_NZ:
         return RET_NZ();
 
     case Opcode::POP_BC:
-        return POP_RR({Cpu::Register::B, Cpu::Register::C});
+        return POP_RR({Register_B, Register_C});
 
     case Opcode::JP_NZ_A16:
         return JUMP_NZ();
@@ -598,7 +598,7 @@ Instruction fetch(Opcode opcode) {
         return CALL_NZ();
 
     case Opcode::PUSH_BC:
-        return PUSH_RR({Cpu::Register::B, Cpu::Register::C});
+        return PUSH_RR({Register_B, Register_C});
 
     case Opcode::ADD_A_D8:
         return ADD_D8();
@@ -634,7 +634,7 @@ Instruction fetch(Opcode opcode) {
         return RET_NC();
 
     case Opcode::POP_DE:
-        return POP_RR({Cpu::Register::D, Cpu::Register::E});
+        return POP_RR({Register_D, Register_E});
 
     case Opcode::JP_NC_A16:
         return JUMP_NC();
@@ -643,7 +643,7 @@ Instruction fetch(Opcode opcode) {
         return CALL_NC();
 
     case Opcode::PUSH_DE:
-        return PUSH_RR({Cpu::Register::D, Cpu::Register::E});
+        return PUSH_RR({Register_D, Register_E});
 
     case Opcode::SUB_D8:
         return SUB_D8();
@@ -673,13 +673,13 @@ Instruction fetch(Opcode opcode) {
         return LDH_ADDR_A8_A();
 
     case Opcode::POP_HL:
-        return POP_RR({Cpu::Register::H, Cpu::Register::L});
+        return POP_RR({Register_H, Register_L});
 
     case Opcode::LD_ADDR_C_A:
         return LD_ADDR_C_A();
 
     case Opcode::PUSH_HL:
-        return PUSH_RR({Cpu::Register::H, Cpu::Register::L});
+        return PUSH_RR({Register_H, Register_L});
 
     case Opcode::AND_D8:
         return AND_D8();
@@ -715,7 +715,7 @@ Instruction fetch(Opcode opcode) {
         return DI();
 
     case Opcode::PUSH_AF:
-        return PUSH_RR({Cpu::Register::A, Cpu::Register::F});
+        return PUSH_RR({Register_A, Register_F});
 
     case Opcode::OR_D8:
         return OR_D8();
@@ -747,32 +747,32 @@ Instruction fetch(Opcode opcode) {
     }
 }
 
-Cpu::Register get_cb_register(CBCode opcode) {
+Cpu_Register get_cb_register(CBCode opcode) {
     auto lower = static_cast<uint8_t>(opcode) & 0x0F;
 
     switch(lower) {
         case 0x00:
         case 0x08:
-            return Cpu::Register::B;
+            return Register_B;
         case 0x01:
         case 0x09:
-            return Cpu::Register::C;
+            return Register_C;
         case 0x02:
         case 0x0A:
-            return Cpu::Register::D;
+            return Register_D;
         case 0x03:
         case 0x0B:
-            return Cpu::Register::E;
+            return Register_E;
         case 0x04:
         case 0x0C:
-            return Cpu::Register::H;
+            return Register_H;
         case 0x05:
         case 0x0D:
-            return Cpu::Register::L;
+            return Register_L;
         case 0x07:
         case 0x0E:
         default:
-            return Cpu::Register::A;
+            return Register_A;
     }
 }
 

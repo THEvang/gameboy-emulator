@@ -204,8 +204,8 @@ Color PPU::get_color(uint8_t color_id, uint16_t palette_address) {
 
     // use the palette to get the colour
     uint8_t color = 0;
-    color = static_cast<uint8_t>(static_cast<uint>(is_set(palette, hi_bit)) << 1U);
-    color = static_cast<uint8_t>(color | static_cast<uint>(is_set(palette, lo_bit)));
+    color = static_cast<uint8_t>(static_cast<unsigned int>(is_set(palette, hi_bit)) << 1U);
+    color = static_cast<uint8_t>(color | static_cast<unsigned int>(is_set(palette, lo_bit)));
 
    // convert the game colour to emulator colour
    switch (color)
