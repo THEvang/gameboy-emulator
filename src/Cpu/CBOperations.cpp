@@ -2,15 +2,15 @@
 
 #include "Memory/Memory_Controller.hpp"
 #include "Cpu/Interpreter.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 #include "Cpu/Cpu.hpp"
 
 uint8_t rlc(uint8_t value, uint8_t& flags) {
 
-    is_set(value, 7) ? set_bit(flags,   Flag_Carry) : 
+    test_bit_8bit(value, 7) ? set_bit(flags,   Flag_Carry) : 
         clear_bit(flags,                Flag_Carry);
 
-    value = rotate_left<uint8_t>(value, 1);
+    value = rotate_left(value, 1);
 
     value == 0 ? set_bit(flags, Flag_Zero) :
         clear_bit(flags,        Flag_Zero);
@@ -51,10 +51,10 @@ Instruction RLC_ADDR_HL() {
 
 uint8_t RRC(uint8_t value, uint8_t& flags) {
     
-    is_set(value, 0) ? set_bit(flags, Flag_Carry)
+    test_bit_8bit(value, 0) ? set_bit(flags, Flag_Carry)
         : clear_bit(flags, Flag_Carry);
     
-    value = rotate_right<uint8_t>(value, 1);
+    value = rotate_right(value, 1);
 
     value == 0 ? set_bit(flags, Flag_Zero) :
         clear_bit(flags, Flag_Zero);
@@ -92,10 +92,10 @@ Instruction RRC_ADDR_HL() {
 
 uint8_t RL(uint8_t value, uint8_t& flags) {
     
-    const auto new_carry_flag = is_set(value, 7);
+    const auto new_carry_flag = test_bit_8bit(value, 7);
     value = static_cast<uint8_t>(value << 1u);
 
-    is_set(flags, Flag_Carry) ? set_bit(value, 0)
+    test_bit_8bit(flags, Flag_Carry) ? set_bit(value, 0)
         : clear_bit(value, 0);
     
     new_carry_flag ? set_bit(flags, Flag_Carry)
@@ -135,7 +135,7 @@ Instruction RL_ADDR_HL() {
 
 uint8_t SRL(uint8_t value, uint8_t& flags) {
 
-    is_set(value, 0)                      ? 
+    test_bit_8bit(value, 0)                      ? 
         set_bit(flags, Flag_Carry)   :
         clear_bit(flags, Flag_Carry);
     
@@ -176,7 +176,7 @@ Instruction SRL_ADDR_HL() {
 
 uint8_t SLA(uint8_t value, uint8_t& flags) {
 
-    is_set(value, 7)                      ? 
+    test_bit_8bit(value, 7)                      ? 
         set_bit(flags, Flag_Carry)   :
         clear_bit(flags, Flag_Carry);
     
@@ -217,11 +217,11 @@ Instruction SLA_ADDR_HL() {
 
 uint8_t SRA(uint8_t value, uint8_t& flags) {
     
-    is_set(value, 0)                      ? 
+    test_bit_8bit(value, 0)                      ? 
         set_bit(flags,      Flag_Carry)   :
         clear_bit(flags,    Flag_Carry);
     
-    const auto old_msb = is_set(value, 7);
+    const auto old_msb = test_bit_8bit(value, 7);
 
     value = static_cast<uint8_t>(value >> 1u);
 
@@ -262,9 +262,9 @@ Instruction SRA_ADDR_HL() {
 
 uint8_t RR(uint8_t value, uint8_t& flags) {
     
-    bool carry_status = is_set(flags, Flag_Carry);
+    bool carry_status = test_bit_8bit(flags, Flag_Carry);
 
-    is_set(value, 0)                  ? 
+    test_bit_8bit(value, 0)                  ? 
         set_bit(flags,      Flag_Carry)   :
         clear_bit(flags,    Flag_Carry);
 
@@ -344,7 +344,7 @@ Instruction SWAP_ADDR_HL() {
 
 void BIT(uint8_t value, int n, uint8_t& flags) {
     
-    is_set(value, n) ? clear_bit(flags, Flag_Zero) :
+    test_bit_8bit(value, n) ? clear_bit(flags, Flag_Zero) :
         set_bit(flags, Flag_Zero);
     
     clear_bit(flags, Flag_Sub);

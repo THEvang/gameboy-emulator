@@ -1,7 +1,7 @@
 #include "Graphics/LCD_Status.hpp"
 
 #include "Memory/Memory_Controller.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
@@ -27,17 +27,17 @@ void LCD_Status::set_status(int& scanline_counter) {
     auto status = m_memory_controller->read(status_address);
     if(current_scanline >= 144) {
         set_mode(LCD_Modes::V_Blank);
-        request_interrupt = is_set(status, 4);
+        request_interrupt = test_bit_8bit(status, 4);
     } else {
         
         if(scanline_counter >= (456 - 80)) {
             set_mode(LCD_Modes::Searching_Sprite_Attributes);
-            request_interrupt = is_set(status, 5);
+            request_interrupt = test_bit_8bit(status, 5);
         } else if(scanline_counter >= (456 - 80 - 172)) {
             set_mode(LCD_Modes::Transferring_Data);
         } else {
             set_mode(LCD_Modes::H_Blank);
-            request_interrupt = is_set(status, 3);
+            request_interrupt = test_bit_8bit(status, 3);
         }
     }
 
@@ -61,7 +61,7 @@ void LCD_Status::set_coincidence_flag() {
     auto status = m_memory_controller->read(status_address);
     set_bit(status, coincidence_bit);
     m_memory_controller->write(status_address, status);
-    if(is_set(status, 6)) {
+    if(test_bit_8bit(status, 6)) {
         m_interrupt_handler.request(Interrupts::LCD_STAT);
     }
 }

@@ -6,7 +6,6 @@
 #include "Disassembler/Disassembler.hpp"
 #include "Memory/Cartridge.hpp"
 #include "Disassembler/Ring_Buffer.hpp"
-#include "BitOperations.hpp"
 
 void render_disassembly(GameBoy& gameboy) {
 

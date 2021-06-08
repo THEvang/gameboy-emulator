@@ -1,5 +1,5 @@
 #include "Graphics/PPU.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 #include "Memory/Memory_Controller.hpp"
 
 PPU::PPU(MemoryBankController* memory_controller)
@@ -102,8 +102,8 @@ void PPU::draw_background() {
         color_bit -= 7;
         color_bit *= -1;
 
-        const uint8_t color_1 = is_set(data_1, color_bit) ? 1 : 0;
-        const uint8_t color_2 = is_set(data_2, color_bit) ? 1 : 0;
+        const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
+        const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
         
         uint8_t color_id = 0;
         color_id = static_cast<uint8_t>(color_2 << 1U); 
@@ -131,8 +131,8 @@ void PPU::draw_sprites() {
     const auto tileLocation = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+2));
     const auto attributes = m_memory_controller->read(static_cast<uint16_t>(0xFE00+index+3));
 
-    bool yFlip = is_set(attributes,6) ;
-    bool xFlip = is_set(attributes,5) ;
+    bool yFlip = test_bit_8bit(attributes,6) ;
+    bool xFlip = test_bit_8bit(attributes,5) ;
 
     auto scanline = m_memory_controller->read(scanline_address);
 
@@ -169,10 +169,10 @@ void PPU::draw_sprites() {
 
          // the rest is the same as for tiles
          int colourNum = 0;
-         colourNum +=  is_set(data2,colourbit) ? 2 : 0;
-         colourNum += is_set(data1,colourbit) ? 1 : 0;
+         colourNum +=  test_bit_8bit(data2,colourbit) ? 2 : 0;
+         colourNum += test_bit_8bit(data1,colourbit) ? 1 : 0;
 
-        const uint16_t colourAddress = is_set(attributes,4) ? 0xFF49 : 0xFF48;
+        const uint16_t colourAddress = test_bit_8bit(attributes,4) ? 0xFF49 : 0xFF48;
         const auto col = get_color(static_cast<uint8_t>(colourNum), colourAddress);
 
          // white is transparent for sprites.
@@ -204,8 +204,8 @@ Color PPU::get_color(uint8_t color_id, uint16_t palette_address) {
 
     // use the palette to get the colour
     uint8_t color = 0;
-    color = static_cast<uint8_t>(static_cast<unsigned int>(is_set(palette, hi_bit)) << 1U);
-    color = static_cast<uint8_t>(color | static_cast<unsigned int>(is_set(palette, lo_bit)));
+    color = static_cast<uint8_t>(static_cast<unsigned int>(test_bit_8bit(palette, hi_bit)) << 1U);
+    color = static_cast<uint8_t>(color | static_cast<unsigned int>(test_bit_8bit(palette, lo_bit)));
 
    // convert the game colour to emulator colour
    switch (color)

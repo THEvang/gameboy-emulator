@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 #include "Cpu/Cpu.hpp"
 #include "Cpu/Interpreter.hpp"
 #include "Cpu/CBOpcodes.hpp"
@@ -720,10 +720,10 @@ Instruction CCF() {
 Instruction RRCA() {
     return {[](Cpu& cpu, Operand&) {
 
-        is_set(cpu.registers[Register_A], 0) ? cpu.set_flag(Flag_Carry)
+        test_bit_8bit(cpu.registers[Register_A], 0) ? cpu.set_flag(Flag_Carry)
             : cpu.clear_flag(Flag_Carry);
         
-        cpu.registers[Register_A] = rotate_right<uint8_t>(cpu.registers[Register_A], 1);
+        cpu.registers[Register_A] = rotate_right(cpu.registers[Register_A], 1);
 
         cpu.clear_flag(Flag_Zero);
         cpu.clear_flag(Flag_Sub);
@@ -739,7 +739,7 @@ Instruction RRA() {
         
         auto a = cpu.registers[Register_A];
 
-        const auto new_carry_flag = is_set(a, 0);
+        const auto new_carry_flag = test_bit_8bit(a, 0);
         a = static_cast<uint8_t>(a >> 1u);
 
         cpu.test_flag(Flag_Carry) ? set_bit(a, 7) 
@@ -764,7 +764,7 @@ Instruction RLA() {
         
         auto a = cpu.registers[Register_A];
 
-        const auto new_carry_flag = is_set(a, 7);
+        const auto new_carry_flag = test_bit_8bit(a, 7);
         a =  static_cast<uint8_t>(a << 1u);
 
         cpu.test_flag(Flag_Carry) ? set_bit(a, 0)
@@ -788,10 +788,10 @@ Instruction RLCA() {
     return {[](Cpu& cpu, Operand&) {
         auto a = cpu.registers[Register_A];
 
-        is_set(a, 7) ? cpu.set_flag(Flag_Carry) : 
+        test_bit_8bit(a, 7) ? cpu.set_flag(Flag_Carry) : 
             cpu.clear_flag(Flag_Carry);
 
-        cpu.registers[Register_A] = rotate_left<uint8_t>(a, 1);
+        cpu.registers[Register_A] = rotate_left(a, 1);
 
         cpu.clear_flag(Flag_Zero);
         cpu.clear_flag(Flag_Sub);
@@ -1065,7 +1065,7 @@ Instruction POP_RR(Cpu_Register r1, Cpu_Register r2) {
 
 uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Flag_Carry) ? 1 : 0;
+    const auto carry_value = test_bit_8bit(flags, Flag_Carry) ? 1 : 0;
 
     half_carry_8bit(first, second)       ?
         set_bit(flags,      Flag_Half_Carry)          :
@@ -1077,13 +1077,13 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
 
     first = static_cast<uint8_t>(first + second);
 
-    if(!is_set(flags, Flag_Half_Carry)) {
+    if(!test_bit_8bit(flags, Flag_Half_Carry)) {
         half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
         set_bit(flags,      Flag_Half_Carry)          :
         clear_bit(flags,    Flag_Half_Carry);
     }
     
-    if(!is_set(flags, Flag_Carry)) {
+    if(!test_bit_8bit(flags, Flag_Carry)) {
         overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
             set_bit(flags,      Flag_Carry)               :
             clear_bit(flags,    Flag_Carry);
@@ -1157,7 +1157,7 @@ Instruction LD_ADDR_C_A() {
 
 uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Flag_Carry) ? 1 : 0;
+    const auto carry_value = test_bit_8bit(flags, Flag_Carry) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
         set_bit(flags, Flag_Half_Carry)  :
@@ -1169,13 +1169,13 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first = static_cast<uint8_t>(first - second);
 
-    if(!is_set(flags, Flag_Half_Carry)) {
+    if(!test_bit_8bit(flags, Flag_Half_Carry)) {
         half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
             set_bit(flags, Flag_Half_Carry)  :
             clear_bit(flags, Flag_Half_Carry);
     }
 
-    if(!is_set(flags, Flag_Carry)) {
+    if(!test_bit_8bit(flags, Flag_Carry)) {
         underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
             set_bit(flags, Flag_Carry)   :
             clear_bit(flags, Flag_Carry);

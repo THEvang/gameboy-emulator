@@ -1,5 +1,5 @@
 #include "Cpu/Cpu.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 #include "Memory/Memory_Controller.hpp"
 
 uint16_t read_register_pair(Cpu cpu, Cpu_Register r1, Cpu_Register r2) {
@@ -58,7 +58,7 @@ Cpu::Cpu(MemoryBankController* memory_controller)
 }
 
 bool Cpu::test_flag(Cpu_Flag flag) const {
-    return is_set(registers[Register_F], flag);
+    return test_bit_8bit(registers[Register_F], flag);
 }
 
 void Cpu::set_flag(Cpu_Flag flag) {

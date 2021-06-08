@@ -1,6 +1,6 @@
 #include "Memory/Memory_Controller.hpp"
 
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 
 #include "Input/Joypad_Controller.hpp"
 
@@ -139,11 +139,11 @@ uint8_t MemoryBankController::read_joypad_input() const {
 
     const auto data = m_internal_memory[0xFF00];
 
-    if(!is_set(data, 5)) {
+    if(!test_bit_8bit(data, 5)) {
         return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
     }
 
-    if(!is_set(data, 4)) {
+    if(!test_bit_8bit(data, 4)) {
         return Joypad_Controller::read_input_as_byte(Button_Types::Direction_Key);
     }
 
