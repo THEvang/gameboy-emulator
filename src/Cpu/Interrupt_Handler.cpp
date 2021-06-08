@@ -2,7 +2,7 @@
 
 #include "Memory/Memory_Controller.hpp"
 #include "Cpu/Cpu.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 
 Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
     : m_memory_bank_controller(memory_controller)
@@ -52,12 +52,12 @@ bool Interrupt_Handler::should_exit_halt() {
 
 bool Interrupt_Handler::is_requested(Interrupts interrupt) const {
     const auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    return is_set(request_register, static_cast<int>(interrupt));
+    return test_bit_8bit(request_register, static_cast<int>(interrupt));
 }
 
 bool Interrupt_Handler::is_enabled(Interrupts interrupt) const {
     const auto interrupt_enable_register = m_memory_bank_controller->read(interrupt_enabled_address);
-    return is_set(interrupt_enable_register, static_cast<int>(interrupt));
+    return test_bit_8bit(interrupt_enable_register, static_cast<int>(interrupt));
 }
 
 void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {

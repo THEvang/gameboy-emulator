@@ -1,5 +1,5 @@
 #include "Timer.hpp"
-#include "BitOperations.hpp"
+#include "Utilities/BitOperations.hpp"
 #include "Memory/Memory_Controller.hpp"
 
 Timer::Timer(MemoryBankController* memory) 
@@ -70,7 +70,7 @@ bool Timer::should_increment_tima() {
             break;
     }
 
-    auto value = is_set(m_div_value, n) && is_set(timer_control, 2);
+    auto value = test_bit_16bit(m_div_value, n) && test_bit_8bit(timer_control, 2);
     if(!value && m_prev_delay) {
         m_prev_delay = value;
         return true;
