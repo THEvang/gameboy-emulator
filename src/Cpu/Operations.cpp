@@ -84,25 +84,25 @@ Instruction JR() {
 
 Instruction JR_NZ() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+        return !cpu.test_flag(Flag_Zero) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Zero) ? jump_relative(cpu, op) : 8;
+        return cpu.test_flag(Flag_Zero) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+        return !cpu.test_flag(Flag_Carry) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Carry) ? jump_relative(cpu, op) : 8;
+        return cpu.test_flag(Flag_Carry) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
@@ -124,25 +124,25 @@ Instruction RET() {
 
 Instruction RET_NZ() {
     return {[](Cpu& cpu, Operand&) {        
-        return !cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8;
+        return !cpu.test_flag(Flag_Zero) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_Z() {
     return {[](Cpu& cpu, Operand&) {
-        return cpu.test_flag(Cpu::Flag::Zero) ? ret(cpu) : 8; 
+        return cpu.test_flag(Flag_Zero) ? ret(cpu) : 8; 
     }, implied};
 }
 
 Instruction RET_NC() {
     return {[](Cpu& cpu, Operand&) {
-        return !cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
+        return !cpu.test_flag(Flag_Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_C() {
     return {[](Cpu& cpu, Operand&) {
-       return cpu.test_flag(Cpu::Flag::Carry) ? ret(cpu) : 8;
+       return cpu.test_flag(Flag_Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
@@ -168,25 +168,25 @@ Instruction JUMP() {
 
 Instruction JUMP_NZ() {
     return {[](Cpu& cpu, Operand& op) {        
-        return !cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
+        return !cpu.test_flag(Flag_Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Zero) ? jump(cpu, op) : 12;
+        return cpu.test_flag(Flag_Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
+        return !cpu.test_flag(Flag_Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Carry) ? jump(cpu, op) : 12;
+        return cpu.test_flag(Flag_Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
@@ -222,25 +222,25 @@ Instruction CALL() {
 
 Instruction CALL_NZ() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
+        return !cpu.test_flag(Flag_Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Zero) ? call(cpu, op) : 12;
+        return cpu.test_flag(Flag_Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
+        return !cpu.test_flag(Flag_Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Cpu::Flag::Carry) ? call(cpu, op) : 12;
+        return cpu.test_flag(Flag_Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
@@ -390,20 +390,20 @@ Instruction LD_HL_SPR8() {
         const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            cpu.set_flag(Cpu::Flag::Half_Carry)  :
-            cpu.clear_flag(Cpu::Flag::Half_Carry);
+            cpu.set_flag(Flag_Half_Carry)  :
+            cpu.clear_flag(Flag_Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            cpu.set_flag(Cpu::Flag::Carry)   :
-            cpu.clear_flag(Cpu::Flag::Carry);
+            cpu.set_flag(Flag_Carry)   :
+            cpu.clear_flag(Flag_Carry);
 
         const auto result = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
         cpu.registers[Register_H] =  static_cast<uint8_t>(result >> 8u);
         cpu.registers[Register_L] =  static_cast<uint8_t>(result & 0xFFu);
 
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -429,19 +429,19 @@ Instruction LD_SP_HL() {
 uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_carry_8bit(first, second)             ? 
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags, Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     overflows_8bit(first, second)          ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags, Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
 
     first = static_cast<uint8_t>(first + second);
 
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Flag_Sub);
 
     return first;
 }
@@ -481,16 +481,16 @@ Instruction ADD_ADDR_HL() {
 uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
     
     overflows_16bit(first, second)                     ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags, Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
 
     half_carry_16bit(first, second)                        ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags, Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     first = static_cast<uint16_t>(first + second);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Flag_Sub);
 
     return first;
 }
@@ -528,19 +528,19 @@ Instruction ADD_HL_SP() {
 uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
     
     half_borrow_8bit(first, second)            ?
-        set_bit(flags,   Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags,   Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     underflows_8bit(first, second)         ?
-        set_bit(flags,   Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags,   Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
 
     first = static_cast<uint8_t>(first - second);
 
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags,        Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags,        Flag_Zero);
 
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Flag_Sub);
 
     return first;
 }
@@ -578,15 +578,15 @@ Instruction SUB_ADDR_HL() {
 uint8_t INC(uint8_t value, uint8_t& flags) {
     
     half_carry_8bit(value, 1)                 ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags, Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     value++;
 
-    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    value == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Flag_Sub);
 
     return value;
 }
@@ -638,15 +638,15 @@ Instruction INC_SP() {
 uint8_t DEC(uint8_t value, uint8_t& flags) {
     
     half_borrow_8bit(value, 1)                ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags, Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     value--;
     
-    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    value == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Flag_Sub);
 
     return value;
 }
@@ -695,9 +695,9 @@ Instruction DEC_SP() {
 
 Instruction SCF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
-        cpu.set_flag(Cpu::Flag::Carry);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
+        cpu.set_flag(Flag_Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -705,10 +705,10 @@ Instruction SCF() {
 
 Instruction CCF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
-        cpu.test_flag(Cpu::Flag::Carry) ? 
-            cpu.clear_flag(Cpu::Flag::Carry) : cpu.set_flag(Cpu::Flag::Carry);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
+        cpu.test_flag(Flag_Carry) ? 
+            cpu.clear_flag(Flag_Carry) : cpu.set_flag(Flag_Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -717,14 +717,14 @@ Instruction CCF() {
 Instruction RRCA() {
     return {[](Cpu& cpu, Operand&) {
 
-        is_set(cpu.registers[Register_A], 0) ? cpu.set_flag(Cpu::Flag::Carry)
-            : cpu.clear_flag(Cpu::Flag::Carry);
+        is_set(cpu.registers[Register_A], 0) ? cpu.set_flag(Flag_Carry)
+            : cpu.clear_flag(Flag_Carry);
         
         cpu.registers[Register_A] = rotate_right<uint8_t>(cpu.registers[Register_A], 1);
 
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -739,17 +739,17 @@ Instruction RRA() {
         const auto new_carry_flag = is_set(a, 0);
         a = static_cast<uint8_t>(a >> 1u);
 
-        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 7) 
+        cpu.test_flag(Flag_Carry) ? set_bit(a, 7) 
             : clear_bit(a, 7);
         
         cpu.registers[Register_A] =  a;
 
-        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry) 
-            : cpu.clear_flag(Cpu::Flag::Carry);
+        new_carry_flag ? cpu.set_flag(Flag_Carry) 
+            : cpu.clear_flag(Flag_Carry);
         
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
     
         constexpr auto cycles = 4;
         return cycles;
@@ -764,17 +764,17 @@ Instruction RLA() {
         const auto new_carry_flag = is_set(a, 7);
         a =  static_cast<uint8_t>(a << 1u);
 
-        cpu.test_flag(Cpu::Flag::Carry) ? set_bit(a, 0)
+        cpu.test_flag(Flag_Carry) ? set_bit(a, 0)
             : clear_bit(a, 0);
         
         cpu.registers[Register_A] =  a;
 
-        new_carry_flag ? cpu.set_flag(Cpu::Flag::Carry)
-            : cpu.clear_flag(Cpu::Flag::Carry);
+        new_carry_flag ? cpu.set_flag(Flag_Carry)
+            : cpu.clear_flag(Flag_Carry);
 
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
@@ -785,14 +785,14 @@ Instruction RLCA() {
     return {[](Cpu& cpu, Operand&) {
         auto a = cpu.registers[Register_A];
 
-        is_set(a, 7) ? cpu.set_flag(Cpu::Flag::Carry) : 
-            cpu.clear_flag(Cpu::Flag::Carry);
+        is_set(a, 7) ? cpu.set_flag(Flag_Carry) : 
+            cpu.clear_flag(Flag_Carry);
 
         cpu.registers[Register_A] = rotate_left<uint8_t>(a, 1);
 
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
+        cpu.clear_flag(Flag_Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -803,28 +803,28 @@ Instruction DAA() {
     return {[](Cpu& cpu, Operand&) {
 
         auto a = cpu.registers[Register_A];
-        if(!cpu.test_flag(Cpu::Flag::Sub)) {
-            if(cpu.test_flag(Cpu::Flag::Carry) || a > 0x99) {
+        if(!cpu.test_flag(Flag_Sub)) {
+            if(cpu.test_flag(Flag_Carry) || a > 0x99) {
                 a += 0x60;
-                cpu.set_flag(Cpu::Flag::Carry);
+                cpu.set_flag(Flag_Carry);
             }
 
-            if(cpu.test_flag(Cpu::Flag::Half_Carry) || (a & 0x0Fu) > 0x09) {
+            if(cpu.test_flag(Flag_Half_Carry) || (a & 0x0Fu) > 0x09) {
                 a += 0x06;
             }
         } else {
-            if(cpu.test_flag(Cpu::Flag::Carry)) {
+            if(cpu.test_flag(Flag_Carry)) {
                 a -= 0x60;
             }
-            if(cpu.test_flag(Cpu::Flag::Half_Carry)) {
+            if(cpu.test_flag(Flag_Half_Carry)) {
                 a -= 0x06;
             }
         }
 
-        cpu.clear_flag(Cpu::Flag::Half_Carry);
+        cpu.clear_flag(Flag_Half_Carry);
 
-        a == 0 ? cpu.set_flag(Cpu::Flag::Zero) :
-            cpu.clear_flag(Cpu::Flag::Zero);
+        a == 0 ? cpu.set_flag(Flag_Zero) :
+            cpu.clear_flag(Flag_Zero);
 
         cpu.registers[Register_A] =  a;
 
@@ -838,19 +838,19 @@ Instruction ADD_SP_R8() {
         const auto distance = std::get<uint8_t>(op);
 
         half_carry_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)     ?
-            cpu.set_flag(Cpu::Flag::Half_Carry)  :
-            cpu.clear_flag(Cpu::Flag::Half_Carry);
+            cpu.set_flag(Flag_Half_Carry)  :
+            cpu.clear_flag(Flag_Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.m_stack_ptr), distance)  ? 
-            cpu.set_flag(Cpu::Flag::Carry)   :
-            cpu.clear_flag(Cpu::Flag::Carry);
+            cpu.set_flag(Flag_Carry)   :
+            cpu.clear_flag(Flag_Carry);
 
 
         cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr + static_cast<int8_t>(distance));
 
-        cpu.clear_flag(Cpu::Flag::Zero);
-        cpu.clear_flag(Cpu::Flag::Sub);
+        cpu.clear_flag(Flag_Zero);
+        cpu.clear_flag(Flag_Sub);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -861,12 +861,12 @@ uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first &= second;
 
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    clear_bit(flags, Flag_Sub);
+    set_bit(flags, Flag_Half_Carry);
+    clear_bit(flags, Flag_Carry);
 
     return first;
 }
@@ -904,12 +904,12 @@ Instruction AND_ADDR_HL() {
 uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first ^= second;
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
+    clear_bit(flags, Flag_Carry);
 
     return first;
 }
@@ -949,12 +949,12 @@ Instruction XOR_ADDR_HL() {
 uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first |= second;
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
+    clear_bit(flags, Flag_Carry);
 
     return first;
 }
@@ -988,18 +988,18 @@ Instruction OR_ADDR_HL() {
 void CP(uint8_t first, uint8_t second, uint8_t& flags) {
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, static_cast<int>(Cpu::Flag::Carry))   :
-        clear_bit(flags, static_cast<int>(Cpu::Flag::Carry));
+        set_bit(flags, static_cast<int>(Flag_Carry))   :
+        clear_bit(flags, static_cast<int>(Flag_Carry));
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags,      Flag_Half_Carry)  :
+        clear_bit(flags,    Flag_Half_Carry);
 
     (first == second) ? 
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags,      Flag_Zero) :
+        clear_bit(flags,    Flag_Zero);
 
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Flag_Sub);
 }
 
 Instruction CP_D8() {
@@ -1062,36 +1062,36 @@ Instruction POP_RR(std::pair<Cpu_Register, Cpu_Register> rr) {
 
 uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
+    const auto carry_value = is_set(flags, Flag_Carry) ? 1 : 0;
 
     half_carry_8bit(first, second)       ?
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags,      Flag_Half_Carry)          :
+        clear_bit(flags,    Flag_Half_Carry);
 
     overflows_8bit(first, second)        ?
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags,      Flag_Carry)               :
+        clear_bit(flags,    Flag_Carry);
 
     first = static_cast<uint8_t>(first + second);
 
-    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
+    if(!is_set(flags, Flag_Half_Carry)) {
         half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Half_Carry))          :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags,      Flag_Half_Carry)          :
+        clear_bit(flags,    Flag_Half_Carry);
     }
     
-    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
+    if(!is_set(flags, Flag_Carry)) {
         overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
-            set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))               :
-            clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
+            set_bit(flags,      Flag_Carry)               :
+            clear_bit(flags,    Flag_Carry);
     }
 
     first = static_cast<uint8_t>(first + carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    clear_bit(flags, Flag_Sub);
     
     return first;
 }
@@ -1154,36 +1154,36 @@ Instruction LD_ADDR_C_A() {
 
 uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
-    const auto carry_value = is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? 1 : 0;
+    const auto carry_value = is_set(flags, Flag_Carry) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+        set_bit(flags, Flag_Half_Carry)  :
+        clear_bit(flags, Flag_Half_Carry);
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags, Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
     
     first = static_cast<uint8_t>(first - second);
 
-    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Half_Carry))) {
+    if(!is_set(flags, Flag_Half_Carry)) {
         half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
-            set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry))  :
-            clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+            set_bit(flags, Flag_Half_Carry)  :
+            clear_bit(flags, Flag_Half_Carry);
     }
 
-    if(!is_set(flags, Cpu::to_index(Cpu::Flag::Carry))) {
+    if(!is_set(flags, Flag_Carry)) {
         underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
-            set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-            clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+            set_bit(flags, Flag_Carry)   :
+            clear_bit(flags, Flag_Carry);
     }
 
     first = static_cast<uint8_t>(first - carry_value);
 
-    first == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    first == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
+    set_bit(flags, Flag_Sub);
 
     return first;
 }
@@ -1267,8 +1267,8 @@ Instruction CPL() {
         a ^= 0xFF;
         cpu.registers[Register_A] =  a;
 
-        cpu.set_flag(Cpu::Flag::Sub);
-        cpu.set_flag(Cpu::Flag::Half_Carry);
+        cpu.set_flag(Flag_Sub);
+        cpu.set_flag(Flag_Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;

@@ -53,26 +53,21 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFFFF, 0x00);
 }
 
-int Cpu::to_index(Cpu::Flag f) {
-    return static_cast<int>(f);
-}
-
 uint16_t Cpu::get(std::pair<Cpu_Register, Cpu_Register> r_pair) const {
     return combine_bytes(registers[r_pair.first], registers[r_pair.second]);
 }
 
-bool Cpu::test_flag(const Flag& flag) const {
-    return is_set(registers[Register_F], static_cast<int>(flag));
+bool Cpu::test_flag(Cpu_Flag flag) const {
+    return is_set(registers[Register_F], flag);
 }
 
-void Cpu::set_flag(const Cpu::Flag& flag) {
-    set_bit(registers[Register_F], static_cast<int>(flag));
+void Cpu::set_flag(Cpu_Flag flag) {
+    set_bit(registers[Register_F], flag);
 }
 
-void Cpu::clear_flag(const Cpu::Flag& flag) {
-    clear_bit(registers[Register_F], static_cast<int>(flag));
+void Cpu::clear_flag(Cpu_Flag flag) {
+    clear_bit(registers[Register_F], flag);
 }
-
 
 //Addressing Modes
 Operand immediate(Cpu& cpu) {
