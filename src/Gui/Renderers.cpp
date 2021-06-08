@@ -8,7 +8,7 @@
 #include "Disassembler/Ring_Buffer.hpp"
 #include "BitOperations.hpp"
 
-void render_disassembly(GameBoy const& gameboy) {
+void render_disassembly(GameBoy& gameboy) {
 
     static Ring_Buffer<Instruction_Info, 20> history;
     const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->m_program_counter);
@@ -30,7 +30,7 @@ void render_disassembly(GameBoy const& gameboy) {
     ImGui::End();
 }
 
-void render_ppu(GameBoy const& gameboy) {
+void render_ppu(GameBoy& gameboy) {
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -96,7 +96,7 @@ std::string to_name(Cpu::Flag flag) {
     }
 }
 
-void render_cpu(GameBoy const& gameboy) {
+void render_cpu(GameBoy& gameboy) {
     
     const auto cpu = gameboy.cpu();
 
@@ -120,7 +120,7 @@ void render_cpu(GameBoy const& gameboy) {
     ImGui::End();
 }
 
-void render_cartridge_data(GameBoy const& gameboy) {
+void render_cartridge_data(GameBoy& gameboy) {
     
     ImGui::Begin("Cartridge Header");
     const auto mbc_identifier = gameboy.memory_controller()->read(0x0147);
