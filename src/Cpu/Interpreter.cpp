@@ -1,7 +1,8 @@
 #include "Cpu/Interpreter.hpp"
-
 #include "Cpu/Operations.hpp"
 #include "Cpu/CBOperations.hpp"
+
+#include <stdio.h>
 
 Instruction fetch(Opcode opcode) {
     
@@ -742,8 +743,8 @@ Instruction fetch(Opcode opcode) {
         return RST(0x38);
 
     default:
-        throw UnimplementedOperation("Invalid Opcode");
-        break;
+        printf("Invalid Opcode: %d\n", opcode);
+        exit(1);
     }
 }
 
@@ -1103,7 +1104,7 @@ Instruction fetch_cb(CBCode opcode)
         return SET_ADDR_HL(get_bit_index(opcode));
 
     default:
-        throw UnimplementedOperation("Unimplemented CB Code\n");
-        break;
+        printf("Unimplemented CB Code: %d\n", opcode);
+        exit(1);
     }
 }
