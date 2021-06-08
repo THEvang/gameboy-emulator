@@ -3,25 +3,24 @@
 #include <cstdint>
 #include <variant>
 #include <functional>
-#include <array>
 #include <BitOperations.hpp>
 
 class MemoryBankController;
 
+enum Cpu_Register {
+    Register_A,
+    Register_B,
+    Register_C,
+    Register_D,
+    Register_E,
+    Register_F,
+    Register_H,
+    Register_L,
+};
+
 struct Cpu {
 
     explicit Cpu(MemoryBankController* memory_controller);
-
-    enum class Register {
-        A,
-        B,
-        C,
-        D,
-        E,
-        F,
-        H,
-        L,
-    };
 
     enum class Flag {
         Carry = 4,
@@ -32,13 +31,7 @@ struct Cpu {
 
     static int to_index(Cpu::Flag f);
 
-    void set(Register r, uint8_t value);
-
-    uint8_t get(Register r) const;
-
-    uint8_t& get(Register r);
-
-    uint16_t get(std::pair<Register, Register> r_pair) const;
+    uint16_t get(std::pair<Cpu_Register, Cpu_Register> r_pair) const;
 
     bool test_flag(const Flag& flag) const;
 
@@ -57,8 +50,7 @@ struct Cpu {
     MemoryBankController* m_memory_controller;
 
     bool m_is_halted = false;
-private:
-    std::array<uint8_t, 8> m_registers;
+    uint8_t registers[8];
 };
 
 using Operand = std::variant<uint8_t, uint16_t, int8_t>;

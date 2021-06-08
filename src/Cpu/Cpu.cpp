@@ -5,14 +5,14 @@
 Cpu::Cpu(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
 {
-    m_registers[static_cast<int>(Register::A)] = 0x01;
-    m_registers[static_cast<int>(Register::B)] = 0x00;
-    m_registers[static_cast<int>(Register::C)] = 0x13;
-    m_registers[static_cast<int>(Register::D)] = 0x00;
-    m_registers[static_cast<int>(Register::E)] = 0xD8;
-    m_registers[static_cast<int>(Register::F)] = 0xB0;
-    m_registers[static_cast<int>(Register::H)] = 0x01;
-    m_registers[static_cast<int>(Register::L)] = 0x4D;
+    registers[Register_A] = 0x01;
+    registers[Register_B] = 0x00;
+    registers[Register_C] = 0x13;
+    registers[Register_D] = 0x00;
+    registers[Register_E] = 0xD8;
+    registers[Register_F] = 0xB0;
+    registers[Register_H] = 0x01;
+    registers[Register_L] = 0x4D;
 
     m_memory_controller->write(0xFF05, 0);
     m_memory_controller->write(0xFF06, 0);
@@ -57,32 +57,20 @@ int Cpu::to_index(Cpu::Flag f) {
     return static_cast<int>(f);
 }
 
-void Cpu::set(Register r, uint8_t value) {
-    m_registers[static_cast<size_t>(r)] = value;
-}
-
-uint8_t Cpu::get(Register r) const {
-    return m_registers[static_cast<size_t>(r)];
-}
-
-uint8_t& Cpu::get(Register r) {
-    return m_registers[static_cast<size_t>(r)];
-}
-
-uint16_t Cpu::get(std::pair<Register, Register> r_pair) const {
-    return combine_bytes(get(r_pair.first), get(r_pair.second));
+uint16_t Cpu::get(std::pair<Cpu_Register, Cpu_Register> r_pair) const {
+    return combine_bytes(registers[r_pair.first], registers[r_pair.second]);
 }
 
 bool Cpu::test_flag(const Flag& flag) const {
-    return is_set(get(Register::F), static_cast<int>(flag));
+    return is_set(registers[Register_F], static_cast<int>(flag));
 }
 
 void Cpu::set_flag(const Cpu::Flag& flag) {
-    set_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+    set_bit(registers[Register_F], static_cast<int>(flag));
 }
 
 void Cpu::clear_flag(const Cpu::Flag& flag) {
-    clear_bit(m_registers[static_cast<int>(Cpu::Register::F)], static_cast<int>(flag));
+    clear_bit(registers[Register_F], static_cast<int>(flag));
 }
 
 
@@ -100,7 +88,7 @@ Operand immediate_extended(Cpu& cpu) {
 
 Operand hl_addressing(Cpu& cpu) {
     cpu.m_program_counter++;
-    const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+    const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
     return cpu.m_memory_controller->read(address);
 }
 

@@ -21,12 +21,12 @@ uint8_t rlc(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction RLC_R(Cpu::Register r) {
+Instruction RLC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
 
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, rlc(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = rlc(r, flags);
+        cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
         return cycles;
@@ -35,12 +35,12 @@ Instruction RLC_R(Cpu::Register r) {
 
 Instruction RLC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
 
-        auto flags = cpu.get(Cpu::Register::F);
+        auto flags = cpu.registers[Register_F];
         value = rlc(value, flags);
-        cpu.set(Cpu::Register::F, flags);
+        cpu.registers[Register_F] = flags;
 
         cpu.m_memory_controller->write(address, value);
 
@@ -65,11 +65,11 @@ uint8_t RRC(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction RRC_R(Cpu::Register r) {
+Instruction RRC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, RRC(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = RRC(cpu.registers[r], flags);
+        cpu.registers[Register_F] =  flags;
         constexpr auto cycles = 8;
         return cycles;
     }, none};   
@@ -77,13 +77,13 @@ Instruction RRC_R(Cpu::Register r) {
 
 Instruction RRC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
 
-        auto flags = cpu.get(Cpu::Register::F);
+        auto flags = cpu.registers[Register_F];
         value = RRC(value, flags);
         cpu.m_memory_controller->write(address, value);
-        cpu.set(Cpu::Register::F, flags);
+        cpu.registers[Register_F] =  flags;
 
         constexpr auto cycles = 16;
         return cycles;
@@ -110,11 +110,11 @@ uint8_t RL(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction RL_R(Cpu::Register r) {
+Instruction RL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, RL(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = RL(cpu.registers[r], flags);
+        cpu.registers[Register_F] =  flags;
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -122,10 +122,10 @@ Instruction RL_R(Cpu::Register r) {
 
 Instruction RL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
 
-        value = RL(value, cpu.get(Cpu::Register::F));
+        value = RL(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -152,11 +152,11 @@ uint8_t SRL(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction SRL_R(Cpu::Register r) {
+Instruction SRL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, SRL(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = SRL(cpu.registers[r], flags);
+        cpu.registers[Register_F] = flags;
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -164,9 +164,9 @@ Instruction SRL_R(Cpu::Register r) {
 
 Instruction SRL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
-        value = SRL(value, cpu.get(Cpu::Register::F));
+        value = SRL(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -193,11 +193,11 @@ uint8_t SLA(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction SLA_R(Cpu::Register r) {
+Instruction SLA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&){
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, SLA(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = SLA(cpu.registers[r], flags);
+        cpu.registers[Register_F] = flags;
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -205,9 +205,9 @@ Instruction SLA_R(Cpu::Register r) {
 
 Instruction SLA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&){
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
-        value = SLA(value, cpu.get(Cpu::Register::F));
+        value = SLA(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -237,11 +237,11 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction SRA_R(Cpu::Register r) {
+Instruction SRA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, SRA(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = SRA(cpu.registers[r], flags);
+        cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
         return cycles;
@@ -250,9 +250,9 @@ Instruction SRA_R(Cpu::Register r) {
 
 Instruction SRA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
-        value = SRA(value, cpu.get(Cpu::Register::F));
+        value = SRA(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -281,11 +281,11 @@ uint8_t RR(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction RR_R(Cpu::Register r) {
+Instruction RR_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, RR(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = RR(cpu.registers[r], flags);
+        cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
         return cycles;
@@ -294,9 +294,9 @@ Instruction RR_R(Cpu::Register r) {
 
 Instruction RR_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
-        value = RR(value, cpu.get(Cpu::Register::F));
+        value = RR(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -319,11 +319,11 @@ uint8_t SWAP(uint8_t value, uint8_t& flags) {
     return value;
 }
 
-Instruction SWAP_R(Cpu::Register r) {
+Instruction SWAP_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        cpu.set(r, SWAP(cpu.get(r), flags));
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        cpu.registers[r] = SWAP(cpu.registers[r], flags);
+        cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
         return cycles;
@@ -332,9 +332,9 @@ Instruction SWAP_R(Cpu::Register r) {
 
 Instruction SWAP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
-        value = SWAP(value, cpu.get(Cpu::Register::F));
+        value = SWAP(value, cpu.registers[Register_F]);
         cpu.m_memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -351,35 +351,35 @@ void BIT(uint8_t value, int n, uint8_t& flags) {
     set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
 }
 
-Instruction BIT_R(Cpu::Register r, int n) {
+Instruction BIT_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
-        auto flags = cpu.get(Cpu::Register::F);
-        BIT(cpu.get(r), n, flags);
-        cpu.set(Cpu::Register::F, flags);
+        auto flags = cpu.registers[Register_F];
+        BIT(cpu.registers[r], n, flags);
+        cpu.registers[Register_F] = flags;
         return 8;
     }, none};
 }
 
 Instruction BIT_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {    
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         const auto value = cpu.m_memory_controller->read(address);
 
-        auto flags = cpu.get(Cpu::Register::F);
+        auto flags = cpu.registers[Register_F];
         BIT(value, n, flags);
         cpu.m_memory_controller->write(address, value);
-        cpu.set(Cpu::Register::F, flags);
+        cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 12;
         return cycles;
     }, none};
 }
 
-Instruction RES_R(Cpu::Register r, int n) {
+Instruction RES_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
-        auto value = cpu.get(r);
+        auto value = cpu.registers[r];
         clear_bit(value, n);
-        cpu.set(r, value);
+        cpu.registers[r] = value;
 
         constexpr auto cycles = 8;
         return cycles;
@@ -388,7 +388,7 @@ Instruction RES_R(Cpu::Register r, int n) {
 
 Instruction RES_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
         clear_bit(value, n);
         cpu.m_memory_controller->write(address, value);
@@ -398,11 +398,11 @@ Instruction RES_ADDR_HL(int n) {
     }, none};
 }
 
-Instruction SET_R(Cpu::Register r, int n) {
+Instruction SET_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
-        auto value = cpu.get(r);
+        auto value = cpu.registers[r];
         set_bit(value, n);
-        cpu.set(r, value);
+        cpu.registers[r] = value;
         constexpr auto cycles = 8;
         return cycles;
     }, none}; 
@@ -410,7 +410,7 @@ Instruction SET_R(Cpu::Register r, int n) {
 
 Instruction SET_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
-        const auto address = combine_bytes(cpu.get(Cpu::Register::H), cpu.get(Cpu::Register::L));
+        const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.m_memory_controller->read(address);
         set_bit(value, n);
         cpu.m_memory_controller->write(address, value);
