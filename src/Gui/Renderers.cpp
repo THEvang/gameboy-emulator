@@ -11,7 +11,7 @@
 void render_disassembly(GameBoy& gameboy) {
 
     static Ring_Buffer<Instruction_Info, 20> history;
-    const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->m_program_counter);
+    const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->program_counter);
     const auto instruction = disassemble(static_cast<Opcode>(opcode));
     history.write(instruction);
 
@@ -101,7 +101,7 @@ void render_cpu(GameBoy& gameboy) {
     const auto cpu = gameboy.cpu();
 
     ImGui::Begin("Cpu!");
-    ImGui::Text("Current Opcode: %i.", cpu->m_memory_controller->read(cpu->m_program_counter));
+    ImGui::Text("Current Opcode: %i.", cpu->memory_controller->read(cpu->program_counter));
 
     for(auto reg_index = 0; reg_index < 7; reg_index++) {
         const auto reg = static_cast<Cpu_Register>(reg_index);

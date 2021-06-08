@@ -18,32 +18,32 @@ void GameBoy::run() {
 
     try {
         
-        const auto opcode = m_cpu.m_memory_controller->read(m_cpu.m_program_counter);
+        const auto opcode = m_cpu.memory_controller->read(m_cpu.program_counter);
 
         auto instruction = fetch(static_cast<Opcode>(opcode));
 
         auto cycles = 4;
-        if(!m_cpu.m_is_halted) {
+        if(!m_cpu.is_halted) {
             auto operand = instruction.read_operand(m_cpu);
             cycles = instruction.execute(m_cpu, operand);
         } else {
-            m_cpu.m_is_halted = m_interrupt_handler.should_exit_halt();
+            m_cpu.is_halted = m_interrupt_handler.should_exit_halt();
         }
 
         m_timer.increment(cycles);
         m_ppu.step(cycles);
             
-        if(m_cpu.m_interrupts_enabled) {
+        if(m_cpu.interrupts_enabled) {
             const auto interrupt_cycles = m_interrupt_handler.interrupts(m_cpu);
             m_timer.increment(interrupt_cycles);
         }
 
-        if(m_cpu.m_should_enable_interrupts) {
-            m_cpu.m_interrupts_enabled = true;
-            m_cpu.m_should_enable_interrupts = false;
-        } else if(m_cpu.m_should_disable_interrupts) {
-            m_cpu.m_interrupts_enabled = false;
-            m_cpu.m_should_disable_interrupts = false;
+        if(m_cpu.should_enable_interrupts) {
+            m_cpu.interrupts_enabled = true;
+            m_cpu.should_enable_interrupts = false;
+        } else if(m_cpu.should_disable_interrupts) {
+            m_cpu.interrupts_enabled = false;
+            m_cpu.should_disable_interrupts = false;
         }
     }
     catch (std::exception& err)  {
