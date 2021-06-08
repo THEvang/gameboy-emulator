@@ -12,9 +12,9 @@ Gui::Gui() {
 
     init_sdl();
     m_window = make_sdl_window();        
-    m_gl_context = SDL_GL_CreateContext(m_window.get());
+    m_gl_context = SDL_GL_CreateContext(m_window);
             
-    SDL_GL_MakeCurrent(m_window.get(), m_gl_context);
+    SDL_GL_MakeCurrent(m_window, m_gl_context);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
     init_glew();
@@ -47,7 +47,7 @@ void Gui::init_sdl() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 }
 
-std::unique_ptr<SDL_Window, std::function<void(SDL_Window*)>> make_sdl_window() {
+SDL_Window* make_sdl_window() {
 
     const auto window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
 
@@ -64,13 +64,7 @@ std::unique_ptr<SDL_Window, std::function<void(SDL_Window*)>> make_sdl_window() 
         return nullptr;
     }
 
-    const auto window_deleter = [](SDL_Window* window_to_delete) {
-        if(window_to_delete != nullptr) {
-            SDL_DestroyWindow(window_to_delete);
-        }
-    };
-
-    return std::unique_ptr<SDL_Window, decltype(window_deleter)>(window, window_deleter);        
+    return window;        
 }
 
 void Gui::init_glew() {
@@ -89,17 +83,17 @@ void Gui::init_imgui() {
     ImGui::CreateContext();
     ImGui::StyleColorsDark();
 
-    ImGui_ImplSDL2_InitForOpenGL(m_window.get(), m_gl_context);
+    ImGui_ImplSDL2_InitForOpenGL(m_window, m_gl_context);
     const char* glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(m_window.get());
+    ImGui_ImplSDL2_NewFrame(m_window);
 }
 
 SDL_Window* Gui::window() {
-    return m_window.get();
+    return m_window;
 }
 
 void Gui::render() {
@@ -112,5 +106,5 @@ void Gui::render() {
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window.get());
+    SDL_GL_SwapWindow(m_window);
 }
