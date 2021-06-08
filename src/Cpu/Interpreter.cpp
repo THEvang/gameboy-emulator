@@ -10,13 +10,13 @@ Instruction fetch(Opcode opcode) {
         return NOP();
 
     case Opcode::LD_BC_D16:
-        return LD_RR_D16({Register_B, Register_C});
+        return LD_RR_D16(Register_B, Register_C);
 
     case Opcode::LD_ADDR_BC_A:
-        return LD_ADDR_RR_A({Register_B, Register_C});
+        return LD_ADDR_RR_A(Register_B, Register_C);
 
     case Opcode::INC_BC:
-        return INC_RR({Register_B, Register_C});
+        return INC_RR(Register_B, Register_C);
 
     case Opcode::INC_B:
         return INC_R(Register_B);
@@ -34,13 +34,13 @@ Instruction fetch(Opcode opcode) {
         return LD_ADDR_A16_SP();
 
     case Opcode::ADD_HL_BC:
-        return ADD_HL_RR({Register_B, Register_C});
+        return ADD_HL_RR(Register_B, Register_C);
 
     case Opcode::LD_A_ADDR_BC:
-        return LD_A_ADDR_RR({Register_B, Register_C});
+        return LD_A_ADDR_RR(Register_B, Register_C);
 
     case Opcode::DEC_BC:
-        return DEC_RR({Register_B, Register_C});
+        return DEC_RR(Register_B, Register_C);
 
     case Opcode::INC_C:
         return INC_R(Register_C);
@@ -58,13 +58,13 @@ Instruction fetch(Opcode opcode) {
         return STOP();
 
     case Opcode::LD_DE_D16:
-        return LD_RR_D16({Register_D, Register_E});
+        return LD_RR_D16(Register_D, Register_E);
 
     case Opcode::LD_ADDR_DE_A:
-        return LD_ADDR_RR_A({Register_D, Register_E});
+        return LD_ADDR_RR_A(Register_D, Register_E);
 
     case Opcode::INC_DE:
-        return INC_RR({Register_D, Register_E});
+        return INC_RR(Register_D, Register_E);
 
     case Opcode::INC_D:
         return INC_R(Register_D);
@@ -82,13 +82,13 @@ Instruction fetch(Opcode opcode) {
         return JR();
 
     case Opcode::ADD_HL_DE:
-        return ADD_HL_RR({Register_D, Register_E});
+        return ADD_HL_RR(Register_D, Register_E);
 
     case Opcode::LD_A_ADDR_DE:
-        return LD_A_ADDR_RR({Register_D, Register_E});
+        return LD_A_ADDR_RR(Register_D, Register_E);
 
     case Opcode::DEC_DE:
-        return DEC_RR({Register_D, Register_E});
+        return DEC_RR(Register_D, Register_E);
 
     case Opcode::INC_E:
         return INC_R(Register_E);
@@ -106,13 +106,13 @@ Instruction fetch(Opcode opcode) {
         return JR_NZ();
 
     case Opcode::LD_HL_D16:
-        return LD_RR_D16({Register_H, Register_L});
+        return LD_RR_D16(Register_H, Register_L);
 
     case Opcode::LD_ADDR_HLI_A:
         return LDI_ADDR_HL_A();
 
     case Opcode::INC_HL:
-        return INC_RR({Register_H, Register_L});
+        return INC_RR(Register_H, Register_L);
 
     case Opcode::INC_H:
         return INC_R(Register_H);
@@ -130,13 +130,13 @@ Instruction fetch(Opcode opcode) {
         return JR_Z();
 
     case Opcode::ADD_HL_HL:
-        return ADD_HL_RR({Register_H, Register_L});
+        return ADD_HL_RR(Register_H, Register_L);
 
     case Opcode::LD_A_ADDR_HLI:
         return LDI_A_ADDR_HL();
 
     case Opcode::DEC_HL:
-        return DEC_RR({Register_H, Register_L});
+        return DEC_RR(Register_H, Register_L);
 
     case Opcode::INC_L:
         return INC_R(Register_L);
@@ -586,7 +586,7 @@ Instruction fetch(Opcode opcode) {
         return RET_NZ();
 
     case Opcode::POP_BC:
-        return POP_RR({Register_B, Register_C});
+        return POP_RR(Register_B, Register_C);
 
     case Opcode::JP_NZ_A16:
         return JUMP_NZ();
@@ -598,7 +598,7 @@ Instruction fetch(Opcode opcode) {
         return CALL_NZ();
 
     case Opcode::PUSH_BC:
-        return PUSH_RR({Register_B, Register_C});
+        return PUSH_RR(Register_B, Register_C);
 
     case Opcode::ADD_A_D8:
         return ADD_D8();
@@ -634,7 +634,7 @@ Instruction fetch(Opcode opcode) {
         return RET_NC();
 
     case Opcode::POP_DE:
-        return POP_RR({Register_D, Register_E});
+        return POP_RR(Register_D, Register_E);
 
     case Opcode::JP_NC_A16:
         return JUMP_NC();
@@ -643,7 +643,7 @@ Instruction fetch(Opcode opcode) {
         return CALL_NC();
 
     case Opcode::PUSH_DE:
-        return PUSH_RR({Register_D, Register_E});
+        return PUSH_RR(Register_D, Register_E);
 
     case Opcode::SUB_D8:
         return SUB_D8();
@@ -673,13 +673,13 @@ Instruction fetch(Opcode opcode) {
         return LDH_ADDR_A8_A();
 
     case Opcode::POP_HL:
-        return POP_RR({Register_H, Register_L});
+        return POP_RR(Register_H, Register_L);
 
     case Opcode::LD_ADDR_C_A:
         return LD_ADDR_C_A();
 
     case Opcode::PUSH_HL:
-        return PUSH_RR({Register_H, Register_L});
+        return PUSH_RR(Register_H, Register_L);
 
     case Opcode::AND_D8:
         return AND_D8();
@@ -715,7 +715,7 @@ Instruction fetch(Opcode opcode) {
         return DI();
 
     case Opcode::PUSH_AF:
-        return PUSH_RR({Register_A, Register_F});
+        return PUSH_RR(Register_A, Register_F);
 
     case Opcode::OR_D8:
         return OR_D8();

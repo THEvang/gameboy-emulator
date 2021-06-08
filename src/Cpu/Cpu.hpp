@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <stdint.h>
 #include <variant>
 
 class MemoryBankController;
@@ -23,11 +23,10 @@ enum Cpu_Flag {
     Flag_Zero
 };
 
+
 struct Cpu {
 
     explicit Cpu(MemoryBankController* memory_controller);
-
-    uint16_t get(std::pair<Cpu_Register, Cpu_Register> r_pair) const;
 
     bool test_flag(Cpu_Flag flag) const;
 
@@ -48,6 +47,8 @@ struct Cpu {
     bool m_is_halted = false;
     uint8_t registers[8];
 };
+
+uint16_t read_register_pair(Cpu, Cpu_Register, Cpu_Register);
 
 using Operand = std::variant<uint8_t, uint16_t, int8_t>;
 

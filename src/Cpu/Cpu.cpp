@@ -2,6 +2,10 @@
 #include "BitOperations.hpp"
 #include "Memory/Memory_Controller.hpp"
 
+uint16_t read_register_pair(Cpu cpu, Cpu_Register r1, Cpu_Register r2) {
+    return combine_bytes(cpu.registers[r1], cpu.registers[r2]);
+}
+
 Cpu::Cpu(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
 {
@@ -51,10 +55,6 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     m_memory_controller->write(0xFF4A, 0x00);
     m_memory_controller->write(0xFF4B, 0x00);
     m_memory_controller->write(0xFFFF, 0x00);
-}
-
-uint16_t Cpu::get(std::pair<Cpu_Register, Cpu_Register> r_pair) const {
-    return combine_bytes(registers[r_pair.first], registers[r_pair.second]);
 }
 
 bool Cpu::test_flag(Cpu_Flag flag) const {
