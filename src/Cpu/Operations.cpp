@@ -1,5 +1,6 @@
-#include <tuple>
 #include "Cpu/Operations.hpp"
+
+#include <stdio.h>
 
 #include "BitOperations.hpp"
 #include "Cpu/Cpu.hpp"
@@ -32,7 +33,8 @@ Instruction HALT() {
             if((interrupt_request & interrupt_enable & 0x1Fu) == 0) {
                 cpu.m_is_halted = true;
             } else {
-                throw UnimplementedOperation("HALT BUG");
+                printf("HALT BUG");
+                exit(1);
             }
         }
         return cycles;
@@ -361,7 +363,8 @@ Instruction LD_ADDR_HL_D8() {
 }
 
 Instruction LD_ADDR_HL_ADDR_HL() {    
-    throw UnimplementedOperation("Unimplemented operation: LD ADDR HL ADDR HL");
+    printf("Unimplemented operation: LD ADDR HL ADDR HL");
+    exit(1);
 }
 
 Instruction LD_ADDR_A16_A() {
