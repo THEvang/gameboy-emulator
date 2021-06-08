@@ -15,7 +15,7 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
             const auto vector = get_vector(interrupt);
             call(cpu, vector);
             clear(interrupt);
-            cpu.m_interrupts_enabled = false;
+            cpu.interrupts_enabled = false;
             return true;
         }
         return false;
@@ -62,12 +62,12 @@ bool Interrupt_Handler::is_enabled(Interrupts interrupt) const {
 
 void Interrupt_Handler::call(Cpu& cpu, uint8_t interrupt_vector) {
 
-    const auto pc_low = static_cast<uint8_t>(cpu.m_program_counter & 0xFFU);
-    const auto pc_high = static_cast<uint8_t>(cpu.m_program_counter >> 8U);
-    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 1), pc_high);
-    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.m_stack_ptr - 2), pc_low);
-    cpu.m_stack_ptr = static_cast<uint16_t>(cpu.m_stack_ptr - 2);
-    cpu.m_program_counter = static_cast<uint16_t>(interrupt_vector);
+    const auto pc_low = static_cast<uint8_t>(cpu.program_counter & 0xFFU);
+    const auto pc_high = static_cast<uint8_t>(cpu.program_counter >> 8U);
+    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.stack_ptr - 1), pc_high);
+    m_memory_bank_controller->write(static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
+    cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr - 2);
+    cpu.program_counter = static_cast<uint16_t>(interrupt_vector);
 }
 
 uint16_t Interrupt_Handler::get_vector(Interrupts interrupt) const {

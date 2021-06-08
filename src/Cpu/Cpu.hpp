@@ -34,17 +34,17 @@ struct Cpu {
 
     void clear_flag(Cpu_Flag flag);
 
-    uint16_t m_stack_ptr = 0xFFFE;
-    uint16_t m_program_counter = 0x0100;
+    uint16_t stack_ptr = 0xFFFE;
+    uint16_t program_counter = 0x0100;
 
-    bool m_interrupts_enabled = false;
-    bool m_should_enable_interrupts = false;
-    bool m_should_disable_interrupts = false;
+    bool interrupts_enabled = false;
+    bool should_enable_interrupts = false;
+    bool should_disable_interrupts = false;
     bool should_stop = false;
 
-    MemoryBankController* m_memory_controller;
+    MemoryBankController* memory_controller;
 
-    bool m_is_halted = false;
+    bool is_halted = false;
     uint8_t registers[8];
 };
 
