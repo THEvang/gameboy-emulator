@@ -23,7 +23,7 @@ void Timer::tick() {
     // }
     
     m_div_value = static_cast<uint16_t>(m_div_value + 4);
-    m_memory->raw()[div_address] = static_cast<uint8_t>(m_div_value >> 8u); 
+    m_memory->internal_memory[div_address] = static_cast<uint8_t>(m_div_value >> 8u); 
     
     if(m_tima_has_overflowed) { 
         reset_tima();
@@ -41,7 +41,7 @@ void Timer::tick() {
         }
         
         tima_value++;
-        m_memory->raw()[tima_address] = tima_value;
+        m_memory->internal_memory[tima_address] = tima_value;
     }
 
 }

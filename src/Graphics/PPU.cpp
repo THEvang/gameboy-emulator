@@ -25,12 +25,12 @@ void PPU::step(int cycles) {
 
         auto current_scanline = m_memory_controller->read(scanline_address);    
         current_scanline++;
-        m_memory_controller->raw()[scanline_address] = current_scanline;
+        m_memory_controller->internal_memory[scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
             m_interrupt_handler.request(Interrupts::V_Blank);
         } else if (current_scanline > 153) {
-            m_memory_controller->raw()[scanline_address] = 0;
+            m_memory_controller->internal_memory[scanline_address] = 0;
         } else if (current_scanline < 144) {
             draw_scanline();
         }

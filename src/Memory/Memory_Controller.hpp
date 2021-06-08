@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "Memory/Memory.hpp"
 #include "Memory/Cartridge.hpp"
 
@@ -18,10 +16,7 @@ public:
     [[nodiscard]] uint8_t read(uint16_t address) const;
     void write(uint16_t address, uint8_t data);
 
-    //Gets raw memory for modules that must bypass usual memory control;
-    constexpr auto& raw() noexcept {
-        return m_internal_memory;
-    };
+    uint8_t internal_memory[0xFFFF];
 
 private:
 
@@ -47,6 +42,5 @@ private:
     void set_ram_bank_number(uint8_t data);
     void set_banking_mode(uint8_t data);
 
-    std::array<uint8_t, 0xFFFF> m_internal_memory;
     Memory m_cartridge_memory;
 };
