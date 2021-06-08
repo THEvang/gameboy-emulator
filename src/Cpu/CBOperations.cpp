@@ -7,16 +7,16 @@
 
 uint8_t rlc(uint8_t value, uint8_t& flags) {
 
-    is_set(value, 7) ? set_bit(flags,   Cpu::to_index(Cpu::Flag::Carry)) : 
-        clear_bit(flags,                Cpu::to_index(Cpu::Flag::Carry));
+    is_set(value, 7) ? set_bit(flags,   Flag_Carry) : 
+        clear_bit(flags,                Flag_Carry);
 
     value = rotate_left<uint8_t>(value, 1);
 
-    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags,        Cpu::to_index(Cpu::Flag::Zero));
+    value == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags,        Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -51,16 +51,16 @@ Instruction RLC_ADDR_HL() {
 
 uint8_t RRC(uint8_t value, uint8_t& flags) {
     
-    is_set(value, 0) ? set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))
-        : clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    is_set(value, 0) ? set_bit(flags, Flag_Carry)
+        : clear_bit(flags, Flag_Carry);
     
     value = rotate_right<uint8_t>(value, 1);
 
-    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    value == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
     
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -95,17 +95,17 @@ uint8_t RL(uint8_t value, uint8_t& flags) {
     const auto new_carry_flag = is_set(value, 7);
     value = static_cast<uint8_t>(value << 1u);
 
-    is_set(flags, Cpu::to_index(Cpu::Flag::Carry)) ? set_bit(value, 0)
+    is_set(flags, Flag_Carry) ? set_bit(value, 0)
         : clear_bit(value, 0);
     
-    new_carry_flag ? set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))
-        : clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    new_carry_flag ? set_bit(flags, Flag_Carry)
+        : clear_bit(flags, Flag_Carry);
 
-    value == 0 ? set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    value == 0 ? set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -136,18 +136,18 @@ Instruction RL_ADDR_HL() {
 uint8_t SRL(uint8_t value, uint8_t& flags) {
 
     is_set(value, 0)                      ? 
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags, Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
     
     value = static_cast<uint8_t>(value >> 1u);
     clear_bit(value, 7);
 
     value == 0                            ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Zero))    :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags, Flag_Zero)    :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -177,18 +177,18 @@ Instruction SRL_ADDR_HL() {
 uint8_t SLA(uint8_t value, uint8_t& flags) {
 
     is_set(value, 7)                      ? 
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags, Flag_Carry)   :
+        clear_bit(flags, Flag_Carry);
     
     value = static_cast<uint8_t>(value << 1u);
     clear_bit(value, 0);
 
     value == 0                            ?
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Zero))    :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags, Flag_Zero)    :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -218,8 +218,8 @@ Instruction SLA_ADDR_HL() {
 uint8_t SRA(uint8_t value, uint8_t& flags) {
     
     is_set(value, 0)                      ? 
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags,      Flag_Carry)   :
+        clear_bit(flags,    Flag_Carry);
     
     const auto old_msb = is_set(value, 7);
 
@@ -228,11 +228,11 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
     old_msb ? set_bit(value, 7) : clear_bit(value, 7);
 
     value == 0                            ?
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Zero))    :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags,      Flag_Zero)    :
+        clear_bit(flags,    Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -262,21 +262,21 @@ Instruction SRA_ADDR_HL() {
 
 uint8_t RR(uint8_t value, uint8_t& flags) {
     
-    bool carry_status = is_set(flags, Cpu::to_index(Cpu::Flag::Carry));
+    bool carry_status = is_set(flags, Flag_Carry);
 
     is_set(value, 0)                  ? 
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Carry))   :
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Carry));
+        set_bit(flags,      Flag_Carry)   :
+        clear_bit(flags,    Flag_Carry);
 
     value = static_cast<uint8_t>(value >> 1u);
     carry_status ? set_bit(value, 7) : clear_bit(value, 7);
 
     value == 0 ? 
-        set_bit(flags,      Cpu::to_index(Cpu::Flag::Zero)) : 
-        clear_bit(flags,    Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags,      Flag_Zero) : 
+        clear_bit(flags,    Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
 
     return value;
 }
@@ -309,12 +309,12 @@ uint8_t SWAP(uint8_t value, uint8_t& flags) {
     swap_nibbles(value);
     
     value == 0 ? 
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+        set_bit(flags, Flag_Zero) :
+        clear_bit(flags, Flag_Zero);
 
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Carry));
+    clear_bit(flags, Flag_Sub);
+    clear_bit(flags, Flag_Half_Carry);
+    clear_bit(flags, Flag_Carry);
 
     return value;
 }
@@ -344,11 +344,11 @@ Instruction SWAP_ADDR_HL() {
 
 void BIT(uint8_t value, int n, uint8_t& flags) {
     
-    is_set(value, n) ? clear_bit(flags, Cpu::to_index(Cpu::Flag::Zero)) :
-        set_bit(flags, Cpu::to_index(Cpu::Flag::Zero));
+    is_set(value, n) ? clear_bit(flags, Flag_Zero) :
+        set_bit(flags, Flag_Zero);
     
-    clear_bit(flags, Cpu::to_index(Cpu::Flag::Sub));
-    set_bit(flags, Cpu::to_index(Cpu::Flag::Half_Carry));
+    clear_bit(flags, Flag_Sub);
+    set_bit(flags, Flag_Half_Carry);
 }
 
 Instruction BIT_R(Cpu_Register r, int n) {

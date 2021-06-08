@@ -2,8 +2,6 @@
 
 #include <cstdint>
 #include <variant>
-#include <functional>
-#include <BitOperations.hpp>
 
 class MemoryBankController;
 
@@ -18,26 +16,24 @@ enum Cpu_Register {
     Register_L,
 };
 
+enum Cpu_Flag {
+    Flag_Carry = 4,
+    Flag_Half_Carry,
+    Flag_Sub,
+    Flag_Zero
+};
+
 struct Cpu {
 
     explicit Cpu(MemoryBankController* memory_controller);
 
-    enum class Flag {
-        Carry = 4,
-        Half_Carry,
-        Sub,
-        Zero
-    };
-
-    static int to_index(Cpu::Flag f);
-
     uint16_t get(std::pair<Cpu_Register, Cpu_Register> r_pair) const;
 
-    bool test_flag(const Flag& flag) const;
+    bool test_flag(Cpu_Flag flag) const;
 
-    void set_flag(const Cpu::Flag& flag);
+    void set_flag(Cpu_Flag flag);
 
-    void clear_flag(const Cpu::Flag& flag);
+    void clear_flag(Cpu_Flag flag);
 
     uint16_t m_stack_ptr = 0xFFFE;
     uint16_t m_program_counter = 0x0100;

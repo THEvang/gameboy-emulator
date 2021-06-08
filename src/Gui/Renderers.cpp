@@ -83,15 +83,15 @@ std::string to_name(Cpu_Register reg) {
     }
 }
 
-std::string to_name(Cpu::Flag flag) {
+std::string to_name(Cpu_Flag flag) {
     switch(flag) {
-        case Cpu::Flag::Carry:
+        case Flag_Carry:
             return {"Carry"};
-        case Cpu::Flag::Half_Carry:
+        case Flag_Half_Carry:
             return {"Half Carry"};
-        case Cpu::Flag::Zero:
+        case Flag_Zero:
             return {"Zero"};
-        case Cpu::Flag::Sub:
+        case Flag_Sub:
             return {"Sub"};
     }
 }
@@ -110,9 +110,8 @@ void render_cpu(GameBoy& gameboy) {
     }
 
     for(auto flag_index = 4; flag_index < 7; flag_index++) {
-        const auto flag = static_cast<Cpu::Flag>(flag_index);
-        const auto flag_name = to_name(flag);
-        auto flag_status = cpu->test_flag(flag);
+        const auto flag_name = to_name((Cpu_Flag) flag_index);
+        auto flag_status = cpu->test_flag((Cpu_Flag) flag_index);
         ImGui::Text("%s Flag: ", flag_name.c_str());
         ImGui::SameLine();
         ImGui::Checkbox("", &flag_status);
