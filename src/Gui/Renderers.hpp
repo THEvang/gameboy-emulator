@@ -2,8 +2,8 @@
 
 #include "Gameboy/Gameboy.hpp"
 
-void render_disassembly(GameBoy const& gameboy);
-void render_ppu(GameBoy const& gameboy);
-void render_cpu(GameBoy const& gameboy);
-void render_cartridge_data(GameBoy const& gameboy);
+void render_disassembly(GameBoy& gameboy);
+void render_ppu(GameBoy& gameboy);
+void render_cpu(GameBoy& gameboy);
+void render_cartridge_data(GameBoy& gameboy);
 void render_menu();
