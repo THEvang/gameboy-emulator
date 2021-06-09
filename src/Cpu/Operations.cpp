@@ -382,8 +382,8 @@ Instruction LD_RR_D16(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint16_t>(op);
 
-        cpu.registers[r1] =  static_cast<uint8_t>(value & 0xFFu);
-        cpu.registers[r2] =  static_cast<uint8_t>(value >> 8u);
+        cpu.registers[r2] =  static_cast<uint8_t>(value & 0xFFu);
+        cpu.registers[r1] =  static_cast<uint8_t>(value >> 8u);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -487,13 +487,9 @@ Instruction ADD_ADDR_HL() {
 
 uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t* flags) {
     
-    overflows_16bit(first, second)                     ?
-        set_bit(flags, Flag_Carry)   :
-        clear_bit(flags, Flag_Carry);
+    overflows_16bit(first, second) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
 
-    half_carry_16bit(first, second)                        ?
-        set_bit(flags, Flag_Half_Carry)  :
-        clear_bit(flags, Flag_Half_Carry);
+    half_carry_16bit(first, second) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
 
     first = static_cast<uint16_t>(first + second);
 
@@ -584,14 +580,11 @@ Instruction SUB_ADDR_HL() {
 
 uint8_t INC(uint8_t value, uint8_t* flags) {
     
-    half_carry_8bit(value, 1)                 ?
-        set_bit(flags, Flag_Half_Carry)  :
-        clear_bit(flags, Flag_Half_Carry);
+    half_carry_8bit(value, 1) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
 
     value++;
 
-    value == 0 ? set_bit(flags, Flag_Zero) :
-        clear_bit(flags, Flag_Zero);
+    value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
 
@@ -600,7 +593,7 @@ uint8_t INC(uint8_t value, uint8_t* flags) {
 
 Instruction INC_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        auto r = cpu.registers[src];
+        uint8_t r = cpu.registers[src];
         cpu.registers[src] = INC(r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;

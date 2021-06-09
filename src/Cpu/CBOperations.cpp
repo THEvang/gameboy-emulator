@@ -7,13 +7,11 @@
 
 uint8_t rlc(uint8_t value, uint8_t* flags) {
 
-    test_bit_8bit(value, 7) ? set_bit(flags,   Flag_Carry) : 
-        clear_bit(flags,                Flag_Carry);
+    test_bit_8bit(value, 7) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
 
     value = rotate_left(value, 1);
 
-    value == 0 ? set_bit(flags, Flag_Zero) :
-        clear_bit(flags,        Flag_Zero);
+    value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
     clear_bit(flags, Flag_Half_Carry);
@@ -23,7 +21,7 @@ uint8_t rlc(uint8_t value, uint8_t* flags) {
 
 Instruction RLC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        cpu.registers[r] = rlc(r, &(cpu.registers[Register_F]));
+        cpu.registers[r] = rlc(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -45,13 +43,11 @@ Instruction RLC_ADDR_HL() {
 
 uint8_t RRC(uint8_t value, uint8_t* flags) {
     
-    test_bit_8bit(value, 0) ? set_bit(flags, Flag_Carry)
-        : clear_bit(flags, Flag_Carry);
+    test_bit_8bit(value, 0) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
     
     value = rotate_right(value, 1);
 
-    value == 0 ? set_bit(flags, Flag_Zero) :
-        clear_bit(flags, Flag_Zero);
+    value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
     
     clear_bit(flags, Flag_Sub);
     clear_bit(flags, Flag_Half_Carry);
