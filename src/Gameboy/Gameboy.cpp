@@ -4,9 +4,9 @@
 #include "Cpu/Opcodes.hpp"
 #include "Cpu/Interpreter.hpp"
 
-GameBoy::GameBoy(const std::vector<uint8_t>& rom)
-    : m_cartridge_memory(rom)
-    , m_memory_bank_controller(m_cartridge_memory.data()) 
+GameBoy::GameBoy(uint8_t* rom_data, size_t rom_size)
+    : m_cartridge_memory(rom_data)
+    , m_memory_bank_controller(m_cartridge_memory) 
     , m_timer(&m_memory_bank_controller)
     , m_interrupt_handler(&m_memory_bank_controller)
     , m_ppu(&m_memory_bank_controller)
