@@ -13,11 +13,10 @@
 
 struct GameBoy {
 
-    GameBoy(uint8_t* rom_data, size_t rom_size);
+    GameBoy(MemoryBankController* mc);
     void run();
 
-    uint8_t* cartridge_memory;
-    MemoryBankController memory_bank_controller;
+    MemoryBankController* memory_bank_controller;
     Cpu cpu;
     Timer timer;
     Interrupt_Handler interrupt_handler;

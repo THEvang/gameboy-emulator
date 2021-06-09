@@ -15,16 +15,16 @@ void LCD_Status::set_status(int& scanline_counter) {
     if(!m_lcd_control.lcd_display_enabled()) {
         scanline_counter = 456;
         set_mode(LCD_Modes::V_Blank);
-        m_memory_controller->write(scanline_address, 0);
+        write(m_memory_controller, scanline_address, 0);
         return;   
     }
 
     const auto current_mode = get_mode();
-    const auto current_scanline = m_memory_controller->read(scanline_address);
+    const auto current_scanline = read(m_memory_controller, scanline_address);
 
     auto request_interrupt = false;
     
-    auto status = m_memory_controller->read(status_address);
+    auto status = read(m_memory_controller, status_address);
     if(current_scanline >= 144) {
         set_mode(LCD_Modes::V_Blank);
         request_interrupt = test_bit_8bit(status, 4);
@@ -52,15 +52,15 @@ void LCD_Status::set_status(int& scanline_counter) {
 }
 
 bool LCD_Status::should_set_coincidence_flag() const {
-    return m_memory_controller->read(0xFF44) 
-        == m_memory_controller->read(0xFF45);
+    return read(m_memory_controller, 0xFF44) 
+        == read(m_memory_controller, 0xFF45);
 }
 
 void LCD_Status::set_coincidence_flag() {
 
-    auto status = m_memory_controller->read(status_address);
+    auto status = read(m_memory_controller, status_address);
     set_bit(&status, coincidence_bit);
-    m_memory_controller->write(status_address, status);
+    write(m_memory_controller, status_address, status);
     if(test_bit_8bit(status, 6)) {
         m_interrupt_handler.request(Interrupts::LCD_STAT);
     }
@@ -68,14 +68,14 @@ void LCD_Status::set_coincidence_flag() {
 
 void LCD_Status::clear_coincidence_flag() {
     
-    auto status = m_memory_controller->read(status_address);
+    auto status = read(m_memory_controller, status_address);
     clear_bit(&status, coincidence_bit);
-    m_memory_controller->write(status_address, status);
+    write(m_memory_controller, status_address, status);
 }
 
 
 LCD_Modes LCD_Status::get_mode() const {
-        auto status = m_memory_controller->read(status_address);
+        auto status = read(m_memory_controller, status_address);
         status &= 0x03;
         switch (status ) {
             case 0: 
@@ -93,7 +93,7 @@ LCD_Modes LCD_Status::get_mode() const {
 
 void LCD_Status::set_mode(const LCD_Modes& mode) {
 
-    auto status = m_memory_controller->read(status_address);
+    auto status = read(m_memory_controller, status_address);
 
     switch(mode) {
         case LCD_Modes::H_Blank:
@@ -116,5 +116,6 @@ void LCD_Status::set_mode(const LCD_Modes& mode) {
             set_bit(&status, 1);
         break;
     }
-    m_memory_controller->write(status_address, status);
+    
+    write(m_memory_controller, status_address, status);
 }
