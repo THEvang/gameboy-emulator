@@ -5,68 +5,44 @@
 #include "Cpu/Interpreter.hpp"
 
 GameBoy::GameBoy(uint8_t* rom_data, size_t rom_size)
-    : m_cartridge_memory(rom_data)
-    , m_memory_bank_controller(m_cartridge_memory) 
-    , m_timer(&m_memory_bank_controller)
-    , m_interrupt_handler(&m_memory_bank_controller)
-    , m_ppu(&m_memory_bank_controller)
-    , m_joypad_controller(&m_interrupt_handler)
+    : cartridge_memory(rom_data)
+    , memory_bank_controller(cartridge_memory) 
+    , timer(&memory_bank_controller)
+    , interrupt_handler(&memory_bank_controller)
+    , ppu(&memory_bank_controller)
+    , joypad_controller(&interrupt_handler)
     {
-        m_cpu.memory_controller = &m_memory_bank_controller;
-        set_initial_state(&m_cpu);
+        cpu.memory_controller = &memory_bank_controller;
+        set_initial_state(&cpu);
     }
 
 void GameBoy::run() {
 
-    const auto opcode = m_cpu.memory_controller->read(m_cpu.program_counter);
+    const auto opcode = memory_bank_controller.read(cpu.program_counter);
 
     auto instruction = fetch(static_cast<Opcode>(opcode));
 
     auto cycles = 4;
-    if(!m_cpu.is_halted) {
-        auto operand = instruction.read_operand(m_cpu);
-        cycles = instruction.execute(m_cpu, operand);
+    if(!cpu.is_halted) {
+        auto operand = instruction.read_operand(cpu);
+        cycles = instruction.execute(cpu, operand);
     } else {
-        m_cpu.is_halted = m_interrupt_handler.should_exit_halt();
+        cpu.is_halted = interrupt_handler.should_exit_halt();
     }
 
-    m_timer.increment(cycles);
-    m_ppu.step(cycles);
+    timer.increment(cycles);
+    ppu.step(cycles);
         
-    if(m_cpu.interrupts_enabled) {
-        const auto interrupt_cycles = m_interrupt_handler.interrupts(m_cpu);
-        m_timer.increment(interrupt_cycles);
+    if(cpu.interrupts_enabled) {
+        const auto interrupt_cycles = interrupt_handler.interrupts(cpu);
+        timer.increment(interrupt_cycles);
     }
 
-    if(m_cpu.should_enable_interrupts) {
-        m_cpu.interrupts_enabled = true;
-        m_cpu.should_enable_interrupts = false;
-    } else if(m_cpu.should_disable_interrupts) {
-        m_cpu.interrupts_enabled = false;
-        m_cpu.should_disable_interrupts = false;
+    if(cpu.should_enable_interrupts) {
+        cpu.interrupts_enabled = true;
+        cpu.should_enable_interrupts = false;
+    } else if(cpu.should_disable_interrupts) {
+        cpu.interrupts_enabled = false;
+        cpu.should_disable_interrupts = false;
     }
-}
-
-Cpu* GameBoy::cpu() {
-    return &m_cpu;
-}
-
-PPU* GameBoy::ppu() {
-    return &m_ppu;
-}
-
-Interrupt_Handler* GameBoy::interrupt_handler() { 
-    return &m_interrupt_handler;
-}
-
-Joypad_Controller* GameBoy::joypad_controller() { 
-    return &m_joypad_controller;
-}
-
-MemoryBankController* GameBoy::memory_controller() {
-    return &m_memory_bank_controller;
-}
-
-Timer* GameBoy::timer() {
-    return &m_timer;
 }
