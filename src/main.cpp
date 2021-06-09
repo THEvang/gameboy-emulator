@@ -76,14 +76,17 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    const auto rom_path = argv[1];
-    const auto rom = load_rom(rom_path);
-    if (rom.empty()) {
+    char* rom_path = argv[1];
+
+    gb_Rom rom;
+    load_rom(&rom, rom_path);
+
+    if (!rom.data) {
         printf("Unable to find Rom: %s\n", rom_path);
         exit(1);
     }
 
-    GameBoy gameboy(rom);
+    GameBoy gameboy(rom.data, rom.size);
     render_main(&gameboy);
     return 0;
 }

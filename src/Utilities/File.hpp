@@ -1,7 +1,10 @@
 #pragma once
 
-#include <string>
-#include <vector>
 #include <cstdint>
 
-std::vector<uint8_t> load_rom(const std::string& path);
+struct gb_Rom {
+    uint8_t* data;
+    size_t size;
+};
+
+void load_rom(gb_Rom* rom, const char* path);

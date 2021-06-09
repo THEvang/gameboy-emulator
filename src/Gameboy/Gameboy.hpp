@@ -15,7 +15,7 @@
 class GameBoy {
 public:
 
-    explicit GameBoy(const std::vector<uint8_t>& rom);
+    GameBoy(uint8_t* rom_data, size_t rom_size);
     void run();
 
     Cpu* cpu();
@@ -27,7 +27,7 @@ public:
 
 private:
 
-    std::vector<uint8_t> m_cartridge_memory;
+    uint8_t* m_cartridge_memory;
     MemoryBankController m_memory_bank_controller;
     Cpu m_cpu;
     Timer m_timer;
