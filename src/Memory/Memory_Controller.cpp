@@ -4,11 +4,9 @@
 
 #include "Input/Joypad_Controller.hpp"
 
-MemoryBankController::MemoryBankController(uint8_t* cartridge_memory) 
-    : m_cartridge_memory(cartridge_memory) 
-{
-    m_bank_type = get_bank_type(m_cartridge_memory[0x0147]);
-}
+MemoryBankController::MemoryBankController(uint8_t* rom) 
+    : rom(rom) 
+{}
 
 uint8_t MemoryBankController::read(uint16_t address) const {
 
@@ -24,13 +22,22 @@ uint8_t MemoryBankController::read(uint16_t address) const {
         return read_joypad_input();        
     }
 
-    return internal_memory[address];
+    return memory[address];
 }
+
+void toggle_ram(MemoryBankController* mc, uint8_t data) {
+    if(data == 0) {
+        mc->ram_enabled = false;
+    } else if (data == 0xA0) {
+        mc->ram_enabled = true;
+    }
+}
+
 
 void MemoryBankController::write(uint16_t address, uint8_t data) {
 
     if(address <= 0x1FFF) {
-        ram_switching(data);
+        toggle_ram(this, data);
     } else if (address >= 0x2000 && address <= 0x3FFF) {
         set_lower_rom_bank_number(data);
     } else if (address >= 0x4000 && address <= 0x5FFF) {
@@ -47,22 +54,22 @@ void MemoryBankController::write(uint16_t address, uint8_t data) {
     } else if (address >= 0x6000 && address <= 0x7FFF) {
         set_banking_mode(data);
     } else if (address >= 0xA000 && address <= 0xBFFF) {
-        if(m_ram_enabled) {
-            internal_memory[address] = data;
+        if(ram_enabled) {
+            memory[address] = data;
         }
     } else if (address >= 0xE000 && address < 0xFE00) {
-        internal_memory[address] = data;
+        memory[address] = data;
         write(static_cast<uint16_t>(address - 0x2000), data);
     } else if (address >= 0xFEA0 && address < 0xFEFF) {
 
     } else if(address == 0xFF04) {
-        internal_memory[0xFF04] = 0;
+        memory[0xFF04] = 0;
     } else if (address == 0xFF44) {
-        internal_memory[0xFF44] = 0;
+        memory[0xFF44] = 0;
     } else if (address == 0xFF46) {
         dma_transfer(data);
     } else {
-        internal_memory[address] = data;
+        memory[address] = data;
     }
 }
 
@@ -74,13 +81,7 @@ void MemoryBankController::dma_transfer(uint8_t data) {
     }
 }
 
-void MemoryBankController::ram_switching(uint8_t data) {
-    if(data == 0) {
-        m_ram_enabled = false;
-    } else if (data == 0xA0) {
-        m_ram_enabled = true;
-    }
-}
+
 
 void MemoryBankController::set_lower_rom_bank_number(uint8_t data) {
 
@@ -122,22 +123,21 @@ void MemoryBankController::set_banking_mode(uint8_t data) {
 
 uint8_t MemoryBankController::read_from_rom_bank(uint16_t address) const {
 
-    
     if (address >= 0x4000 && address <= 0x7FFF) {
         const auto read_addr = static_cast<uint16_t>(address + (m_rom_bank - 1) * 0x4000);
-        return m_cartridge_memory[read_addr];
+        return rom[read_addr];
     }
     
-    return m_cartridge_memory[address];
+    return rom[address];
 }
 
 uint8_t MemoryBankController::read_from_ram(uint16_t address) const {   
-    return internal_memory[address];
+    return memory[address];
 }
 
 uint8_t MemoryBankController::read_joypad_input() const {
 
-    const auto data = internal_memory[0xFF00];
+    const auto data = memory[0xFF00];
 
     if(!test_bit_8bit(data, 5)) {
         return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
