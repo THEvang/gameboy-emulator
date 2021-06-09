@@ -7,8 +7,8 @@ uint8_t rotate_right(uint8_t value, size_t n);
 
 uint16_t combine_bytes(uint8_t upper, uint8_t lower);
 
-void set_bit(uint8_t& b, int n);
-void clear_bit(uint8_t& b, int n);
+void set_bit(uint8_t* b, int n);
+void clear_bit(uint8_t* b, int n);
 
 bool test_bit_8bit(uint8_t b, int n);
 bool test_bit_16bit(uint16_t b, int n);
@@ -25,5 +25,5 @@ bool overflows_16bit(uint16_t a, uint16_t b);
 bool underflows_8bit(uint8_t a, uint8_t b);
 bool underflows_16bit(uint16_t a, uint16_t b);
 
-void swap_nibbles(uint8_t& a);
+void swap_nibbles(uint8_t* a);
 uint8_t get_value(uint8_t a, int n);

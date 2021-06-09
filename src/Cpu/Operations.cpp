@@ -433,7 +433,7 @@ Instruction LD_SP_HL() {
     }, implied};
 }
 
-uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t* flags) {
     
     half_carry_8bit(first, second)             ? 
         set_bit(flags, Flag_Half_Carry)  :
@@ -457,7 +457,7 @@ Instruction ADD_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
 
-        cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -469,7 +469,7 @@ Instruction ADD_R(Cpu_Register src) {
         const auto a = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
         
-        cpu.registers[Register_A] = ADD_8bit(a, r, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADD_8bit(a, r, &(cpu.registers[Register_F]));
 
         constexpr auto cycles = 4;
         return cycles;
@@ -479,13 +479,13 @@ Instruction ADD_R(Cpu_Register src) {
 Instruction ADD_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t& flags) {
+uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t* flags) {
     
     overflows_16bit(first, second)                     ?
         set_bit(flags, Flag_Carry)   :
@@ -508,7 +508,7 @@ Instruction ADD_HL_RR(Cpu_Register r1, Cpu_Register r2) {
         const auto hl = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         const auto value = combine_bytes(cpu.registers[r1], cpu.registers[r2]);
 
-        const auto result = ADD_16bit(hl, value, cpu.registers[Register_F]);
+        const auto result = ADD_16bit(hl, value, &(cpu.registers[Register_F]));
 
         cpu.registers[Register_H] =  static_cast<uint8_t>(result >> 8u);
         cpu.registers[Register_L] =  static_cast<uint8_t>(result & 0xFFu);
@@ -522,7 +522,7 @@ Instruction ADD_HL_SP() {
     return {[](Cpu& cpu, Operand&) {
         
         const auto hl = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        const auto result = ADD_16bit(hl, cpu.stack_ptr, cpu.registers[Register_F]);
+        const auto result = ADD_16bit(hl, cpu.stack_ptr, &(cpu.registers[Register_F]));
 
         cpu.registers[Register_H] =  static_cast<uint8_t>(result >> 8u);
         cpu.registers[Register_L] =  static_cast<uint8_t>(result & 0xFFu);
@@ -532,7 +532,7 @@ Instruction ADD_HL_SP() {
     }, implied};
 }
 
-uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t SUB(uint8_t first, uint8_t second, uint8_t* flags) {
     
     half_borrow_8bit(first, second)            ?
         set_bit(flags,   Flag_Half_Carry)  :
@@ -555,7 +555,7 @@ uint8_t SUB(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction SUB_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -566,7 +566,7 @@ Instruction SUB_R(Cpu_Register src) {
         const auto acc = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
         
-        cpu.registers[Register_A] = SUB(acc, r, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SUB(acc, r, &(cpu.registers[Register_F]));
 
         constexpr auto cycles = 4;
         return cycles;
@@ -576,13 +576,13 @@ Instruction SUB_R(Cpu_Register src) {
 Instruction SUB_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-uint8_t INC(uint8_t value, uint8_t& flags) {
+uint8_t INC(uint8_t value, uint8_t* flags) {
     
     half_carry_8bit(value, 1)                 ?
         set_bit(flags, Flag_Half_Carry)  :
@@ -601,7 +601,7 @@ uint8_t INC(uint8_t value, uint8_t& flags) {
 Instruction INC_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
         auto r = cpu.registers[src];
-        cpu.registers[src] = INC(r, cpu.registers[Register_F]);
+        cpu.registers[src] = INC(r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -626,7 +626,7 @@ Instruction INC_ADDR_HL() {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
 
-        value = INC(value, cpu.registers[Register_F]);
+        value = INC(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 12;
@@ -642,7 +642,7 @@ Instruction INC_SP() {
     }, implied};
 }
 
-uint8_t DEC(uint8_t value, uint8_t& flags) {
+uint8_t DEC(uint8_t value, uint8_t* flags) {
     
     half_borrow_8bit(value, 1)                ?
         set_bit(flags, Flag_Half_Carry)  :
@@ -661,7 +661,7 @@ uint8_t DEC(uint8_t value, uint8_t& flags) {
 Instruction DEC_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto r = cpu.registers[src];
-        cpu.registers[src] = DEC(r, cpu.registers[Register_F]);
+        cpu.registers[src] = DEC(r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -685,7 +685,7 @@ Instruction DEC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = DEC(value, cpu.registers[Register_F]);
+        value = DEC(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
         constexpr auto cycles = 12;
         return cycles;
@@ -757,8 +757,8 @@ Instruction RRA() {
         const auto new_carry_flag = test_bit_8bit(a, 0);
         a = static_cast<uint8_t>(a >> 1u);
 
-        test_flag(*flags, Flag_Carry) ? set_bit(a, 7) 
-            : clear_bit(a, 7);
+        test_flag(*flags, Flag_Carry) ? set_bit(&a, 7) 
+            : clear_bit(&a, 7);
         
         cpu.registers[Register_A] =  a;
 
@@ -783,7 +783,7 @@ Instruction RLA() {
         const auto new_carry_flag = test_bit_8bit(a, 7);
         a =  static_cast<uint8_t>(a << 1u);
 
-        test_flag(*flags, Flag_Carry) ? set_bit(a, 0) : clear_bit(a, 0);
+        test_flag(*flags, Flag_Carry) ? set_bit(&a, 0) : clear_bit(&a, 0);
         
         cpu.registers[Register_A] =  a;
 
@@ -878,7 +878,7 @@ Instruction ADD_SP_R8() {
     }, immediate};    
 }
 
-uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t AND(uint8_t first, uint8_t second, uint8_t* flags) {
     
     first &= second;
 
@@ -895,7 +895,7 @@ uint8_t AND(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction AND_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -906,7 +906,7 @@ Instruction AND_R(Cpu_Register src) {
         const auto a = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
         
-        cpu.registers[Register_A] = AND(a, r, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = AND(a, r, &(cpu.registers[Register_F]));
 
         constexpr auto cycles = 4;
         return cycles;
@@ -916,13 +916,13 @@ Instruction AND_R(Cpu_Register src) {
 Instruction AND_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t XOR(uint8_t first, uint8_t second, uint8_t* flags) {
     
     first ^= second;
     first == 0 ? set_bit(flags, Flag_Zero) :
@@ -938,7 +938,7 @@ uint8_t XOR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction XOR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -949,7 +949,7 @@ Instruction XOR_R(Cpu_Register src) {
         auto a = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
 
-        a = XOR(a, r, cpu.registers[Register_F]);
+        a = XOR(a, r, &(cpu.registers[Register_F]));
 
         cpu.registers[Register_A] =  a;
 
@@ -961,13 +961,13 @@ Instruction XOR_R(Cpu_Register src) {
 Instruction XOR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t OR(uint8_t first, uint8_t second, uint8_t* flags) {
     
     first |= second;
     first == 0 ? set_bit(flags, Flag_Zero) :
@@ -983,7 +983,7 @@ uint8_t OR(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction OR_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -991,7 +991,7 @@ Instruction OR_D8() {
 
 Instruction OR_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
-        cpu.registers[Register_A] = OR(cpu.registers[Register_A], cpu.registers[src], cpu.registers[Register_F]);
+        cpu.registers[Register_A] = OR(cpu.registers[Register_A], cpu.registers[src], &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1000,13 +1000,13 @@ Instruction OR_R(Cpu_Register src) {
 Instruction OR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
 }
 
-void CP(uint8_t first, uint8_t second, uint8_t& flags) {
+void CP(uint8_t first, uint8_t second, uint8_t* flags) {
 
     underflows_8bit(first, second)         ?
         set_bit(flags, static_cast<int>(Flag_Carry))   :
@@ -1026,7 +1026,7 @@ void CP(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction CP_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        CP(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        CP(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1036,7 +1036,7 @@ Instruction CP_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto a = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
-        CP(a, r, cpu.registers[Register_F]);
+        CP(a, r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1045,7 +1045,7 @@ Instruction CP_R(Cpu_Register src) {
 Instruction CP_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        CP(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        CP(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1081,9 +1081,9 @@ Instruction POP_RR(Cpu_Register r1, Cpu_Register r2) {
     }, implied};
 }
 
-uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t ADC(uint8_t first, uint8_t second, uint8_t* flags) {
     
-    const auto carry_value = test_bit_8bit(flags, Flag_Carry) ? 1 : 0;
+    const auto carry_value = test_bit_8bit(*flags, Flag_Carry) ? 1 : 0;
 
     half_carry_8bit(first, second)       ?
         set_bit(flags,      Flag_Half_Carry)          :
@@ -1095,13 +1095,13 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
 
     first = static_cast<uint8_t>(first + second);
 
-    if(!test_bit_8bit(flags, Flag_Half_Carry)) {
+    if(!test_bit_8bit(*flags, Flag_Half_Carry)) {
         half_carry_8bit(first, static_cast<uint8_t>(carry_value))       ?
         set_bit(flags,      Flag_Half_Carry)          :
         clear_bit(flags,    Flag_Half_Carry);
     }
     
-    if(!test_bit_8bit(flags, Flag_Carry)) {
+    if(!test_bit_8bit(*flags, Flag_Carry)) {
         overflows_8bit(first, static_cast<uint8_t>(carry_value))        ?
             set_bit(flags,      Flag_Carry)               :
             clear_bit(flags,    Flag_Carry);
@@ -1120,7 +1120,7 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t& flags) {
 Instruction ADC_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1130,7 +1130,7 @@ Instruction ADC_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto r = cpu.registers[src];
         const auto a = cpu.registers[Register_A];
-        cpu.registers[Register_A] = ADC(a, r, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADC(a, r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1139,7 +1139,7 @@ Instruction ADC_R(Cpu_Register src) {
 Instruction ADC_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
-        cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -1173,9 +1173,9 @@ Instruction LD_ADDR_C_A() {
     }, implied};
 }
 
-uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
+uint8_t SBC(uint8_t first, uint8_t second, uint8_t* flags) {
     
-    const auto carry_value = test_bit_8bit(flags, Flag_Carry) ? 1 : 0;
+    const auto carry_value = test_bit_8bit(*flags, Flag_Carry) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
         set_bit(flags, Flag_Half_Carry)  :
@@ -1187,13 +1187,13 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t& flags) {
     
     first = static_cast<uint8_t>(first - second);
 
-    if(!test_bit_8bit(flags, Flag_Half_Carry)) {
+    if(!test_bit_8bit(*flags, Flag_Half_Carry)) {
         half_borrow_8bit(first, static_cast<uint8_t>(carry_value))       ?
             set_bit(flags, Flag_Half_Carry)  :
             clear_bit(flags, Flag_Half_Carry);
     }
 
-    if(!test_bit_8bit(flags, Flag_Carry)) {
+    if(!test_bit_8bit(*flags, Flag_Carry)) {
         underflows_8bit(first, static_cast<uint8_t>(carry_value))         ?
             set_bit(flags, Flag_Carry)   :
             clear_bit(flags, Flag_Carry);
@@ -1213,7 +1213,7 @@ Instruction SBC_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
         const auto a = cpu.registers[Register_A];
-        cpu.registers[Register_A] = SBC(a, value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SBC(a, value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -1223,7 +1223,7 @@ Instruction SBC_R(Cpu_Register src) {
     return {[src](Cpu& cpu, Operand&) {
         const auto a = cpu.registers[Register_A];
         const auto r = cpu.registers[src];
-        cpu.registers[Register_A] = SBC(a, r, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SBC(a, r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -1233,7 +1233,7 @@ Instruction SBC_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
         const auto value = std::get<uint8_t>(op);
         auto a = cpu.registers[Register_A];
-        cpu.registers[Register_A] = SBC(a, value, cpu.registers[Register_F]);
+        cpu.registers[Register_A] = SBC(a, value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};

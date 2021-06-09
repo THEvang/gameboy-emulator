@@ -60,11 +60,11 @@ bool test_flag(uint8_t flags, Cpu_Flag flag) {
 }
 
 void set_flag(uint8_t* flags, Cpu_Flag flag) {
-    set_bit(*flags, flag);
+    set_bit(flags, flag);
 }
 
 void clear_flag(uint8_t* flags, Cpu_Flag flag) {
-    clear_bit(*flags, flag);
+    clear_bit(flags, flag);
 }
 
 //Addressing Modes
