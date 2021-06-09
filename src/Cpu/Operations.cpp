@@ -71,7 +71,6 @@ Instruction EI() {
     }, implied};
 }
 
-
 int jump_relative(Cpu& cpu, Operand& op) {
     const auto distance = static_cast<int8_t>(std::get<uint8_t>(op));
     cpu.program_counter = static_cast<uint16_t>(cpu.program_counter + distance);
@@ -86,25 +85,25 @@ Instruction JR() {
 
 Instruction JR_NZ() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Flag_Zero) ? jump_relative(cpu, op) : 8;
+        return !test_flag(cpu.registers[Register_F], Flag_Zero) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Zero) ? jump_relative(cpu, op) : 8;
+        return test_flag(cpu.registers[Register_F], Flag_Zero) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Flag_Carry) ? jump_relative(cpu, op) : 8;
+        return !test_flag(cpu.registers[Register_F], Flag_Carry) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
 Instruction JR_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Carry) ? jump_relative(cpu, op) : 8;
+        return test_flag(cpu.registers[Register_F], Flag_Carry) ? jump_relative(cpu, op) : 8;
     }, immediate};
 }
 
@@ -125,26 +124,26 @@ Instruction RET() {
 }
 
 Instruction RET_NZ() {
-    return {[](Cpu& cpu, Operand&) {        
-        return !cpu.test_flag(Flag_Zero) ? ret(cpu) : 8;
+    return {[](Cpu& cpu, Operand&) {  
+        return !test_flag(cpu.registers[Register_F], Flag_Zero) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_Z() {
     return {[](Cpu& cpu, Operand&) {
-        return cpu.test_flag(Flag_Zero) ? ret(cpu) : 8; 
+        return test_flag(cpu.registers[Register_F], Flag_Zero) ? ret(cpu) : 8; 
     }, implied};
 }
 
 Instruction RET_NC() {
     return {[](Cpu& cpu, Operand&) {
-        return !cpu.test_flag(Flag_Carry) ? ret(cpu) : 8;
+        return !test_flag(cpu.registers[Register_F], Flag_Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
 Instruction RET_C() {
     return {[](Cpu& cpu, Operand&) {
-       return cpu.test_flag(Flag_Carry) ? ret(cpu) : 8;
+       return test_flag(cpu.registers[Register_F], Flag_Carry) ? ret(cpu) : 8;
     }, implied};
 }
 
@@ -169,26 +168,26 @@ Instruction JUMP() {
 }
 
 Instruction JUMP_NZ() {
-    return {[](Cpu& cpu, Operand& op) {        
-        return !cpu.test_flag(Flag_Zero) ? jump(cpu, op) : 12;
+    return {[](Cpu& cpu, Operand& op) {
+        return !test_flag(cpu.registers[Register_F], Flag_Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Zero) ? jump(cpu, op) : 12;
+        return test_flag(cpu.registers[Register_F], Flag_Zero) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Flag_Carry) ? jump(cpu, op) : 12;
+        return !test_flag(cpu.registers[Register_F], Flag_Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction JUMP_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Carry) ? jump(cpu, op) : 12;
+        return test_flag(cpu.registers[Register_F], Flag_Carry) ? jump(cpu, op) : 12;
     }, immediate_extended};
 }
 
@@ -224,30 +223,33 @@ Instruction CALL() {
 
 Instruction CALL_NZ() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Flag_Zero) ? call(cpu, op) : 12;
+        return !test_flag(cpu.registers[Register_F], Flag_Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_Z() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Zero) ? call(cpu, op) : 12;
+        return test_flag(cpu.registers[Register_F], Flag_Zero) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_NC() {
     return {[](Cpu& cpu, Operand& op) {
-        return !cpu.test_flag(Flag_Carry) ? call(cpu, op) : 12;
+        return !test_flag(cpu.registers[Register_F], Flag_Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction CALL_C() {
     return {[](Cpu& cpu, Operand& op) {
-        return cpu.test_flag(Flag_Carry) ? call(cpu, op) : 12;
+        return test_flag(cpu.registers[Register_F], Flag_Carry) ? call(cpu, op) : 12;
     }, immediate_extended};
 }
 
 Instruction LD_R_R(Cpu_Register dst, Cpu_Register src) {
     return {[dst, src](Cpu& cpu, Operand&){
+
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
         cpu.registers[dst] =  cpu.registers[src];
         return 4;
     }, implied};
@@ -392,21 +394,23 @@ Instruction LD_HL_SPR8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto distance = std::get<uint8_t>(op);
 
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
         half_carry_8bit(static_cast<uint8_t>(cpu.stack_ptr), distance)     ?
-            cpu.set_flag(Flag_Half_Carry)  :
-            cpu.clear_flag(Flag_Half_Carry);
+            set_flag(flags, Flag_Half_Carry)  :
+            clear_flag(flags, Flag_Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.stack_ptr), distance)  ? 
-            cpu.set_flag(Flag_Carry)   :
-            cpu.clear_flag(Flag_Carry);
+            set_flag(flags, Flag_Carry)   :
+            clear_flag(flags, Flag_Carry);
 
         const auto result = static_cast<uint16_t>(cpu.stack_ptr + static_cast<int8_t>(distance));
         cpu.registers[Register_H] =  static_cast<uint8_t>(result >> 8u);
         cpu.registers[Register_L] =  static_cast<uint8_t>(result & 0xFFu);
 
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -698,9 +702,12 @@ Instruction DEC_SP() {
 
 Instruction SCF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
-        cpu.set_flag(Flag_Carry);
+
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
+        set_flag(flags, Flag_Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -708,10 +715,14 @@ Instruction SCF() {
 
 Instruction CCF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
-        cpu.test_flag(Flag_Carry) ? 
-            cpu.clear_flag(Flag_Carry) : cpu.set_flag(Flag_Carry);
+
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
+
+        test_flag(*flags, Flag_Carry) ? 
+            clear_flag(flags, Flag_Carry) : set_flag(flags, Flag_Carry);
         constexpr auto cycles = 4;
         return cycles;
     }, implied};
@@ -720,14 +731,16 @@ Instruction CCF() {
 Instruction RRCA() {
     return {[](Cpu& cpu, Operand&) {
 
-        test_bit_8bit(cpu.registers[Register_A], 0) ? cpu.set_flag(Flag_Carry)
-            : cpu.clear_flag(Flag_Carry);
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        test_bit_8bit(cpu.registers[Register_A], 0) ? set_flag(flags, Flag_Carry)
+            : clear_flag(flags, Flag_Carry);
         
         cpu.registers[Register_A] = rotate_right(cpu.registers[Register_A], 1);
 
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -736,23 +749,25 @@ Instruction RRCA() {
 
 Instruction RRA() {
     return {[](Cpu& cpu, Operand&) {
+
+        uint8_t* flags = &(cpu.registers[Register_F]);
         
         auto a = cpu.registers[Register_A];
 
         const auto new_carry_flag = test_bit_8bit(a, 0);
         a = static_cast<uint8_t>(a >> 1u);
 
-        cpu.test_flag(Flag_Carry) ? set_bit(a, 7) 
+        test_flag(*flags, Flag_Carry) ? set_bit(a, 7) 
             : clear_bit(a, 7);
         
         cpu.registers[Register_A] =  a;
 
-        new_carry_flag ? cpu.set_flag(Flag_Carry) 
-            : cpu.clear_flag(Flag_Carry);
+        new_carry_flag ? set_flag(flags, Flag_Carry) 
+            : clear_flag(flags, Flag_Carry);
         
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
     
         constexpr auto cycles = 4;
         return cycles;
@@ -763,21 +778,20 @@ Instruction RLA() {
     return {[](Cpu& cpu, Operand&) {
         
         auto a = cpu.registers[Register_A];
+        uint8_t* flags = &(cpu.registers[Register_F]);
 
         const auto new_carry_flag = test_bit_8bit(a, 7);
         a =  static_cast<uint8_t>(a << 1u);
 
-        cpu.test_flag(Flag_Carry) ? set_bit(a, 0)
-            : clear_bit(a, 0);
+        test_flag(*flags, Flag_Carry) ? set_bit(a, 0) : clear_bit(a, 0);
         
         cpu.registers[Register_A] =  a;
 
-        new_carry_flag ? cpu.set_flag(Flag_Carry)
-            : cpu.clear_flag(Flag_Carry);
+        new_carry_flag ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
@@ -786,16 +800,17 @@ Instruction RLA() {
 
 Instruction RLCA() {
     return {[](Cpu& cpu, Operand&) {
-        auto a = cpu.registers[Register_A];
 
-        test_bit_8bit(a, 7) ? cpu.set_flag(Flag_Carry) : 
-            cpu.clear_flag(Flag_Carry);
+        auto a = cpu.registers[Register_A];
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        test_bit_8bit(a, 7) ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
         cpu.registers[Register_A] = rotate_left(a, 1);
 
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
-        cpu.clear_flag(Flag_Half_Carry);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
+        clear_flag(flags, Flag_Half_Carry);
 
         constexpr auto cycles = 4;
         return cycles;
@@ -806,28 +821,29 @@ Instruction DAA() {
     return {[](Cpu& cpu, Operand&) {
 
         auto a = cpu.registers[Register_A];
-        if(!cpu.test_flag(Flag_Sub)) {
-            if(cpu.test_flag(Flag_Carry) || a > 0x99) {
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        if(!test_flag(*flags, Flag_Sub)) {
+            if(test_flag(*flags, Flag_Carry) || a > 0x99) {
                 a += 0x60;
-                cpu.set_flag(Flag_Carry);
+                set_flag(flags, Flag_Carry);
             }
 
-            if(cpu.test_flag(Flag_Half_Carry) || (a & 0x0Fu) > 0x09) {
+            if(test_flag(*flags, Flag_Half_Carry) || (a & 0x0Fu) > 0x09) {
                 a += 0x06;
             }
         } else {
-            if(cpu.test_flag(Flag_Carry)) {
+            if(test_flag(*flags, Flag_Carry)) {
                 a -= 0x60;
             }
-            if(cpu.test_flag(Flag_Half_Carry)) {
+            if(test_flag(*flags, Flag_Half_Carry)) {
                 a -= 0x06;
             }
         }
 
-        cpu.clear_flag(Flag_Half_Carry);
+        clear_flag(flags, Flag_Half_Carry);
 
-        a == 0 ? cpu.set_flag(Flag_Zero) :
-            cpu.clear_flag(Flag_Zero);
+        a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
         cpu.registers[Register_A] =  a;
 
@@ -840,20 +856,22 @@ Instruction ADD_SP_R8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto distance = std::get<uint8_t>(op);
 
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
         half_carry_8bit(static_cast<uint8_t>(cpu.stack_ptr), distance)     ?
-            cpu.set_flag(Flag_Half_Carry)  :
-            cpu.clear_flag(Flag_Half_Carry);
+            set_flag(flags, Flag_Half_Carry)  :
+            clear_flag(flags, Flag_Half_Carry);
 
 
         overflows_8bit(static_cast<uint8_t>(cpu.stack_ptr), distance)  ? 
-            cpu.set_flag(Flag_Carry)   :
-            cpu.clear_flag(Flag_Carry);
+            set_flag(flags, Flag_Carry)   :
+            clear_flag(flags, Flag_Carry);
 
 
         cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr + static_cast<int8_t>(distance));
 
-        cpu.clear_flag(Flag_Zero);
-        cpu.clear_flag(Flag_Sub);
+        clear_flag(flags, Flag_Zero);
+        clear_flag(flags, Flag_Sub);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -1270,8 +1288,10 @@ Instruction CPL() {
         a ^= 0xFF;
         cpu.registers[Register_A] =  a;
 
-        cpu.set_flag(Flag_Sub);
-        cpu.set_flag(Flag_Half_Carry);
+        uint8_t* flags = &(cpu.registers[Register_F]);
+
+        set_flag(flags, Flag_Sub);
+        set_flag(flags, Flag_Half_Carry);
         
         constexpr auto cycles = 4;
         return cycles;
