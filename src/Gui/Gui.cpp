@@ -1,40 +1,10 @@
 #include "Gui/Gui.hpp"
 
-#include <stdio.h>
-
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include <SDL2/SDL.h>
-#include <GL/glew.h>    // Initialize with glewInit()
-
-Gui::Gui() {
-
-    init_sdl();
-    m_window = make_sdl_window();        
-    m_gl_context = SDL_GL_CreateContext(m_window);
-            
-    SDL_GL_MakeCurrent(m_window, m_gl_context);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
-
-    init_glew();
-    init_imgui();
-
-}
-
-Gui::~Gui() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
-    SDL_GL_DeleteContext(m_gl_context);
-    SDL_Quit();
-}
-
-void Gui::init_sdl() {
+void init_gui(SDL_Window** window) {
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
         printf("SDL ERROR: %s\n", SDL_GetError());
-        exit(1);        
+        exit(1);
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
@@ -45,29 +15,23 @@ void Gui::init_sdl() {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-}
 
-SDL_Window* make_sdl_window() {
-
-    const auto window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-
-    auto window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", 
+    *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
         1280, 
         720, 
-        window_flags);
+        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     
 
     if(window == nullptr) {
         printf("Failed to create SDL Window: %s\n", SDL_GetError());
-        return nullptr;
+        exit(1);
     }
 
-    return window;        
-}
-
-void Gui::init_glew() {
+    SDL_GLContext gl_context = SDL_GL_CreateContext(*window);
+    SDL_GL_MakeCurrent(*window, gl_context);
+    SDL_GL_SetSwapInterval(1); // Enable vsync
 
     auto err = glewInit();
     if (err != GLEW_OK)
@@ -75,36 +39,56 @@ void Gui::init_glew() {
         printf("GLEW ERROR: %s\n", glewGetErrorString(err));
         exit(1);
     }
-}
-
-void Gui::init_imgui() {
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    auto io = ImGui::GetIO();
+
     ImGui::StyleColorsDark();
 
-    ImGui_ImplSDL2_InitForOpenGL(m_window, m_gl_context);
+    ImGui_ImplSDL2_InitForOpenGL(*window, gl_context);
+
     const char* glsl_version = "#version 130";
     ImGui_ImplOpenGL3_Init(glsl_version);
+}
+
+void render_gui(SDL_Window* window, GameBoy* gameboy) {
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(m_window);
-}
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
 
-SDL_Window* Gui::window() {
-    return m_window;
-}
+    render_cpu(*gameboy);
+    render_ppu(*gameboy);
+    render_cartridge_data(*gameboy);
+    //render_disassembly(*gameboy);
+    render_menu();
 
-void Gui::render() {
-    
-    auto io = ImGui::GetIO();
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     // Rendering
+    auto io = ImGui::GetIO();
     ImGui::Render();
-    glViewport(0, 0, static_cast<int>(io.DisplaySize.x), static_cast<int>(io.DisplaySize.y));
+    glViewport(0, 0, (int) io.DisplaySize.x, (int) io.DisplaySize.y);
     glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(window);
+}
+
+
+Gui::Gui() {
+    init_gui(&window);
+}
+
+Gui::~Gui() {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+    // SDL_GL_DeleteContext(m_gl_context);
+    SDL_Quit();
+}
+
+void Gui::render(GameBoy* gb) {
+    render_gui(window, gb);    
 }

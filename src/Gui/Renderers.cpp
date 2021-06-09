@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdio.h>
 
 #include "Gui/Renderers.hpp"
 #include "imgui/imgui.h"
@@ -36,7 +36,7 @@ void render_ppu(GameBoy& gameboy) {
     glBindTexture(GL_TEXTURE_2D, texture);
 
     if(glGetError() != GL_NO_ERROR) {
-        std::cerr << "Failed to bind texture\n";
+        printf("Failed to bind texture\n");
     }
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

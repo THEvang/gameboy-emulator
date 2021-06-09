@@ -1,9 +1,15 @@
 #pragma once
 
-#include "imgui/imgui.h"
-#include <SDL2/SDL.h>
+#include <stdio.h>
 
-SDL_Window* make_sdl_window();
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include <SDL2/SDL.h>
+#include <GL/glew.h>    // Initialize with glewInit()
+#include "Gui/Renderers.hpp"
+
+void init_gui(SDL_Window** window);
 
 class Gui {
 public:
@@ -11,15 +17,6 @@ public:
     Gui();
     ~Gui();
 
-    void render();
-    SDL_Window* window();
-  
-private:
-
-    void init_sdl();
-    void init_glew();
-    void init_imgui();
-    
-    SDL_Window* m_window;
-    SDL_GLContext m_gl_context;
+    void render(GameBoy*);
+    SDL_Window* window;
 };
