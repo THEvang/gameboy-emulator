@@ -1,11 +1,8 @@
 #pragma once
 
 #include <string>
-#include <bitset>
 #include <vector>
 #include <array>
-
-#include <stdexcept>
 
 enum class Bank_Type {
     Rom_Only,
