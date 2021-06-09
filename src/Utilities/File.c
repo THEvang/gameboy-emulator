@@ -1,4 +1,4 @@
-#include "Utilities/File.hpp"
+#include "File.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@ void load_rom(gb_Rom* rom, const char* path) {
     FILE* rom_file;
     rom_file = fopen(path, "r");
     if(!rom_file) {
-        rom->data = nullptr;
+        rom->data = NULL;
         return;
     }
 

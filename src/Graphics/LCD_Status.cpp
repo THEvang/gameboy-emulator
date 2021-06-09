@@ -1,7 +1,7 @@
 #include "Graphics/LCD_Status.hpp"
 
 #include "Memory/Memory_Controller.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)

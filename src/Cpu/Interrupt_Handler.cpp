@@ -2,7 +2,7 @@
 
 #include "Memory/Memory_Controller.hpp"
 #include "Cpu/Cpu.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 
 Interrupt_Handler::Interrupt_Handler(MemoryBankController* memory_controller)
     : m_memory_bank_controller(memory_controller)

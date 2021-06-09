@@ -1,5 +1,5 @@
 #include "Graphics/PPU.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.hpp"
 
 PPU::PPU(MemoryBankController* memory_controller)

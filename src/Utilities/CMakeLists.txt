@@ -1,7 +1,7 @@
 target_sources(gb-core 
     PRIVATE
-    "File.hpp"
-    "File.cpp"
-    BitOperations.hpp
-    BitOperations.cpp
+    "File.h"
+    "File.c"
+    BitOperations.h
+    BitOperations.c
 )

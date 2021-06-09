@@ -1,6 +1,6 @@
 #include "Memory/Memory_Controller.hpp"
 
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 
 #include "Input/Joypad_Controller.hpp"
 

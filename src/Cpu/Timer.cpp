@@ -1,5 +1,5 @@
 #include "Timer.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.hpp"
 
 Timer::Timer(MemoryBankController* memory) 
