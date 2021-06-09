@@ -108,7 +108,7 @@ void render_cpu(GameBoy& gameboy) {
         ImGui::Text("Register %s: %i.", register_name.c_str(), cpu->registers[reg]);
     }
 
-    for(auto flag_index = 4; flag_index < 7; flag_index++) {
+    for(auto flag_index = 4; flag_index <= 7; flag_index++) {
         const auto flag_name = to_name((Cpu_Flag) flag_index);
         auto flag_status = test_flag(cpu->registers[Register_F], (Cpu_Flag) flag_index);
         ImGui::Text("%s Flag: ", flag_name.c_str());

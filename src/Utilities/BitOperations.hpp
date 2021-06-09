@@ -26,4 +26,3 @@ bool underflows_8bit(uint8_t a, uint8_t b);
 bool underflows_16bit(uint16_t a, uint16_t b);
 
 void swap_nibbles(uint8_t* a);
-uint8_t get_value(uint8_t a, int n);
