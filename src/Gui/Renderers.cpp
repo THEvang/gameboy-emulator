@@ -124,30 +124,30 @@ void render_cartridge_data(GameBoy& gameboy) {
     std::string mbc_render {};
 
     switch(mbc_type) {
-        case Bank_Type::Rom_Only:
+        case Bank_Rom_Only:
             mbc_render = "Rom only";
         break;
-        case Bank_Type::MBC_1:
+        case Bank_MBC_1:
             mbc_render = "MBC 1";
         break;
 
-        case Bank_Type::MBC_2:
+        case Bank_MBC_2:
             mbc_render = "MBC 2";
         break;
 
-        case Bank_Type::MBC_3:
+        case Bank_MBC_3:
             mbc_render = "MBC 3";
         break;
 
-        case Bank_Type::MBC_5:
+        case Bank_MBC_5:
             mbc_render = "MBC 5";
         break;
 
-        case Bank_Type::MBC_6:
+        case Bank_MBC_6:
             mbc_render = "MBC 6";
         break;
 
-        case Bank_Type::MBC_7:
+        case Bank_MBC_7:
             mbc_render = "MBC 7";
         break;
 
