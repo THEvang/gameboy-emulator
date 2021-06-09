@@ -16,39 +16,32 @@ GameBoy::GameBoy(const std::vector<uint8_t>& rom)
 
 void GameBoy::run() {
 
-    try {
-        
-        const auto opcode = m_cpu.memory_controller->read(m_cpu.program_counter);
+    const auto opcode = m_cpu.memory_controller->read(m_cpu.program_counter);
 
-        auto instruction = fetch(static_cast<Opcode>(opcode));
+    auto instruction = fetch(static_cast<Opcode>(opcode));
 
-        auto cycles = 4;
-        if(!m_cpu.is_halted) {
-            auto operand = instruction.read_operand(m_cpu);
-            cycles = instruction.execute(m_cpu, operand);
-        } else {
-            m_cpu.is_halted = m_interrupt_handler.should_exit_halt();
-        }
-
-        m_timer.increment(cycles);
-        m_ppu.step(cycles);
-            
-        if(m_cpu.interrupts_enabled) {
-            const auto interrupt_cycles = m_interrupt_handler.interrupts(m_cpu);
-            m_timer.increment(interrupt_cycles);
-        }
-
-        if(m_cpu.should_enable_interrupts) {
-            m_cpu.interrupts_enabled = true;
-            m_cpu.should_enable_interrupts = false;
-        } else if(m_cpu.should_disable_interrupts) {
-            m_cpu.interrupts_enabled = false;
-            m_cpu.should_disable_interrupts = false;
-        }
+    auto cycles = 4;
+    if(!m_cpu.is_halted) {
+        auto operand = instruction.read_operand(m_cpu);
+        cycles = instruction.execute(m_cpu, operand);
+    } else {
+        m_cpu.is_halted = m_interrupt_handler.should_exit_halt();
     }
-    catch (std::exception& err)  {
-        printf("%s\n", err.what());
-        exit(1);
+
+    m_timer.increment(cycles);
+    m_ppu.step(cycles);
+        
+    if(m_cpu.interrupts_enabled) {
+        const auto interrupt_cycles = m_interrupt_handler.interrupts(m_cpu);
+        m_timer.increment(interrupt_cycles);
+    }
+
+    if(m_cpu.should_enable_interrupts) {
+        m_cpu.interrupts_enabled = true;
+        m_cpu.should_enable_interrupts = false;
+    } else if(m_cpu.should_disable_interrupts) {
+        m_cpu.interrupts_enabled = false;
+        m_cpu.should_disable_interrupts = false;
     }
 }
 
