@@ -36,10 +36,10 @@ void MemoryBankController::write(uint16_t address, uint8_t data) {
     } else if (address >= 0x4000 && address <= 0x5FFF) {
 
         switch (m_banking_mode) {
-            case BankingMode::RAM:
+            case Banking_Mode_RAM:
                 set_ram_bank_number(data);
                 break;
-            case BankingMode::ROM:
+            case Banking_Mode_ROM:
                 set_upper_rom_bank_number(data);
                 break;
         }
@@ -114,9 +114,9 @@ void MemoryBankController::set_ram_bank_number(uint8_t data) {
 
 void MemoryBankController::set_banking_mode(uint8_t data) {
     if(data == 0) {
-        m_banking_mode = BankingMode::ROM;
+        m_banking_mode = Banking_Mode_ROM;
     } else if (data == 1) {
-        m_banking_mode = BankingMode::RAM;
+        m_banking_mode = Banking_Mode_RAM;
     }
 }
 

@@ -2,9 +2,9 @@
 
 #include "Memory/Cartridge.hpp"
 
-enum class BankingMode {
-    ROM,
-    RAM
+enum BankingMode {
+    Banking_Mode_ROM,
+    Banking_Mode_RAM
 };
 
 class MemoryBankController {
@@ -19,12 +19,12 @@ public:
 
 private:
 
-    Bank_Type m_bank_type = Bank_Type::Uknown;
+    Bank_Type m_bank_type = Bank_Uknown;
 
     uint8_t m_ram_bank = 1;
     uint8_t m_rom_bank = 1;
     bool m_ram_enabled = false;
-    BankingMode m_banking_mode = BankingMode::ROM;
+    BankingMode m_banking_mode = Banking_Mode_ROM;
 
     void special_writes(uint16_t address);
     void dma_transfer(uint8_t data);
