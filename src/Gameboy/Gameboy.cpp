@@ -7,12 +7,14 @@
 GameBoy::GameBoy(const std::vector<uint8_t>& rom)
     : m_cartridge_memory(rom)
     , m_memory_bank_controller(m_cartridge_memory) 
-    , m_cpu(&m_memory_bank_controller)
     , m_timer(&m_memory_bank_controller)
     , m_interrupt_handler(&m_memory_bank_controller)
     , m_ppu(&m_memory_bank_controller)
     , m_joypad_controller(&m_interrupt_handler)
-    {}
+    {
+        m_cpu.memory_controller = &m_memory_bank_controller;
+        set_initial_state(&m_cpu);
+    }
 
 void GameBoy::run() {
 

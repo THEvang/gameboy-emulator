@@ -26,9 +26,6 @@ enum Cpu_Flag {
 using Operand = std::variant<uint8_t, uint16_t, int8_t>;
 
 struct Cpu {
-
-    explicit Cpu(MemoryBankController* memory_controller);
-
     uint16_t stack_ptr = 0xFFFE;
     uint16_t program_counter = 0x0100;
 
@@ -42,6 +39,8 @@ struct Cpu {
     bool is_halted = false;
     uint8_t registers[8];
 };
+
+void set_initial_state(Cpu* cpu);
 
 bool test_flag(uint8_t flags, Cpu_Flag flag);
 void set_flag(uint8_t* flags, Cpu_Flag flag);
