@@ -10,7 +10,7 @@
 void render_disassembly(GameBoy& gameboy) {
 
     static Ring_Buffer<Instruction_Info, 20> history;
-    const auto opcode = gameboy.memory_controller()->read(gameboy.cpu()->program_counter);
+    const auto opcode = gameboy.memory_bank_controller.read(gameboy.cpu.program_counter);
     const auto instruction = disassemble(static_cast<Opcode>(opcode));
     history.write(instruction);
 
@@ -95,22 +95,20 @@ std::string to_name(Cpu_Flag flag) {
     }
 }
 
-void render_cpu(GameBoy& gameboy) {
-    
-    const auto cpu = gameboy.cpu();
+void render_cpu(GameBoy& gb) {
 
     ImGui::Begin("Cpu!");
-    ImGui::Text("Current Opcode: %i.", cpu->memory_controller->read(cpu->program_counter));
+    ImGui::Text("Current Opcode: %i.", gb.cpu.memory_controller->read(gb.cpu.program_counter));
 
     for(auto reg_index = 0; reg_index < 7; reg_index++) {
         const auto reg = static_cast<Cpu_Register>(reg_index);
         const auto register_name = to_name(reg);
-        ImGui::Text("Register %s: %i.", register_name.c_str(), cpu->registers[reg]);
+        ImGui::Text("Register %s: %i.", register_name.c_str(), gb.cpu.registers[reg]);
     }
 
     for(auto flag_index = 4; flag_index <= 7; flag_index++) {
         const auto flag_name = to_name((Cpu_Flag) flag_index);
-        auto flag_status = test_flag(cpu->registers[Register_F], (Cpu_Flag) flag_index);
+        auto flag_status = test_flag(gb.cpu.registers[Register_F], (Cpu_Flag) flag_index);
         ImGui::Text("%s Flag: ", flag_name.c_str());
         ImGui::SameLine();
         ImGui::Checkbox("", &flag_status);
@@ -121,7 +119,7 @@ void render_cpu(GameBoy& gameboy) {
 void render_cartridge_data(GameBoy& gameboy) {
     
     ImGui::Begin("Cartridge Header");
-    const auto mbc_identifier = gameboy.memory_controller()->read(0x0147);
+    const auto mbc_identifier = gameboy.memory_bank_controller.read(0x0147);
     const auto mbc_type = get_bank_type(mbc_identifier);
     std::string mbc_render {};
 

@@ -15,7 +15,7 @@
 void render_main(GameBoy* gameboy) {
 
     Keyboard_Emitter keyboard_emitter;
-    keyboard_emitter.add_observer(gameboy->joypad_controller());
+    keyboard_emitter.add_observer(&(gameboy->joypad_controller));
 
     SDL_SetEventFilter(keyboard_filter, static_cast<void*>(keyboard_emitter.get_queue()));
 
