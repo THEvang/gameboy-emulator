@@ -73,7 +73,10 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    GameBoy gameboy(rom.data, rom.size);
+    MemoryBankController mc;
+    mc.rom = rom.data;
+
+    GameBoy gameboy(&mc);
     render_main(&gameboy);
     return 0;
 }
