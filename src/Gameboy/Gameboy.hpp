@@ -28,10 +28,10 @@ public:
 private:
 
     Memory m_cartridge_memory;
-    Joypad_Controller m_joypad_controller;
     MemoryBankController m_memory_bank_controller;
     Cpu m_cpu;
     Timer m_timer;
     Interrupt_Handler m_interrupt_handler;
     PPU m_ppu;
+    Joypad_Controller m_joypad_controller;
 };
