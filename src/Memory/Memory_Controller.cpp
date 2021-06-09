@@ -4,10 +4,10 @@
 
 #include "Input/Joypad_Controller.hpp"
 
-MemoryBankController::MemoryBankController(Memory& cartridge_memory) 
+MemoryBankController::MemoryBankController(uint8_t* cartridge_memory) 
     : m_cartridge_memory(cartridge_memory) 
 {
-    m_bank_type = get_bank_type(m_cartridge_memory.read(0x0147));
+    m_bank_type = get_bank_type(m_cartridge_memory[0x0147]);
 }
 
 uint8_t MemoryBankController::read(uint16_t address) const {
@@ -125,10 +125,10 @@ uint8_t MemoryBankController::read_from_rom_bank(uint16_t address) const {
     
     if (address >= 0x4000 && address <= 0x7FFF) {
         const auto read_addr = static_cast<uint16_t>(address + (m_rom_bank - 1) * 0x4000);
-        return m_cartridge_memory.read(read_addr);
+        return m_cartridge_memory[read_addr];
     }
     
-    return m_cartridge_memory.read(address);
+    return m_cartridge_memory[address];
 }
 
 uint8_t MemoryBankController::read_from_ram(uint16_t address) const {   

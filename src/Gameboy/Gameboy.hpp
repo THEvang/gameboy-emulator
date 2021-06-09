@@ -1,7 +1,7 @@
 #pragma once
 
+#include <vector>
 #include "Memory/Memory_Controller.hpp"
-#include "Memory/Memory.hpp"
 
 #include "Cpu/Cpu.hpp"
 #include "Cpu/Timer.hpp"
@@ -27,7 +27,7 @@ public:
 
 private:
 
-    Memory m_cartridge_memory;
+    std::vector<uint8_t> m_cartridge_memory;
     MemoryBankController m_memory_bank_controller;
     Cpu m_cpu;
     Timer m_timer;

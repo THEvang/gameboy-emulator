@@ -56,7 +56,7 @@ void render_ppu(GameBoy& gameboy) {
     glTexImage2D(target, level, internal_format, 
         width, height, border, 
         format, type, 
-        (GLvoid*) gameboy.ppu()->screen().data());
+        (GLvoid*) gameboy.ppu()->screen.data());
 
     ImGui::Begin("PPU");
     ImGui::Image((void*)(intptr_t) texture, ImVec2(width*3, height*3)); 

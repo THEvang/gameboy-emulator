@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Memory/Memory.hpp"
 #include "Memory/Cartridge.hpp"
 
 enum class BankingMode {
@@ -11,7 +10,7 @@ enum class BankingMode {
 class MemoryBankController {
 public:
 
-    MemoryBankController(Memory& cartridge_memory);
+    MemoryBankController(uint8_t* cartridge_memory);
 
     [[nodiscard]] uint8_t read(uint16_t address) const;
     void write(uint16_t address, uint8_t data);
@@ -42,5 +41,5 @@ private:
     void set_ram_bank_number(uint8_t data);
     void set_banking_mode(uint8_t data);
 
-    Memory m_cartridge_memory;
+    uint8_t* m_cartridge_memory;
 };
