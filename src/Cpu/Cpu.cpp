@@ -1,5 +1,5 @@
 #include "Cpu/Cpu.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.hpp"
 
 uint16_t read_register_pair(Cpu cpu, Cpu_Register r1, Cpu_Register r2) {

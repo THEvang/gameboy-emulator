@@ -2,7 +2,7 @@
 
 #include "Memory/Memory_Controller.hpp"
 #include "Cpu/Interpreter.hpp"
-#include "Utilities/BitOperations.hpp"
+#include "Utilities/BitOperations.h"
 #include "Cpu/Cpu.hpp"
 
 uint8_t rlc(uint8_t value, uint8_t* flags) {

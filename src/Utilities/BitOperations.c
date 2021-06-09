@@ -1,4 +1,4 @@
-#include "BitOperations.hpp"
+#include "BitOperations.h"
 
 uint8_t rotate_left(uint8_t value, size_t n) {
     return (uint8_t) ((value << n) | (value >> (sizeof(uint8_t) * 8 - n)));

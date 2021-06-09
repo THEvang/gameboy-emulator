@@ -1,6 +1,13 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 uint8_t rotate_left(uint8_t value, size_t n);
 uint8_t rotate_right(uint8_t value, size_t n);
@@ -26,3 +33,7 @@ bool underflows_8bit(uint8_t a, uint8_t b);
 bool underflows_16bit(uint16_t a, uint16_t b);
 
 void swap_nibbles(uint8_t* a);
+
+#ifdef __cplusplus
+}
+#endif
