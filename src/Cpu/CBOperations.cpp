@@ -23,11 +23,7 @@ uint8_t rlc(uint8_t value, uint8_t* flags) {
 
 Instruction RLC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = rlc(r, &flags);
-        cpu.registers[Register_F] = flags;
-
+        cpu.registers[r] = rlc(r, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -38,9 +34,7 @@ Instruction RLC_ADDR_HL() {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
 
-        auto flags = cpu.registers[Register_F];
-        value = rlc(value, &flags);
-        cpu.registers[Register_F] = flags;
+        value = rlc(value, &(cpu.registers[Register_F]));
 
         cpu.memory_controller->write(address, value);
 
@@ -67,9 +61,7 @@ uint8_t RRC(uint8_t value, uint8_t* flags) {
 
 Instruction RRC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RRC(cpu.registers[r], &flags);
-        cpu.registers[Register_F] =  flags;
+        cpu.registers[r] = RRC(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, &none};   
@@ -80,10 +72,8 @@ Instruction RRC_ADDR_HL() {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
 
-        auto flags = cpu.registers[Register_F];
-        value = RRC(value, &flags);
+        value = RRC(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
-        cpu.registers[Register_F] =  flags;
 
         constexpr auto cycles = 16;
         return cycles;
@@ -112,9 +102,7 @@ uint8_t RL(uint8_t value, uint8_t* flags) {
 
 Instruction RL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RL(cpu.registers[r], &flags);
-        cpu.registers[Register_F] =  flags;
+        cpu.registers[r] = RL(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -154,9 +142,7 @@ uint8_t SRL(uint8_t value, uint8_t* flags) {
 
 Instruction SRL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SRL(cpu.registers[r], &flags);
-        cpu.registers[Register_F] = flags;
+        cpu.registers[r] = SRL(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -195,9 +181,7 @@ uint8_t SLA(uint8_t value, uint8_t* flags) {
 
 Instruction SLA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&){
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SLA(cpu.registers[r], &flags);
-        cpu.registers[Register_F] = flags;
+        cpu.registers[r] = SLA(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -239,10 +223,7 @@ uint8_t SRA(uint8_t value, uint8_t* flags) {
 
 Instruction SRA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SRA(cpu.registers[r], &flags);
-        cpu.registers[Register_F] = flags;
-
+        cpu.registers[r] = SRA(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none}; 
@@ -283,10 +264,7 @@ uint8_t RR(uint8_t value, uint8_t* flags) {
 
 Instruction RR_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RR(cpu.registers[r], &flags);
-        cpu.registers[Register_F] = flags;
-
+        cpu.registers[r] = RR(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};
@@ -321,10 +299,7 @@ uint8_t SWAP(uint8_t value, uint8_t* flags) {
 
 Instruction SWAP_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SWAP(cpu.registers[r], &flags);
-        cpu.registers[Register_F] = flags;
-
+        cpu.registers[r] = SWAP(cpu.registers[r], &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
     }, none};   
@@ -353,9 +328,7 @@ void BIT(uint8_t value, int n, uint8_t* flags) {
 
 Instruction BIT_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
-        auto flags = cpu.registers[Register_F];
-        BIT(cpu.registers[r], n, &flags);
-        cpu.registers[Register_F] = flags;
+        BIT(cpu.registers[r], n, &(cpu.registers[Register_F]));
         return 8;
     }, none};
 }
@@ -377,10 +350,7 @@ Instruction BIT_ADDR_HL(int n) {
 
 Instruction RES_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
-        auto value = cpu.registers[r];
-        clear_bit(&value, n);
-        cpu.registers[r] = value;
-
+        clear_bit(&(cpu.registers[r]), n);
         constexpr auto cycles = 8;
         return cycles;
     }, none};
