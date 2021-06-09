@@ -12,9 +12,7 @@ public:
 
     void step(int cycles);
 
-    [[nodiscard]] constexpr auto screen() const noexcept {
-        return m_pixels;
-    }
+    Pixel_Array screen;
 
 private:
 
@@ -41,6 +39,4 @@ private:
     LCD_Status m_lcd_status;
     
     int m_scanline_counter = 0;
-
-    Pixel_Array m_pixels;
 };
