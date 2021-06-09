@@ -20,51 +20,39 @@ void render_main(GameBoy* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
-    try {
-        Gui gui;
 
-        bool done = false;
-        while (!done) {
-            SDL_Event event;
-            while (static_cast<bool>(SDL_PollEvent(&event)))
+    Gui gui;
+
+    bool done = false;
+    while (!done) {
+        SDL_Event event;
+        while (static_cast<bool>(SDL_PollEvent(&event)))
+        {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+            switch (event.type)
             {
-                ImGui_ImplSDL2_ProcessEvent(&event);
-                switch (event.type)
-                {
-                case SDL_QUIT:
+            case SDL_QUIT:
+                done = true;
+                break;
+            case SDL_WINDOWEVENT:
+                if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window)) {
                     done = true;
-                    break;
-                case SDL_WINDOWEVENT:
-                    if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window())) {
-                        done = true;
-                    }
-                    break;
-                default:
-                    break;
                 }
+                break;
+            default:
+                break;
             }
-
-            keyboard_emitter.emitt();
-
-            gameboy->run();
-            double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
-            if( duration >= 16e-3) {
-                start = clock();
-                ImGui_ImplOpenGL3_NewFrame();
-                ImGui_ImplSDL2_NewFrame(gui.window());
-                ImGui::NewFrame();
-                render_cpu(*gameboy);
-                render_ppu(*gameboy);
-                render_cartridge_data(*gameboy);
-                //render_disassembly(*gameboy);
-                render_menu();
-                gui.render();
-            }
-            stop = clock();
         }
-    } catch (const std::exception& err) {
-        printf("%s\n", err.what());
-        exit(2);
+
+        keyboard_emitter.emitt();
+
+        gameboy->run();
+        double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
+        if( duration >= 0.2) {
+            start = clock();
+            gui.render(gameboy);
+        }
+        stop = clock();
     }
 }
 
