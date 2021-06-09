@@ -32,13 +32,13 @@ int Interrupt_Handler::interrupts(Cpu& cpu) {
 
 void Interrupt_Handler::request(Interrupts interrupt) {
     auto interrupt_request = m_memory_bank_controller->read(interrupt_request_address);
-    set_bit(interrupt_request, static_cast<int>(interrupt));
+    set_bit(&interrupt_request, static_cast<int>(interrupt));
     m_memory_bank_controller->write(interrupt_request_address, interrupt_request);
 }
 
 void Interrupt_Handler::clear(Interrupts interrupt) {
     auto request_register = m_memory_bank_controller->read(interrupt_request_address);
-    clear_bit(request_register, static_cast<int>(interrupt));
+    clear_bit(&request_register, static_cast<int>(interrupt));
     m_memory_bank_controller->write(interrupt_request_address, request_register);
 }
 

@@ -5,7 +5,7 @@
 #include "Utilities/BitOperations.hpp"
 #include "Cpu/Cpu.hpp"
 
-uint8_t rlc(uint8_t value, uint8_t& flags) {
+uint8_t rlc(uint8_t value, uint8_t* flags) {
 
     test_bit_8bit(value, 7) ? set_bit(flags,   Flag_Carry) : 
         clear_bit(flags,                Flag_Carry);
@@ -25,7 +25,7 @@ Instruction RLC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
 
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = rlc(r, flags);
+        cpu.registers[r] = rlc(r, &flags);
         cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
@@ -39,7 +39,7 @@ Instruction RLC_ADDR_HL() {
         auto value = cpu.memory_controller->read(address);
 
         auto flags = cpu.registers[Register_F];
-        value = rlc(value, flags);
+        value = rlc(value, &flags);
         cpu.registers[Register_F] = flags;
 
         cpu.memory_controller->write(address, value);
@@ -49,7 +49,7 @@ Instruction RLC_ADDR_HL() {
     }, none};
 }
 
-uint8_t RRC(uint8_t value, uint8_t& flags) {
+uint8_t RRC(uint8_t value, uint8_t* flags) {
     
     test_bit_8bit(value, 0) ? set_bit(flags, Flag_Carry)
         : clear_bit(flags, Flag_Carry);
@@ -68,11 +68,11 @@ uint8_t RRC(uint8_t value, uint8_t& flags) {
 Instruction RRC_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RRC(cpu.registers[r], flags);
+        cpu.registers[r] = RRC(cpu.registers[r], &flags);
         cpu.registers[Register_F] =  flags;
         constexpr auto cycles = 8;
         return cycles;
-    }, none};   
+    }, &none};   
 }
 
 Instruction RRC_ADDR_HL() {
@@ -81,7 +81,7 @@ Instruction RRC_ADDR_HL() {
         auto value = cpu.memory_controller->read(address);
 
         auto flags = cpu.registers[Register_F];
-        value = RRC(value, flags);
+        value = RRC(value, &flags);
         cpu.memory_controller->write(address, value);
         cpu.registers[Register_F] =  flags;
 
@@ -90,13 +90,13 @@ Instruction RRC_ADDR_HL() {
     }, none}; 
 }
 
-uint8_t RL(uint8_t value, uint8_t& flags) {
+uint8_t RL(uint8_t value, uint8_t* flags) {
     
     const auto new_carry_flag = test_bit_8bit(value, 7);
     value = static_cast<uint8_t>(value << 1u);
 
-    test_bit_8bit(flags, Flag_Carry) ? set_bit(value, 0)
-        : clear_bit(value, 0);
+    test_bit_8bit(*flags, Flag_Carry) ? set_bit(&value, 0)
+        : clear_bit(&value, 0);
     
     new_carry_flag ? set_bit(flags, Flag_Carry)
         : clear_bit(flags, Flag_Carry);
@@ -113,7 +113,7 @@ uint8_t RL(uint8_t value, uint8_t& flags) {
 Instruction RL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RL(cpu.registers[r], flags);
+        cpu.registers[r] = RL(cpu.registers[r], &flags);
         cpu.registers[Register_F] =  flags;
         constexpr auto cycles = 8;
         return cycles;
@@ -125,7 +125,7 @@ Instruction RL_ADDR_HL() {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
 
-        value = RL(value, cpu.registers[Register_F]);
+        value = RL(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -133,14 +133,14 @@ Instruction RL_ADDR_HL() {
     }, none};
 }
 
-uint8_t SRL(uint8_t value, uint8_t& flags) {
+uint8_t SRL(uint8_t value, uint8_t* flags) {
 
     test_bit_8bit(value, 0)                      ? 
         set_bit(flags, Flag_Carry)   :
         clear_bit(flags, Flag_Carry);
     
     value = static_cast<uint8_t>(value >> 1u);
-    clear_bit(value, 7);
+    clear_bit(&value, 7);
 
     value == 0                            ?
         set_bit(flags, Flag_Zero)    :
@@ -155,7 +155,7 @@ uint8_t SRL(uint8_t value, uint8_t& flags) {
 Instruction SRL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SRL(cpu.registers[r], flags);
+        cpu.registers[r] = SRL(cpu.registers[r], &flags);
         cpu.registers[Register_F] = flags;
         constexpr auto cycles = 8;
         return cycles;
@@ -166,7 +166,7 @@ Instruction SRL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = SRL(value, cpu.registers[Register_F]);
+        value = SRL(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -174,14 +174,14 @@ Instruction SRL_ADDR_HL() {
     }, none};
 }
 
-uint8_t SLA(uint8_t value, uint8_t& flags) {
+uint8_t SLA(uint8_t value, uint8_t* flags) {
 
     test_bit_8bit(value, 7)                      ? 
         set_bit(flags, Flag_Carry)   :
         clear_bit(flags, Flag_Carry);
     
     value = static_cast<uint8_t>(value << 1u);
-    clear_bit(value, 0);
+    clear_bit(&value, 0);
 
     value == 0                            ?
         set_bit(flags, Flag_Zero)    :
@@ -196,7 +196,7 @@ uint8_t SLA(uint8_t value, uint8_t& flags) {
 Instruction SLA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&){
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SLA(cpu.registers[r], flags);
+        cpu.registers[r] = SLA(cpu.registers[r], &flags);
         cpu.registers[Register_F] = flags;
         constexpr auto cycles = 8;
         return cycles;
@@ -207,7 +207,7 @@ Instruction SLA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&){
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = SLA(value, cpu.registers[Register_F]);
+        value = SLA(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -215,7 +215,7 @@ Instruction SLA_ADDR_HL() {
     }, none};
 }
 
-uint8_t SRA(uint8_t value, uint8_t& flags) {
+uint8_t SRA(uint8_t value, uint8_t* flags) {
     
     test_bit_8bit(value, 0)                      ? 
         set_bit(flags,      Flag_Carry)   :
@@ -225,7 +225,7 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
 
     value = static_cast<uint8_t>(value >> 1u);
 
-    old_msb ? set_bit(value, 7) : clear_bit(value, 7);
+    old_msb ? set_bit(&value, 7) : clear_bit(&value, 7);
 
     value == 0                            ?
         set_bit(flags,      Flag_Zero)    :
@@ -240,7 +240,7 @@ uint8_t SRA(uint8_t value, uint8_t& flags) {
 Instruction SRA_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SRA(cpu.registers[r], flags);
+        cpu.registers[r] = SRA(cpu.registers[r], &flags);
         cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
@@ -252,7 +252,7 @@ Instruction SRA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = SRA(value, cpu.registers[Register_F]);
+        value = SRA(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -260,16 +260,16 @@ Instruction SRA_ADDR_HL() {
     }, none};
 }
 
-uint8_t RR(uint8_t value, uint8_t& flags) {
+uint8_t RR(uint8_t value, uint8_t* flags) {
     
-    bool carry_status = test_bit_8bit(flags, Flag_Carry);
+    bool carry_status = test_bit_8bit(*flags, Flag_Carry);
 
     test_bit_8bit(value, 0)                  ? 
         set_bit(flags,      Flag_Carry)   :
         clear_bit(flags,    Flag_Carry);
 
     value = static_cast<uint8_t>(value >> 1u);
-    carry_status ? set_bit(value, 7) : clear_bit(value, 7);
+    carry_status ? set_bit(&value, 7) : clear_bit(&value, 7);
 
     value == 0 ? 
         set_bit(flags,      Flag_Zero) : 
@@ -284,7 +284,7 @@ uint8_t RR(uint8_t value, uint8_t& flags) {
 Instruction RR_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = RR(cpu.registers[r], flags);
+        cpu.registers[r] = RR(cpu.registers[r], &flags);
         cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
@@ -296,7 +296,7 @@ Instruction RR_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = RR(value, cpu.registers[Register_F]);
+        value = RR(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -304,9 +304,9 @@ Instruction RR_ADDR_HL() {
     }, none};
 }
 
-uint8_t SWAP(uint8_t value, uint8_t& flags) {
+uint8_t SWAP(uint8_t value, uint8_t* flags) {
 
-    swap_nibbles(value);
+    swap_nibbles(&value);
     
     value == 0 ? 
         set_bit(flags, Flag_Zero) :
@@ -322,7 +322,7 @@ uint8_t SWAP(uint8_t value, uint8_t& flags) {
 Instruction SWAP_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        cpu.registers[r] = SWAP(cpu.registers[r], flags);
+        cpu.registers[r] = SWAP(cpu.registers[r], &flags);
         cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 8;
@@ -334,7 +334,7 @@ Instruction SWAP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        value = SWAP(value, cpu.registers[Register_F]);
+        value = SWAP(value, &(cpu.registers[Register_F]));
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -342,7 +342,7 @@ Instruction SWAP_ADDR_HL() {
     }, none};
 }
 
-void BIT(uint8_t value, int n, uint8_t& flags) {
+void BIT(uint8_t value, int n, uint8_t* flags) {
     
     test_bit_8bit(value, n) ? clear_bit(flags, Flag_Zero) :
         set_bit(flags, Flag_Zero);
@@ -354,7 +354,7 @@ void BIT(uint8_t value, int n, uint8_t& flags) {
 Instruction BIT_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
         auto flags = cpu.registers[Register_F];
-        BIT(cpu.registers[r], n, flags);
+        BIT(cpu.registers[r], n, &flags);
         cpu.registers[Register_F] = flags;
         return 8;
     }, none};
@@ -366,7 +366,7 @@ Instruction BIT_ADDR_HL(int n) {
         const auto value = cpu.memory_controller->read(address);
 
         auto flags = cpu.registers[Register_F];
-        BIT(value, n, flags);
+        BIT(value, n, &flags);
         cpu.memory_controller->write(address, value);
         cpu.registers[Register_F] = flags;
 
@@ -378,7 +378,7 @@ Instruction BIT_ADDR_HL(int n) {
 Instruction RES_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
         auto value = cpu.registers[r];
-        clear_bit(value, n);
+        clear_bit(&value, n);
         cpu.registers[r] = value;
 
         constexpr auto cycles = 8;
@@ -390,7 +390,7 @@ Instruction RES_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        clear_bit(value, n);
+        clear_bit(&value, n);
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;
@@ -401,7 +401,7 @@ Instruction RES_ADDR_HL(int n) {
 Instruction SET_R(Cpu_Register r, int n) {
     return {[r, n](Cpu& cpu, Operand&) {
         auto value = cpu.registers[r];
-        set_bit(value, n);
+        set_bit(&value, n);
         cpu.registers[r] = value;
         constexpr auto cycles = 8;
         return cycles;
@@ -412,7 +412,7 @@ Instruction SET_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         auto value = cpu.memory_controller->read(address);
-        set_bit(value, n);
+        set_bit(&value, n);
         cpu.memory_controller->write(address, value);
 
         constexpr auto cycles = 16;

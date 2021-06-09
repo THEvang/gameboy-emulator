@@ -49,6 +49,7 @@ void clear_flag(uint8_t* flags, Cpu_Flag flag);
 uint16_t read_register_pair(Cpu, Cpu_Register, Cpu_Register);
 
 //Addressing Modes
+Operand implied(Cpu&);
 Operand immediate(Cpu&);
 Operand immediate_extended(Cpu&);
 Operand hl_addressing(Cpu&);

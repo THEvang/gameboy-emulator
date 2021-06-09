@@ -59,7 +59,7 @@ bool LCD_Status::should_set_coincidence_flag() const {
 void LCD_Status::set_coincidence_flag() {
 
     auto status = m_memory_controller->read(status_address);
-    set_bit(status, coincidence_bit);
+    set_bit(&status, coincidence_bit);
     m_memory_controller->write(status_address, status);
     if(test_bit_8bit(status, 6)) {
         m_interrupt_handler.request(Interrupts::LCD_STAT);
@@ -69,7 +69,7 @@ void LCD_Status::set_coincidence_flag() {
 void LCD_Status::clear_coincidence_flag() {
     
     auto status = m_memory_controller->read(status_address);
-    clear_bit(status, coincidence_bit);
+    clear_bit(&status, coincidence_bit);
     m_memory_controller->write(status_address, status);
 }
 
@@ -97,23 +97,23 @@ void LCD_Status::set_mode(const LCD_Modes& mode) {
 
     switch(mode) {
         case LCD_Modes::H_Blank:
-            clear_bit(status, 0);
-            clear_bit(status, 1);
+            clear_bit(&status, 0);
+            clear_bit(&status, 1);
         break;
 
         case LCD_Modes::V_Blank:
-            set_bit(status, 0);
-            clear_bit(status, 1);
+            set_bit(&status, 0);
+            clear_bit(&status, 1);
         break;
 
         case LCD_Modes::Searching_Sprite_Attributes:
-            clear_bit(status, 0);
-            set_bit(status, 1);
+            clear_bit(&status, 0);
+            set_bit(&status, 1);
         break;
 
         case LCD_Modes::Transferring_Data:
-            set_bit(status, 0);
-            set_bit(status, 1);
+            set_bit(&status, 0);
+            set_bit(&status, 1);
         break;
     }
     m_memory_controller->write(status_address, status);

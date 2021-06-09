@@ -1,5 +1,4 @@
 #include "BitOperations.hpp"
-#include <limits.h>
 
 uint8_t rotate_left(uint8_t value, size_t n) {
     return (uint8_t) ((value << n) | (value >> (sizeof(uint8_t) * 8 - n)));
@@ -13,12 +12,12 @@ uint16_t combine_bytes(uint8_t upper, uint8_t lower) {
     return (uint16_t) ((upper << 8U) | lower);
 }
 
-void set_bit(uint8_t& b, int n) {
-    b |= static_cast<uint8_t>((1U << n));
+void set_bit(uint8_t* b, int n) {
+    *b |= (uint8_t) ((1U << n));
 }
 
-void clear_bit(uint8_t& b, int n) {
-    b &= static_cast<uint8_t>(~(1U << n));
+void clear_bit(uint8_t* b, int n) {
+    *b &= (uint8_t) (~(1U << n));
 }
 
 bool test_bit_8bit(uint8_t b, int n) {
@@ -47,7 +46,7 @@ bool half_borrow_16bit(uint16_t a, uint16_t b) {
 
 bool overflows_8bit(uint8_t a, uint8_t b) {
     int sum = a + b;
-    return sum > UCHAR_MAX;
+    return sum > 0xFF;
 }
 
 bool overflows_16bit(uint16_t a, uint16_t b) {
@@ -63,8 +62,8 @@ bool underflows_16bit(uint16_t a, uint16_t b) {
     return b > a;
 }
 
-void swap_nibbles(uint8_t& a) {
-    a = (uint8_t) (( (a & 0x0FU) << 4U | (a & 0xF0U) >> 4U));
+void swap_nibbles(uint8_t* a) {
+    *a = (uint8_t) (( (*a & 0x0FU) << 4U | (*a & 0xF0U) >> 4U));
 }
 
 uint8_t get_value(uint8_t a, int n) {
