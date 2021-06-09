@@ -23,16 +23,11 @@ enum Cpu_Flag {
     Flag_Zero
 };
 
+using Operand = std::variant<uint8_t, uint16_t, int8_t>;
 
 struct Cpu {
 
     explicit Cpu(MemoryBankController* memory_controller);
-
-    bool test_flag(Cpu_Flag flag) const;
-
-    void set_flag(Cpu_Flag flag);
-
-    void clear_flag(Cpu_Flag flag);
 
     uint16_t stack_ptr = 0xFFFE;
     uint16_t program_counter = 0x0100;
@@ -48,9 +43,11 @@ struct Cpu {
     uint8_t registers[8];
 };
 
-uint16_t read_register_pair(Cpu, Cpu_Register, Cpu_Register);
+bool test_flag(uint8_t flags, Cpu_Flag flag);
+void set_flag(uint8_t* flags, Cpu_Flag flag);
+void clear_flag(uint8_t* flags, Cpu_Flag flag);
 
-using Operand = std::variant<uint8_t, uint16_t, int8_t>;
+uint16_t read_register_pair(Cpu, Cpu_Register, Cpu_Register);
 
 //Addressing Modes
 Operand immediate(Cpu&);

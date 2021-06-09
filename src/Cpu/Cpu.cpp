@@ -57,16 +57,16 @@ Cpu::Cpu(MemoryBankController* memory_controller)
     memory_controller->write(0xFFFF, 0x00);
 }
 
-bool Cpu::test_flag(Cpu_Flag flag) const {
-    return test_bit_8bit(registers[Register_F], flag);
+bool test_flag(uint8_t flags, Cpu_Flag flag) {
+    return test_bit_8bit(flags, flag);
 }
 
-void Cpu::set_flag(Cpu_Flag flag) {
-    set_bit(registers[Register_F], flag);
+void set_flag(uint8_t* flags, Cpu_Flag flag) {
+    set_bit(*flags, flag);
 }
 
-void Cpu::clear_flag(Cpu_Flag flag) {
-    clear_bit(registers[Register_F], flag);
+void clear_flag(uint8_t* flags, Cpu_Flag flag) {
+    clear_bit(*flags, flag);
 }
 
 //Addressing Modes
