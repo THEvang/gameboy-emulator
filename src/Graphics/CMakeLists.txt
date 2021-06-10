@@ -1,7 +1,7 @@
 target_sources(gb-core 
     PRIVATE
-    LCD_Control.hpp
-    LCD_Control.cpp
+    LCD_Control.h
+    LCD_Control.c
     LCD_Status.hpp
     LCD_Status.cpp
     PPU.hpp

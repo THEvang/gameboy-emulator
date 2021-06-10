@@ -33,7 +33,6 @@ private:
 
     MemoryBankController* m_memory_controller;
 
-    LCD_Control m_lcd_control;
     LCD_Status m_lcd_status;
     
     int m_scanline_counter = 0;

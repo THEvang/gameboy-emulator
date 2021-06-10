@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Graphics/LCD_Control.hpp"
-
-class MemoryBankController;
+#include "Memory/Memory_Controller.h"
 
 enum class LCD_Modes {
     H_Blank,
@@ -13,8 +11,7 @@ enum class LCD_Modes {
 
 class LCD_Status {
 public:
-    LCD_Status(MemoryBankController* memory_controller, 
-        const LCD_Control& lcd_control);
+    explicit LCD_Status(MemoryBankController* memory_controller);
 
     void set_status(int& scanline_counter);
 
@@ -31,5 +28,4 @@ private:
     static const int coincidence_bit = 2;
 
     MemoryBankController* m_memory_controller;
-    LCD_Control m_lcd_control;
 };
