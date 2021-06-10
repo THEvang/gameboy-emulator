@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Graphics/Pixel.hpp"
+#include "Graphics/Pixel.h"
 #include "Memory/Memory_Controller.h"
 
 class PPU {

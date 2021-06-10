@@ -111,7 +111,7 @@ void PPU::draw_background() {
         color_id |= color_1;
 
         Color pixel_color = get_color(color_id, 0xFF47);
-        screen.set_pixel({pixel, scanline}, pixel_color);
+        set_pixel(&screen ,{pixel, scanline}, pixel_color);
     }
 }
 
@@ -186,7 +186,7 @@ void PPU::draw_sprites() {
             int xPix = 0 - tilePixel ;
             xPix += 7 ;
             int pixel = xPos+xPix ;
-            screen.set_pixel({static_cast<uint8_t>(pixel), scanline}, col);
+            set_pixel(&screen, {static_cast<uint8_t>(pixel), scanline}, col);
             }
         }
     }
