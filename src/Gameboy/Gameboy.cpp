@@ -7,17 +7,20 @@
 GameBoy::GameBoy(MemoryBankController* mc)
     : memory_bank_controller(mc) 
     , timer(memory_bank_controller)
-    , interrupt_handler(memory_bank_controller)
     , ppu(memory_bank_controller)
-    , joypad_controller(&interrupt_handler)
     {
+        joypad.direction_keys = 0b1111;
+        joypad.button_keys = 0b1111;
         cpu.memory_controller = memory_bank_controller;
+        interrupt_handler.memory_bank_controller = memory_bank_controller;
+
         set_initial_state(&cpu);
     }
 
 void GameBoy::run() {
 
     const auto opcode = read(memory_bank_controller, cpu.program_counter);
+
 
     auto instruction = fetch(static_cast<Opcode>(opcode));
 

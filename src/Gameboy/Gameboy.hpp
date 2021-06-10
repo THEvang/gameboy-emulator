@@ -1,14 +1,12 @@
 #pragma once
 
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 
 #include "Cpu/Cpu.hpp"
 #include "Cpu/Timer.hpp"
 #include "Cpu/Interrupt_Handler.hpp"
 #include "Graphics/PPU.hpp"
-
-#include "Input/Keyboard.hpp"
-#include "Input/Joypad_Controller.hpp"
+#include "Input/Joypad.hpp"
 
 
 struct GameBoy {
@@ -21,5 +19,5 @@ struct GameBoy {
     Timer timer;
     Interrupt_Handler interrupt_handler;
     PPU ppu;
-    Joypad_Controller joypad_controller;
+    Joypad joypad;
 };

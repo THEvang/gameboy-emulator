@@ -4,7 +4,7 @@
 #include "imgui/imgui.h"
 #include "Cpu/Opcodes.hpp"
 #include "Disassembler/Disassembler.hpp"
-#include "Memory/Cartridge.hpp"
+#include "Memory/Cartridge.h"
 #include "Disassembler/Ring_Buffer.hpp"
 
 void render_disassembly(GameBoy& gameboy) {

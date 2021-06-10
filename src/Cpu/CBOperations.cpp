@@ -1,6 +1,6 @@
 #include "Cpu/CBOperations.hpp"
 
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 #include "Cpu/Interpreter.hpp"
 #include "Utilities/BitOperations.h"
 #include "Cpu/Cpu.hpp"

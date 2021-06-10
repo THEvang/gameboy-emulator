@@ -9,14 +9,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
-#include "Input/Keyboard.hpp"
 
 void render_main(GameBoy* gameboy) {
-
-    Keyboard_Emitter keyboard_emitter;
-    keyboard_emitter.add_observer(&(gameboy->joypad_controller));
-
-    SDL_SetEventFilter(keyboard_filter, static_cast<void*>(keyboard_emitter.get_queue()));
 
     clock_t start = clock(); 
     clock_t stop = clock();
@@ -25,26 +19,79 @@ void render_main(GameBoy* gameboy) {
 
     bool done = false;
     while (!done) {
+
         SDL_Event event;
-        while (static_cast<bool>(SDL_PollEvent(&event)))
+        while (SDL_PollEvent(&event))
         {
             ImGui_ImplSDL2_ProcessEvent(&event);
-            switch (event.type)
-            {
+            switch (event.type) {
+            
             case SDL_QUIT:
                 done = true;
                 break;
+            
             case SDL_WINDOWEVENT:
                 if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window)) {
                     done = true;
                 }
                 break;
+            
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym) {
+                    case SDLK_x:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_B);
+                        break;
+                    case SDLK_RETURN:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Start);
+                        break;
+                    case SDLK_BACKSPACE:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Select);
+                        break;
+                    case SDLK_w:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Up);
+                        break;
+                    case SDLK_s:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Down);
+                        break;
+                    case SDLK_d:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Right);
+                        break;
+                    case SDLK_a:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Left);
+                        break;
+                }
+            break;
+
+            case SDL_KEYUP:
+                switch(event.key.keysym.sym) {
+                    case SDLK_x:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_B);
+                        break;
+                    case SDLK_RETURN:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Start);
+                        break;
+                    case SDLK_BACKSPACE:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Select);
+                        break;
+                    case SDLK_w:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Up);
+                        break;
+                    case SDLK_s:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Down);
+                        break;
+                    case SDLK_d:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Right);
+                        break;
+                    case SDLK_a:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Left);
+                        break;
+                }
+            break;
+
             default:
                 break;
             }
         }
-
-        keyboard_emitter.emitt();
 
         gameboy->run();
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
@@ -74,6 +121,10 @@ int main(int argc, char* argv[])
     }
 
     MemoryBankController mc;
+    mc.ram_enabled = false;
+    mc.rom_bank = 1;
+    mc.banking_mode = Banking_Mode_ROM;
+    mc.ram_bank = 1;
     mc.rom = rom.data;
 
     GameBoy gameboy(&mc);

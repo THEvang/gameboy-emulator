@@ -1,13 +1,14 @@
 #include "Graphics/PPU.hpp"
 #include "Utilities/BitOperations.h"
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 
 PPU::PPU(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
-    , m_interrupt_handler(m_memory_controller)
     , m_lcd_control(m_memory_controller)
     , m_lcd_status(m_memory_controller, m_lcd_control)
-{}
+{
+    m_interrupt_handler.memory_bank_controller = m_memory_controller;
+}
 
 void PPU::step(int cycles) {
 
@@ -27,7 +28,7 @@ void PPU::step(int cycles) {
         m_memory_controller->memory[scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
-            m_interrupt_handler.request(Interrupts::V_Blank);
+            request_interrupt(m_memory_controller, Interrupts_V_Blank);
         } else if (current_scanline > 153) {
             m_memory_controller->memory[scanline_address] = 0;
         } else if (current_scanline < 144) {

@@ -1,7 +1,6 @@
-#include "Memory/Memory_Controller.hpp"
-
+#include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
-#include "Input/Joypad_Controller.hpp"
+#include "Input/Joypad.hpp"
 
 uint8_t read(MemoryBankController* mc, uint16_t address) {
 
@@ -92,7 +91,7 @@ void write(MemoryBankController* mc, uint16_t address, uint8_t data) {
         }
     } else if (address >= 0xE000 && address < 0xFE00) {
         mc->memory[address] = data;
-        write(mc, static_cast<uint16_t>(address - 0x2000), data);
+        write(mc, (uint16_t) (address - 0x2000), data);
     } else if (address >= 0xFEA0 && address < 0xFEFF) {
 
     } else if(address == 0xFF04) {
@@ -107,17 +106,19 @@ void write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 }
 
 void dma_transfer(MemoryBankController* mc, uint8_t data) {
-    const auto address = static_cast<uint16_t>(data << 8u);
+    
+    uint16_t address = (uint16_t) (data << 8u);
+    
     for(int i = 0; i < 0xA0; i++) {
-        const auto dma_data = read(mc, static_cast<uint16_t>(address + i));
-        write(mc, static_cast<uint16_t>(0xFE00+i), dma_data);
+        uint8_t dma_data = read(mc, (uint16_t) (address + i));
+        write(mc, (uint16_t) (0xFE00+i), dma_data);
     }
 }
 
 uint8_t read_from_rom_bank(MemoryBankController* mc, uint16_t address) {
 
     if (address >= 0x4000 && address <= 0x7FFF) {
-        const auto read_addr = static_cast<uint16_t>(address + (mc->rom_bank - 1) * 0x4000);
+        uint16_t read_addr = (uint16_t) (address + (mc->rom_bank - 1) * 0x4000);
         return mc->rom[read_addr];
     }
     
@@ -126,14 +127,14 @@ uint8_t read_from_rom_bank(MemoryBankController* mc, uint16_t address) {
 
 uint8_t read_joypad_input(MemoryBankController* mc) {
 
-    const auto data = mc->memory[0xFF00];
+    uint8_t data = mc->memory[0xFF00];
 
     if(!test_bit_8bit(data, 5)) {
-        return Joypad_Controller::read_input_as_byte(Button_Types::Button_Key);
+        return mc->joypad->button_keys;
     }
 
     if(!test_bit_8bit(data, 4)) {
-        return Joypad_Controller::read_input_as_byte(Button_Types::Direction_Key);
+        return mc->joypad->direction_keys;
     }
 
     return data;

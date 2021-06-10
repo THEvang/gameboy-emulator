@@ -1,13 +1,14 @@
 #include "Graphics/LCD_Status.hpp"
 
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
-    , m_interrupt_handler(m_memory_controller)
     , m_lcd_control(lcd_control)
-{}
+{
+    m_interrupt_handler.memory_bank_controller =  m_memory_controller;
+}
 
 void LCD_Status::set_status(int& scanline_counter) {
     
@@ -22,29 +23,29 @@ void LCD_Status::set_status(int& scanline_counter) {
     const auto current_mode = get_mode();
     const auto current_scanline = read(m_memory_controller, scanline_address);
 
-    auto request_interrupt = false;
+    auto should_request_interrupt = false;
     
     auto status = read(m_memory_controller, status_address);
     if(current_scanline >= 144) {
         set_mode(LCD_Modes::V_Blank);
-        request_interrupt = test_bit_8bit(status, 4);
+        should_request_interrupt = test_bit_8bit(status, 4);
     } else {
         
         if(scanline_counter >= (456 - 80)) {
             set_mode(LCD_Modes::Searching_Sprite_Attributes);
-            request_interrupt = test_bit_8bit(status, 5);
+            should_request_interrupt = test_bit_8bit(status, 5);
         } else if(scanline_counter >= (456 - 80 - 172)) {
             set_mode(LCD_Modes::Transferring_Data);
         } else {
             set_mode(LCD_Modes::H_Blank);
-            request_interrupt = test_bit_8bit(status, 3);
+            should_request_interrupt = test_bit_8bit(status, 3);
         }
     }
 
     const auto new_mode = get_mode();
 
-    if(request_interrupt && (current_mode != new_mode)) {
-        m_interrupt_handler.request(Interrupts::LCD_STAT);
+    if(should_request_interrupt && (current_mode != new_mode)) {
+        request_interrupt(m_memory_controller, Interrupts_LCD_STAT);
     }
 
     should_set_coincidence_flag() ? set_coincidence_flag() :
@@ -62,7 +63,7 @@ void LCD_Status::set_coincidence_flag() {
     set_bit(&status, coincidence_bit);
     write(m_memory_controller, status_address, status);
     if(test_bit_8bit(status, 6)) {
-        m_interrupt_handler.request(Interrupts::LCD_STAT);
+        request_interrupt(m_memory_controller, Interrupts_LCD_STAT);
     }
 }
 
@@ -72,7 +73,6 @@ void LCD_Status::clear_coincidence_flag() {
     clear_bit(&status, coincidence_bit);
     write(m_memory_controller, status_address, status);
 }
-
 
 LCD_Modes LCD_Status::get_mode() const {
         auto status = read(m_memory_controller, status_address);

@@ -1,20 +1,29 @@
 #pragma once
 
-#include "Memory/Cartridge.hpp"
+#include <stdint.h>
+#include <stdbool.h>
+#include "Memory/Cartridge.h"
 
-enum BankingMode {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct Joypad Joypad;
+
+typedef enum Banking_Mode {
     Banking_Mode_ROM,
     Banking_Mode_RAM
-};
+} Banking_Mode;
 
-struct MemoryBankController {
+typedef struct MemoryBankController {
     uint8_t memory[0xFFFF];
     uint8_t* rom;
-    bool ram_enabled = false;
-    uint8_t rom_bank = 1;
-    BankingMode banking_mode = Banking_Mode_ROM;
-    uint8_t ram_bank = 1;
-};
+    bool ram_enabled;
+    uint8_t rom_bank;
+    Banking_Mode banking_mode;
+    uint8_t ram_bank;
+    Joypad* joypad;
+} MemoryBankController;
 
 void write(MemoryBankController* mc, uint16_t address, uint8_t data);
 uint8_t read(MemoryBankController* mc, uint16_t address);
@@ -28,3 +37,7 @@ void set_lower_rom_bank_number(MemoryBankController* mc, uint8_t data);
 void set_upper_rom_bank_number(MemoryBankController* mc, uint8_t data);
 void set_banking_mode(MemoryBankController* mc, uint8_t data);
 void set_ram_bank_number(MemoryBankController* mc, uint8_t data);
+
+#ifdef __cplusplus
+}
+#endif

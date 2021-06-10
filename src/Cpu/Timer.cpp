@@ -1,11 +1,12 @@
 #include "Timer.hpp"
 #include "Utilities/BitOperations.h"
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 
 Timer::Timer(MemoryBankController* memory) 
     : m_memory(memory)
-    , m_interrupt_handler(memory)
-{}
+{
+    m_interrupt_handler.memory_bank_controller = memory;
+}
 
 
 void Timer::increment(int cycles) {
@@ -28,7 +29,7 @@ void Timer::tick() {
     if(m_tima_has_overflowed) { 
         reset_tima();
         //if(m_interrupt_handler.timer_interrupt_enabled()) {
-            m_interrupt_handler.request(Interrupts::Timer);
+            request_interrupt(m_memory, Interrupts_Timer);
         //}
         m_tima_has_overflowed = false;
     }

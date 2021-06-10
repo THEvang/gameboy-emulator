@@ -1,41 +1,38 @@
 #pragma once 
 
-#include <cstdint>
+#include <stdint.h>
+#include "Memory/Memory_Controller.h"
 
-class Cpu;
-class MemoryBankController;
+struct Cpu;
 
-enum class Interrupts {
-    V_Blank = 0,
-    LCD_STAT,
-    Timer,
-    Serial,
-    Joypad
-};
+typedef enum Interrupts {
+    Interrupts_V_Blank = 0,
+    Interrupts_LCD_STAT,
+    Interrupts_Timer,
+    Interrupts_Serial,
+    Interrupts_Joypad
+} Interrupts;
 
-class Interrupt_Handler {
-public: 
+const uint16_t g_interrupt_request_address = 0xFF0F;
+const uint16_t g_interrupt_enabled_address = 0xFFFF;
 
-    explicit Interrupt_Handler(MemoryBankController* memory_controller);
+
+struct Interrupt_Handler {
 
     int interrupts(Cpu& cpu);
-
-    void request(Interrupts interrupt);
 
     bool should_exit_halt();
     bool timer_interrupt_enabled() const;
 
-private:
-
-    void clear(Interrupts interrupt);
     bool is_requested(Interrupts interrupt) const;
     bool is_enabled(Interrupts interrupt) const;
     uint16_t get_vector(Interrupts interrupt) const;
 
     void call(Cpu& cpu, uint8_t interrupt_vector);  
     
-    const uint16_t interrupt_request_address = 0xFF0F;
-    const uint16_t interrupt_enabled_address = 0xFFFF;
 
-    MemoryBankController* m_memory_bank_controller;
+    MemoryBankController* memory_bank_controller;
 };
+
+void request_interrupt(MemoryBankController* mc, Interrupts interrupt);
+void clear_interrupt(MemoryBankController* mc, Interrupts interrupt);
