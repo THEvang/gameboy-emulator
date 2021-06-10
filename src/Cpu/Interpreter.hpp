@@ -1,15 +1,12 @@
 #pragma once
 
 #include <functional>
-#include <variant>
-
 #include "Cpu/Cpu.h"
 
 #include "Cpu/Opcodes.hpp"
 #include "Cpu/CBOpcodes.hpp"
+#include "Adressing_Modes.hpp"
 
-using Operand = std::variant<uint8_t, uint16_t, int8_t>;
-using Address_Mode = std::function<Operand(Cpu&)>;
 using Operation = std::function<int(Cpu&, Operand&)>;
 
 struct Instruction {

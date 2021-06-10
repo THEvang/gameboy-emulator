@@ -1,19 +1,21 @@
 #pragma once
 
 #include <stdint.h>
-#include <variant>
+#include <functional>
+
 #include "Cpu.h"
 
-using Operand = std::variant<uint8_t, uint16_t, int8_t>;
+typedef union Operand {
+    uint8_t byte;
+    uint16_t word;
+} Operand;
+
+using Address_Mode = std::function<Operand(Cpu&)>;
 
 //Addressing Modes
 Operand implied(Cpu&);
 Operand immediate(Cpu&);
 Operand immediate_extended(Cpu&);
 Operand hl_addressing(Cpu&);
-Operand relative_address(Cpu&);
 Operand extended_address(Cpu&);
-Operand implied(Cpu&);
-Operand indexed_address(Cpu&);
-Operand extended_addressing(Cpu&);
 Operand none(Cpu&);
