@@ -1,6 +1,6 @@
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
-#include "Input/Joypad.hpp"
+#include "Input/Joypad.h"
 
 uint8_t read(MemoryBankController* mc, uint16_t address) {
 

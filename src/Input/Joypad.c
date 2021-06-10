@@ -1,5 +1,5 @@
-#include "Input/Joypad.hpp"
-#include "Cpu/Interrupt_Handler.hpp"
+#include "Input/Joypad.h"
+#include "Cpu/Interrupts.h"
 #include "Utilities/BitOperations.h"
 
 void key_down(Joypad* pad, MemoryBankController* mc, Button button) {

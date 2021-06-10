@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cpu/Cpu.hpp"
+#include "Cpu/Cpu.h"
 
 struct Instruction;
 

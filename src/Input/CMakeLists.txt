@@ -1,6 +1,6 @@
 target_sources(gb-core 
     PRIVATE
     
-    Joypad.hpp
-    Joypad.cpp
+    Joypad.h
+    Joypad.c
 )

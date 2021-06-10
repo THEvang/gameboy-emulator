@@ -1,4 +1,4 @@
-#include "Cpu/Cpu.hpp"
+#include "Cpu/Cpu.h"
 #include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.h"
 
@@ -7,6 +7,16 @@ uint16_t read_register_pair(Cpu cpu, Cpu_Register r1, Cpu_Register r2) {
 }
 
 void set_initial_state(Cpu* cpu) {
+
+    cpu->stack_ptr = 0xFFFE;
+    cpu->program_counter = 0x0100;
+
+    cpu->interrupts_enabled = false;
+    cpu->should_enable_interrupts = false;
+    cpu->should_disable_interrupts = false;
+    cpu->should_stop = false;
+    cpu->is_halted = false;
+    
     cpu->registers[Register_A] = 0x01;
     cpu->registers[Register_B] = 0x00;
     cpu->registers[Register_C] = 0x13;
@@ -65,44 +75,4 @@ void set_flag(uint8_t* flags, Cpu_Flag flag) {
 
 void clear_flag(uint8_t* flags, Cpu_Flag flag) {
     clear_bit(flags, flag);
-}
-
-//Addressing Modes
-Operand immediate(Cpu& cpu) {
-    cpu.program_counter += 2;
-    return {read(cpu.memory_controller,cpu.program_counter-1)};
-}
-
-Operand immediate_extended(Cpu& cpu) {
-    cpu.program_counter += 3;
-    const auto pc = cpu.program_counter;
-    return combine_bytes(read(cpu.memory_controller,pc-1), read(cpu.memory_controller,pc-2));
-}
-
-Operand hl_addressing(Cpu& cpu) {
-    cpu.program_counter++;
-    const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-    return read(cpu.memory_controller,address);
-}
-
-// Operand relative_address(Cpu& cpu) {
-//     cpu.program_counter += 2;
-//     const auto pc = cpu.program_counter;
-//     return pc + static_cast<int8_t>(read(cpu.memory_controller,pc-1));
-// }
-
-Operand extended_address(Cpu& cpu) {
-    cpu.program_counter += 3;
-    const auto pc = cpu.program_counter;
-    const auto address = combine_bytes(read(cpu.memory_controller,pc-1), read(cpu.memory_controller,pc-2));
-    return read(cpu.memory_controller,address);
-}
-
-Operand implied(Cpu& cpu) {
-    cpu.program_counter++;
-    return {static_cast<uint8_t>(0)};   
-}
-
-Operand none(Cpu&) {
-    return {static_cast<uint8_t>(0)};
 }
