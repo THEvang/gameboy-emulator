@@ -72,7 +72,7 @@ Instruction EI() {
 }
 
 int jump_relative(Cpu& cpu, Operand& op) {
-    const auto distance = static_cast<int8_t>(std::get<uint8_t>(op));
+    const auto distance = static_cast<int8_t>(op.byte);
     cpu.program_counter = static_cast<uint16_t>(cpu.program_counter + distance);
     return 12;
 }
@@ -155,7 +155,7 @@ Instruction RETI() {
 }
 
 int jump(Cpu& cpu, Operand& op) {
-    const auto address = std::get<uint16_t>(op);
+    const auto address = op.word;
     cpu.program_counter = address; 
     constexpr auto cycles = 16;
     return cycles;
@@ -209,7 +209,7 @@ int call(Cpu& cpu, Operand& op) {
     write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
     cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr -2);
     
-     cpu.program_counter = std::get<uint16_t>(op);
+     cpu.program_counter = op.word;
 
     constexpr auto cycles = 24;
     return cycles;
@@ -257,7 +257,7 @@ Instruction LD_R_R(Cpu_Register dst, Cpu_Register src) {
 
 Instruction LD_R_D8(Cpu_Register dst) {
     return {[dst](Cpu& cpu, Operand& op) {
-        cpu.registers[dst] =  std::get<uint8_t>(op);
+        cpu.registers[dst] =  op.byte;
         constexpr auto cycles = 8;
         return cycles;
     }, immediate};
@@ -274,7 +274,7 @@ Instruction LD_A_ADDR_RR(Cpu_Register r1, Cpu_Register r2) {
 
 Instruction LD_A_ADDR_A16() {
     return {[](Cpu& cpu, Operand& op) {
-        cpu.registers[Register_A] =  std::get<uint8_t>(op);
+        cpu.registers[Register_A] =  op.byte;
         constexpr auto cycles = 16;
         return cycles;
     }, extended_address};
@@ -292,7 +292,7 @@ Instruction LD_A_ADDR_C() {
 
 Instruction LD_ADDR_A16_SP() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto address = std::get<uint16_t>(op);        
+        const auto address = op.word;        
         write(cpu.memory_controller, address, static_cast<uint8_t>(cpu.stack_ptr & 0xFFu));
         write(cpu.memory_controller, static_cast<uint16_t>(address + 1), static_cast<uint8_t>(cpu.stack_ptr >> 8u));
         constexpr auto cycles = 20;
@@ -340,7 +340,7 @@ Instruction LD_ADDR_RR_A(Cpu_Register r1, Cpu_Register r2) {
 
 Instruction LD_R_ADDR_HL(Cpu_Register dst) {
     return {[dst](Cpu& cpu, Operand& op) {
-        cpu.registers[dst] =  std::get<uint8_t>(op);
+        cpu.registers[dst] =  op.byte;
         constexpr auto cycles = 8;
         return cycles;
     }, hl_addressing};
@@ -358,7 +358,7 @@ Instruction LD_ADDR_HL_R(Cpu_Register r) {
 Instruction LD_ADDR_HL_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         write(cpu.memory_controller, address, value);
         constexpr auto cycles = 12;
         return cycles;
@@ -372,7 +372,7 @@ Instruction LD_ADDR_HL_ADDR_HL() {
 
 Instruction LD_ADDR_A16_A() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto address = std::get<uint16_t>(op);
+        const auto address = op.word;
         write(cpu.memory_controller, address, cpu.registers[Register_A]);
         constexpr auto cycles = 16;
         return cycles;
@@ -381,7 +381,7 @@ Instruction LD_ADDR_A16_A() {
 
 Instruction LD_RR_D16(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint16_t>(op);
+        const auto value = op.word;
 
         cpu.registers[r2] =  static_cast<uint8_t>(value & 0xFFu);
         cpu.registers[r1] =  static_cast<uint8_t>(value >> 8u);
@@ -393,7 +393,7 @@ Instruction LD_RR_D16(Cpu_Register r1, Cpu_Register r2) {
 
 Instruction LD_HL_SPR8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto distance = std::get<uint8_t>(op);
+        const auto distance = op.byte;
 
         uint8_t* flags = &(cpu.registers[Register_F]);
 
@@ -420,7 +420,7 @@ Instruction LD_HL_SPR8() {
 
 Instruction LD_SP_D16() {
     return {[](Cpu& cpu, Operand& op) {
-        cpu.stack_ptr = std::get<uint16_t>(op);
+        cpu.stack_ptr = op.word;
         constexpr auto cycles = 12;
         return cycles;
     }, immediate_extended};
@@ -456,7 +456,7 @@ uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction ADD_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
 
         cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
@@ -479,7 +479,7 @@ Instruction ADD_R(Cpu_Register src) {
 
 Instruction ADD_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = ADD_8bit(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -551,7 +551,7 @@ uint8_t SUB(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction SUB_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -572,7 +572,7 @@ Instruction SUB_R(Cpu_Register src) {
 
 Instruction SUB_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = SUB(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -848,7 +848,7 @@ Instruction DAA() {
 
 Instruction ADD_SP_R8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto distance = std::get<uint8_t>(op);
+        const auto distance = op.byte;
 
         uint8_t* flags = &(cpu.registers[Register_F]);
 
@@ -888,7 +888,7 @@ uint8_t AND(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction AND_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -909,7 +909,7 @@ Instruction AND_R(Cpu_Register src) {
 
 Instruction AND_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = AND(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -931,7 +931,7 @@ uint8_t XOR(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction XOR_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -954,7 +954,7 @@ Instruction XOR_R(Cpu_Register src) {
 
 Instruction XOR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = XOR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -976,7 +976,7 @@ uint8_t OR(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction OR_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -993,7 +993,7 @@ Instruction OR_R(Cpu_Register src) {
 
 Instruction OR_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = OR(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -1019,7 +1019,7 @@ void CP(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction CP_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         CP(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -1038,7 +1038,7 @@ Instruction CP_R(Cpu_Register src) {
 
 Instruction CP_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         CP(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -1113,7 +1113,7 @@ uint8_t ADC(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction ADC_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -1132,7 +1132,7 @@ Instruction ADC_R(Cpu_Register src) {
 
 Instruction ADC_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         cpu.registers[Register_A] = ADC(cpu.registers[Register_A], value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
         return cycles;
@@ -1141,7 +1141,7 @@ Instruction ADC_ADDR_HL() {
 
 Instruction LDH_ADDR_A8_A() {
     return  {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         const auto address = static_cast<uint16_t>(0xFF00 + value);
         write(cpu.memory_controller, address, cpu.registers[Register_A]);    
         constexpr auto cycles = 12;
@@ -1151,7 +1151,7 @@ Instruction LDH_ADDR_A8_A() {
 
 Instruction LDH_A_ADDR_A8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto address = static_cast<uint16_t>(0xFF00 + std::get<uint8_t>(op));
+        const auto address = static_cast<uint16_t>(0xFF00 + op.byte);
         cpu.registers[Register_A] =  read(cpu.memory_controller,address);             
         constexpr auto cycles = 12;
         return cycles;
@@ -1205,7 +1205,7 @@ uint8_t SBC(uint8_t first, uint8_t second, uint8_t* flags) {
 
 Instruction SBC_D8() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         const auto a = cpu.registers[Register_A];
         cpu.registers[Register_A] = SBC(a, value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
@@ -1225,7 +1225,7 @@ Instruction SBC_R(Cpu_Register src) {
 
 Instruction SBC_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand& op) {
-        const auto value = std::get<uint8_t>(op);
+        const auto value = op.byte;
         auto a = cpu.registers[Register_A];
         cpu.registers[Register_A] = SBC(a, value, &(cpu.registers[Register_F]));
         constexpr auto cycles = 8;
