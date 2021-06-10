@@ -3,7 +3,7 @@ set(CMAKE_BUILD_TYPE Debug)
 project(Gameboy
     VERSION 1.0
     DESCRIPTION "Gameboy emulator"
-    LANGUAGES CXX)
+    LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
