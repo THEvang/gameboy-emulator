@@ -3,7 +3,7 @@
 #include <functional>
 #include <variant>
 
-#include "Cpu/Cpu.hpp"
+#include "Cpu/Cpu.h"
 
 #include "Cpu/Opcodes.hpp"
 #include "Cpu/CBOpcodes.hpp"

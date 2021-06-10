@@ -2,13 +2,12 @@
 
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
+#include "Cpu/Interrupts.h"
 
 LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
     : m_memory_controller(memory_controller)
     , m_lcd_control(lcd_control)
-{
-    m_interrupt_handler.memory_bank_controller =  m_memory_controller;
-}
+{}
 
 void LCD_Status::set_status(int& scanline_counter) {
     

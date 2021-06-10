@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Graphics/LCD_Status.hpp"
-#include "Cpu/Interrupt_Handler.hpp"
 #include "Graphics/Pixel.hpp"
 
 class MemoryBankController;
@@ -34,7 +33,6 @@ private:
 
     MemoryBankController* m_memory_controller;
 
-    Interrupt_Handler m_interrupt_handler;
     LCD_Control m_lcd_control;
     LCD_Status m_lcd_status;
     

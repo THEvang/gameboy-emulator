@@ -1,8 +1,10 @@
 target_sources(gb-core
     PRIVATE
+    Adressing_Modes.hpp
+    Adressing_Modes.cpp
     Opcodes.hpp
-    Cpu.hpp
-    Cpu.cpp
+    Cpu.h
+    Cpu.c
     CBOpcodes.hpp
     CBOperations.hpp
     CBOperations.cpp
@@ -10,8 +12,8 @@ target_sources(gb-core
     Operations.cpp 
     Timer.hpp
     Timer.cpp
-    Interrupt_Handler.hpp
-    Interrupt_Handler.cpp
+    Interrupts.h
+    Interrupts.c
     Interpreter.hpp
     Interpreter.cpp
 )

@@ -1,12 +1,11 @@
 #include "Timer.hpp"
 #include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.h"
+#include "Cpu/Interrupts.h"
 
 Timer::Timer(MemoryBankController* memory) 
     : m_memory(memory)
-{
-    m_interrupt_handler.memory_bank_controller = memory;
-}
+{}
 
 
 void Timer::increment(int cycles) {

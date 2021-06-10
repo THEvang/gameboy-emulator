@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cpu/Interrupt_Handler.hpp"
 #include "Graphics/LCD_Control.hpp"
 
 class MemoryBankController;
@@ -32,6 +31,5 @@ private:
     static const int coincidence_bit = 2;
 
     MemoryBankController* m_memory_controller;
-    Interrupt_Handler m_interrupt_handler;
     LCD_Control m_lcd_control;
 };

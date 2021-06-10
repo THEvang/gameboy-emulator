@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 #include "Utilities/BitOperations.h"
-#include "Cpu/Cpu.hpp"
 #include "Cpu/Interpreter.hpp"
 #include "Cpu/CBOpcodes.hpp"
 #include "Memory/Memory_Controller.h"
+#include "Adressing_Modes.hpp"
 
 Instruction NOP() {
     return {[](Cpu&, Operand&) { return 4;}, implied};

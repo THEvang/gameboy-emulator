@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "Cpu/Interrupt_Handler.hpp"
 
 class MemoryBankController;
 
@@ -25,7 +24,6 @@ private:
     uint16_t m_div_value = 0xABCC;
 
     MemoryBankController* m_memory;
-    Interrupt_Handler m_interrupt_handler;
 
     bool m_prev_delay = false;
     bool m_tima_has_overflowed = false;
