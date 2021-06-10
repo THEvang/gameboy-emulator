@@ -2,18 +2,17 @@
 #include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Interrupts.h"
-
+#include "LCD_Control.h"
 
 PPU::PPU(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
-    , m_lcd_control(m_memory_controller)
-    , m_lcd_status(m_memory_controller, m_lcd_control)
+    , m_lcd_status(m_memory_controller)
 {}
 
 void PPU::step(int cycles) {
 
     m_lcd_status.set_status(m_scanline_counter);
-    if(!m_lcd_control.lcd_display_enabled()) {
+    if(!lcd_display_enabled(m_memory_controller)) {
         return;
     }
 
@@ -39,11 +38,11 @@ void PPU::step(int cycles) {
 
 void PPU::draw_scanline() {
 
-    if(m_lcd_control.background_display_enabled()) {
+    if(background_display_enabled(m_memory_controller)) {
         draw_background();
     }
 
-    if(m_lcd_control.sprite_display_eanbled()) {
+    if(sprite_display_eanbled(m_memory_controller)) {
         draw_sprites();
     }
 }
@@ -57,13 +56,13 @@ void PPU::draw_background() {
     const auto scanline = read(m_memory_controller, scanline_address);
 
     auto using_window = false;
-    if(m_lcd_control.window_display_enabled()) {
+    if(window_display_enabled(m_memory_controller)) {
         using_window = window_y <= scanline;
     }
 
-    const auto tile_data_start_address = m_lcd_control.tile_data_start_address();
-    const auto tile_map_start_address = using_window ? m_lcd_control.window_tile_map_start_address() :
-        m_lcd_control.background_tile_map_start_address();
+    const auto tile_data_start_addr = tile_data_start_address(m_memory_controller);
+    const auto tile_map_start_address = using_window ? window_tile_map_start_address(m_memory_controller) :
+        background_tile_map_start_address(m_memory_controller);
 
     const auto y_pos = using_window ? static_cast<uint8_t>(scanline - window_y) : 
         static_cast<uint8_t>(scroll_y + scanline);
@@ -83,9 +82,9 @@ void PPU::draw_background() {
         const auto tile_column = static_cast<uint16_t>((x_pos / 8));
         const auto tile_map_address = static_cast<uint16_t>(tile_map_start_address + tile_row + tile_column);
 
-        uint16_t tile_data_address = tile_data_start_address;
+        uint16_t tile_data_address = tile_data_start_addr;
 
-        if(m_lcd_control.tile_data_signed()) {
+        if(tile_data_signed(m_memory_controller)) {
             const auto tile_number = static_cast<int8_t>( read(m_memory_controller, tile_map_address));
             tile_data_address = static_cast<uint16_t>(tile_data_address + (tile_number + 128) * 16);
 
@@ -117,7 +116,7 @@ void PPU::draw_background() {
 void PPU::draw_sprites() {
 
     bool use8x16 = false;
-    if(m_lcd_control.sprite_size()) {
+    if(sprite_size(m_memory_controller)) {
         use8x16 = true;
     }
 

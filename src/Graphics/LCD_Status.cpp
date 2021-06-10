@@ -3,16 +3,16 @@
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
 #include "Cpu/Interrupts.h"
+#include "Graphics/LCD_Control.h"
 
-LCD_Status::LCD_Status(MemoryBankController* memory_controller, const LCD_Control& lcd_control)
+LCD_Status::LCD_Status(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
-    , m_lcd_control(lcd_control)
 {}
 
 void LCD_Status::set_status(int& scanline_counter) {
     
     constexpr uint16_t scanline_address = 0xFF44;
-    if(!m_lcd_control.lcd_display_enabled()) {
+    if(!lcd_display_enabled(m_memory_controller)) {
         scanline_counter = 456;
         set_mode(LCD_Modes::V_Blank);
         write(m_memory_controller, scanline_address, 0);
