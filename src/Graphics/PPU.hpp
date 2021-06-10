@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Graphics/LCD_Status.hpp"
 #include "Graphics/Pixel.hpp"
-
-class MemoryBankController;
+#include "Memory/Memory_Controller.h"
 
 class PPU {
 public:
@@ -32,8 +30,6 @@ private:
     const static auto horizontal_tiles = 32;
 
     MemoryBankController* m_memory_controller;
-
-    LCD_Status m_lcd_status;
     
     int m_scanline_counter = 0;
 };
