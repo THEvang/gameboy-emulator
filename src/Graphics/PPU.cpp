@@ -1,17 +1,19 @@
-#include "Graphics/PPU.hpp"
+#include "PPU.hpp"
+
+#include "LCD_Control.h"
+#include "LCD_Status.h"
 #include "Utilities/BitOperations.h"
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Interrupts.h"
-#include "LCD_Control.h"
+
 
 PPU::PPU(MemoryBankController* memory_controller)
     : m_memory_controller(memory_controller)
-    , m_lcd_status(m_memory_controller)
 {}
 
 void PPU::step(int cycles) {
 
-    m_lcd_status.set_status(m_scanline_counter);
+    set_status(m_memory_controller, &m_scanline_counter);
     if(!lcd_display_enabled(m_memory_controller)) {
         return;
     }
