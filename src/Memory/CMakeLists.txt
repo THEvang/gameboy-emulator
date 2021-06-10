@@ -1,9 +1,9 @@
 target_sources(gb-core
     PRIVATE
     
-    Memory_Controller.hpp
-    Memory_Controller.cpp
+    Memory_Controller.h
+    Memory_Controller.c
 
-    Cartridge.hpp
-    Cartridge.cpp
+    Cartridge.h
+    Cartridge.c
 )

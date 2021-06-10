@@ -6,7 +6,7 @@
 #include "Cpu/Cpu.hpp"
 #include "Cpu/Interpreter.hpp"
 #include "Cpu/CBOpcodes.hpp"
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 
 Instruction NOP() {
     return {[](Cpu&, Operand&) { return 4;}, implied};

@@ -1,6 +1,6 @@
 #include "Cpu/Cpu.hpp"
 #include "Utilities/BitOperations.h"
-#include "Memory/Memory_Controller.hpp"
+#include "Memory/Memory_Controller.h"
 
 uint16_t read_register_pair(Cpu cpu, Cpu_Register r1, Cpu_Register r2) {
     return combine_bytes(cpu.registers[r1], cpu.registers[r2]);
