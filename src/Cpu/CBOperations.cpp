@@ -3,7 +3,7 @@
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Interpreter.hpp"
 #include "Utilities/BitOperations.h"
-#include "Adressing_Modes.hpp"
+#include "Adressing_Modes.h"
 
 uint8_t rlc(uint8_t value, uint8_t* flags) {
 

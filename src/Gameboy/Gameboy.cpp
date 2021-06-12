@@ -25,7 +25,7 @@ void GameBoy::run() {
 
     auto cycles = 4;
     if(!cpu.is_halted) {
-        auto operand = instruction.read_operand(cpu);
+        auto operand = instruction.read_operand(&cpu);
         cycles = instruction.execute(cpu, operand);
     } else {
         cpu.is_halted = should_exit_halt(memory_bank_controller);
