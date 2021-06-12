@@ -2,7 +2,7 @@
 #include "Utilities/BitOperations.h"
 #include "Input/Joypad.h"
 
-uint8_t read(MemoryBankController* mc, uint16_t address) {
+uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
     if(address <= 0x7FFF) {
         return read_from_rom_bank(mc, address);
@@ -11,7 +11,7 @@ uint8_t read(MemoryBankController* mc, uint16_t address) {
     if (address >= 0xA000 && address <= 0xBFFF) {
         //RAM
         return mc->memory[address];    
-    } 
+    }
 
     if(address == 0xFF00) {
         return read_joypad_input(mc);        
@@ -66,7 +66,7 @@ void set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
     mc->ram_bank = (data & 0x03u);
 }
 
-void write(MemoryBankController* mc, uint16_t address, uint8_t data) {
+void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     if(address <= 0x1FFF) {
         toggle_ram(mc, data);

@@ -30,11 +30,11 @@ Instruction RLC_R(Cpu_Register r) {
 Instruction RLC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
 
         value = rlc(value, &(cpu.registers[Register_F]));
 
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -66,10 +66,10 @@ Instruction RRC_R(Cpu_Register r) {
 Instruction RRC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
 
         value = RRC(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -107,10 +107,10 @@ Instruction RL_R(Cpu_Register r) {
 Instruction RL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
 
         value = RL(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -147,9 +147,9 @@ Instruction SRL_R(Cpu_Register r) {
 Instruction SRL_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller,address);
+        auto value = gb_read(cpu.memory_controller,address);
         value = SRL(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -186,9 +186,9 @@ Instruction SLA_R(Cpu_Register r) {
 Instruction SLA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&){
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         value = SLA(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -228,9 +228,9 @@ Instruction SRA_R(Cpu_Register r) {
 Instruction SRA_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         value = SRA(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -269,9 +269,9 @@ Instruction RR_R(Cpu_Register r) {
 Instruction RR_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         value = RR(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -304,9 +304,9 @@ Instruction SWAP_R(Cpu_Register r) {
 Instruction SWAP_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         value = SWAP(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -332,11 +332,11 @@ Instruction BIT_R(Cpu_Register r, int n) {
 Instruction BIT_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {    
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        const auto value = read(cpu.memory_controller, address);
+        const auto value = gb_read(cpu.memory_controller, address);
 
         auto flags = cpu.registers[Register_F];
         BIT(value, n, &flags);
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
         cpu.registers[Register_F] = flags;
 
         constexpr auto cycles = 12;
@@ -355,9 +355,9 @@ Instruction RES_R(Cpu_Register r, int n) {
 Instruction RES_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         clear_bit(&value, n);
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;
@@ -377,9 +377,9 @@ Instruction SET_R(Cpu_Register r, int n) {
 Instruction SET_ADDR_HL(int n) {
     return {[n](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller, address);
+        auto value = gb_read(cpu.memory_controller, address);
         set_bit(&value, n);
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 16;
         return cycles;

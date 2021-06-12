@@ -19,7 +19,7 @@ GameBoy::GameBoy(MemoryBankController* mc)
 
 void GameBoy::run() {
 
-    const auto opcode = read(memory_bank_controller, cpu.program_counter);
+    const auto opcode = gb_read(memory_bank_controller, cpu.program_counter);
 
     auto instruction = fetch(static_cast<Opcode>(opcode));
 

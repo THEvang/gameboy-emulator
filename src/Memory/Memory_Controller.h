@@ -25,8 +25,8 @@ typedef struct MemoryBankController {
     Joypad* joypad;
 } MemoryBankController;
 
-void write(MemoryBankController* mc, uint16_t address, uint8_t data);
-uint8_t read(MemoryBankController* mc, uint16_t address);
+void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data);
+uint8_t gb_read(MemoryBankController* mc, uint16_t address);
 
 void dma_transfer(MemoryBankController* mc, uint8_t data);
 uint8_t read_from_rom_bank(MemoryBankController* mc, uint16_t address);

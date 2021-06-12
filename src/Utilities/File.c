@@ -16,8 +16,8 @@ void load_rom(gb_Rom* rom, const char* path) {
     rom->size = ftell(rom_file);
     fseek(rom_file, 0, SEEK_SET);
 
-    rom->data = (uint8_t*) malloc(rom->size);
-    fread(rom->data, 1, rom->size, rom_file);
+    rom->data = malloc(rom->size * sizeof(uint8_t));
+    fread(rom->data, sizeof(uint8_t), rom->size, rom_file);
 
     fclose(rom_file);
 }
