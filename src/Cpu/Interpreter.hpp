@@ -3,8 +3,8 @@
 #include <functional>
 #include "Cpu/Cpu.h"
 
-#include "Cpu/Opcodes.hpp"
-#include "Cpu/CBOpcodes.hpp"
+#include "Cpu/Opcodes.h"
+#include "Cpu/CBOpcodes.h"
 #include "Adressing_Modes.h"
 
 using Operation = std::function<int(Cpu&, Operand&)>;

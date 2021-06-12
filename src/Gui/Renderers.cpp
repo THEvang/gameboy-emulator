@@ -2,7 +2,7 @@
 
 #include "Gui/Renderers.hpp"
 #include "imgui/imgui.h"
-#include "Cpu/Opcodes.hpp"
+#include "Cpu/Opcodes.h"
 #include "Disassembler/Disassembler.hpp"
 #include "Memory/Cartridge.h"
 #include "Disassembler/Ring_Buffer.hpp"

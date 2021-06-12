@@ -4,7 +4,7 @@
 
 #include "Utilities/BitOperations.h"
 #include "Cpu/Interpreter.hpp"
-#include "Cpu/CBOpcodes.hpp"
+#include "Cpu/CBOpcodes.h"
 #include "Memory/Memory_Controller.h"
 #include "Adressing_Modes.h"
 

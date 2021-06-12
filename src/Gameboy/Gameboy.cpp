@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "Gameboy.hpp"
-#include "Cpu/Opcodes.hpp"
+#include "Cpu/Opcodes.h"
 #include "Cpu/Interpreter.hpp"
 #include "Cpu/Interrupts.h"
 

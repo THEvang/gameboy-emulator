@@ -3,739 +3,739 @@
 Instruction_Info disassemble(Opcode const& opcode) {
 
     switch (opcode) {
-    case Opcode::NOP:
+    case Opcode_NOP:
         return {opcode, "NOP", 4};
 
-    case Opcode::LD_BC_D16:
+    case Opcode_LD_BC_D16:
         return {opcode, "LD BC, d16", 12};
 
-    case Opcode::LD_ADDR_BC_A:
+    case Opcode_LD_ADDR_BC_A:
         return {opcode, "LD (BC), A", 8};
 
-    case Opcode::INC_BC:
+    case Opcode_INC_BC:
         return {opcode, "INC BC", 4};
 
-    case Opcode::INC_B:
+    case Opcode_INC_B:
         return {opcode, "INC B", 4};
 
-    case Opcode::DEC_B:
+    case Opcode_DEC_B:
         return {opcode, "DEC B", 4};
 
-    case Opcode::LD_B_D8:
+    case Opcode_LD_B_D8:
         return {opcode, "LD B, d8", 9};
 
-    case Opcode::RLCA:
+    case Opcode_RLCA:
         return {opcode, "RLCA", 4};
 
-    case Opcode::LD_ADDR_A16_SP:
+    case Opcode_LD_ADDR_A16_SP:
         return {opcode, "LD (a16), SP", 20};
 
-    case Opcode::ADD_HL_BC:
+    case Opcode_ADD_HL_BC:
         return {opcode, "ADD HL, BC", 8};
 
-    case Opcode::LD_A_ADDR_BC:
+    case Opcode_LD_A_ADDR_BC:
         return {opcode, "LD A, (BC)", 8};
 
-    case Opcode::DEC_BC:
+    case Opcode_DEC_BC:
         return {opcode, "DEC BC", 8};
 
-    case Opcode::INC_C:
+    case Opcode_INC_C:
         return {opcode, "INC C", 4};
 
-    case Opcode::DEC_C:
+    case Opcode_DEC_C:
         return {opcode, "DEC C", 4};
 
-    case Opcode::LD_C_D8:
+    case Opcode_LD_C_D8:
         return {opcode, "LD C d8", 8};
 
-    case Opcode::RRCA:
+    case Opcode_RRCA:
         return {opcode, "RRCA", 4};
 
-    case Opcode::STOP:
+    case Opcode_STOP:
         return {opcode, "STOP", 4};
 
-    case Opcode::LD_DE_D16:
+    case Opcode_LD_DE_D16:
         return {opcode, "LD DE, d16", 12};
 
-    case Opcode::LD_ADDR_DE_A:
+    case Opcode_LD_ADDR_DE_A:
         return {opcode, "LD (DE), A", 8};
 
-    case Opcode::INC_DE:
+    case Opcode_INC_DE:
         return {opcode, "INC DE", 8};
 
-    case Opcode::INC_D:
+    case Opcode_INC_D:
         return {opcode, "INC D", 4};
 
-    case Opcode::DEC_D:
+    case Opcode_DEC_D:
         return {opcode, "DEC D", 4};
 
-    case Opcode::LD_D_D8:
+    case Opcode_LD_D_D8:
         return {opcode, "LD D, d8", 8};
 
-    case Opcode::RLA:
+    case Opcode_RLA:
         return {opcode, "RLA", 4};
 
-    case Opcode::JR_R8:
+    case Opcode_JR_R8:
         return {opcode, "JR r8", 12};
 
-    case Opcode::ADD_HL_DE:
+    case Opcode_ADD_HL_DE:
         return {opcode, "ADD HL DE", 8};
 
-    case Opcode::LD_A_ADDR_DE:
+    case Opcode_LD_A_ADDR_DE:
         return {opcode, "LD A, (DE)", 8};
 
-    case Opcode::DEC_DE:
+    case Opcode_DEC_DE:
         return {opcode, "DEC DE", 8};
 
-    case Opcode::INC_E:
+    case Opcode_INC_E:
         return {opcode, "INC E", 4};
 
-    case Opcode::DEC_E:
+    case Opcode_DEC_E:
         return {opcode, "DEC E", 4};
 
-    case Opcode::LD_E_D8:
+    case Opcode_LD_E_D8:
         return {opcode, "LD E, d8", 8};
 
-    case Opcode::RRA:
+    case Opcode_RRA:
         return {opcode, "RRA", 4};
 
-    case Opcode::JR_NZ_R8:
+    case Opcode_JR_NZ_R8:
         return {opcode, "JR NZ, r8", 12};
 
-    case Opcode::LD_HL_D16:
+    case Opcode_LD_HL_D16:
         return {opcode, "LD HL, d16", 12};
 
-    case Opcode::LD_ADDR_HLI_A:
+    case Opcode_LD_ADDR_HLI_A:
         return {opcode, "LD (HL+), A", 8};
 
-    case Opcode::INC_HL:
+    case Opcode_INC_HL:
         return {opcode, "INC HL", 8};
 
-    case Opcode::INC_H:
+    case Opcode_INC_H:
         return {opcode, "INC H", 4};
 
-    case Opcode::DEC_H:
+    case Opcode_DEC_H:
         return {opcode, "DEC H", 4};
 
-    case Opcode::LD_H_D8:
+    case Opcode_LD_H_D8:
         return {opcode, "LD H, d8", 8};
 
-    case Opcode::DAA:
+    case Opcode_DAA:
         return {opcode, "DAA", 4};
 
-    case Opcode::JR_Z_R8:
+    case Opcode_JR_Z_R8:
         return {opcode, "JR Z, r8", 12};
 
-    case Opcode::ADD_HL_HL:
+    case Opcode_ADD_HL_HL:
         return {opcode, "ADD HL, HL", 8};
 
-    case Opcode::LD_A_ADDR_HLI:
+    case Opcode_LD_A_ADDR_HLI:
         return {opcode, "LD A, (HL+)", 8};
 
-    case Opcode::DEC_HL:
+    case Opcode_DEC_HL:
         return {opcode, "DEC HL", 8};
 
-    case Opcode::INC_L:
+    case Opcode_INC_L:
         return {opcode, "INC L", 4};
 
-    case Opcode::DEC_L:
+    case Opcode_DEC_L:
         return {opcode, "DEC L", 1};
 
-    case Opcode::LD_L_D8:
+    case Opcode_LD_L_D8:
         return {opcode, "LD L, d8", 8};
 
-    case Opcode::CPL:
+    case Opcode_CPL:
         return {opcode, "CPL", 4};
 
-    case Opcode::JR_NC_R8:
+    case Opcode_JR_NC_R8:
         return {opcode, "JR NC, r8", 12};
 
-    case Opcode::LD_SP_D16:
+    case Opcode_LD_SP_D16:
         return {opcode, "LD SP d16", 12};
 
-    case Opcode::LD_ADDR_HLD_A:
+    case Opcode_LD_ADDR_HLD_A:
         return {opcode, "LD (HL-), A", 8};
 
-    case Opcode::INC_SP:
+    case Opcode_INC_SP:
         return {opcode, "INC SP", 8};
 
-    case Opcode::INC_ADDR_HL:
+    case Opcode_INC_ADDR_HL:
         return {opcode, "INC (HL)", 12};
 
-    case Opcode::DEC_ADDR_HL:
+    case Opcode_DEC_ADDR_HL:
         return {opcode, "DEC (HL)", 12};
 
-    case Opcode::LD_ADDR_HL_D8:
+    case Opcode_LD_ADDR_HL_D8:
         return {opcode, "LD (HL), d8", 12};
 
-    case Opcode::SCF:
+    case Opcode_SCF:
         return {opcode, "SCF", 4};
 
-    case Opcode::JR_C_R8:
+    case Opcode_JR_C_R8:
         return {opcode, "JR C, r8", 12};
 
-    case Opcode::ADD_HL_SP:
+    case Opcode_ADD_HL_SP:
         return {opcode, "ADD HL, SP", 8};
 
-    case Opcode::LD_A_ADDR_HLD:
+    case Opcode_LD_A_ADDR_HLD:
         return {opcode, "LD A, (HL-)", 8};
 
-    case Opcode::DEC_SP:
+    case Opcode_DEC_SP:
         return {opcode, "DEC SP", 8};
 
-    case Opcode::INC_A:
+    case Opcode_INC_A:
         return {opcode, "INC A", 4};
 
-    case Opcode::DEC_A:
+    case Opcode_DEC_A:
         return {opcode, "DEC A", 4};;
 
-    case Opcode::LD_A_D8:
+    case Opcode_LD_A_D8:
         return {opcode, "LD A, d8", 8};
 
-    case Opcode::CCF:
+    case Opcode_CCF:
         return {opcode, "CCF", 4};
 
-    case Opcode::LD_B_B:
+    case Opcode_LD_B_B:
         return {opcode, "LD B, B", 4};
 
-    case Opcode::LD_B_C:
+    case Opcode_LD_B_C:
         return {opcode, "LD B, C", 4};
 
-    case Opcode::LD_B_D:
+    case Opcode_LD_B_D:
         return {opcode, "LD B, D", 4};
 
-    case Opcode::LD_B_E:
+    case Opcode_LD_B_E:
         return {opcode, "LD B, E", 4};
 
-    case Opcode::LD_B_H:
+    case Opcode_LD_B_H:
         return {opcode, "LD B, H", 4};
 
-    case Opcode::LD_B_L:
+    case Opcode_LD_B_L:
         return {opcode, "LD B, L", 4};
 
-    case Opcode::LD_B_ADDR_HL:
+    case Opcode_LD_B_ADDR_HL:
         return {opcode, "LD B, (HL)", 8};
 
-    case Opcode::LD_B_A:
+    case Opcode_LD_B_A:
         return {opcode, "LD B, A", 4};
 
-    case Opcode::LD_C_B:
+    case Opcode_LD_C_B:
         return {opcode, "LD C, B", 4};
 
-    case Opcode::LD_C_C:
+    case Opcode_LD_C_C:
         return {opcode, "LD C, C", 4};
 
-    case Opcode::LD_C_D:
+    case Opcode_LD_C_D:
         return {opcode, "LD C, D", 4};
 
-    case Opcode::LD_C_E:
+    case Opcode_LD_C_E:
         return {opcode, "LD C, E", 4};
 
-    case Opcode::LD_C_H:
+    case Opcode_LD_C_H:
         return {opcode, "LD C, H", 4};
 
-    case Opcode::LD_C_L:
+    case Opcode_LD_C_L:
         return {opcode, "LD C, L", 4};
 
-    case Opcode::LD_C_ADDR_HL:
+    case Opcode_LD_C_ADDR_HL:
         return {opcode, "LD C, (HL)", 8};
 
-    case Opcode::LD_C_A:
+    case Opcode_LD_C_A:
         return {opcode, "LD C, A", 4};
 
-    case Opcode::LD_D_B:
+    case Opcode_LD_D_B:
         return {opcode, "LD D, B", 4};
 
-    case Opcode::LD_D_C:
+    case Opcode_LD_D_C:
         return {opcode, "LD D, C", 4};
 
-    case Opcode::LD_D_D:
+    case Opcode_LD_D_D:
         return {opcode, "LD D, D", 4};
 
-    case Opcode::LD_D_E:
+    case Opcode_LD_D_E:
         return {opcode, "LD D, E", 4};
 
-    case Opcode::LD_D_H:
+    case Opcode_LD_D_H:
         return {opcode, "LD D, H", 4};
 
-    case Opcode::LD_D_L:
+    case Opcode_LD_D_L:
         return {opcode, "LD D, L", 4};
 
-    case Opcode::LD_D_ADDR_HL:
+    case Opcode_LD_D_ADDR_HL:
         return {opcode, "LD D, (HL)", 8};
 
-    case Opcode::LD_D_A:
+    case Opcode_LD_D_A:
         return {opcode, "LD D, A", 4};
 
-    case Opcode::LD_E_B:
+    case Opcode_LD_E_B:
         return {opcode, "LD E, B", 4};
 
-    case Opcode::LD_E_C:
+    case Opcode_LD_E_C:
         return {opcode, "LD E, C", 4};
 
-    case Opcode::LD_E_D:
+    case Opcode_LD_E_D:
         return {opcode, "LD E, D", 4};
 
-    case Opcode::LD_E_E:
+    case Opcode_LD_E_E:
         return {opcode, "LD E, E", 4};
 
-    case Opcode::LD_E_H:
+    case Opcode_LD_E_H:
         return {opcode, "LD E, H", 4};
 
-    case Opcode::LD_E_L:
+    case Opcode_LD_E_L:
         return {opcode, "LD E, L", 4};
 
-    case Opcode::LD_E_ADDR_HL:
+    case Opcode_LD_E_ADDR_HL:
         return {opcode, "LD E, (HL)", 8};
 
-    case Opcode::LD_E_A:
+    case Opcode_LD_E_A:
         return {opcode, "LD E, A", 4};
 
-    case Opcode::LD_H_B:
+    case Opcode_LD_H_B:
         return {opcode, "LD H, B", 4};
 
-    case Opcode::LD_H_C:
+    case Opcode_LD_H_C:
         return {opcode, "LD H, C", 4};
 
-    case Opcode::LD_H_D:
+    case Opcode_LD_H_D:
         return {opcode, "LD H, D", 4};
 
-    case Opcode::LD_H_E:
+    case Opcode_LD_H_E:
         return {opcode, "LD H, E", 4};
 
-    case Opcode::LD_H_H:
+    case Opcode_LD_H_H:
         return {opcode, "LD H, E", 4};
 
-    case Opcode::LD_H_L:
+    case Opcode_LD_H_L:
         return {opcode, "LD H, L", 4};
 
-    case Opcode::LD_H_ADDR_HL:
+    case Opcode_LD_H_ADDR_HL:
         return {opcode, "LD H, (HL)", 8};
 
-    case Opcode::LD_H_A:
+    case Opcode_LD_H_A:
         return {opcode, "LD H, A", 4};
 
-    case Opcode::LD_L_B:
+    case Opcode_LD_L_B:
         return {opcode, "LD L, B", 4};
 
-    case Opcode::LD_L_C:
+    case Opcode_LD_L_C:
         return {opcode, "LD L, C", 4};
 
-    case Opcode::LD_L_D:
+    case Opcode_LD_L_D:
         return {opcode, "LD L, D", 4};
 
-    case Opcode::LD_L_E:
+    case Opcode_LD_L_E:
         return {opcode, "LD L, E", 4};
 
-    case Opcode::LD_L_H:
+    case Opcode_LD_L_H:
         return {opcode, "LD L, H", 4};
 
-    case Opcode::LD_L_L:
+    case Opcode_LD_L_L:
         return {opcode, "LD L, L", 4};
 
-    case Opcode::LD_L_ADDR_HL:
+    case Opcode_LD_L_ADDR_HL:
         return {opcode, "LD L, (HL)", 8};
 
-    case Opcode::LD_L_A:
+    case Opcode_LD_L_A:
         return {opcode, "LD L, A", 4};
 
-    case Opcode::LD_ADDR_HL_B:
+    case Opcode_LD_ADDR_HL_B:
         return {opcode, "LD (HL), B", 8};
 
-    case Opcode::LD_ADDR_HL_C:
+    case Opcode_LD_ADDR_HL_C:
         return {opcode, "LD (HL), C", 8};
 
-    case Opcode::LD_ADDR_HL_D:
+    case Opcode_LD_ADDR_HL_D:
         return {opcode, "LD (HL), D", 8};
 
-    case Opcode::LD_ADDR_HL_E:
+    case Opcode_LD_ADDR_HL_E:
         return {opcode, "LD (HL), E", 8};
 
-    case Opcode::LD_ADDR_HL_H:
+    case Opcode_LD_ADDR_HL_H:
         return {opcode, "LD (HL), H", 8};
 
-    case Opcode::LD_ADDR_HL_L:
+    case Opcode_LD_ADDR_HL_L:
         return {opcode, "LD (HL), L", 8};
 
-    case Opcode::HALT:
+    case Opcode_HALT:
         return {opcode, "HALT", 4};
 
-    case Opcode::LD_ADDR_HL_A:
+    case Opcode_LD_ADDR_HL_A:
         return {opcode, "LD (HL), A", 8};
 
-    case Opcode::LD_A_B:
+    case Opcode_LD_A_B:
         return {opcode, "LD A, B", 4};
 
-    case Opcode::LD_A_C:
+    case Opcode_LD_A_C:
         return {opcode, "LD A, C", 4};
 
-    case Opcode::LD_A_D:
+    case Opcode_LD_A_D:
         return {opcode, "LD A, D", 4};
 
-    case Opcode::LD_A_E:
+    case Opcode_LD_A_E:
         return {opcode, "LD A, E", 4};
 
-    case Opcode::LD_A_H:
+    case Opcode_LD_A_H:
         return {opcode, "LD A, H", 4};
 
-    case Opcode::LD_A_L:
+    case Opcode_LD_A_L:
         return {opcode, "LD A, L", 4};
 
-    case Opcode::LD_A_ADDR_HL:
+    case Opcode_LD_A_ADDR_HL:
         return {opcode, "LD A, (HL)", 8};
 
-    case Opcode::LD_A_A:
+    case Opcode_LD_A_A:
         return {opcode, "LD A, A", 4};
 
-    case Opcode::ADD_A_B:
+    case Opcode_ADD_A_B:
         return {opcode, "ADD A, B", 4};
 
-    case Opcode::ADD_A_C:
+    case Opcode_ADD_A_C:
         return {opcode, "ADD A, C", 4};
 
-    case Opcode::ADD_A_D:
+    case Opcode_ADD_A_D:
         return {opcode, "ADD A, D", 4};
 
-    case Opcode::ADD_A_E:
+    case Opcode_ADD_A_E:
         return {opcode, "ADD A, E", 4};
 
-    case Opcode::ADD_A_H:
+    case Opcode_ADD_A_H:
         return {opcode, "ADD A, H", 4};
 
-    case Opcode::ADD_A_L:
+    case Opcode_ADD_A_L:
         return {opcode, "ADD A, L", 4};
 
-    case Opcode::ADD_A_ADDR_HL:
+    case Opcode_ADD_A_ADDR_HL:
         return {opcode, "ADD A, (HL)", 4};
 
-    case Opcode::ADD_A_A:
+    case Opcode_ADD_A_A:
         return {opcode, "ADD A, A", 4};
 
-    case Opcode::ADC_A_B:
+    case Opcode_ADC_A_B:
         return {opcode, "ADC A, B", 4};
 
-    case Opcode::ADC_A_C:
+    case Opcode_ADC_A_C:
         return {opcode, "ADC A, C", 4};
 
-    case Opcode::ADC_A_D:
+    case Opcode_ADC_A_D:
         return {opcode, "ADC A, D", 4};
 
-    case Opcode::ADC_A_E:
+    case Opcode_ADC_A_E:
         return {opcode, "ADC A, E", 4};
 
-    case Opcode::ADC_A_H:
+    case Opcode_ADC_A_H:
         return {opcode, "ADC A, H", 4};
 
-    case Opcode::ADC_A_L:
+    case Opcode_ADC_A_L:
         return {opcode, "ADC A, L", 4};
 
-    case Opcode::ADC_A_ADDR_HL:
+    case Opcode_ADC_A_ADDR_HL:
         return {opcode, "ADC A, (HL)", 8};
 
-    case Opcode::ADC_A_A:
+    case Opcode_ADC_A_A:
         return {opcode, "ADC A, A", 4};
 
-    case Opcode::SUB_B:
+    case Opcode_SUB_B:
         return {opcode, "SUB B", 4};
 
-    case Opcode::SUB_C:
+    case Opcode_SUB_C:
         return {opcode, "SUB C", 4};
 
-    case Opcode::SUB_D:
+    case Opcode_SUB_D:
         return {opcode, "SUB D", 4};
 
-    case Opcode::SUB_E:
+    case Opcode_SUB_E:
         return {opcode, "SUB E", 4};
 
-    case Opcode::SUB_H:
+    case Opcode_SUB_H:
         return {opcode, "SUB H", 4};
 
-    case Opcode::SUB_L:
+    case Opcode_SUB_L:
         return {opcode, "SUB L", 4};
 
-    case Opcode::SUB_ADDR_HL:
+    case Opcode_SUB_ADDR_HL:
         return {opcode, "SUB (HL)", 8};
 
-    case Opcode::SUB_A:
+    case Opcode_SUB_A:
         return {opcode, "SUB A", 4};
 
-    case Opcode::SBC_A_B:
+    case Opcode_SBC_A_B:
         return {opcode, "SBC A, B", 4};
 
-    case Opcode::SBC_A_C:
+    case Opcode_SBC_A_C:
         return {opcode, "SBC A, C", 4};
 
-    case Opcode::SBC_A_D:
+    case Opcode_SBC_A_D:
         return {opcode, "SBC A, D", 4};
 
-    case Opcode::SBC_A_E:
+    case Opcode_SBC_A_E:
         return {opcode, "SBC A, E", 4};
 
-    case Opcode::SBC_A_H:
+    case Opcode_SBC_A_H:
         return {opcode, "SBC A, H", 4};
 
-    case Opcode::SBC_A_L:
+    case Opcode_SBC_A_L:
         return {opcode, "SBC A, L", 4};
 
-    case Opcode::SBC_A_ADDR_HL:
+    case Opcode_SBC_A_ADDR_HL:
         return {opcode, "SBC A, (HL)", 8};
 
-    case Opcode::SBC_A_A:
+    case Opcode_SBC_A_A:
         return {opcode, "SBC A, A", 4};
 
-    case Opcode::AND_B:
+    case Opcode_AND_B:
         return {opcode, "AND B", 4};
 
-    case Opcode::AND_C:
+    case Opcode_AND_C:
         return {opcode, "AND C", 4};
 
-    case Opcode::AND_D:
+    case Opcode_AND_D:
         return {opcode, "AND D", 4};
 
-    case Opcode::AND_E:
+    case Opcode_AND_E:
         return {opcode, "AND E", 4};
 
-    case Opcode::AND_H:
+    case Opcode_AND_H:
         return {opcode, "AND H", 4};
 
-    case Opcode::AND_L:
+    case Opcode_AND_L:
         return {opcode, "AND L", 4};
 
-    case Opcode::AND_ADDR_HL:
+    case Opcode_AND_ADDR_HL:
         return {opcode, "AND (HL)", 8};
 
-    case Opcode::AND_A:
+    case Opcode_AND_A:
         return {opcode, "AND A", 4};
 
-    case Opcode::XOR_B:
+    case Opcode_XOR_B:
         return {opcode, "XOR B", 4};
 
-    case Opcode::XOR_C:
+    case Opcode_XOR_C:
         return {opcode, "XOR C", 4};
 
-    case Opcode::XOR_D:
+    case Opcode_XOR_D:
         return {opcode, "XOR D", 4};
 
-    case Opcode::XOR_E:
+    case Opcode_XOR_E:
         return {opcode, "XOR E", 4};
 
-    case Opcode::XOR_H:
+    case Opcode_XOR_H:
         return {opcode, "XOR H", 4};
 
-    case Opcode::XOR_L:
+    case Opcode_XOR_L:
         return {opcode, "XOR L", 4};
 
-    case Opcode::XOR_ADDR_HL:
+    case Opcode_XOR_ADDR_HL:
         return {opcode, "XOR (HL)", 8};
 
-    case Opcode::XOR_A:
+    case Opcode_XOR_A:
         return {opcode, "XOR A", 4};
 
-    case Opcode::OR_B:
+    case Opcode_OR_B:
         return {opcode, "OR B", 4};
 
-    case Opcode::OR_C:
+    case Opcode_OR_C:
         return {opcode, "OR C", 4};
 
-    case Opcode::OR_D:
+    case Opcode_OR_D:
         return {opcode, "OR D", 4};
 
-    case Opcode::OR_E:
+    case Opcode_OR_E:
         return {opcode, "OR E", 4};
 
-    case Opcode::OR_H:
+    case Opcode_OR_H:
         return {opcode, "OR H", 4};
 
-    case Opcode::OR_L:
+    case Opcode_OR_L:
         return {opcode, "OR L", 4};
 
-    case Opcode::OR_ADDR_HL:
+    case Opcode_OR_ADDR_HL:
         return {opcode, "OR (HL)", 8};
 
-    case Opcode::OR_A:
+    case Opcode_OR_A:
         return {opcode, "OR A", 4};
 
-    case Opcode::CP_B:
+    case Opcode_CP_B:
         return {opcode, "CP B", 4};
 
-    case Opcode::CP_C:
+    case Opcode_CP_C:
         return {opcode, "CP C", 4};
 
-    case Opcode::CP_D:
+    case Opcode_CP_D:
         return {opcode, "CP D", 4};
 
-    case Opcode::CP_E:
+    case Opcode_CP_E:
         return {opcode, "CP E", 4};
 
-    case Opcode::CP_H:
+    case Opcode_CP_H:
         return {opcode, "CP H", 4};
 
-    case Opcode::CP_L:
+    case Opcode_CP_L:
         return {opcode, "CP L", 4};
 
-    case Opcode::CP_ADDR_HL:
+    case Opcode_CP_ADDR_HL:
         return {opcode, "CP (HL)", 8};
 
-    case Opcode::CP_A:
+    case Opcode_CP_A:
         return {opcode, "CP A", 4};
 
-    case Opcode::RET_NZ:
+    case Opcode_RET_NZ:
         return {opcode, "RET NZ", 20};
 
-    case Opcode::POP_BC:
+    case Opcode_POP_BC:
         return {opcode, "POP BC", 12};
 
-    case Opcode::JP_NZ_A16:
+    case Opcode_JP_NZ_A16:
         return {opcode, "JP NZ, a16", 16};
 
-    case Opcode::JP_A16:
+    case Opcode_JP_A16:
         return {opcode, "JP a16", 16};
 
-    case Opcode::CALL_NZ_A16:
+    case Opcode_CALL_NZ_A16:
         return {opcode, "CALL NZ, a16", 24};
 
-    case Opcode::PUSH_BC:
+    case Opcode_PUSH_BC:
         return {opcode, "PUSH BC", 16};
 
-    case Opcode::ADD_A_D8:
+    case Opcode_ADD_A_D8:
         return {opcode, "ADD A, d8", 8};
 
-    case Opcode::RST_00H:
+    case Opcode_RST_00H:
         return {opcode, "RST 00h", 16};
 
-    case Opcode::RET_Z:
+    case Opcode_RET_Z:
         return {opcode, "RET Z", 20};
 
-    case Opcode::RET:
+    case Opcode_RET:
         return {opcode, "RET", 16};
 
-    case Opcode::JP_Z_A16:
+    case Opcode_JP_Z_A16:
         return {opcode, "JP Z, a16", 24};
 
-    case Opcode::PREFIX_CB:
+    case Opcode_PREFIX_CB:
         return {opcode, "PREFIX CB", 4};
 
-    case Opcode::CALL_Z_A16:
+    case Opcode_CALL_Z_A16:
         return {opcode, "CALL Z", 24};
 
-    case Opcode::CALL_A16:
+    case Opcode_CALL_A16:
         return {opcode, "CALL", 16};;
 
-    case Opcode::ADC_A_D8:
+    case Opcode_ADC_A_D8:
         return {opcode, "ADC A, d8", 8};
 
-    case Opcode::RST_08H:
+    case Opcode_RST_08H:
         return {opcode, "RST 08h", 16};
 
-    case Opcode::RET_NC:
+    case Opcode_RET_NC:
         return {opcode, "RET NC", 20};
 
-    case Opcode::POP_DE:
+    case Opcode_POP_DE:
         return {opcode, "POP DE", 12};
 
-    case Opcode::JP_NC_A16:
+    case Opcode_JP_NC_A16:
         return {opcode, "JP NC, a16", 16};
 
-    case Opcode::CALL_NC_A16:
+    case Opcode_CALL_NC_A16:
         return {opcode, "CALL NC, a16", 24};
 
-    case Opcode::PUSH_DE:
+    case Opcode_PUSH_DE:
         return {opcode, "PUSH DE", 16};
 
-    case Opcode::SUB_D8:
+    case Opcode_SUB_D8:
         return {opcode, "SUB d8", 8};
 
-    case Opcode::RST_10H:
+    case Opcode_RST_10H:
         return {opcode, "RST 10h", 16};
 
-    case Opcode::RET_C:
+    case Opcode_RET_C:
         return {opcode, "RET C", 20};
 
-    case Opcode::RETI:
+    case Opcode_RETI:
         return {opcode, "RETI", 16};
 
-    case Opcode::JP_C_A16:
+    case Opcode_JP_C_A16:
         return {opcode, "JP C, a16", 16};
 
-    case Opcode::CALL_C_A16:
+    case Opcode_CALL_C_A16:
         return {opcode, "CALL C, a16", 24};
 
-    case Opcode::SBC_A_D8:
+    case Opcode_SBC_A_D8:
         return {opcode, "SBC A, d8", 8};
 
-    case Opcode::RST_18H:
+    case Opcode_RST_18H:
         return {opcode, "RST 18h", 16};
 
-    case Opcode::LDH_ADDR_A8_A:
+    case Opcode_LDH_ADDR_A8_A:
         return {opcode, "LD (a8), A", 12};
 
-    case Opcode::POP_HL:
+    case Opcode_POP_HL:
         return {opcode, "POP HL", 12};
 
-    case Opcode::LD_ADDR_C_A:
+    case Opcode_LD_ADDR_C_A:
         return {opcode, "LD (C), A", 8};
 
-    case Opcode::PUSH_HL:
+    case Opcode_PUSH_HL:
         return {opcode, "PUSH HL", 16};
 
-    case Opcode::AND_D8:
+    case Opcode_AND_D8:
         return {opcode, "AND d8", 8};
 
-    case Opcode::RST_20H:
+    case Opcode_RST_20H:
         return {opcode, "RST 20h", 16};
 
-    case Opcode::ADD_SP_R8:
+    case Opcode_ADD_SP_R8:
         return {opcode, "ADD SP, r8", 16};
 
-    case Opcode::JP_ADDR_HL:
+    case Opcode_JP_ADDR_HL:
         return {opcode, "JP (HL)", 4};
 
-    case Opcode::LD_ADDR_A16_A:
+    case Opcode_LD_ADDR_A16_A:
         return {opcode, "LD (a16), A", 16};
 
-    case Opcode::XOR_D8:
+    case Opcode_XOR_D8:
         return {opcode, "XOR d8", 8};
 
-    case Opcode::RST_28H:
+    case Opcode_RST_28H:
         return {opcode, "RST 20h", 16};
 
-    case Opcode::LDH_A_ADDR_A8:
+    case Opcode_LDH_A_ADDR_A8:
         return {opcode, "LDH A, (a8)", 12};
 
-    case Opcode::POP_AF:
+    case Opcode_POP_AF:
         return {opcode, "PP AF", 12};;
 
-    case Opcode::LD_A_ADDR_C:
+    case Opcode_LD_A_ADDR_C:
         return {opcode, "LD A, (C)", 8};
 
-    case Opcode::DI:
+    case Opcode_DI:
         return {opcode, "DI", 4};
 
-    case Opcode::PUSH_AF:
+    case Opcode_PUSH_AF:
         return {opcode, "PUSH AF", 16};
 
-    case Opcode::OR_D8:
+    case Opcode_OR_D8:
         return {opcode, "OR d8", 8};
 
-    case Opcode::RST_30H:
+    case Opcode_RST_30H:
         return {opcode, "RST 30h", 16};
 
-    case Opcode::LD_HL_SPR8:
+    case Opcode_LD_HL_SPR8:
         return {opcode, "LD HL, SP+r8", 12};
 
-    case Opcode::LD_SP_HL:
+    case Opcode_LD_SP_HL:
         return {opcode, "LD SP, HL", 8};
 
-    case Opcode::LD_A_ADDR_A16:
+    case Opcode_LD_A_ADDR_A16:
         return {opcode, "LD A, (a16)", 16};
 
-    case Opcode::EI:
+    case Opcode_EI:
         return {opcode, "EI", 4};
 
-    case Opcode::CP_D8:
+    case Opcode_CP_D8:
         return {opcode, "CP d8", 8};
 
-    case Opcode::RST_38H:
+    case Opcode_RST_38H:
         return {opcode, "RST 38h", 16};
 
     default:

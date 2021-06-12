@@ -1,7 +1,7 @@
 #include <string>
 
-#include "Cpu/Opcodes.hpp"
-#include "Cpu/CBOpcodes.hpp"
+#include "Cpu/Opcodes.h"
+#include "Cpu/CBOpcodes.h"
 
 struct Instruction_Info {
     Opcode opcode;
