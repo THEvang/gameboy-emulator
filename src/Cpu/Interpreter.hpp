@@ -5,7 +5,7 @@
 
 #include "Cpu/Opcodes.hpp"
 #include "Cpu/CBOpcodes.hpp"
-#include "Adressing_Modes.hpp"
+#include "Adressing_Modes.h"
 
 using Operation = std::function<int(Cpu&, Operand&)>;
 

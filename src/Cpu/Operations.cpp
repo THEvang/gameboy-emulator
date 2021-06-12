@@ -6,7 +6,7 @@
 #include "Cpu/Interpreter.hpp"
 #include "Cpu/CBOpcodes.hpp"
 #include "Memory/Memory_Controller.h"
-#include "Adressing_Modes.hpp"
+#include "Adressing_Modes.h"
 
 Instruction NOP() {
     return {[](Cpu&, Operand&) { return 4;}, implied};
@@ -1237,12 +1237,9 @@ Instruction PREFIX_CB() {
     return {[](Cpu& cpu, Operand&) {
         const auto cb_opcode = static_cast<CBCode>(gb_read(cpu.memory_controller,static_cast<uint16_t>(cpu.program_counter - 1)));
         const auto instruction = fetch_cb(cb_opcode);
-        auto operand = instruction.read_operand(cpu);
+        auto operand = instruction.read_operand(&cpu);
         return instruction.execute(cpu, operand);
-    }, [](Cpu& cpu) -> Operand {
-        cpu.program_counter += 2;
-        return {static_cast<uint8_t>(0)};
-    }};
+    }, cb_addressing};
 }
 
 Instruction LD_ADDR_HLD_A() {
