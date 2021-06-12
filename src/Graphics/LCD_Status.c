@@ -14,16 +14,16 @@ void set_status(MemoryBankController* mc, int* scanline_counter) {
     if(!lcd_display_enabled(mc)) {
         *scanline_counter = 456;
         set_mode(mc, LCD_Mode_V_Blank);
-        write(mc, scanline_address, 0);
+        gb_write(mc, scanline_address, 0);
         return;   
     }
 
     const LCD_Modes current_mode = get_mode(mc);
-    const uint8_t current_scanline = read(mc, scanline_address);
+    const uint8_t current_scanline = gb_read(mc, scanline_address);
 
     bool should_request_interrupt = false;
     
-    uint8_t status = read(mc, g_status_address);
+    uint8_t status = gb_read(mc, g_status_address);
     if(current_scanline >= 144) {
         set_mode(mc, LCD_Mode_V_Blank);
         should_request_interrupt = test_bit_8bit(status, 4);
@@ -50,14 +50,14 @@ void set_status(MemoryBankController* mc, int* scanline_counter) {
 }
 
 bool should_set_coincidence_flag(MemoryBankController* mc) {
-    return read(mc, 0xFF44) == read(mc, 0xFF45);
+    return gb_read(mc, 0xFF44) == gb_read(mc, 0xFF45);
 }
 
 void set_coincidence_flag(MemoryBankController* mc) {
 
-    uint8_t status = read(mc, g_status_address);
+    uint8_t status = gb_read(mc, g_status_address);
     set_bit(&status, g_coincidence_bit);
-    write(mc, g_status_address, status);
+    gb_write(mc, g_status_address, status);
     if(test_bit_8bit(status, 6)) {
         request_interrupt(mc, Interrupts_LCD_STAT);
     }
@@ -65,13 +65,13 @@ void set_coincidence_flag(MemoryBankController* mc) {
 
 void clear_coincidence_flag(MemoryBankController* mc) {
     
-    uint8_t status = read(mc, g_status_address);
+    uint8_t status = gb_read(mc, g_status_address);
     clear_bit(&status, g_coincidence_bit);
-    write(mc, g_status_address, status);
+    gb_write(mc, g_status_address, status);
 }
 
 LCD_Modes get_mode(MemoryBankController* mc) {
-        uint8_t status = read(mc, g_status_address);
+        uint8_t status = gb_read(mc, g_status_address);
         status &= 0x03;
         switch (status ) {
             case 0: 
@@ -89,7 +89,7 @@ LCD_Modes get_mode(MemoryBankController* mc) {
 
 void set_mode(MemoryBankController* mc, LCD_Modes mode) {
 
-    uint8_t status = read(mc, g_status_address);
+    uint8_t status = gb_read(mc, g_status_address);
 
     switch(mode) {
         case LCD_Mode_H_Blank:
@@ -113,5 +113,5 @@ void set_mode(MemoryBankController* mc, LCD_Modes mode) {
         break;
     }
     
-    write(mc, g_status_address, status);
+    gb_write(mc, g_status_address, status);
 }
