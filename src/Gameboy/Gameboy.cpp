@@ -11,6 +11,7 @@ GameBoy::GameBoy(MemoryBankController* mc)
     {
         joypad.direction_keys = 0b1111;
         joypad.button_keys = 0b1111;
+        memory_bank_controller->joypad = &joypad;
 
         cpu.memory_controller = memory_bank_controller;
         set_initial_state(&cpu);
