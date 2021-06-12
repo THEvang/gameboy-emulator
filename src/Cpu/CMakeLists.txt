@@ -10,8 +10,8 @@ target_sources(gb-core
     CBOperations.cpp
     Operations.hpp
     Operations.cpp 
-    Timer.hpp
-    Timer.cpp
+    Timer.h
+    Timer.c
     Interrupts.h
     Interrupts.c
     Interpreter.hpp

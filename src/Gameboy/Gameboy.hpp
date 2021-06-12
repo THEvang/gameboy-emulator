@@ -3,7 +3,7 @@
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Cpu.h"
 #include "Input/Joypad.h"
-#include "Cpu/Timer.hpp"
+#include "Cpu/Timer.h"
 #include "Graphics/PPU.hpp"
 
 struct GameBoy {
