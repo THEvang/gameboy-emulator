@@ -24,7 +24,7 @@ void PPU::step(int cycles) {
 
         m_scanline_counter = 456;
 
-        auto current_scanline = read(m_memory_controller, scanline_address);    
+        auto current_scanline = gb_read(m_memory_controller, scanline_address);    
         current_scanline++;
         m_memory_controller->memory[scanline_address] = current_scanline;
 
@@ -51,11 +51,11 @@ void PPU::draw_scanline() {
 
 void PPU::draw_background() {
 
-    const auto scroll_y = read(m_memory_controller, scroll_y_address);
-    const auto scroll_x = read(m_memory_controller, scroll_x_address);
-    const auto window_y = read(m_memory_controller, window_scroll_y_address);
-    const auto window_x = static_cast<uint8_t>(read(m_memory_controller, window_scroll_x_address) - static_cast<uint8_t>(7));
-    const auto scanline = read(m_memory_controller, scanline_address);
+    const auto scroll_y = gb_read(m_memory_controller, scroll_y_address);
+    const auto scroll_x = gb_read(m_memory_controller, scroll_x_address);
+    const auto window_y = gb_read(m_memory_controller, window_scroll_y_address);
+    const auto window_x = static_cast<uint8_t>(gb_read(m_memory_controller, window_scroll_x_address) - static_cast<uint8_t>(7));
+    const auto scanline = gb_read(m_memory_controller, scanline_address);
 
     auto using_window = false;
     if(window_display_enabled(m_memory_controller)) {
@@ -87,17 +87,17 @@ void PPU::draw_background() {
         uint16_t tile_data_address = tile_data_start_addr;
 
         if(tile_data_signed(m_memory_controller)) {
-            const auto tile_number = static_cast<int8_t>( read(m_memory_controller, tile_map_address));
+            const auto tile_number = static_cast<int8_t>( gb_read(m_memory_controller, tile_map_address));
             tile_data_address = static_cast<uint16_t>(tile_data_address + (tile_number + 128) * 16);
 
         } else {
-            const auto tile_number = read(m_memory_controller, tile_map_address);
+            const auto tile_number = gb_read(m_memory_controller, tile_map_address);
             tile_data_address = static_cast<uint16_t>(tile_number * 16 + tile_data_address);
         }
 
         auto line = static_cast<uint8_t>((y_pos % 8) * 2);
-        const auto data_1 = read(m_memory_controller, static_cast<uint16_t>(tile_data_address + line));
-        const auto data_2 = read(m_memory_controller, static_cast<uint16_t>(tile_data_address + line + 1));
+        const auto data_1 = gb_read(m_memory_controller, static_cast<uint16_t>(tile_data_address + line));
+        const auto data_2 = gb_read(m_memory_controller, static_cast<uint16_t>(tile_data_address + line + 1));
 
         auto color_bit = x_pos % 8;
         color_bit -= 7;
@@ -129,15 +129,15 @@ void PPU::draw_sprites() {
     
     // sprite occupies 4 bytes in the sprite attributes table
     const auto index = static_cast<uint8_t>(sprite*4);
-    const auto yPos = static_cast<uint8_t>(read(m_memory_controller, static_cast<uint16_t>(0xFE00+index)) - 16);
-    const auto xPos = static_cast<uint8_t>(read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+1)) - 8);
-    const auto tileLocation = read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+2));
-    const auto attributes = read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+3));
+    const auto yPos = static_cast<uint8_t>(gb_read(m_memory_controller, static_cast<uint16_t>(0xFE00+index)) - 16);
+    const auto xPos = static_cast<uint8_t>(gb_read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+1)) - 8);
+    const auto tileLocation = gb_read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+2));
+    const auto attributes = gb_read(m_memory_controller, static_cast<uint16_t>(0xFE00+index+3));
 
     bool yFlip = test_bit_8bit(attributes,6) ;
     bool xFlip = test_bit_8bit(attributes,5) ;
 
-    auto scanline = read(m_memory_controller, scanline_address);
+    auto scanline = gb_read(m_memory_controller, scanline_address);
 
     int ysize = use8x16 ? 16 : 8;
 
@@ -155,8 +155,8 @@ void PPU::draw_sprites() {
 
        line *= 2; // same as for tiles
        const auto dataAddress = static_cast<uint16_t>((0x8000 + (tileLocation * 16)) + line);
-       const auto data1 = read(m_memory_controller,  dataAddress ) ;
-       const auto data2 = read(m_memory_controller, static_cast<uint16_t>(dataAddress +1)) ;
+       const auto data1 = gb_read(m_memory_controller,  dataAddress ) ;
+       const auto data2 = gb_read(m_memory_controller, static_cast<uint16_t>(dataAddress +1)) ;
 
        // its easier to read in from right to left as pixel 0 is
        // bit 7 in the colour data, pixel 1 is bit 6 etc...
@@ -194,7 +194,7 @@ void PPU::draw_sprites() {
 
 Color PPU::get_color(uint8_t color_id, uint16_t palette_address) {
     
-    const uint8_t palette = read(m_memory_controller, palette_address);
+    const uint8_t palette = gb_read(m_memory_controller, palette_address);
     int hi_bit = 0;
     int lo_bit = 0;
 

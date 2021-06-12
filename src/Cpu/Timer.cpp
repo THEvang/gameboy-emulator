@@ -18,7 +18,7 @@ void Timer::increment(int cycles) {
 
 void Timer::tick() {
 
-    // if(m_memory->read(div_address) == 0) {
+    // if(m_memory->gb_read(div_address) == 0) {
     //     m_div_value = 0;
     // }
     
@@ -35,7 +35,7 @@ void Timer::tick() {
 
     if(should_increment_tima()) {
 
-        auto tima_value = read(m_memory, tima_address);
+        auto tima_value = gb_read(m_memory, tima_address);
         if(overflows_8bit(tima_value, 1)) {
             m_tima_has_overflowed = true;
         }
@@ -48,7 +48,7 @@ void Timer::tick() {
 
 bool Timer::should_increment_tima() {
 
-    const auto timer_control = read(m_memory, tac_address);
+    const auto timer_control = gb_read(m_memory, tac_address);
     const auto clock_select = static_cast<uint8_t>(timer_control & 0x03u);
     auto n = 0;
 
@@ -81,6 +81,6 @@ bool Timer::should_increment_tima() {
 }
 
 void Timer::reset_tima() {
-    const auto tima_reset_value = read(m_memory, tma_address);
-    write(m_memory, tima_address, tima_reset_value);
+    const auto tima_reset_value = gb_read(m_memory, tma_address);
+    gb_write(m_memory, tima_address, tima_reset_value);
 }

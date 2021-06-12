@@ -19,33 +19,33 @@ int handle_interrupts(Cpu* cpu) {
 }
 
 void request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
-    uint8_t interrupt_request = read(mc, g_interrupt_request_address);
+    uint8_t interrupt_request = gb_read(mc, g_interrupt_request_address);
     set_bit(&interrupt_request, interrupt);
     write(mc, g_interrupt_request_address, interrupt_request);
 }
 
 void clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
-    uint8_t request_register = read(mc, g_interrupt_request_address);
+    uint8_t request_register = gb_read(mc, g_interrupt_request_address);
     clear_bit(&request_register, interrupt);
     write(mc, g_interrupt_request_address, request_register);
 }
 
 bool should_exit_halt(MemoryBankController* mc) {
 
-    const uint8_t interrupt_requests = read(mc, g_interrupt_request_address);
-    const uint8_t interrupts_enabled = read(mc, g_interrupt_request_address);
+    const uint8_t interrupt_requests = gb_read(mc, g_interrupt_request_address);
+    const uint8_t interrupts_enabled = gb_read(mc, g_interrupt_request_address);
 
     return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
 bool is_requested(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t request_register = read(mc, g_interrupt_request_address);
+    const uint8_t request_register = gb_read(mc, g_interrupt_request_address);
     return test_bit_8bit(request_register, interrupt);
 }
 
 bool is_enabled(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t interrupt_enable_register = read(mc, g_interrupt_enabled_address);
+    const uint8_t interrupt_enable_register = gb_read(mc, g_interrupt_enabled_address);
     return test_bit_8bit(interrupt_enable_register, interrupt);
 }
 

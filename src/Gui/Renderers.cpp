@@ -10,7 +10,7 @@
 void render_disassembly(GameBoy& gameboy) {
 
     static Ring_Buffer<Instruction_Info, 20> history;
-    const auto opcode = read(gameboy.memory_bank_controller, gameboy.cpu.program_counter);
+    const auto opcode = gb_read(gameboy.memory_bank_controller, gameboy.cpu.program_counter);
     const auto instruction = disassemble(static_cast<Opcode>(opcode));
     history.write(instruction);
 
@@ -98,7 +98,7 @@ std::string to_name(Cpu_Flag flag) {
 void render_cpu(GameBoy& gb) {
 
     ImGui::Begin("Cpu!");
-    ImGui::Text("Current Opcode: %i.", read(gb.cpu.memory_controller, gb.cpu.program_counter));
+    ImGui::Text("Current Opcode: %i.", gb_read(gb.cpu.memory_controller, gb.cpu.program_counter));
 
     for(auto reg_index = 0; reg_index < 7; reg_index++) {
         const auto reg = static_cast<Cpu_Register>(reg_index);
@@ -119,7 +119,7 @@ void render_cpu(GameBoy& gb) {
 void render_cartridge_data(GameBoy& gameboy) {
     
     ImGui::Begin("Cartridge Header");
-    const auto mbc_identifier = read(gameboy.memory_bank_controller, 0x0147);
+    const auto mbc_identifier = gb_read(gameboy.memory_bank_controller, 0x0147);
     const auto mbc_type = get_bank_type(mbc_identifier);
     std::string mbc_render {};
 

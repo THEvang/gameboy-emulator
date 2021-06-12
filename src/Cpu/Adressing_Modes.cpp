@@ -13,7 +13,7 @@ Operand implied(Cpu& cpu) {
 
 Operand immediate(Cpu& cpu) {
     cpu.program_counter += 2;
-    return {read(cpu.memory_controller,cpu.program_counter-1)};
+    return {gb_read(cpu.memory_controller,cpu.program_counter-1)};
 }
 
 Operand immediate_extended(Cpu& cpu) {
@@ -21,7 +21,7 @@ Operand immediate_extended(Cpu& cpu) {
     const auto pc = cpu.program_counter;
 
     Operand op;
-    op.word = combine_bytes(read(cpu.memory_controller,pc-1), read(cpu.memory_controller,pc-2));
+    op.word = combine_bytes(gb_read(cpu.memory_controller,pc-1), gb_read(cpu.memory_controller,pc-2));
     return op;
 }
 
@@ -30,16 +30,16 @@ Operand hl_addressing(Cpu& cpu) {
     const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
 
     Operand op;
-    op.byte = read(cpu.memory_controller,address);
+    op.byte = gb_read(cpu.memory_controller,address);
 }
 
 Operand extended_address(Cpu& cpu) {
     cpu.program_counter += 3;
     const auto pc = cpu.program_counter;
-    const auto address = combine_bytes(read(cpu.memory_controller,pc-1), read(cpu.memory_controller,pc-2));
+    const auto address = combine_bytes(gb_read(cpu.memory_controller,pc-1), gb_read(cpu.memory_controller,pc-2));
 
     Operand op;
-    op.byte = read(cpu.memory_controller,address);
+    op.byte = gb_read(cpu.memory_controller,address);
     return op;
 }
 

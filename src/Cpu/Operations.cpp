@@ -27,8 +27,8 @@ Instruction HALT() {
             const uint16_t interrupt_request_addr = 0xFF0F;
             const uint16_t interrupt_enable_addr = 0xFFFF;
 
-            const auto interrupt_request = read(cpu.memory_controller,interrupt_request_addr);
-            const auto interrupt_enable = read(cpu.memory_controller,interrupt_enable_addr);
+            const auto interrupt_request = gb_read(cpu.memory_controller,interrupt_request_addr);
+            const auto interrupt_enable = gb_read(cpu.memory_controller,interrupt_enable_addr);
 
             if((interrupt_request & interrupt_enable & 0x1Fu) == 0) {
                 cpu.is_halted = true;
@@ -47,8 +47,8 @@ Instruction RST(uint8_t address) {
         const auto pc_high = static_cast<uint8_t>(cpu.program_counter >> 8u);
         const auto pc_low =  static_cast<uint8_t>(cpu.program_counter & 0xFFu);
 
-        write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 1), pc_high);
-        write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
+        gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 1), pc_high);
+        gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
 
         cpu.program_counter = combine_bytes(0x00, address);
         cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr - 2);
@@ -108,8 +108,8 @@ Instruction JR_C() {
 }
 
 int ret(Cpu& cpu) {            
-    const auto pc_low = read(cpu.memory_controller,cpu.stack_ptr);
-    const auto pc_high = read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
+    const auto pc_low = gb_read(cpu.memory_controller,cpu.stack_ptr);
+    const auto pc_high = gb_read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
     
     cpu.program_counter = combine_bytes(pc_high, pc_low);
     cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr + 2);
@@ -205,8 +205,8 @@ int call(Cpu& cpu, Operand& op) {
     const auto pc_high = static_cast<uint8_t>(cpu.program_counter >> 8u);
     const auto pc_low = static_cast<uint8_t>(cpu.program_counter & 0xFFu);
     
-    write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 1), pc_high);
-    write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
+    gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 1), pc_high);
+    gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr - 2), pc_low);
     cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr -2);
     
      cpu.program_counter = op.word;
@@ -266,7 +266,7 @@ Instruction LD_R_D8(Cpu_Register dst) {
 Instruction LD_A_ADDR_RR(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand&) {        
         const auto address = read_register_pair(cpu, r1, r2);
-        cpu.registers[Register_A] =  read(cpu.memory_controller,address);
+        cpu.registers[Register_A] = gb_read(cpu.memory_controller,address);
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -283,7 +283,7 @@ Instruction LD_A_ADDR_A16() {
 Instruction LD_A_ADDR_C() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = static_cast<uint16_t>(0xFF00 + cpu.registers[Register_C]);
-        cpu.registers[Register_A] =  read(cpu.memory_controller,address);
+        cpu.registers[Register_A] =  gb_read(cpu.memory_controller,address);
 
         constexpr auto cycles = 8;
         return cycles;
@@ -293,8 +293,8 @@ Instruction LD_A_ADDR_C() {
 Instruction LD_ADDR_A16_SP() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = op.word;        
-        write(cpu.memory_controller, address, static_cast<uint8_t>(cpu.stack_ptr & 0xFFu));
-        write(cpu.memory_controller, static_cast<uint16_t>(address + 1), static_cast<uint8_t>(cpu.stack_ptr >> 8u));
+        gb_write(cpu.memory_controller, address, static_cast<uint8_t>(cpu.stack_ptr & 0xFFu));
+        gb_write(cpu.memory_controller, static_cast<uint16_t>(address + 1), static_cast<uint8_t>(cpu.stack_ptr >> 8u));
         constexpr auto cycles = 20;
         return cycles;
     }, immediate_extended};
@@ -304,7 +304,7 @@ Instruction LDI_ADDR_HL_A() {
     return {[](Cpu& cpu, Operand&) {
         auto address = read_register_pair(cpu, Register_H, Register_L);
         
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);
 
         address++;
         cpu.registers[Register_H] =  static_cast<uint8_t>(address >> 8u);
@@ -318,7 +318,7 @@ Instruction LDI_ADDR_HL_A() {
 Instruction LDI_A_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         auto address = read_register_pair(cpu, Register_H, Register_L);
-        cpu.registers[Register_A] = read(cpu.memory_controller,address);
+        cpu.registers[Register_A] = gb_read(cpu.memory_controller,address);
         
         address++;
         cpu.registers[Register_H] = static_cast<uint8_t>(address >> 8u);
@@ -332,7 +332,7 @@ Instruction LDI_A_ADDR_HL() {
 Instruction LD_ADDR_RR_A(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand&) {
         const auto address = read_register_pair(cpu, r1, r2);
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);   
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);   
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -349,7 +349,7 @@ Instruction LD_R_ADDR_HL(Cpu_Register dst) {
 Instruction LD_ADDR_HL_R(Cpu_Register r) {
     return {[r](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        write(cpu.memory_controller, address, cpu.registers[r]);
+        gb_write(cpu.memory_controller, address, cpu.registers[r]);
         constexpr auto cycles = 8;
         return cycles;
     }, implied};    
@@ -359,7 +359,7 @@ Instruction LD_ADDR_HL_D8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
         const auto value = op.byte;
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
         constexpr auto cycles = 12;
         return cycles;
     }, immediate};
@@ -373,7 +373,7 @@ Instruction LD_ADDR_HL_ADDR_HL() {
 Instruction LD_ADDR_A16_A() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = op.word;
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);
         constexpr auto cycles = 16;
         return cycles;
     }, immediate_extended};
@@ -618,10 +618,10 @@ Instruction INC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller,address);
+        auto value = gb_read(cpu.memory_controller,address);
 
         value = INC(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
 
         constexpr auto cycles = 12;
         return cycles;
@@ -678,9 +678,9 @@ Instruction DEC_RR(Cpu_Register r1, Cpu_Register r2) {
 Instruction DEC_ADDR_HL() {
     return {[](Cpu& cpu, Operand&) {
         const auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        auto value = read(cpu.memory_controller,address);
+        auto value = gb_read(cpu.memory_controller,address);
         value = DEC(value, &(cpu.registers[Register_F]));
-        write(cpu.memory_controller, address, value);
+        gb_write(cpu.memory_controller, address, value);
         constexpr auto cycles = 12;
         return cycles;
     }, implied};
@@ -1047,8 +1047,8 @@ Instruction CP_ADDR_HL() {
 
 Instruction PUSH_RR(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand&) {
-        write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr-1), cpu.registers[r1]);
-        write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr-2), cpu.registers[r2]);
+        gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr-1), cpu.registers[r1]);
+        gb_write(cpu.memory_controller, static_cast<uint16_t>(cpu.stack_ptr-2), cpu.registers[r2]);
         cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr - 2);
         constexpr auto cycles = 16;
         return cycles;
@@ -1057,8 +1057,8 @@ Instruction PUSH_RR(Cpu_Register r1, Cpu_Register r2) {
 
 Instruction POP_AF() {
     return {[](Cpu& cpu, Operand&) {
-        cpu.registers[Register_F] =  read(cpu.memory_controller,cpu.stack_ptr) & 0xF0u;
-        cpu.registers[Register_A] =  read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
+        cpu.registers[Register_F] =  gb_read(cpu.memory_controller,cpu.stack_ptr) & 0xF0u;
+        cpu.registers[Register_A] =  gb_read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
         cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr + 2);
         constexpr auto cycles = 12;
         return cycles;
@@ -1067,8 +1067,8 @@ Instruction POP_AF() {
 
 Instruction POP_RR(Cpu_Register r1, Cpu_Register r2) {
     return {[r1, r2](Cpu& cpu, Operand&) {
-        cpu.registers[r2] =  read(cpu.memory_controller,cpu.stack_ptr);
-        cpu.registers[r1] =  read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
+        cpu.registers[r2] =  gb_read(cpu.memory_controller,cpu.stack_ptr);
+        cpu.registers[r1] =  gb_read(cpu.memory_controller,static_cast<uint16_t>(cpu.stack_ptr + 1));
         cpu.stack_ptr = static_cast<uint16_t>(cpu.stack_ptr + 2);
         constexpr auto cycles = 12;
         return cycles;
@@ -1143,7 +1143,7 @@ Instruction LDH_ADDR_A8_A() {
     return  {[](Cpu& cpu, Operand& op) {
         const auto value = op.byte;
         const auto address = static_cast<uint16_t>(0xFF00 + value);
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);    
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);    
         constexpr auto cycles = 12;
         return cycles;
     }, immediate};
@@ -1152,7 +1152,7 @@ Instruction LDH_ADDR_A8_A() {
 Instruction LDH_A_ADDR_A8() {
     return {[](Cpu& cpu, Operand& op) {
         const auto address = static_cast<uint16_t>(0xFF00 + op.byte);
-        cpu.registers[Register_A] =  read(cpu.memory_controller,address);             
+        cpu.registers[Register_A] =  gb_read(cpu.memory_controller,address);             
         constexpr auto cycles = 12;
         return cycles;
     }, immediate};
@@ -1161,7 +1161,7 @@ Instruction LDH_A_ADDR_A8() {
 Instruction LD_ADDR_C_A() {
     return {[](Cpu& cpu, Operand&) {        
         const auto address = static_cast<uint16_t>(0xFF00 + cpu.registers[Register_C]);
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);
         constexpr auto cycles = 8;
         return cycles;
     }, implied};
@@ -1235,7 +1235,7 @@ Instruction SBC_A_ADDR_HL() {
 
 Instruction PREFIX_CB() {
     return {[](Cpu& cpu, Operand&) {
-        const auto cb_opcode = static_cast<CBCode>(read(cpu.memory_controller,static_cast<uint16_t>(cpu.program_counter - 1)));
+        const auto cb_opcode = static_cast<CBCode>(gb_read(cpu.memory_controller,static_cast<uint16_t>(cpu.program_counter - 1)));
         const auto instruction = fetch_cb(cb_opcode);
         auto operand = instruction.read_operand(cpu);
         return instruction.execute(cpu, operand);
@@ -1249,7 +1249,7 @@ Instruction LD_ADDR_HLD_A() {
     return {[](Cpu& cpu, Operand&) {
             
         auto address = read_register_pair(cpu, Register_H, Register_L);
-        write(cpu.memory_controller, address, cpu.registers[Register_A]);
+        gb_write(cpu.memory_controller, address, cpu.registers[Register_A]);
 
         address--;
 
@@ -1265,7 +1265,7 @@ Instruction LD_A_ADDR_HLD() {
     return {[](Cpu& cpu, Operand&) {
         
         auto address = combine_bytes(cpu.registers[Register_H], cpu.registers[Register_L]);
-        cpu.registers[Register_A] =  read(cpu.memory_controller,address);
+        cpu.registers[Register_A] =  gb_read(cpu.memory_controller,address);
 
         address--;
         cpu.registers[Register_H] =  static_cast<uint8_t>(address >> 8u);
