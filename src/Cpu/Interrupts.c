@@ -21,14 +21,14 @@ int handle_interrupts(Cpu* cpu) {
 void request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     uint8_t interrupt_request = gb_read(mc, g_interrupt_request_address);
     set_bit(&interrupt_request, interrupt);
-    write(mc, g_interrupt_request_address, interrupt_request);
+    gb_write(mc, g_interrupt_request_address, interrupt_request);
 }
 
 void clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
     uint8_t request_register = gb_read(mc, g_interrupt_request_address);
     clear_bit(&request_register, interrupt);
-    write(mc, g_interrupt_request_address, request_register);
+    gb_write(mc, g_interrupt_request_address, request_register);
 }
 
 bool should_exit_halt(MemoryBankController* mc) {
@@ -54,8 +54,8 @@ void call_interrupt_vector(Cpu* cpu, uint8_t interrupt_vector) {
     const uint8_t pc_low = (uint8_t) (cpu->program_counter & 0xFFU);
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8U);
 
-    write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 1), pc_high);
-    write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 2), pc_low);
+    gb_write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 1), pc_high);
+    gb_write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 2), pc_low);
 
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
     cpu->program_counter = (uint16_t) (interrupt_vector);

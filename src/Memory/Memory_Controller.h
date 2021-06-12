@@ -28,15 +28,15 @@ typedef struct MemoryBankController {
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data);
 uint8_t gb_read(MemoryBankController* mc, uint16_t address);
 
-void dma_transfer(MemoryBankController* mc, uint8_t data);
-uint8_t read_from_rom_bank(MemoryBankController* mc, uint16_t address);
-uint8_t read_joypad_input(MemoryBankController* mc);
+void gb_dma_transfer(MemoryBankController* mc, uint8_t data);
+uint8_t gb_read_from_rom_bank(MemoryBankController* mc, uint16_t address);
+uint8_t gb_read_joypad_input(MemoryBankController* mc);
 
-void toggle_ram(MemoryBankController* mc, uint8_t data);
-void set_lower_rom_bank_number(MemoryBankController* mc, uint8_t data);
-void set_upper_rom_bank_number(MemoryBankController* mc, uint8_t data);
-void set_banking_mode(MemoryBankController* mc, uint8_t data);
-void set_ram_bank_number(MemoryBankController* mc, uint8_t data);
+void gb_toggle_ram(MemoryBankController* mc, uint8_t data);
+void gb_set_lower_rom_bank_number(MemoryBankController* mc, uint8_t data);
+void gb_set_upper_rom_bank_number(MemoryBankController* mc, uint8_t data);
+void gb_set_banking_mode(MemoryBankController* mc, uint8_t data);
+void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data);
 
 #ifdef __cplusplus
 }
