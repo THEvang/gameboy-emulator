@@ -2,10 +2,10 @@ target_sources(gb-core
     PRIVATE
     Adressing_Modes.h
     Adressing_Modes.c
-    Opcodes.hpp
+    Opcodes.h
+    CBOpcodes.h
     Cpu.h
     Cpu.c
-    CBOpcodes.hpp
     CBOperations.hpp
     CBOperations.cpp
     Operations.hpp
