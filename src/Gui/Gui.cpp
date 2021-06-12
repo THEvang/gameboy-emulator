@@ -59,11 +59,7 @@ void render_gui(SDL_Window* window, GameBoy* gameboy) {
     ImGui_ImplSDL2_NewFrame(window);
     ImGui::NewFrame();
 
-    render_cpu(*gameboy);
     render_ppu(*gameboy);
-    render_cartridge_data(*gameboy);
-    //render_disassembly(*gameboy);
-    render_menu();
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
     // Rendering
