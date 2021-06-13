@@ -35,6 +35,9 @@ void render_main(GameBoy* gameboy) {
             
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym) {
+                    case SDLK_z:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_A);
+                        break;
                     case SDLK_x:
                         input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_B);
                         break;
@@ -61,6 +64,9 @@ void render_main(GameBoy* gameboy) {
 
             case SDL_KEYUP:
                 switch(event.key.keysym.sym) {
+                    case SDLK_z:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_A);
+                        break;
                     case SDLK_x:
                         input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_B);
                         break;
@@ -92,7 +98,7 @@ void render_main(GameBoy* gameboy) {
 
         gameboy->run();
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
-        if( duration >= 0.2) {
+        if( duration >= 16e-3) {
             start = clock();
             gb_render(&gui, gameboy);
         }
