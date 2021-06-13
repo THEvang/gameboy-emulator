@@ -7,5 +7,5 @@ void set_pixel(Pixel_Array* arr, Screen_Position screen_position, Color color) {
 
     int index = x_pos + y_pos * GB_SCREEN_WIDTH;
 
-    arr->pixels[index] = (GLuint) (color.red << 24u | color.green << 16u | color.blue << 8u | 0xFFu);
+    arr->pixels[index] = (uint32_t) (color.red << 24u | color.green << 16u | color.blue << 8u | 0xFFu);
 }

@@ -1,6 +1,0 @@
-[requires]
-glew/2.1.0
-sdl2/2.0.12@bincrafters/stable
-
-[generators]
-cmake

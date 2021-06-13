@@ -1,90 +1,60 @@
 #include "Gui/Gui.hpp"
 
-void init_gui(SDL_Window** window) {
+#include <stdio.h>
+
+void init_gui(Gb_Gui* gui) {
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
         printf("SDL ERROR: %s\n", SDL_GetError());
         exit(1);
     }
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-
-    *window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", 
+    gui->window = SDL_CreateWindow("Gameboy Emulator", 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
-        1280, 
-        720, 
-        SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+        5*160, 
+        5*144, 
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     
 
-    if(window == nullptr) {
+    if(!gui->window) {
         printf("Failed to create SDL Window: %s\n", SDL_GetError());
         exit(1);
     }
 
-    SDL_GLContext gl_context = SDL_GL_CreateContext(*window);
-    SDL_GL_MakeCurrent(*window, gl_context);
-    SDL_GL_SetSwapInterval(1); // Enable vsync
+    gui->renderer = SDL_CreateRenderer(
+        gui->window,
+        -1,
+        SDL_RENDERER_ACCELERATED
+    );
 
-    auto err = glewInit();
-    if (err != GLEW_OK)
-    {   
-        printf("GLEW ERROR: %s\n", glewGetErrorString(err));
+    if(!gui->renderer) {
+        printf("SDL ERROR: Unable to create renderer: %s\n", SDL_GetError());
         exit(1);
     }
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    auto io = ImGui::GetIO();
-
-    ImGui::StyleColorsDark();
-
-    ImGui_ImplSDL2_InitForOpenGL(*window, gl_context);
-
-    const char* glsl_version = "#version 130";
-    ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-void render_gui(SDL_Window* window, GameBoy* gameboy) {
+void gb_render(Gb_Gui* gui, GameBoy* gameboy) {
 
     // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplSDL2_NewFrame(window);
-    ImGui::NewFrame();
-
-    render_ppu(*gameboy);
-
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    // Rendering
-    auto io = ImGui::GetIO();
-    ImGui::Render();
-    glViewport(0, 0, (int) io.DisplaySize.x, (int) io.DisplaySize.y);
-    glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-    glClear(GL_COLOR_BUFFER_BIT);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    SDL_GL_SwapWindow(window);
+    render_ppu(gui, gameboy);
+    SDL_RenderPresent(gui->renderer);
 }
 
+void render_ppu(Gb_Gui* gui, GameBoy* gameboy) {
 
-Gui::Gui() {
-    init_gui(&window);
-}
+    SDL_Surface* surf = SDL_CreateRGBSurfaceFrom((void*) &(gameboy->ppu.screen.pixels[0]),
+    160, 144,
+    32, 4*160,
+    0xFF000000,
+    0x00FF0000,
+    0x0000FF00,
+    0x000000FF);
 
-Gui::~Gui() {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
-    // SDL_GL_DeleteContext(m_gl_context);
-    SDL_Quit();
-}
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(gui->renderer, surf);
 
-void Gui::render(GameBoy* gb) {
-    render_gui(window, gb);    
+    SDL_RenderCopy(gui->renderer, texture, NULL, NULL);
+
+    SDL_FreeSurface(surf);
+    SDL_DestroyTexture(texture);
 }
