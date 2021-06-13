@@ -1,22 +1,13 @@
 #pragma once
 
-#include <stdio.h>
-
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
 #include <SDL2/SDL.h>
-#include <GL/glew.h>    // Initialize with glewInit()
-#include "Gui/Renderers.hpp"
+#include "Gameboy/Gameboy.hpp"
 
-void init_gui(SDL_Window** window);
-
-class Gui {
-public:
-
-    Gui();
-    ~Gui();
-
-    void render(GameBoy*);
+struct Gb_Gui {
     SDL_Window* window;
+    SDL_Renderer* renderer;
 };
+
+void init_gui(Gb_Gui*);
+void gb_render(Gb_Gui*, GameBoy*);
+void render_ppu(Gb_Gui*, GameBoy*);

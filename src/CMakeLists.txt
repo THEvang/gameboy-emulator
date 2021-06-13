@@ -5,7 +5,6 @@ target_sources(gb-emu
 add_subdirectory(Input)
 add_subdirectory(Cpu)
 add_subdirectory(Gameboy)
-add_subdirectory(imgui)
 add_subdirectory(Memory)
 add_subdirectory(Utilities)
 add_subdirectory(Graphics)

@@ -1,10 +1,9 @@
 #pragma once
 
 #include <stdint.h>
-#include <GL/gl.h>
 
 #define GB_SCREEN_WIDTH 160
-#define GB_SCREEN_HEIGHT 160
+#define GB_SCREEN_HEIGHT 144
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +21,7 @@ typedef struct Color {
 } Color;
 
 typedef struct Pixel_Array {
-    GLuint pixels[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
+    uint32_t pixels[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
 } Pixel_Array;
 
 void set_pixel(Pixel_Array* arr, Screen_Position screen_position, Color color);

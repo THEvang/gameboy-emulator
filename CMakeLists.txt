@@ -26,6 +26,6 @@ target_include_directories(gb-emu PRIVATE src)
 target_link_libraries(gb-emu PRIVATE project_warnings)
 
 target_link_libraries(gb-emu PRIVATE gb-gui gb-core)
-target_link_libraries(gb-emu PRIVATE SDL2 GLEW GL pthread  ${CMAKE_DL_LIBS})
+target_link_libraries(gb-emu PRIVATE SDL2)
 
 add_subdirectory(src)

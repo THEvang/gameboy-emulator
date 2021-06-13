@@ -6,16 +6,14 @@
 #include "Gui/Gui.hpp"
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.hpp"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 void render_main(GameBoy* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
 
-    Gui gui;
+    Gb_Gui gui;
+    init_gui(&gui);
 
     bool done = false;
     while (!done) {
@@ -23,7 +21,6 @@ void render_main(GameBoy* gameboy) {
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
-            ImGui_ImplSDL2_ProcessEvent(&event);
             switch (event.type) {
             
             case SDL_QUIT:
@@ -97,7 +94,7 @@ void render_main(GameBoy* gameboy) {
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
         if( duration >= 0.2) {
             start = clock();
-            gui.render(gameboy);
+            gb_render(&gui, gameboy);
         }
         stop = clock();
     }
