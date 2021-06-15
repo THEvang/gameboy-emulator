@@ -1,4 +1,4 @@
-#include "Gui/Gui.hpp"
+#include "Gui/Gui.h"
 
 #include <stdio.h>
 

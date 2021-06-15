@@ -1,5 +1,5 @@
 target_sources(gb-gui
     PRIVATE
-    Gui.hpp    
-    Gui.cpp
+    Gui.h    
+    Gui.c
 )

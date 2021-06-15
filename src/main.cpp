@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "Gui/Gui.hpp"
+#include "Gui/Gui.h"
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
 #include "Cpu/Cpu.h"
