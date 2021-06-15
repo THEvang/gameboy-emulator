@@ -1,6 +1,6 @@
 target_sources(gb-emu 
     PRIVATE
-    main.cpp)
+    main.c)
     
 add_subdirectory(Input)
 add_subdirectory(Cpu)

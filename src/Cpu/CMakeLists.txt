@@ -6,14 +6,14 @@ target_sources(gb-core
     CBOpcodes.h
     Cpu.h
     Cpu.c
-    CBOperations.hpp
-    CBOperations.cpp
-    Operations.hpp
-    Operations.cpp 
+    CBOperations.h
+    CBOperations.c
+    Operations.h
+    Operations.c 
     Timer.h
     Timer.c
     Interrupts.h
     Interrupts.c
-    Interpreter.hpp
-    Interpreter.cpp
+    Interpreter.h
+    Interpreter.c
 )

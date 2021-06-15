@@ -4,16 +4,23 @@
 #include "Cpu/Cpu.h"
 #include "Input/Joypad.h"
 #include "Cpu/Timer.h"
-#include "Graphics/PPU.hpp"
+#include "Graphics/PPU.h"
 
-struct GameBoy {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    GameBoy(MemoryBankController* mc);
-    void run();
+typedef struct GameBoy {
 
     MemoryBankController* memory_bank_controller;
     Cpu cpu;
     Timer timer;
     PPU ppu;
     Joypad joypad;
-};
+} GameBoy;
+
+void gb_run(GameBoy* gb);
+
+#ifdef __cplusplus
+}
+#endif

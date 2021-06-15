@@ -7,21 +7,11 @@
 extern "C" {
 #endif
 
-typedef union Operand {
-    uint8_t byte;
-    uint16_t word;
-} Operand;
-
-typedef Operand (*Address_Mode)(Cpu*);
-
 //Addressing Modes
-Operand implied(Cpu*);
-Operand immediate(Cpu*);
-Operand immediate_extended(Cpu*);
-Operand hl_addressing(Cpu*);
-Operand extended_address(Cpu*);
-Operand none(Cpu*);
-Operand cb_addressing(Cpu*);
+void implied(Cpu*);
+uint8_t immediate_byte(Cpu*);
+uint16_t immediate_word(Cpu*);
+uint8_t hl_addressing(Cpu*);
 
 
 #ifdef __cplusplus

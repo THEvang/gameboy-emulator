@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "Gui/Gui.hpp"
+#include "Gui/Gui.h"
 #include "Utilities/File.h"
-#include "Gameboy/Gameboy.hpp"
+#include "Gameboy/Gameboy.h"
+#include "Cpu/Cpu.h"
 
 void render_main(GameBoy* gameboy) {
 
@@ -28,13 +29,16 @@ void render_main(GameBoy* gameboy) {
                 break;
             
             case SDL_WINDOWEVENT:
-                if(event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(gui.window)) {
+                if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
                     done = true;
                 }
                 break;
             
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym) {
+                    case SDLK_z:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_A);
+                        break;
                     case SDLK_x:
                         input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_B);
                         break;
@@ -61,6 +65,9 @@ void render_main(GameBoy* gameboy) {
 
             case SDL_KEYUP:
                 switch(event.key.keysym.sym) {
+                    case SDLK_z:
+                        input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_A);
+                        break;
                     case SDLK_x:
                         input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_B);
                         break;
@@ -90,12 +97,19 @@ void render_main(GameBoy* gameboy) {
             }
         }
 
-        gameboy->run();
+        gb_run(gameboy);
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
-        if( duration >= 0.2) {
+        if( duration >= 16e-3) {
             start = clock();
             gb_render(&gui, gameboy);
         }
+
+        if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
+            printf("%c", gameboy->memory_bank_controller->memory[0xFF01]);
+            fflush(stdout);
+            gameboy->memory_bank_controller->memory[0xFF02] = 0;
+        }
+
         stop = clock();
     }
 }
@@ -124,7 +138,22 @@ int main(int argc, char* argv[])
     mc.ram_bank = 1;
     mc.rom = rom.data;
 
-    GameBoy gameboy(&mc);
+    GameBoy gameboy;
+    gameboy.memory_bank_controller = &mc;
+    gameboy.joypad.direction_keys = 0b1111;
+    gameboy.joypad.button_keys = 0b1111;
+    gameboy.memory_bank_controller->joypad = &(gameboy.joypad);
+
+    gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
+    set_initial_state(&(gameboy.cpu));
+
+    gameboy.ppu.memory_controller = gameboy.memory_bank_controller;
+    gameboy.ppu.scanline_counter = 0;
+
+    gameboy.timer.prev_delay = false;
+    gameboy.timer.tima_has_overflowed = false;
+    gameboy.timer.div_value = 0xABCC;
+
     render_main(&gameboy);
     return 0;
 }
