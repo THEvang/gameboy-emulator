@@ -13,7 +13,7 @@ branches:
     - master
 
 before_install:
-  - sudo apt -y install libsdl2-dev mesa-common-dev libglew-dev
+  - sudo apt -y install libsdl2-dev
 
 install:
   - pip install --user cmake
