@@ -17,6 +17,7 @@ set_project_warnings(project_warnings)
 
 add_library(gb-core)
 target_include_directories(gb-core PRIVATE src)
+target_link_libraries(gb-core PRIVATE project_warnings)
 
 add_library(gb-gui)
 target_include_directories(gb-gui PRIVATE src)
