@@ -5,11 +5,8 @@ function(set_project_warnings project_name)
         -Wall
         -Wextra
         -Wshadow
-        -Wnon-virtual-dtor
-        -Wold-style-cast
         -Wcast-align
         -Wunused
-        -Woverloaded-virtual
         -Wpedantic
         -Wconversion
         -Wsign-conversion
@@ -27,7 +24,6 @@ function(set_project_warnings project_name)
         -Wmisleading-indentation
         -Wduplicated-cond
         -Wlogical-op
-        -Wuseless-cast
     )
 
     if(CMAKE_CXX_COMILER_ID STREQUAL "Clang")
