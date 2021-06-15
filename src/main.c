@@ -7,6 +7,7 @@
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
 #include "Cpu/Cpu.h"
+#include "Gameboy/Rom_Info.h"
 
 void render_main(GameBoy* gameboy) {
 
@@ -114,6 +115,7 @@ void render_main(GameBoy* gameboy) {
     }
 }
 
+
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
@@ -121,7 +123,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    char* rom_path = argv[1];
+    char* rom_path = argv[argc-1];
 
     gb_Rom rom;
     load_rom(&rom, rom_path);
@@ -131,106 +133,11 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    for(int i = 0x0134; i <= 0x0143; i++) {
-        printf("%c", rom.data[i]);
-    }
-    printf("\n");
-
-    
-    if (rom.data[0x0146] == 0x03) {
-        printf("Super Gameboy support\n");
-    }
-
-    switch(rom.data[0x0147]) {
-        case 0x00:
-            printf("ROM ONLY\n");
-            break;
-        case 0x01:
-            printf("MBC 1\n");
-            break;
-        case 0x02:
-            printf("MBC 1 + RAM\n");
-            break;
-        case 0x03:
-            printf("MBC 1 + RAM + Battery\n");
-            break;
-        case 0x05:
-            printf("MBC 2\n");
-            break;
-        case 0x06:
-            printf("MBC2 + Battery\n");
-            break;
-        case 0x08:
-            printf("ROM + RAM\n");
-            break;
-        case 0x09:
-            printf("ROM + RAM + Battery\n");
-            break;
-        case 0x0F:
-            printf("MBC3 + Timer + Battery\n");
-            break;
-        case 0x10:
-            printf("MBC3 + Timer + Ram + Battery\n");
-            break;
-        case 0x11:
-            printf("MBC3\n");
-            break;
-        case 0x12:
-            printf("MBC3 + Ram\n");
-            break;
-        case 0x13:
-            printf("MBC3 + Ram + Battery\n");
-            break;
-        case 0x19:
-            printf("MBC5\n");
-            break;
-        case 0x1A:
-            printf("MB5 + Ram\n");
-            break;
-        case 0x1B:
-            printf("MBC5 + Ram + Battery\n");
-            break;
-    }
-
-    printf("ROM SIZE: ");
-    switch (rom.data[0x0148]) {
-        case 0x00:
-            printf("32kb - 2 Banks\n");
-            break;
-        case 0x01:
-            printf("64kb - 4 Banks\n");
-            break;
-        case 0x02:
-            printf("128kb - 8 Banks\n");
-            break;
-        case 0x03:
-            printf("256kb - 16 Banks\n");
-            break;
-        case 0x04:
-            printf("512kb - 32 Banks\n");
-            break;
-        case 0x05:
-            printf("1Mb - 64 Banks\n");
-            break;
-        case 0x06:
-            printf("2MByte - 128 Banks\n");
-            break;
-    }
-
-    printf("RAM SIZE:");
-    switch (rom.data[0x0149]) {
-        case 0x00:
-            printf("0 - No Ram\n");
-            break;
-        case 0x01:
-            printf("2kb\n");
-            break;
-        case 0x02:
-            printf("8kb\n");
-            break;
-        case 0x03:
-            printf("32kb - 4 banks\n");
-            break;
+    for(int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-i") == 0) {
+            gb_print_rom_info(&rom);
+            exit(0);
+        }
     }
 
     MemoryBankController mc;
