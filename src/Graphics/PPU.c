@@ -6,10 +6,10 @@
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Interrupts.h"
 
-void gb_ppu_step(PPU* ppu, int cycles) {
+void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
-    set_status(ppu->memory_controller, &(ppu->scanline_counter));
-    if(!lcd_display_enabled(ppu->memory_controller)) {
+    set_status(mc, &(ppu->scanline_counter));
+    if(!lcd_display_enabled(mc)) {
         return;
     }
 
@@ -19,16 +19,16 @@ void gb_ppu_step(PPU* ppu, int cycles) {
 
         ppu->scanline_counter = 456;
 
-        uint8_t current_scanline = gb_read(ppu->memory_controller, g_scanline_address);    
+        uint8_t current_scanline = gb_read(mc, g_scanline_address);    
         current_scanline++;
-        ppu->memory_controller->memory[g_scanline_address] = current_scanline;
+        mc->memory[g_scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
-            request_interrupt(ppu->memory_controller, Interrupts_V_Blank);
+            request_interrupt(mc, Interrupts_V_Blank);
         } else if (current_scanline > 153) {
-            ppu->memory_controller->memory[g_scanline_address] = 0;
+            mc->memory[g_scanline_address] = 0;
         } else if (current_scanline < 144) {
-            gb_draw_scanline(ppu, ppu->memory_controller);
+            gb_draw_scanline(ppu, mc);
         }
     }
 }

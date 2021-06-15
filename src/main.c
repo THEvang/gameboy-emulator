@@ -147,7 +147,6 @@ int main(int argc, char* argv[])
     gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
     set_initial_state(&(gameboy.cpu));
 
-    gameboy.ppu.memory_controller = gameboy.memory_bank_controller;
     gameboy.ppu.scanline_counter = 0;
 
     gameboy.timer.prev_delay = false;

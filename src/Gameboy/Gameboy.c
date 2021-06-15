@@ -15,7 +15,7 @@ void gb_run(GameBoy* gb) {
     }
 
     gb_timer_increment(&(gb->timer), gb->memory_bank_controller, cycles);
-    gb_ppu_step(&(gb->ppu), cycles);
+    gb_ppu_step(&(gb->ppu), gb->memory_bank_controller, cycles);
         
     if(gb->cpu.interrupts_enabled) {
         const int interrupt_cycles = handle_interrupts(&(gb->cpu));
