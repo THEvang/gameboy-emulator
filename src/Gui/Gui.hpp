@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL.h>
-#include "Gameboy/Gameboy.hpp"
+#include "Gameboy/Gameboy.h"
 
 struct Gb_Gui {
     SDL_Window* window;
