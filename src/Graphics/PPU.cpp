@@ -121,8 +121,6 @@ void PPU::draw_sprites() {
     if(sprite_size(m_memory_controller)) {
         use8x16 = true;
     }
-
-    Screen_Position positions[40];
     
    for (int sprite = 0 ; sprite < 40; sprite++)
    {
