@@ -3,10 +3,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum Bank_Type {
     Bank_Rom_Only,
     Bank_MBC_1,
@@ -20,7 +16,3 @@ typedef enum Bank_Type {
 
 Bank_Type get_bank_type(uint8_t type_number);
 bool has_ram(uint8_t type_number);
-
-#ifdef __cplusplus
-}
-#endif

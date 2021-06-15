@@ -3,10 +3,6 @@
 #include <stdint.h>
 #include "Memory/Memory_Controller.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum Button_Types {
     Direction_Key,
     Button_Key
@@ -36,7 +32,3 @@ typedef struct Joypad {
 void input(Joypad* pad, MemoryBankController* mc, Key_Press key_press, Button button);
 void key_down(Joypad* pad, MemoryBankController* mc, Button button);
 void key_up(Joypad* pad, Button button);
-
-#ifdef __cplusplus
-}
-#endif

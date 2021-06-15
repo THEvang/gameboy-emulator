@@ -5,10 +5,6 @@
 #define GB_SCREEN_WIDTH 160
 #define GB_SCREEN_HEIGHT 144
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct Screen_Position {
     uint8_t x;
     uint8_t y;
@@ -25,7 +21,3 @@ typedef struct Pixel_Array {
 } Pixel_Array;
 
 void set_pixel(Pixel_Array* arr, Screen_Position screen_position, Color color);
-
-#ifdef __cplusplus
-}
-#endif

@@ -6,10 +6,6 @@
 #include "Cpu/Timer.h"
 #include "Graphics/PPU.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct GameBoy {
 
     MemoryBankController* memory_bank_controller;
@@ -20,7 +16,3 @@ typedef struct GameBoy {
 } GameBoy;
 
 void gb_run(GameBoy* gb);
-
-#ifdef __cplusplus
-}
-#endif

@@ -4,10 +4,6 @@
 #include <stdbool.h>
 #include "Memory/Memory_Controller.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum Cpu_Register {
     Register_A,
     Register_B,
@@ -48,7 +44,3 @@ void set_flag(uint8_t* flags, Cpu_Flag flag);
 void clear_flag(uint8_t* flags, Cpu_Flag flag);
 
 uint16_t read_register_pair(Cpu, Cpu_Register, Cpu_Register);
-
-#ifdef __cplusplus
-}
-#endif

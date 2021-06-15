@@ -3,10 +3,6 @@
 #include <stdbool.h>
 #include "Memory/Memory_Controller.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum LCD_Modes {
     LCD_Mode_H_Blank,
     LCD_Mode_V_Blank,
@@ -21,7 +17,3 @@ void set_mode(MemoryBankController* mc, LCD_Modes mode);
 bool should_set_coincidence_flag(MemoryBankController* mc);
 void set_coincidence_flag(MemoryBankController* mc);
 void clear_coincidence_flag(MemoryBankController* mc);
-
-#ifdef __cplusplus
-}
-#endif

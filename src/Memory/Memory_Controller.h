@@ -4,10 +4,6 @@
 #include <stdbool.h>
 #include "Memory/Cartridge.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef struct Joypad Joypad;
 
 typedef enum Banking_Mode {
@@ -37,7 +33,3 @@ void gb_set_lower_rom_bank_number(MemoryBankController* mc, uint8_t data);
 void gb_set_upper_rom_bank_number(MemoryBankController* mc, uint8_t data);
 void gb_set_banking_mode(MemoryBankController* mc, uint8_t data);
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data);
-
-#ifdef __cplusplus
-}
-#endif

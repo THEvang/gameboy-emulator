@@ -3,12 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "Memory/Memory_Controller.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct Cpu Cpu;
+#include "Cpu/Cpu.h"
 
 typedef enum Interrupts {
     Interrupts_V_Blank = 0,
