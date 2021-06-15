@@ -3,7 +3,4 @@ target_sources(gb-core
     
     Memory_Controller.h
     Memory_Controller.c
-
-    Cartridge.h
-    Cartridge.c
 )

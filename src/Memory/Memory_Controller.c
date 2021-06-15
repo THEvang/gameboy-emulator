@@ -2,15 +2,27 @@
 #include "Utilities/BitOperations.h"
 #include "Input/Joypad.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
-    if(address <= 0x7FFF) {
-        return gb_read_from_rom_bank(mc, address);
+    if (address <= 0x3FFF) {
+        return mc->rom[address];
+    }
+
+    if(address >= 0x4000 && address <= 0x7FFF) {
+        int offset = address - 0x4000;
+        int effective_bank = gb_get_effective_bank_number(mc);
+        int read_addr = offset + effective_bank * 0x4000;
+        return mc->rom[read_addr];
     }
     
     if (address >= 0xA000 && address <= 0xBFFF) {
         //RAM
-        return mc->memory[address];    
+        printf("Ram Not supported\n");
+        exit(1);
+        // return mc->memory[address];
     }
 
     if(address == 0xFF00) {
@@ -20,89 +32,91 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
     return mc->memory[address];
 }
 
-void gb_toggle_ram(MemoryBankController* mc, uint8_t data) {
-    if(data == 0) {
-        mc->ram_enabled = false;
-    } else if (data == 0xA0) {
-        mc->ram_enabled = true;
-    }
-}
+void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
 
-void gb_set_lower_rom_bank_number(MemoryBankController* mc, uint8_t data) {
-
-    data &= 0b00011111;
-    mc->rom_bank &= (0b11100000);
-    mc->rom_bank |= data;
+    mc->rom_bank_number = (data & 0x1F);
     
-    if(mc->rom_bank == 0) {
-        mc->rom_bank = 1;
-    } else if (mc->rom_bank == 20) {
-        mc->rom_bank = 21;
-    } else if (mc->rom_bank == 40) {
-        mc->rom_bank = 41;
-    } else if (mc->rom_bank == 60) {
-        mc->rom_bank = 61;   
-    }
-}
-
-void gb_set_upper_rom_bank_number(MemoryBankController* mc, uint8_t data) {
-    data &= 0b11100000;
-    mc->rom_bank &= 0b00011111;
-    mc->rom_bank |= data;
-    if(mc->rom_bank == 0) {
-        mc->rom_bank++;
+    if(mc->rom_bank_number == 0) {
+        (mc->rom_bank_number)++;
+    } else if (mc->rom_bank_number == 0x20) {
+        (mc->rom_bank_number)++;
+    } else if (mc->rom_bank_number == 0x40) {
+        (mc->rom_bank_number)++;
+    } else if (mc->rom_bank_number == 0x60) {
+        (mc->rom_bank_number)++;   
     }
 }
 
 void gb_set_banking_mode(MemoryBankController* mc, uint8_t data) {
-    if(data == 0) {
-        mc->banking_mode = Banking_Mode_ROM;
-    } else if (data == 1) {
+    
+    if (data == 1) {
         mc->banking_mode = Banking_Mode_RAM;
+        return;
     }
+    
+    mc->banking_mode = Banking_Mode_ROM;
 }
 
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
-    mc->ram_bank = (data & 0x03u);
+    mc->ram_bank_number = (data & 0x03u);
 }
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     if(address <= 0x1FFF) {
-        gb_toggle_ram(mc, data);
-    } else if (address >= 0x2000 && address <= 0x3FFF) {
-        gb_set_lower_rom_bank_number(mc, data);
-    } else if (address >= 0x4000 && address <= 0x5FFF) {
+        mc->ram_enabled = (data & 0x0F) == 0x0A;
+        return;
+    }
 
-        switch (mc->banking_mode) {
-            case Banking_Mode_RAM:
-                gb_set_ram_bank_number(mc, data);
-                break;
-            case Banking_Mode_ROM:
-                gb_set_upper_rom_bank_number(mc, data);
-                break;
-        }
-
-    } else if (address >= 0x6000 && address <= 0x7FFF) {
+    if (address >= 0x2000 && address <= 0x3FFF) {
+        gb_set_rom_bank_number(mc, data);
+        return;
+    } 
+    
+    if (address >= 0x4000 && address <= 0x5FFF) {
+        gb_set_ram_bank_number(mc, data);
+        return;
+    } 
+    
+    if (address >= 0x6000 && address <= 0x7FFF) {
         gb_set_banking_mode(mc, data);
-    } else if (address >= 0xA000 && address <= 0xBFFF) {
+        return;
+    } 
+
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        printf("ERROR: Ram not supported\n");
+        exit(1);
         if(mc->ram_enabled) {
             mc->memory[address] = data;
         }
-    } else if (address >= 0xE000 && address < 0xFE00) {
+    } 
+    
+    if (address >= 0xE000 && address < 0xFE00) {
         mc->memory[address] = data;
         gb_write(mc, (uint16_t) (address - 0x2000), data);
-    } else if (address >= 0xFEA0 && address < 0xFEFF) {
-
-    } else if(address == 0xFF04) {
+        return;
+    } 
+    
+    if (address >= 0xFEA0 && address < 0xFEFF) {
+        return;
+    } 
+    
+    if(address == 0xFF04) {
         mc->memory[0xFF04] = 0;
-    } else if (address == 0xFF44) {
-        mc->memory[0xFF44] = 0;
-    } else if (address == 0xFF46) {
-        gb_dma_transfer(mc, data);
-    } else {
-        mc->memory[address] = data;
+        return;
     }
+
+    if (address == 0xFF44) {
+        mc->memory[0xFF44] = 0;
+        return;
+    }
+    
+    if (address == 0xFF46) {
+        gb_dma_transfer(mc, data);
+        return;
+    } 
+
+    mc->memory[address] = data;
 }
 
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
@@ -113,16 +127,6 @@ void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
         uint8_t dma_data = gb_read(mc, (uint16_t) (address + i));
         gb_write(mc, (uint16_t) (0xFE00+i), dma_data);
     }
-}
-
-uint8_t gb_read_from_rom_bank(MemoryBankController* mc, uint16_t address) {
-
-    if (address >= 0x4000 && address <= 0x7FFF) {
-        uint16_t read_addr = (uint16_t) (address + (mc->rom_bank - 1) * 0x4000);
-        return mc->rom[read_addr];
-    }
-    
-    return mc->rom[address];
 }
 
 uint8_t gb_read_joypad_input(MemoryBankController* mc) {
@@ -138,4 +142,13 @@ uint8_t gb_read_joypad_input(MemoryBankController* mc) {
     }
 
     return data;
+}
+
+int gb_get_effective_bank_number(MemoryBankController* mc) {
+
+    if (mc->banking_mode == Banking_Mode_RAM) {
+        return ( (mc->ram_bank_number & 0x03) << 5) | (mc->rom_bank_number);
+    }
+
+    return mc->rom_bank_number;
 }

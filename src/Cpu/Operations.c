@@ -12,7 +12,8 @@ int gb_nop() {
     return 4;
 }
 
-int gb_stop() {
+int gb_stop(Cpu* cpu) {
+    cpu->memory_controller->memory[0xFF04] = 0;
     return 4;
 }
 
@@ -63,7 +64,7 @@ int gb_ei(Cpu* cpu) {
 }
 
 int jump_relative(uint8_t offset, Cpu* cpu) {
-    cpu->program_counter += (int8_t) offset;
+    cpu->program_counter = (uint16_t) (cpu->program_counter + (int8_t) offset);
     return 12;
 }
 
@@ -163,7 +164,7 @@ int gb_ldi_addr_hl_a(Cpu* cpu) {
 int gb_ldi_a_addr_hl(Cpu* cpu) {
     
     uint16_t address = read_register_pair(*cpu, Register_H, Register_L);
-    cpu->registers[Register_A] = gb_read(cpu->memory_controller,address);
+    cpu->registers[Register_A] = gb_read(cpu->memory_controller, address);
     
     address++;
     cpu->registers[Register_H] = (uint8_t) (address >> 8u);
@@ -503,7 +504,7 @@ int gb_add_sp_r8(uint8_t offset, Cpu* cpu) {
         clear_flag(flags, Flag_Carry);
 
 
-    cpu->stack_ptr += (int8_t) offset;
+    cpu->stack_ptr = (uint16_t) (cpu->stack_ptr + (int8_t) offset);
 
     clear_flag(flags, Flag_Zero);
     clear_flag(flags, Flag_Sub);
@@ -683,7 +684,7 @@ int gb_sbc(uint8_t r, Cpu* cpu) {
 
 int gb_prefix_cb(Cpu* cpu) {
     CB_Code cb_opcode = (CB_Code) gb_read(cpu->memory_controller, cpu->program_counter);
-    return execute_cb(cb_opcode, cpu);
+    return gb_execute_cb(cb_opcode, cpu);
 }
 
 int gb_ld_addr_hld_a(Cpu* cpu) {

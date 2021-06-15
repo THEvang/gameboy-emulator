@@ -4,5 +4,5 @@
 #include "Cpu/Opcodes.h"
 #include "Cpu/CBOpcodes.h"
 
-int execute(Opcode opcode, Cpu* cpu);
-int execute_cb(CB_Code opcode, Cpu* cpu);
+int gb_execute(Opcode opcode, Cpu* cpu);
+int gb_execute_cb(CB_Code opcode, Cpu* cpu);

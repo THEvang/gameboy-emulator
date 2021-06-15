@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int execute(Opcode opcode, Cpu* cpu) {
+int gb_execute(Opcode opcode, Cpu* cpu) {
     
     uint8_t* a = &(cpu->registers[Register_A]);
     uint8_t* b = &(cpu->registers[Register_B]);
@@ -81,7 +81,7 @@ int execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_STOP:
         implied(cpu);
-        return gb_stop();
+        return gb_stop(cpu);
 
     case Opcode_LD_DE_D16:
         return gb_ld_rr_d16(d, e, immediate_word(cpu));
@@ -1010,7 +1010,7 @@ int get_bit_index(CB_Code opcode) {
     return column_index + row_index;
 }
 
-int execute_cb(CB_Code opcode, Cpu* cpu) {
+int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     uint8_t* reg = &(cpu->registers[get_cb_register(opcode)]);
     uint8_t* f = &(cpu->registers[Register_F]);

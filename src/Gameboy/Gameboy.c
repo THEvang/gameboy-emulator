@@ -9,7 +9,7 @@ void gb_run(GameBoy* gb) {
 
     if(!gb->cpu.is_halted) {
         const Opcode opcode = (Opcode) gb_read(gb->memory_bank_controller, gb->cpu.program_counter);
-        cycles = execute(opcode, &(gb->cpu));
+        cycles = gb_execute(opcode, &(gb->cpu));
     } else {
         gb->cpu.is_halted = should_exit_halt(gb->memory_bank_controller);
     }

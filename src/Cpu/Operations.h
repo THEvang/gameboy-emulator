@@ -4,7 +4,7 @@
 #include "Cpu/Cpu.h"
 
 int gb_nop();
-int gb_stop();
+int gb_stop(Cpu* cpu);
 int gb_halt(Cpu*);
 int gb_rst(uint8_t address, Cpu* cpu); 
 int gb_di(Cpu* cpu);

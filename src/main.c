@@ -131,17 +131,58 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    for(int i = 0x0134; i <= 0x0143; i++) {
+        printf("%c", rom.data[i]);
+    }
+    printf("\n");
+
+    
+    if (rom.data[0x0146] == 0x03) {
+        printf("Super Gameboy support\n");
+    }
+
+    switch(rom.data[0x0147]) {
+        case 0x00:
+            printf("ROM ONLY\n");
+            break;
+        case 0x01:
+            printf("MBC 1\n");
+            break;
+        case 0x02:
+            printf("MBC 1 + RAM\n");
+    }
+
+    printf("ROM SIZE: ");
+    switch (rom.data[0x0148]) {
+        case 0x00:
+            printf("32kb - 2 Banks\n");
+            break;
+        case 0x01:
+            printf("64kb - 4 Banks\n");
+            break;
+        case 0x02:
+            printf("128 - 8 Banks\n");
+            break;
+    }
+
+    printf("RAm SIZE:");
+    switch (rom.data[0x0149]) {
+        case 0x00:
+            printf("0 - No Ram\n");
+            break;
+    }
+
     MemoryBankController mc;
     mc.ram_enabled = false;
-    mc.rom_bank = 1;
+    mc.rom_bank_number = 1;
+    mc.ram_bank_number = 0;
     mc.banking_mode = Banking_Mode_ROM;
-    mc.ram_bank = 1;
     mc.rom = rom.data;
 
     GameBoy gameboy;
     gameboy.memory_bank_controller = &mc;
-    gameboy.joypad.direction_keys = 0b1111;
-    gameboy.joypad.button_keys = 0b1111;
+    gameboy.joypad.direction_keys = 0x0F;
+    gameboy.joypad.button_keys = 0x0F;
     gameboy.memory_bank_controller->joypad = &(gameboy.joypad);
 
     gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
