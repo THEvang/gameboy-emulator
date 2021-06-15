@@ -274,25 +274,21 @@ int gb_add_hl(uint16_t value, Cpu* cpu) {
     return 8;
 }
 
-uint8_t SUB(uint8_t first, uint8_t second, uint8_t* flags) {
-    
-    half_borrow_8bit(first, second) ? set_bit(flags,   Flag_Half_Carry) :
-        clear_bit(flags, Flag_Half_Carry);
+int gb_sub(uint8_t r, Cpu* cpu) {
 
-    underflows_8bit(first, second) ? set_bit(flags,   Flag_Carry) :
-        clear_bit(flags, Flag_Carry);
+    uint8_t* a = &(cpu->registers[Register_A]);
+    uint8_t* flags = &(cpu->registers[Register_F]);
 
-    first = (uint8_t) (first - second);
+    half_borrow_8bit(*a, r) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
 
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    underflows_8bit(*a, r) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+
+    *a = (uint8_t) (*a - r);
+
+    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     set_bit(flags, Flag_Sub);
 
-    return first;
-}
-
-int gb_sub(uint8_t r, Cpu* cpu) {
-    cpu->registers[Register_A] = SUB(cpu->registers[Register_A], r, &(cpu->registers[Register_F]));
     return 4;
 }
 
@@ -337,30 +333,16 @@ int gb_inc_sp(uint16_t* sp) {
     return 8;
 }
 
-uint8_t DEC(uint8_t value, uint8_t* flags) {
-    
-    half_borrow_8bit(value, 1) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+int gb_dec_r(uint8_t* r, uint8_t* flags) {
 
-    value--;
+    half_borrow_8bit(*r, 1) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+
+    (*r)--;
     
-    value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *r == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
     set_bit(flags, Flag_Sub);
 
-    return value;
-}
-
-int gb_dec_r(uint8_t* r, uint8_t* flags) {
-    *r = DEC(*r, flags);
     return 4;
-}
-
-int gb_dec_addr_hl(Cpu* cpu) {
-
-    const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    uint8_t value = gb_read(cpu->memory_controller,address);
-    value = DEC(value, &(cpu->registers[Register_F]));
-    gb_write(cpu->memory_controller, address, value);
-    return 12;
 }
 
 int gb_dec_rr(uint8_t* r1, uint8_t* r2) { 
@@ -546,37 +528,33 @@ int gb_and(uint8_t value, Cpu* cpu) {
     return 4;
 }
 
-uint8_t XOR(uint8_t first, uint8_t second, uint8_t* flags) {
-    
-    first ^= second;
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+int gb_xor(uint8_t value, Cpu* cpu) {
+
+    uint8_t* a = &(cpu->registers[Register_A]);
+    uint8_t* flags = &(cpu->registers[Register_F]);
+
+    *a ^= value;
+    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
     clear_bit(flags, Flag_Half_Carry);
     clear_bit(flags, Flag_Carry);
 
-    return first;
-}
-
-int gb_xor(uint8_t value, Cpu* cpu) {
-    cpu->registers[Register_A] = XOR(cpu->registers[Register_A], value, &(cpu->registers[Register_F]));
     return 4;
 }
 
-uint8_t OR(uint8_t first, uint8_t second, uint8_t* flags) {
+int gb_or(uint8_t value, Cpu* cpu) {
+
+    uint8_t* a = &(cpu->registers[Register_A]);
+    uint8_t* flags = &(cpu->registers[Register_F]);
     
-    first |= second;
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *a |= value;
+    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
     clear_bit(flags, Flag_Half_Carry);
     clear_bit(flags, Flag_Carry);
 
-    return first;
-}
-
-int gb_or(uint8_t value, Cpu* cpu) {
-    cpu->registers[Register_A] = OR(cpu->registers[Register_A], value, &(cpu->registers[Register_F]));
     return 4;
 }
 
@@ -599,14 +577,6 @@ int gb_push_rr(uint8_t r1, uint8_t r2, Cpu* cpu) {
     gb_write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr-2), r2);
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
     return 16;
-}
-
-int gb_pop_af(Cpu* cpu) {
-
-    cpu->registers[Register_F] =  gb_read(cpu->memory_controller, cpu->stack_ptr) & 0xF0u;
-    cpu->registers[Register_A] =  gb_read(cpu->memory_controller, (uint16_t) (cpu->stack_ptr + 1));
-    cpu->stack_ptr = (uint16_t) (cpu->stack_ptr + 2);
-    return 12;
 }
 
 int gb_pop_rr(uint8_t* r1, uint8_t* r2, Cpu* cpu) {
@@ -741,13 +711,9 @@ int gb_ld_a_addr_hld(Cpu* cpu) {
     return 8;
 }
 
-int gb_cpl(Cpu* cpu) {
+int gb_cpl(uint8_t* a, uint8_t* flags) {
 
-    uint8_t a = cpu->registers[Register_A];
-    a ^= 0xFF;
-    cpu->registers[Register_A] =  a;
-
-    uint8_t* flags = &(cpu->registers[Register_F]);
+    *a ^= 0xFF;
 
     set_flag(flags, Flag_Sub);
     set_flag(flags, Flag_Half_Carry);

@@ -49,7 +49,6 @@ int gb_inc_sp(uint16_t* sp);
 
 int gb_dec_r(uint8_t* r1, uint8_t* flags);
 int gb_dec_rr(uint8_t* r1, uint8_t* r2);
-int gb_dec_addr_hl(Cpu* cpu);
 int gb_dec_sp(uint16_t* sp);
 
 int gb_scf(uint8_t* flags);
@@ -71,7 +70,6 @@ int gb_or(uint8_t r, Cpu* cpu);
 int gb_cp(uint8_t r1, uint8_t r2, uint8_t* flags);
 
 int gb_push_rr(uint8_t r1, uint8_t r2, Cpu* cpu);
-int gb_pop_af(Cpu* cpu);
 int gb_pop_rr(uint8_t* r1, uint8_t* r2, Cpu* cpu);
 
 int gb_adc(uint8_t r, Cpu* cpu);
@@ -86,4 +84,4 @@ int gb_prefix_cb(Cpu* cpu);
 int gb_ld_addr_hld_a(Cpu*);
 int gb_ld_a_addr_hld(Cpu*);
 
-int gb_cpl(Cpu* flags);
+int gb_cpl(uint8_t* a, uint8_t* flags);
