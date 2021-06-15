@@ -6,7 +6,6 @@
 #include "Utilities/BitOperations.h"
 #include "Cpu/CBOpcodes.h"
 #include "Memory/Memory_Controller.h"
-#include "Adressing_Modes.h"
 #include "Interpreter.h"
 
 int gb_nop() {
@@ -227,73 +226,50 @@ int gb_ld_hl_spr8(uint8_t offset, Cpu* cpu) {
     return 12;
 }
 
-int gb_ld_sp_d16(uint16_t rr, Cpu* cpu) {
-    cpu->stack_ptr = rr;
+int gb_ld_sp(uint16_t* sp, uint16_t rr) {
+    *sp = rr;
     return 12;
 }
 
-int gb_ld_sp_hl(Cpu* cpu) {
-    cpu->stack_ptr =  combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    return 8;
-}
+int gb_add(uint8_t value, Cpu* cpu) {
 
-uint8_t ADD_8bit(uint8_t first, uint8_t second, uint8_t* flags) {
-    
-    half_carry_8bit(first, second)             ? 
+    uint8_t* flags = &(cpu->registers[Register_F]);
+    uint8_t a = cpu->registers[Register_A];
+
+    half_carry_8bit(a, value)             ? 
         set_bit(flags, Flag_Half_Carry)  :
         clear_bit(flags, Flag_Half_Carry);
 
-    overflows_8bit(first, second)          ?
+    overflows_8bit(a, value)          ?
         set_bit(flags, Flag_Carry)   :
         clear_bit(flags, Flag_Carry);
 
-    first = (uint8_t) (first + second);
+    a = (uint8_t) (a + value);
 
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
-
-    clear_bit(flags, Flag_Sub);
-
-    return first;
-}
-
-int gb_add(uint8_t r, Cpu* cpu) {
-    cpu->registers[Register_A] = ADD_8bit(cpu->registers[Register_A], r, &(cpu->registers[Register_F]));
-    return 8;
-}
-
-uint16_t ADD_16bit(uint16_t first, uint16_t second, uint8_t* flags) {
-    
-    overflows_16bit(first, second) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
-
-    half_carry_16bit(first, second) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
-
-    first = (uint16_t) (first + second);
+    a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
 
-    return first;
-}
-
-int gb_add_hl_rr(uint8_t r1, uint8_t r2, Cpu* cpu) {
+    cpu->registers[Register_A] = a;
     
-    const uint16_t hl = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    const uint16_t value = combine_bytes(r1, r2);
-
-    const uint16_t result = ADD_16bit(hl, value, &(cpu->registers[Register_F]));
-
-    cpu->registers[Register_H] =  (uint8_t)(result >> 8u);
-    cpu->registers[Register_L] =  (uint8_t)(result & 0xFFu);
-
     return 8;
 }
 
-int gb_add_hl_sp(Cpu* cpu) {
-        
-    const uint16_t hl = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    const uint16_t result = ADD_16bit(hl, cpu->stack_ptr, &(cpu->registers[Register_F]));
+int gb_add_hl(uint16_t value, Cpu* cpu) {
+    
+    uint8_t* flags = &(cpu->registers[Register_F]);
+    uint16_t hl = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
 
-    cpu->registers[Register_H] =  (uint8_t) (result >> 8u);
-    cpu->registers[Register_L] =  (uint8_t) (result & 0xFFu);
+    overflows_16bit(hl, value) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+
+    half_carry_16bit(hl, value) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+
+    hl = (uint16_t) (hl + value);
+
+    clear_bit(flags, Flag_Sub);
+
+    cpu->registers[Register_H] =  (uint8_t)(hl >> 8u);
+    cpu->registers[Register_L] =  (uint8_t)(hl & 0xFFu);
 
     return 8;
 }

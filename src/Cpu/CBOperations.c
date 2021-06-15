@@ -3,22 +3,17 @@
 #include "Cpu/Cpu.h"
 #include "Utilities/BitOperations.h"
 
-uint8_t rlc(uint8_t value, uint8_t* flags) {
+int gb_rlc(uint8_t* r, uint8_t* flags) {
 
-    test_bit_8bit(value, 7) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+    test_bit_8bit(*r, 7) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
 
-    value = rotate_left(value, 1);
+    *r = rotate_left(*r, 1);
 
-    value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *r == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
 
     clear_bit(flags, Flag_Sub);
     clear_bit(flags, Flag_Half_Carry);
 
-    return value;
-}
-
-int gb_rlc(uint8_t* r, uint8_t* flags) {
-    *r = rlc(*r, flags);
     return 8;
 }
 

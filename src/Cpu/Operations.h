@@ -35,13 +35,10 @@ int gb_ld_addr_a16_a(uint16_t address, Cpu* cpu);
 int gb_ld_rr_d16(uint8_t* r1, uint8_t* r2, uint16_t value);
 int gb_ld_hl_spr8(uint8_t offset, Cpu* cpu);
 
-int gb_ld_sp_d16(uint16_t rr, Cpu* cpu);
-int gb_ld_sp_hl(Cpu*);
+int gb_ld_sp(uint16_t* sp, uint16_t rr);
 
 int gb_add(uint8_t r, Cpu* cpu);
-
-int gb_add_hl_rr(uint8_t r1, uint8_t r2, Cpu* cpu);
-int gb_add_hl_sp(Cpu* cpu);
+int gb_add_hl(uint16_t value, Cpu* cpu);
 
 int gb_sub(uint8_t r, Cpu* cpu);
 
