@@ -49,7 +49,7 @@ bool is_enabled(MemoryBankController* mc, Interrupts interrupt) {
     return test_bit_8bit(interrupt_enable_register, interrupt);
 }
 
-void call_interrupt_vector(Cpu* cpu, uint8_t interrupt_vector) {
+void call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector) {
 
     const uint8_t pc_low = (uint8_t) (cpu->program_counter & 0xFFU);
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8U);
