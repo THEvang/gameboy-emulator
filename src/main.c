@@ -157,6 +157,39 @@ int main(int argc, char* argv[])
         case 0x05:
             printf("MBC 2\n");
             break;
+        case 0x06:
+            printf("MBC2 + Battery\n");
+            break;
+        case 0x08:
+            printf("ROM + RAM\n");
+            break;
+        case 0x09:
+            printf("ROM + RAM + Battery\n");
+            break;
+        case 0x0F:
+            printf("MBC3 + Timer + Battery\n");
+            break;
+        case 0x10:
+            printf("MBC3 + Timer + Ram + Battery\n");
+            break;
+        case 0x11:
+            printf("MBC3\n");
+            break;
+        case 0x12:
+            printf("MBC3 + Ram\n");
+            break;
+        case 0x13:
+            printf("MBC3 + Ram + Battery\n");
+            break;
+        case 0x19:
+            printf("MBC5\n");
+            break;
+        case 0x1A:
+            printf("MB5 + Ram\n");
+            break;
+        case 0x1B:
+            printf("MBC5 + Ram + Battery\n");
+            break;
     }
 
     printf("ROM SIZE: ");
@@ -176,6 +209,12 @@ int main(int argc, char* argv[])
         case 0x04:
             printf("512kb - 32 Banks\n");
             break;
+        case 0x05:
+            printf("1Mb - 64 Banks\n");
+            break;
+        case 0x06:
+            printf("2MByte - 128 Banks\n");
+            break;
     }
 
     printf("RAM SIZE:");
@@ -188,6 +227,9 @@ int main(int argc, char* argv[])
             break;
         case 0x02:
             printf("8kb\n");
+            break;
+        case 0x03:
+            printf("32kb - 4 banks\n");
             break;
     }
 

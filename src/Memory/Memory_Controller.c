@@ -19,10 +19,7 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
     }
     
     if (address >= 0xA000 && address <= 0xBFFF) {
-        //RAM
-        printf("Ram Not supported\n");
-        exit(1);
-        // return mc->memory[address];
+        return mc->memory[address];
     }
 
     if(address == 0xFF00) {
@@ -84,8 +81,6 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
     } 
 
     if (address >= 0xA000 && address <= 0xBFFF) {
-        printf("ERROR: Ram not supported\n");
-        exit(1);
         if(mc->ram_enabled) {
             mc->memory[address] = data;
         }
