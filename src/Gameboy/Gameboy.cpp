@@ -2,7 +2,7 @@
 
 #include "Gameboy.hpp"
 #include "Cpu/Opcodes.h"
-#include "Cpu/Interpreter.hpp"
+#include "Cpu/Interpreter.h"
 #include "Cpu/Interrupts.h"
 
 GameBoy::GameBoy(MemoryBankController* mc)
@@ -23,14 +23,11 @@ GameBoy::GameBoy(MemoryBankController* mc)
 
 void GameBoy::run() {
 
-    const auto opcode = gb_read(memory_bank_controller, cpu.program_counter);
+    int cycles = 4;
 
-    auto instruction = fetch(static_cast<Opcode>(opcode));
-
-    auto cycles = 4;
     if(!cpu.is_halted) {
-        auto operand = instruction.read_operand(&cpu);
-        cycles = instruction.execute(cpu, operand);
+        const Opcode opcode = (Opcode) gb_read(memory_bank_controller, cpu.program_counter);
+        cycles = execute(opcode, &cpu);
     } else {
         cpu.is_halted = should_exit_halt(memory_bank_controller);
     }
