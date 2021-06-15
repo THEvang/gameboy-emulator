@@ -4,8 +4,8 @@ target_sources(gb-core
     LCD_Control.c
     LCD_Status.h
     LCD_Status.c
-    PPU.hpp
-    PPU.cpp
+    PPU.h
+    PPU.c
     Pixel.h
     Pixel.c
 )

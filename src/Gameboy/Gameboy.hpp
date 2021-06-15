@@ -4,7 +4,7 @@
 #include "Cpu/Cpu.h"
 #include "Input/Joypad.h"
 #include "Cpu/Timer.h"
-#include "Graphics/PPU.hpp"
+#include "Graphics/PPU.h"
 
 struct GameBoy {
 

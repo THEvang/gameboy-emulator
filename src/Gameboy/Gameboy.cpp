@@ -7,7 +7,6 @@
 
 GameBoy::GameBoy(MemoryBankController* mc)
     : memory_bank_controller(mc) 
-    , ppu(memory_bank_controller)
     {
         joypad.direction_keys = 0b1111;
         joypad.button_keys = 0b1111;
@@ -15,6 +14,9 @@ GameBoy::GameBoy(MemoryBankController* mc)
 
         cpu.memory_controller = memory_bank_controller;
         set_initial_state(&cpu);
+
+        ppu.memory_controller = memory_bank_controller;
+        ppu.scanline_counter = 0;
 
         timer.prev_delay = false;
         timer.tima_has_overflowed = false;
@@ -33,7 +35,7 @@ void GameBoy::run() {
     }
 
     gb_timer_increment(&timer, memory_bank_controller, cycles);
-    ppu.step(cycles);
+    gb_ppu_step(&ppu, cycles);
         
     if(cpu.interrupts_enabled) {
         const auto interrupt_cycles = handle_interrupts(&cpu);
