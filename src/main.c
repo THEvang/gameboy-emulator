@@ -150,6 +150,13 @@ int main(int argc, char* argv[])
             break;
         case 0x02:
             printf("MBC 1 + RAM\n");
+            break;
+        case 0x03:
+            printf("MBC 1 + RAM + Battery\n");
+            break;
+        case 0x05:
+            printf("MBC 2\n");
+            break;
     }
 
     printf("ROM SIZE: ");
@@ -161,14 +168,26 @@ int main(int argc, char* argv[])
             printf("64kb - 4 Banks\n");
             break;
         case 0x02:
-            printf("128 - 8 Banks\n");
+            printf("128kb - 8 Banks\n");
+            break;
+        case 0x03:
+            printf("256kb - 16 Banks\n");
+            break;
+        case 0x04:
+            printf("512kb - 32 Banks\n");
             break;
     }
 
-    printf("RAm SIZE:");
+    printf("RAM SIZE:");
     switch (rom.data[0x0149]) {
         case 0x00:
             printf("0 - No Ram\n");
+            break;
+        case 0x01:
+            printf("2kb\n");
+            break;
+        case 0x02:
+            printf("8kb\n");
             break;
     }
 
