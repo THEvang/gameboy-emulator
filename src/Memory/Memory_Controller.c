@@ -26,6 +26,10 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
         return gb_read_joypad_input(mc);        
     }
 
+    if(address == 0xFF0F) {
+        return mc->memory[address] | 0xE0;
+    }
+
     return mc->memory[address];
 }
 
@@ -97,12 +101,12 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
     } 
     
     if(address == 0xFF04) {
-        mc->memory[0xFF04] = 0;
+        mc->memory[address] = 0;
         return;
     }
 
     if (address == 0xFF44) {
-        mc->memory[0xFF44] = 0;
+        mc->memory[address] = 0;
         return;
     }
     
