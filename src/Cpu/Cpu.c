@@ -16,6 +16,7 @@ void set_initial_state(Cpu* cpu) {
     cpu->should_disable_interrupts = false;
     cpu->should_stop = false;
     cpu->is_halted = false;
+    cpu->halt_bug_triggered = false;
     
     cpu->registers[Register_A] = 0x01;
     cpu->registers[Register_B] = 0x00;

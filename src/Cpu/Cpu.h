@@ -32,6 +32,7 @@ typedef struct Cpu {
     bool should_stop;
 
     bool is_halted;
+    bool halt_bug_triggered;
 
     MemoryBankController* memory_controller;
     uint8_t registers[8];

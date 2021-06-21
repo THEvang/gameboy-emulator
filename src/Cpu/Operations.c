@@ -7,6 +7,7 @@
 #include "Cpu/CBOpcodes.h"
 #include "Memory/Memory_Controller.h"
 #include "Interpreter.h"
+#include "Adressing_Modes.h"
 
 int gb_nop() {
     return 4;
@@ -19,24 +20,24 @@ int gb_stop(Cpu* cpu) {
 
 int gb_halt(Cpu* cpu) {
 
-    if(cpu->interrupts_enabled) {
+    const uint16_t interrupt_request_addr = 0xFF0F;
+    const uint16_t interrupt_enable_addr = 0xFFFF;
+
+    const uint8_t interrupt_request = gb_read(cpu->memory_controller, interrupt_request_addr);
+    const uint8_t interrupt_enable = gb_read(cpu->memory_controller, interrupt_enable_addr);
+
+    if (cpu->interrupts_enabled) {
         cpu->is_halted = true;
-    } else {
-
-        const uint16_t interrupt_request_addr = 0xFF0F;
-        const uint16_t interrupt_enable_addr = 0xFFFF;
-
-        const uint8_t interrupt_request = gb_read(cpu->memory_controller, interrupt_request_addr);
-        const uint8_t interrupt_enable = gb_read(cpu->memory_controller, interrupt_enable_addr);
-
-        if((interrupt_request & interrupt_enable & 0x1Fu) == 0) {
-            cpu->is_halted = true;
-        } else {
-            printf("HALT BUG");
-            exit(1);
-        }
+        return 4;
     }
-    return 4;
+
+    if ( (interrupt_request & interrupt_enable & 0x1F) == 0) {
+        cpu->is_halted = true;
+        return 4;
+    } else {
+        cpu->halt_bug_triggered = true;
+        return 4;
+    }
 }
 
 int gb_rst(uint8_t address, Cpu* cpu) {

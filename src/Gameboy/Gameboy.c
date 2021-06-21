@@ -8,8 +8,10 @@ void gb_run(GameBoy* gb) {
     int cycles = 4;
 
     if(!gb->cpu.is_halted) {
-        const Opcode opcode = (Opcode) gb_read(gb->memory_bank_controller, gb->cpu.program_counter);
+        uint16_t pc = gb->cpu.program_counter;
+        const Opcode opcode = (Opcode) gb_read(gb->memory_bank_controller, pc);
         cycles = gb_execute(opcode, &(gb->cpu));
+
     } else {
         gb->cpu.is_halted = should_exit_halt(gb->memory_bank_controller);
     }
