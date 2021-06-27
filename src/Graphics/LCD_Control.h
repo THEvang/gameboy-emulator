@@ -17,4 +17,4 @@ uint16_t window_tile_map_start_address(MemoryBankController* mc);
 bool lcd_display_enabled(MemoryBankController* mc);
 bool window_display_enabled(MemoryBankController* mc);
 bool background_display_enabled(MemoryBankController* mc);
-bool sprite_display_eanbled(MemoryBankController* mc);
+bool sprite_display_enabled(MemoryBankController* mc);

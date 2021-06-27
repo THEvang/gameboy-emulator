@@ -42,6 +42,7 @@ bool background_tile_map_select(MemoryBankController* mc) {
 }
 
 bool tile_data_signed(MemoryBankController* mc) {
+
     const uint8_t status = gb_read(mc, g_lcd_control_address);
 
     const int background_tile_data_select_bit = 4;
@@ -49,6 +50,7 @@ bool tile_data_signed(MemoryBankController* mc) {
 }
 
 uint16_t tile_data_start_address(MemoryBankController* mc) {
+
     const uint8_t status = gb_read(mc, g_lcd_control_address);
 
     const int background_tile_data_select_bit = 4;

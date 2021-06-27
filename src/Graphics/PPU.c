@@ -39,7 +39,7 @@ void gb_draw_scanline(PPU* ppu, MemoryBankController* mc) {
         gb_draw_background(ppu, mc);
     }
 
-    if(sprite_display_eanbled(mc)) {
+    if(sprite_display_enabled(mc)) {
         gb_draw_sprites(ppu, mc);
     }
 }
@@ -71,8 +71,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 
     const uint16_t tile_row = (uint16_t) ( (uint8_t) ((y_pos / 8)) * 32); 
 
-    const uint8_t horizontal_pixels = 160;
-    for(uint8_t pixel = 0; pixel < horizontal_pixels; pixel++) {
+    for(uint8_t pixel = 0; pixel < 160; pixel++) {
 
         uint8_t x_pos = (uint8_t) (scroll_x + pixel);
         if(using_window) {
@@ -122,27 +121,26 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
         use8x16 = true;
     }
     
-   for (int sprite = 0 ; sprite < 40; sprite++)
-   {
+   for (int sprite = 0; sprite < 40; sprite++) {
     
     // sprite occupies 4 bytes in the sprite attributes table
-    const uint8_t index = (uint8_t) sprite * 4;
-    const uint8_t yPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00+index)) - 16);
-    const uint8_t xPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00+index+1)) - 8);
-    const uint8_t tileLocation = gb_read(mc, (uint16_t) (0xFE00 + index + 2));
-    const uint8_t attributes = gb_read(mc, (uint16_t) (0xFE00 + index + 3));
+    const int sprite_index = sprite * 4;
+    const uint8_t yPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index)) - 16);
+    const uint8_t xPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 1)) - 8);
+    const uint8_t tileLocation = gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 2));
+    const uint8_t attributes = gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 3));
 
-    bool yFlip = test_bit_8bit(attributes,6) ;
-    bool xFlip = test_bit_8bit(attributes,5) ;
+    bool yFlip = test_bit_8bit(attributes, 6);
+    bool xFlip = test_bit_8bit(attributes, 5);
 
     uint8_t scanline = gb_read(mc, g_scanline_address);
 
     int ysize = use8x16 ? 16 : 8;
 
      // does this sprite intercept with the scanline?
-     if ((scanline >= yPos) && (scanline < (yPos+ysize)))
-     {
-       int line = scanline - yPos ;
+    if ((scanline >= yPos) && (scanline < (yPos + ysize))) {
+        
+        int line = scanline - yPos;
 
        // read the sprite in backwards in the y axis
        if (yFlip)
@@ -158,14 +156,12 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
        // its easier to read in from right to left as pixel 0 is
        // bit 7 in the colour data, pixel 1 is bit 6 etc...
-       for (int tilePixel = 7; tilePixel >= 0; tilePixel--)
-       {
+        for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
         int colourbit = tilePixel ;
         // read the sprite in backwards for the x axis
-        if (xFlip)
-        {
-        colourbit -= 7 ;
-        colourbit *= -1 ;
+            if (xFlip) {
+                colourbit -= 7;
+                colourbit *= -1;
         }
 
         // the rest is the same as for tiles
@@ -173,49 +169,50 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
         colourNum +=  test_bit_8bit(data2, colourbit) ? 2 : 0;
         colourNum += test_bit_8bit(data1, colourbit) ? 1 : 0;
 
-        const uint16_t colourAddress = test_bit_8bit(attributes,4) ? 0xFF49 : 0xFF48;
-        const Color col = gb_get_color((uint8_t) (colourNum), colourAddress, mc);
+            const uint16_t palette_address = test_bit_8bit(attributes, 4) ? 0xFF49 : 0xFF48;
+            Color col = gb_get_color((uint8_t) (colourNum), palette_address, mc);
 
          // white is transparent for sprites.
          if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
            continue;
          }
         
-            int xPix = 0 - tilePixel ;
+            int xPix = 0 - tilePixel;
             xPix += 7 ;
-            int pixel = xPos+xPix ;
-            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y =scanline}, col);
+            int pixel = xPos + xPix;
+            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline - 1}, col);
             }
         }
     }
 }
 
-Color gb_get_color(uint8_t color_id, uint16_t palette_address, MemoryBankController* mc) {
+Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc) {
     
     const uint8_t palette = gb_read(mc, palette_address);
-    int hi_bit = 0;
-    int lo_bit = 0;
+    uint8_t mask = 0x03;
+    int n = 0;
 
-    switch (color_id)
-    {
-        case 0: hi_bit = 1 ; lo_bit = 0 ;break ;
-        case 1: hi_bit = 3 ; lo_bit = 2 ;break ;
-        case 2: hi_bit = 5 ; lo_bit = 4 ;break ;
-        case 3: hi_bit = 7 ; lo_bit = 6 ;break ;
+    switch (color_index) {
+        case 0: n = 0; break;
+        case 1: n = 2; break;
+        case 2: n = 4; break;
+        case 3: n = 6; break;
+        default:
+            exit(1);
     }
 
-    // use the palette to get the colour
-    uint8_t color = 0;
-    color = (uint8_t) ((unsigned int)(test_bit_8bit(palette, hi_bit)) << 1U);
-    color = (uint8_t) (color | (unsigned int)(test_bit_8bit(palette, lo_bit)));
+    uint8_t color =  (uint8_t) ((mask << n) & palette) >> n;
 
-   // convert the game colour to emulator colour
-   switch (color)
-   {
-     case 0: return (Color) {.red = 0xFF, .green = 0xFF, .blue = 0xFF};
-     case 1: return (Color) {.red = 0xCC, .green = 0xCC, .blue = 0xCC}; 
-     case 2: return (Color) {.red = 0x77, .green = 0x77, .blue = 0x77};
-     case 3: return (Color) {.red = 0x00, .green = 0x00, .blue = 0x00};
-     default: return (Color) {.red = 0xDD, .green = 0xDD, .blue = 0xDD};
+    switch (color) {
+        case 0: 
+            return (Color) {.red = 0xFF, .green = 0xFF, .blue = 0xFF, .alpha = 0xFF};
+        case 1: 
+            return (Color) {.red = 0xA9, .green = 0xA9, .blue = 0xA9, .alpha = 0xFF}; 
+        case 2: 
+            return (Color) {.red = 0x54, .green = 0x54, .blue = 0x54, .alpha = 0xFF};
+        case 3: 
+            return (Color) {.red = 0x00, .green = 0x00, .blue = 0x00, .alpha = 0xFF};
+        default:
+            return (Color) {.red = 0xFF, .green = 0x00, .blue = 0x00, .alpha = 0xFF};
    }
 }

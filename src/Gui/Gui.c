@@ -36,7 +36,6 @@ void init_gui(Gb_Gui* gui) {
 
 void gb_render(Gb_Gui* gui, GameBoy* gameboy) {
 
-    // Start the Dear ImGui frame
     render_ppu(gui, gameboy);
     SDL_RenderPresent(gui->renderer);
 }
@@ -45,7 +44,7 @@ void render_ppu(Gb_Gui* gui, GameBoy* gameboy) {
 
     SDL_Surface* surf = SDL_CreateRGBSurfaceFrom((void*) &(gameboy->ppu.screen.pixels[0]),
     160, 144,
-    32, 4*160,
+    32, 4 * 160,
     0xFF000000,
     0x00FF0000,
     0x0000FF00,
