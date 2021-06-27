@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ROM_BANK_SIZE 0x4000
+#define RAM_BANK_SIZE 0x2000
+
 uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
     if (address <= 0x3FFF) {
@@ -12,9 +15,9 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
     }
 
     if(address >= 0x4000 && address <= 0x7FFF) {
-        int offset = address - 0x4000;
+        int offset = address - ROM_BANK_SIZE;
         int effective_bank = gb_get_effective_rom_bank_number(mc);
-        int read_addr = offset + effective_bank * 0x4000;
+        int read_addr = offset + effective_bank * ROM_BANK_SIZE;
         return mc->rom[read_addr];
     }
     
@@ -22,7 +25,7 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
         if (mc->ram_enabled) {
             int offset = address - 0xA000;
             int ram_bank = gb_get_effective_ram_bank_number(mc);
-            int read_addr = offset + ram_bank * (0xBFFF - 0xA000);
+            int read_addr = offset + ram_bank * RAM_BANK_SIZE;
             return mc->ram[read_addr];
         }
         return 0;
@@ -65,7 +68,7 @@ void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     if(address <= 0x1FFF) {
-        mc->ram_enabled = (data & 0x0F) == 0x0A;
+        mc->ram_enabled = ((data & 0x0F) == 0x0A);
         return;
     }
 
@@ -88,15 +91,9 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
         if(mc->ram_enabled) {
             int offset = address - 0xA000;
             int ram_bank = gb_get_effective_ram_bank_number(mc);
-            int write_addr = offset + ram_bank * (0xBFFF - 0xA000);
+            int write_addr = offset + ram_bank * RAM_BANK_SIZE;
             mc->ram[write_addr] = data;
         }
-        return;
-    } 
-    
-    if (address >= 0xE000 && address < 0xFE00) {
-        mc->memory[address] = data;
-        gb_write(mc, (uint16_t) (address - 0x2000), data);
         return;
     } 
     
@@ -128,7 +125,7 @@ void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
     for(int i = 0; i < 0xA0; i++) {
         uint8_t dma_data = gb_read(mc, (uint16_t) (address + i));
-        gb_write(mc, (uint16_t) (0xFE00+i), dma_data);
+        gb_write(mc, (uint16_t) (0xFE00 + i), dma_data);
     }
 }
 
