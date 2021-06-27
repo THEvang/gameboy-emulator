@@ -11,9 +11,10 @@ typedef struct Screen_Position {
 } Screen_Position;
 
 typedef struct Color {  
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t alpha; 
 } Color;
 
 typedef struct Pixel_Array {
