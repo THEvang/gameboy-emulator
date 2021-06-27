@@ -116,6 +116,59 @@ void render_main(GameBoy* gameboy) {
 }
 
 
+int get_rom_bank_mask(uint8_t* rom) {
+
+    switch (rom[0x0148]) {
+        case 0x00:
+            return 0x1;
+        case 0x01:
+            return 0x3;
+        case 0x02:
+            return 0x7;
+        case 0x03:
+            return 0xF;
+        case 0x04:
+            return 0x1F;
+        case 0x05:
+            return 0x3F;
+        case 0x06:
+            return 0x7F;
+        case 0x07:
+            return 0xFF;
+        case 0x08:
+            printf("8MByte - 512 Banks\n");
+            break;
+        case 0x52:
+            printf("1.1MByte - 72 Banks\n");
+            break;
+        case 0x53:
+            printf("1.2MByte - 80 Banks\n");
+            break;
+        case 0x54:
+            printf("1.5Mbyte - 96 Banks\n");
+            break;
+        default:
+            return 0x00;
+            break;
+    }
+}
+
+int get_ram_bank_mask(uint8_t* rom) {
+    switch (rom[0x0149]) {
+        case 0x03:
+            return 0x3;
+        case 0x04:
+            return 0x1F;
+        case 0x05:
+            return 0x7;
+        case 0x00:
+        case 0x01:
+        case 0x02:
+        default:
+            return 0x00;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
@@ -141,11 +194,14 @@ int main(int argc, char* argv[])
     }
 
     MemoryBankController mc;
-    mc.ram_enabled = false;
+    mc.rom = rom.data;
+
     mc.rom_bank_number = 1;
+    mc.rom_bank_mask = get_rom_bank_mask(mc.rom);
+    mc.ram_enabled = false;
+    mc.ram_bank_mask = get_ram_bank_mask(mc.rom);
     mc.ram_bank_number = 0;
     mc.banking_mode = Banking_Mode_ROM;
-    mc.rom = rom.data;
 
     GameBoy gameboy;
     gameboy.memory_bank_controller = &mc;

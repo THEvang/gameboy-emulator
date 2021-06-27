@@ -44,7 +44,7 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
 void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
 
-    mc->rom_bank_number = (data & 0x1F);
+    mc->rom_bank_number = (data & mc->rom_bank_mask);
     
     if(mc->rom_bank_number == 0) {
         (mc->rom_bank_number)++;
@@ -62,7 +62,7 @@ void gb_set_banking_mode(MemoryBankController* mc, uint8_t data) {
 }
 
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
-    mc->ram_bank_number = (data & 0x03) & mc->ram_bank_mask;
+    mc->ram_bank_number = (data & mc->ram_bank_mask);
 }
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
@@ -145,19 +145,9 @@ uint8_t gb_read_joypad_input(MemoryBankController* mc) {
 }
 
 int gb_get_effective_rom_bank_number(MemoryBankController* mc) {
-
-    if (mc->banking_mode == Banking_Mode_ROM) {
-        return ( (mc->ram_bank_number << 5) | (mc->rom_bank_number) );
-    }
-
-    return mc->rom_bank_number;
+    return ((mc->ram_bank_number << 5) | (mc->rom_bank_number)) & mc->rom_bank_mask;
 }
 
 int gb_get_effective_ram_bank_number(MemoryBankController* mc) {
-
-    if (mc->banking_mode == Banking_Mode_ROM) {
-        return 0;
-    }
-
-    return mc->ram_bank_number;
+    return mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->ram_bank_number & mc->ram_bank_mask);
 }
