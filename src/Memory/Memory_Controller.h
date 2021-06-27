@@ -12,7 +12,11 @@ typedef enum Banking_Mode {
 
 typedef struct MemoryBankController {
     uint8_t memory[0xFFFF+1];
+    uint8_t ram[(0x1FFF+1) * 4];
     uint8_t rom_bank_number;
+    uint8_t rom_bank_mask;
+
+    uint8_t ram_bank_mask;
     uint8_t ram_bank_number;
 
     uint8_t* rom;
@@ -27,7 +31,9 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address);
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data);
 uint8_t gb_read_joypad_input(MemoryBankController* mc);
 
-int gb_get_effective_bank_number(MemoryBankController* mc);
+int gb_get_effective_rom_bank_number(MemoryBankController* mc);
+int gb_get_effective_ram_bank_number(MemoryBankController* mc);
+
 void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data);
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data);
 void gb_set_banking_mode(MemoryBankController* mc, uint8_t data);

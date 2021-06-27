@@ -13,13 +13,19 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
     if(address >= 0x4000 && address <= 0x7FFF) {
         int offset = address - 0x4000;
-        int effective_bank = gb_get_effective_bank_number(mc);
+        int effective_bank = gb_get_effective_rom_bank_number(mc);
         int read_addr = offset + effective_bank * 0x4000;
         return mc->rom[read_addr];
     }
     
     if (address >= 0xA000 && address <= 0xBFFF) {
-        return mc->memory[address];
+        if (mc->ram_enabled) {
+            int offset = address - 0xA000;
+            int ram_bank = gb_get_effective_ram_bank_number(mc);
+            int read_addr = offset + ram_bank * (0xBFFF - 0xA000);
+            return mc->ram[read_addr];
+        }
+        return 0;
     }
 
     if(address == 0xFF00) {
@@ -39,12 +45,6 @@ void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
     
     if(mc->rom_bank_number == 0) {
         (mc->rom_bank_number)++;
-    } else if (mc->rom_bank_number == 0x20) {
-        (mc->rom_bank_number)++;
-    } else if (mc->rom_bank_number == 0x40) {
-        (mc->rom_bank_number)++;
-    } else if (mc->rom_bank_number == 0x60) {
-        (mc->rom_bank_number)++;   
     }
 }
 
@@ -59,7 +59,7 @@ void gb_set_banking_mode(MemoryBankController* mc, uint8_t data) {
 }
 
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
-    mc->ram_bank_number = (data & 0x03u);
+    mc->ram_bank_number = (data & 0x03) & mc->ram_bank_mask;
 }
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
@@ -86,8 +86,12 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     if (address >= 0xA000 && address <= 0xBFFF) {
         if(mc->ram_enabled) {
-            mc->memory[address] = data;
+            int offset = address - 0xA000;
+            int ram_bank = gb_get_effective_ram_bank_number(mc);
+            int write_addr = offset + ram_bank * (0xBFFF - 0xA000);
+            mc->ram[write_addr] = data;
         }
+        return;
     } 
     
     if (address >= 0xE000 && address < 0xFE00) {
@@ -120,7 +124,7 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
-    uint16_t address = (uint16_t) (data << 8u);
+    uint16_t address = (uint16_t) (data << 8);
     
     for(int i = 0; i < 0xA0; i++) {
         uint8_t dma_data = gb_read(mc, (uint16_t) (address + i));
@@ -143,11 +147,20 @@ uint8_t gb_read_joypad_input(MemoryBankController* mc) {
     return data;
 }
 
-int gb_get_effective_bank_number(MemoryBankController* mc) {
+int gb_get_effective_rom_bank_number(MemoryBankController* mc) {
 
-    if (mc->banking_mode == Banking_Mode_RAM) {
-        return ( (mc->ram_bank_number & 0x03) << 5) | (mc->rom_bank_number);
+    if (mc->banking_mode == Banking_Mode_ROM) {
+        return ( (mc->ram_bank_number << 5) | (mc->rom_bank_number) );
     }
 
     return mc->rom_bank_number;
+}
+
+int gb_get_effective_ram_bank_number(MemoryBankController* mc) {
+
+    if (mc->banking_mode == Banking_Mode_ROM) {
+        return 0;
+    }
+
+    return mc->ram_bank_number;
 }
