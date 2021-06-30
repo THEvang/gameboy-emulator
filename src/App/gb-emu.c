@@ -139,30 +139,23 @@ int get_n_rom_banks(uint8_t* rom) {
             case 0x05:
                 return 64;
             case 0x06:
-                printf("2MByte - 128 Banks\n");
-                break;
+                return 128;
             case 0x07:
-                printf("4MByte - 256 Banks\n");
-                break;
+                return 256;
             case 0x08:
-                printf("8MByte - 512 Banks\n");
-                break;
+                return 512;
             case 0x52:
-                printf("1.1MByte - 72 Banks\n");
-                break;
+                return 72;
             case 0x53:
-                printf("1.2MByte - 80 Banks\n");
-                break;
+                return 80;
             case 0x54:
-                printf("1.5Mbyte - 96 Banks\n");
-                break;
+                return 96;
             default:
-                printf("Unknown\n");
-                break;
+                return 0;
     }
 }
 
-int get_rom_bank_mask(uint8_t* rom) {
+uint8_t get_rom_bank_mask(uint8_t* rom) {
 
     switch (rom[0x0148]) {
         case 0x00:
@@ -199,7 +192,7 @@ int get_rom_bank_mask(uint8_t* rom) {
     }
 }
 
-int get_ram_bank_mask(uint8_t* rom) {
+uint8_t get_ram_bank_mask(uint8_t* rom) {
     switch (rom[0x0149]) {
         case 0x00:
         case 0x01:
