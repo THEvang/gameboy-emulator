@@ -54,7 +54,7 @@ uint16_t tile_data_start_address(MemoryBankController* mc) {
     const uint8_t status = gb_read(mc, g_lcd_control_address);
 
     const int background_tile_data_select_bit = 4;
-    return test_bit_8bit(status, background_tile_data_select_bit) ? 0x8000 : 0x8800;
+    return test_bit_8bit(status, background_tile_data_select_bit) ? 0x8000 : 0x9000;
 }
 
 uint16_t background_tile_map_start_address(MemoryBankController* mc) {

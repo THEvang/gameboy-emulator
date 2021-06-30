@@ -73,7 +73,7 @@ void clear_coincidence_flag(MemoryBankController* mc) {
 LCD_Modes get_mode(MemoryBankController* mc) {
         uint8_t status = gb_read(mc, g_status_address);
         status &= 0x03;
-        switch (status ) {
+        switch (status) {
             case 0: 
                 return LCD_Mode_H_Blank;
             case 1:
