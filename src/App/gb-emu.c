@@ -5,7 +5,7 @@
 #include <time.h>
 #include <stdbool.h>
 
-#include "Gui/Gui.h"
+#include "Gui.h"
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
 #include "Cpu/Cpu.h"
@@ -107,11 +107,11 @@ void render_main(GameBoy* gameboy) {
             gb_render(&gui, gameboy);
         }
 
-        if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
-            printf("%c", gameboy->memory_bank_controller->memory[0xFF01]);
-            fflush(stdout);
-            gameboy->memory_bank_controller->memory[0xFF02] = 0;
-        }
+        // if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
+        //     printf("%c", gameboy->memory_bank_controller->memory[0xFF01]);
+        //     fflush(stdout);
+        //     gameboy->memory_bank_controller->memory[0xFF02] = 0;
+        // }
 
         stop = clock();
     }
