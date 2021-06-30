@@ -13,6 +13,7 @@ typedef struct Timer {
     bool prev_delay;
     bool tima_has_overflowed;
     uint16_t div_value;
+    int tima_speed;
 } Timer;
 
 void gb_timer_increment(Timer* timer, MemoryBankController* mc, int cycles);
