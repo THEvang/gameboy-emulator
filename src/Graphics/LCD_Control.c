@@ -20,7 +20,7 @@ bool background_display_enabled(MemoryBankController* mc) {
     return test_bit_8bit(status, background_display_bit);
 }
 
-bool sprite_display_eanbled(MemoryBankController* mc) {
+bool sprite_display_enabled(MemoryBankController* mc) {
     const uint8_t status = gb_read(mc, g_lcd_control_address);
 
     const int sprite_enable_bit = 1;
