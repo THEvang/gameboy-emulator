@@ -19,6 +19,7 @@ typedef struct MemoryBankController {
 
     uint8_t ram_bank_mask;
     uint8_t ram_bank_number;
+    uint16_t div_register;
 
     uint8_t* rom;
     bool ram_enabled;

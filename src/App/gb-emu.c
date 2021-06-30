@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
     gameboy.timer.prev_delay = false;
     gameboy.timer.tima_has_overflowed = false;
     gameboy.timer.tima_speed = 1024;
-    gameboy.timer.div_value = 0xABCC;
+    gameboy.memory_bank_controller->div_register = 0xABCC;
 
     render_main(&gameboy);
     return 0;

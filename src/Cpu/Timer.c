@@ -12,14 +12,12 @@ void gb_timer_increment(Timer* timer, MemoryBankController* mc, int cycles) {
 
 void gb_timer_tick(Timer* timer, MemoryBankController* mc) {
 
-    timer->div_value += 4;
-    mc->memory[g_div_address] = (uint8_t) (timer->div_value >> 8u); 
-    
+    mc->div_register += 4;
+    mc->memory[g_div_address] = (uint8_t) (mc->div_register >> 8);
+
     if(timer->tima_has_overflowed) { 
         gb_timer_reset_tima(mc);
-        //if(m_interrupt_handler.timer_interrupt_enabled()) {
-            request_interrupt(mc, Interrupts_Timer);
-        //}
+        request_interrupt(mc, Interrupts_Timer);
         timer->tima_has_overflowed = false;
     }
 
@@ -60,7 +58,7 @@ bool gb_timer_should_increment_tima(Timer* timer, MemoryBankController* mc) {
             break;
     }
 
-    bool value = test_bit_16bit(timer->div_value, n) && test_bit_8bit(timer_control, 2);
+    bool value = test_bit_16bit(mc->div_register, n) && test_bit_8bit(timer_control, 2);
     if(!value && timer->prev_delay) {
         timer->prev_delay = value;
         return true;

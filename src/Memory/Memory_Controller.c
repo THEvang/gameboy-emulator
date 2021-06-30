@@ -115,6 +115,7 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
     
     if(address == 0xFF04) {
         mc->memory[address] = 0;
+        mc->div_register = 0;
         return;
     }
 

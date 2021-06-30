@@ -12,7 +12,6 @@ static const uint16_t g_tac_address = 0xFF07;
 typedef struct Timer {
     bool prev_delay;
     bool tima_has_overflowed;
-    uint16_t div_value;
     int tima_speed;
 } Timer;
 
