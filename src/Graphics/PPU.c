@@ -1,4 +1,5 @@
 #include "PPU.h"
+#include <stdlib.h>
 
 #include "LCD_Control.h"
 #include "LCD_Status.h"
@@ -66,7 +67,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint16_t tile_map_start_address = using_window ? window_tile_map_start_address(mc) :
         background_tile_map_start_address(mc);
 
-    const uint8_t y_pos = using_window ? (uint8_t)(scanline - window_y) : 
+    const uint8_t y_pos = using_window ? (uint8_t) (scanline - window_y) : 
         (uint8_t) (scroll_y + scanline);
 
     const uint16_t tile_row = (uint16_t) ( (uint8_t) ((y_pos / 8)) * 32); 
@@ -86,11 +87,11 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         uint16_t tile_data_address = tile_data_start_addr;
 
         if(tile_data_signed(mc)) {
-            const int8_t tile_number = (int8_t) gb_read(mc, tile_map_address);
-            tile_data_address = (uint16_t) (tile_data_address + (tile_number + 128) * 16);
+            const int16_t tile_number = (int8_t) gb_read(mc, tile_map_address);
+            tile_data_address += (tile_number + 128) * 16;
 
         } else {
-            const uint8_t tile_number = gb_read(mc, tile_map_address);
+            const uint16_t tile_number = (uint8_t) gb_read(mc, tile_map_address);
             tile_data_address = (uint16_t) (tile_number * 16 + tile_data_address);
         }
 
@@ -105,11 +106,11 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
         const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
         
-        uint8_t color_id = 0;
-        color_id = (uint8_t) (color_2 << 1U); 
-        color_id |= color_1;
+        uint8_t color_index = 0;
+        color_index += (uint8_t) (color_2 * 2);
+        color_index += color_1;
 
-        Color pixel_color = gb_get_color(color_id, 0xFF47, mc);
+        Color pixel_color = gb_get_color(color_index, 0xFF47, mc);
         set_pixel(&(ppu->screen) , (Screen_Position) {.x = pixel, .y = scanline}, pixel_color);
     }
 }
@@ -124,7 +125,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
    for (int sprite = 0; sprite < 40; sprite++) {
     
     // sprite occupies 4 bytes in the sprite attributes table
-    const int sprite_index = sprite * 4;
+    const uint8_t sprite_index = (uint8_t) sprite * 4;
     const uint8_t yPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index)) - 16);
     const uint8_t xPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 1)) - 8);
     const uint8_t tileLocation = gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 2));
@@ -133,7 +134,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
     bool yFlip = test_bit_8bit(attributes, 6);
     bool xFlip = test_bit_8bit(attributes, 5);
 
-    uint8_t scanline = gb_read(mc, g_scanline_address);
+    int scanline = gb_read(mc, g_scanline_address);
 
     int ysize = use8x16 ? 16 : 8;
 
@@ -157,7 +158,8 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
        // its easier to read in from right to left as pixel 0 is
        // bit 7 in the colour data, pixel 1 is bit 6 etc...
         for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
-        int colourbit = tilePixel ;
+            
+            int colourbit = tilePixel;
         // read the sprite in backwards for the x axis
             if (xFlip) {
                 colourbit -= 7;
@@ -201,7 +203,7 @@ Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankCont
             exit(1);
     }
 
-    uint8_t color =  (uint8_t) ((mask << n) & palette) >> n;
+    uint8_t color =  (uint8_t) (palette >> n) & mask;
 
     switch (color) {
         case 0: 
@@ -213,6 +215,6 @@ Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankCont
         case 3: 
             return (Color) {.red = 0x00, .green = 0x00, .blue = 0x00, .alpha = 0xFF};
         default:
-            return (Color) {.red = 0xFF, .green = 0x00, .blue = 0x00, .alpha = 0xFF};
+            exit(1);
    }
 }
