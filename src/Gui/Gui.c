@@ -14,7 +14,7 @@ void init_gui(Gb_Gui* gui) {
         SDL_WINDOWPOS_CENTERED, 
         5*160, 
         5*144, 
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+        SDL_WINDOW_RESIZABLE);
     
 
     if(!gui->window) {
@@ -32,28 +32,19 @@ void init_gui(Gb_Gui* gui) {
         printf("SDL ERROR: Unable to create renderer: %s\n", SDL_GetError());
         exit(1);
     }
+
+    gui->screen = SDL_CreateTexture(gui->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 160, 144);
 }
 
 void gb_render(Gb_Gui* gui, GameBoy* gameboy) {
 
+    SDL_RenderClear(gui->renderer);
     render_ppu(gui, gameboy);
     SDL_RenderPresent(gui->renderer);
 }
 
 void render_ppu(Gb_Gui* gui, GameBoy* gameboy) {
 
-    SDL_Surface* surf = SDL_CreateRGBSurfaceFrom((void*) &(gameboy->ppu.screen.pixels[0]),
-    160, 144,
-    32, 4 * 160,
-    0xFF000000,
-    0x00FF0000,
-    0x0000FF00,
-    0x000000FF);
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(gui->renderer, surf);
-
-    SDL_RenderCopy(gui->renderer, texture, NULL, NULL);
-
-    SDL_FreeSurface(surf);
-    SDL_DestroyTexture(texture);
+    SDL_UpdateTexture(gui->screen, NULL, (void*) &(gameboy->ppu.screen.pixels[0]), 4 * 160);
+    SDL_RenderCopy(gui->renderer, gui->screen, NULL, NULL);
 }
