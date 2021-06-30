@@ -129,11 +129,6 @@ int gb_ld_a_addr_rr(uint8_t r1, uint8_t r2, Cpu* cpu) {
     return 8;
 }
 
-int LD_A_ADDR_A16(uint16_t address, Cpu* cpu) {
-    cpu->registers[Register_A] = gb_read(cpu->memory_controller, address);
-    return 16;
-}
-
 int gb_ld_a_addr_c(Cpu* cpu) {
 
     const uint16_t address = (uint16_t) (0xFF00 + cpu->registers[Register_C]);
