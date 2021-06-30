@@ -182,7 +182,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
             int xPix = 0 - tilePixel;
             xPix += 7 ;
             int pixel = xPos + xPix;
-            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline - 1}, col);
+            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline}, col);
             }
         }
     }
