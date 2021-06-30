@@ -11,8 +11,9 @@ typedef enum Banking_Mode {
 } Banking_Mode;
 
 typedef struct MemoryBankController {
-    uint8_t memory[0xFFFF+1];
-    uint8_t ram[(0x1FFF+1) * 4];
+    uint8_t memory[0x10000];
+    uint8_t ram[0x2000 * 4];
+    int n_rom_banks;
     uint8_t rom_bank_number;
     uint8_t rom_bank_mask;
 

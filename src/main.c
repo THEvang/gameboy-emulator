@@ -1,7 +1,9 @@
 #define SDL_MAIN_HANDLED
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "Gui/Gui.h"
 #include "Utilities/File.h"
@@ -115,6 +117,50 @@ void render_main(GameBoy* gameboy) {
     }
 }
 
+void gb_print_usage() {
+    printf("Gameboy Emulator\n");
+    printf("gb-emu <rom_file>\n");
+    printf("-i Inspect rom without running the emulator\n");
+}
+
+int get_n_rom_banks(uint8_t* rom) {
+    
+    switch (rom[0x0148]) {
+            case 0x00:
+                return 2;
+            case 0x01:
+                return 4;
+            case 0x02:
+                return 8;
+            case 0x03:
+                return 16;
+            case 0x04:
+                return 32;
+            case 0x05:
+                return 64;
+            case 0x06:
+                printf("2MByte - 128 Banks\n");
+                break;
+            case 0x07:
+                printf("4MByte - 256 Banks\n");
+                break;
+            case 0x08:
+                printf("8MByte - 512 Banks\n");
+                break;
+            case 0x52:
+                printf("1.1MByte - 72 Banks\n");
+                break;
+            case 0x53:
+                printf("1.2MByte - 80 Banks\n");
+                break;
+            case 0x54:
+                printf("1.5Mbyte - 96 Banks\n");
+                break;
+            default:
+                printf("Unknown\n");
+                break;
+    }
+}
 
 int get_rom_bank_mask(uint8_t* rom) {
 
@@ -155,15 +201,16 @@ int get_rom_bank_mask(uint8_t* rom) {
 
 int get_ram_bank_mask(uint8_t* rom) {
     switch (rom[0x0149]) {
-        case 0x03:
-            return 0x3;
-        case 0x04:
-            return 0x1F;
-        case 0x05:
-            return 0x7;
         case 0x00:
         case 0x01:
         case 0x02:
+            return 0x00;
+        case 0x03:
+            return 0x03;
+        case 0x04:
+            return 0x0F;
+        case 0x05:
+            return 0x07;
         default:
             return 0x00;
     }
@@ -172,7 +219,7 @@ int get_ram_bank_mask(uint8_t* rom) {
 int main(int argc, char* argv[])
 {
     if (argc < 2) {
-        printf("Error: No input rom\n");
+        gb_print_usage();
         exit(1);
     }
 
@@ -198,6 +245,8 @@ int main(int argc, char* argv[])
 
     mc.rom_bank_number = 1;
     mc.rom_bank_mask = get_rom_bank_mask(mc.rom);
+    mc.n_rom_banks = get_n_rom_banks(mc.rom);
+
     mc.ram_enabled = false;
     mc.ram_bank_mask = get_ram_bank_mask(mc.rom);
     mc.ram_bank_number = 0;
@@ -216,6 +265,7 @@ int main(int argc, char* argv[])
 
     gameboy.timer.prev_delay = false;
     gameboy.timer.tima_has_overflowed = false;
+    gameboy.timer.tima_speed = 1024;
     gameboy.timer.div_value = 0xABCC;
 
     render_main(&gameboy);

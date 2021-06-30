@@ -11,7 +11,12 @@
 uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
     if (address <= 0x3FFF) {
-        return mc->rom[address];
+        int effective_bank = 0;
+        if(mc->banking_mode == Banking_Mode_RAM) {
+            effective_bank = (mc->ram_bank_number << 5) & mc->rom_bank_mask;
+        }
+
+        return mc->rom[address + effective_bank * ROM_BANK_SIZE];
     }
 
     if(address >= 0x4000 && address <= 0x7FFF) {
@@ -28,7 +33,7 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
             int read_addr = offset + ram_bank * RAM_BANK_SIZE;
             return mc->ram[read_addr];
         }
-        return 0;
+        return 0xFF;
     }
 
     if(address == 0xFF00) {
@@ -44,7 +49,7 @@ uint8_t gb_read(MemoryBankController* mc, uint16_t address) {
 
 void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
 
-    mc->rom_bank_number = (data & mc->rom_bank_mask);
+    mc->rom_bank_number = (data & 0x1F);
     
     if(mc->rom_bank_number == 0) {
         (mc->rom_bank_number)++;
@@ -62,7 +67,7 @@ void gb_set_banking_mode(MemoryBankController* mc, uint8_t data) {
 }
 
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
-    mc->ram_bank_number = (data & mc->ram_bank_mask);
+    mc->ram_bank_number = (data & 0x3);
 }
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
@@ -95,7 +100,14 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
             mc->ram[write_addr] = data;
         }
         return;
+    }
+    
+    if (address >= 0xE000 && address < 0xFE00) {
+        mc->memory[address] = data;
+        gb_write(mc, (uint16_t) (address - 0x2000), data);
+        return;
     } 
+    
     
     if (address >= 0xFEA0 && address < 0xFEFF) {
         return;

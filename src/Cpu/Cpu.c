@@ -27,6 +27,7 @@ void set_initial_state(Cpu* cpu) {
     cpu->registers[Register_H] = 0x01;
     cpu->registers[Register_L] = 0x4D;
 
+    gb_write(cpu->memory_controller, 0xFF04, 0xCC);
     gb_write(cpu->memory_controller, 0xFF05, 0);
     gb_write(cpu->memory_controller, 0xFF06, 0);
     gb_write(cpu->memory_controller, 0xFF07, 0);
