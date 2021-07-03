@@ -912,6 +912,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         *f &= 0xF0u;
         return cycles;
     }
+    
     case Opcode_LD_A_ADDR_C:
         implied(cpu);
         return gb_ld_a_addr_c(cpu);

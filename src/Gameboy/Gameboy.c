@@ -2,6 +2,7 @@
 #include "Cpu/Opcodes.h"
 #include "Cpu/Interpreter.h"
 #include "Cpu/Interrupts.h"
+#include "Sound/Sound.h"
 
 void gb_run(GameBoy* gb) {
 
@@ -31,4 +32,6 @@ void gb_run(GameBoy* gb) {
         gb->cpu.interrupts_enabled = false;
         gb->cpu.should_disable_interrupts = false;
     }
+
+    gb_play_sound_channel_2(gb->memory_bank_controller, &(gb->sound_channels));
 }

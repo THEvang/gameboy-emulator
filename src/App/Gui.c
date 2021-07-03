@@ -1,10 +1,37 @@
 #include "Gui.h"
 
+#include "Sound/Sound.h"
 #include <stdio.h>
+
+void init_sound(Sound_Channels* channels) {
+
+    if (SDL_Init(SDL_INIT_AUDIO) != 0) {
+        printf("SDL ERROR: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    SDL_AudioSpec spec_hints, obtained_spec;
+    spec_hints.callback = gb_audio_callback;
+    spec_hints.userdata = channels;
+    spec_hints.format = AUDIO_F32SYS;
+    spec_hints.freq = 44100;
+    spec_hints.samples = 4096;
+    spec_hints.channels = 1;
+
+
+    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &spec_hints, &obtained_spec, SDL_AUDIO_ALLOW_ANY_CHANGE);
+
+    if (SDL_OpenAudio(&spec_hints, &obtained_spec) < 0) {
+        printf("SDL ERROR: Unable to open audio: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    SDL_PauseAudioDevice(dev, 0);
+}
 
 void init_gui(Gb_Gui* gui) {
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO) != 0) {
         printf("SDL ERROR: %s\n", SDL_GetError());
         exit(1);
     }

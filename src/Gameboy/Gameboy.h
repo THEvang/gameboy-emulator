@@ -5,6 +5,7 @@
 #include "Input/Joypad.h"
 #include "Cpu/Timer.h"
 #include "Graphics/PPU.h"
+#include "Sound/Sound.h"
 
 typedef struct GameBoy {
 
@@ -13,6 +14,7 @@ typedef struct GameBoy {
     Timer timer;
     PPU ppu;
     Joypad joypad;
+    Sound_Channels sound_channels;
 } GameBoy;
 
 void gb_run(GameBoy* gb);

@@ -5,6 +5,7 @@
 #include <time.h>
 #include <stdbool.h>
 
+#include "Sound/Sound.h"
 #include "Gui.h"
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
@@ -22,8 +23,9 @@ void render_main(GameBoy* gameboy) {
     bool done = false;
     while (!done) {
 
-        
+
         gb_run(gameboy);
+        
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
         if( duration >= 16e-3) {
             start = clock();
@@ -262,6 +264,13 @@ int main(int argc, char* argv[])
     gameboy.timer.tima_has_overflowed = false;
     gameboy.timer.tima_speed = 1024;
     gameboy.memory_bank_controller->div_register = 0xABCC;
+
+    gameboy.sound_channels.channel_2.duty = 0.5;
+    gameboy.sound_channels.channel_2.length = 0;
+    gameboy.sound_channels.channel_2.time = 0;
+    gameboy.sound_channels.channel_2.freq = 400;
+
+    init_sound(&(gameboy.sound_channels));
 
     render_main(&gameboy);
     return 0;
