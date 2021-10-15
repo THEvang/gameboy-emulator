@@ -106,9 +106,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
         const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
         
-        uint8_t color_index = 0;
-        color_index += (uint8_t) (color_2 * 2);
-        color_index += color_1;
+        uint8_t color_index = (color_2 << 1u) | color_1;
     
         Color pixel_color = gb_get_color(color_index, 0xFF47, mc);
         set_pixel(&(ppu->screen) , (Screen_Position) {.x = pixel, .y = scanline}, pixel_color);
@@ -151,31 +149,32 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
             line *= 2; // same as for tiles
             const uint16_t dataAddress = (uint16_t) ((0x8000 + (tileLocation * 16)) + line);
-            const uint8_t data1 = gb_read(mc,  dataAddress ) ;
-            const uint8_t data2 = gb_read(mc, (uint16_t) (dataAddress +1)) ;
+            const uint8_t data_1 = gb_read(mc,  dataAddress ) ;
+            const uint8_t data_2 = gb_read(mc, (uint16_t) (dataAddress +1)) ;
 
             // its easier to read in from right to left as pixel 0 is
             // bit 7 in the colour data, pixel 1 is bit 6 etc...
             for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
                 
-                int colourbit = tilePixel;
+                int color_bit = tilePixel;
                 // read the sprite in backwards for the x axis
                 if (xFlip) {
-                        colourbit -= 7;
-                        colourbit *= -1;
+                        color_bit -= 7;
+                        color_bit *= -1;
                 }
 
                 // the rest is the same as for tiles
-                int colourNum = 0;
-                colourNum +=  test_bit_8bit(data2, colourbit) ? 2 : 0;
-                colourNum += test_bit_8bit(data1, colourbit) ? 1 : 0;
+                const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
+                const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
+                uint8_t color_index = (color_2 << 1u) | color_1;
 
                 const uint16_t palette_address = test_bit_8bit(attributes, 4) ? 0xFF49 : 0xFF48;
-                Color col = gb_get_color((uint8_t) (colourNum), palette_address, mc);
+                Color col = gb_get_color(color_index, palette_address, mc);
 
                 // white is transparent for sprites.
                 if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
-                continue;
+                    col.alpha = 0x00;
+                    // continue;
                 }
                 
                 int xPix = 0 - tilePixel;
@@ -189,31 +188,16 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
 Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc) {
     
-    const uint8_t palette = gb_read(mc, palette_address);
+    const uint8_t palette = mc->memory[palette_address];
     uint8_t mask = 0x03;
-    int n = 0;
+    uint8_t color =  (uint8_t) (palette >> (color_index * 2)) & mask;
 
-    switch (color_index) {
-        case 0: n = 0; break;
-        case 1: n = 2; break;
-        case 2: n = 4; break;
-        case 3: n = 6; break;
-        default:
-            exit(1);
-    }
+    static Color colors[4] = {
+        {.red = 0xFF, .green = 0xFF, .blue = 0xFF, .alpha = 0xFF},
+        {.red = 0xA9, .green = 0xA9, .blue = 0xA9, .alpha = 0xFF},
+        {.red = 0x54, .green = 0x54, .blue = 0x54, .alpha = 0xFF},
+        {.red = 0x00, .green = 0x00, .blue = 0x00, .alpha = 0xFF}
+    };
 
-    uint8_t color =  (uint8_t) (palette >> n) & mask;
-
-    switch (color) {
-        case 0: 
-            return (Color) {.red = 0xFF, .green = 0xFF, .blue = 0xFF, .alpha = 0xFF};
-        case 1: 
-            return (Color) {.red = 0xA9, .green = 0xA9, .blue = 0xA9, .alpha = 0xFF}; 
-        case 2: 
-            return (Color) {.red = 0x54, .green = 0x54, .blue = 0x54, .alpha = 0xFF};
-        case 3: 
-            return (Color) {.red = 0x00, .green = 0x00, .blue = 0x00, .alpha = 0xFF};
-        default:
-            exit(1);
-   }
-}
+    return colors[color];
+ }
