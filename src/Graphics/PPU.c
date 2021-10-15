@@ -173,8 +173,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
                 // white is transparent for sprites.
                 if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
-                    col.alpha = 0x00;
-                    // continue;
+                    continue;
                 }
                 
                 int xPix = 0 - tilePixel;

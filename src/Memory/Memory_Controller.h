@@ -3,12 +3,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct Joypad Joypad;
-
 typedef enum Banking_Mode {
     Banking_Mode_ROM,
     Banking_Mode_RAM
 } Banking_Mode;
+
+typedef enum Button_Types {
+    Direction_Button  = 1 << 4,
+    Action_Button = 1 << 5
+} Button_Type;
 
 typedef struct MemoryBankController {
     uint8_t memory[0x10000];
@@ -24,7 +27,9 @@ typedef struct MemoryBankController {
     uint8_t* rom;
     bool ram_enabled;
     Banking_Mode banking_mode;
-    Joypad* joypad;
+
+    uint8_t buttons;
+
 } MemoryBankController;
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data);

@@ -1,34 +1,17 @@
 #pragma once 
 
-#include <stdint.h>
 #include "Memory/Memory_Controller.h"
 
-typedef enum Button_Types {
-    Direction_Key,
-    Button_Key
-} Button_Types;
-
 typedef enum Button {
-    Button_Start,
-    Button_Select,
-    Button_A,
-    Button_B,
-    Button_Up,
-    Button_Down,
-    Button_Right,
-    Button_Left
+    Button_Right = 1 << 0,
+    Button_Left = 1 << 1,
+    Button_Up = 1 << 2,
+    Button_Down = 1 << 3,
+    Button_A = 1 << 4,
+    Button_B = 1 << 5,
+    Button_Select = 1 << 6,
+    Button_Start = 1 << 7
 } Button;
 
-typedef enum Key_Press {
-    Key_Down,
-    Key_Up
-} Key_Press;
-
-typedef struct Joypad {
-    uint8_t direction_keys;
-    uint8_t button_keys;
-} Joypad;
-
-void input(Joypad* pad, MemoryBankController* mc, Key_Press key_press, Button button);
-void key_down(Joypad* pad, MemoryBankController* mc, Button button);
-void key_up(Joypad* pad, Button button);
+void key_down(MemoryBankController* mc, Button button);
+void key_up(MemoryBankController* mc, Button button);   

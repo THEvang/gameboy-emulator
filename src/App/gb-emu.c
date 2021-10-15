@@ -10,6 +10,7 @@
 #include "Gameboy/Gameboy.h"
 #include "Cpu/Cpu.h"
 #include "Gameboy/Rom_Info.h"
+#include "Input/Joypad.h"
 
 void render_main(GameBoy* gameboy) {
 
@@ -28,7 +29,7 @@ void render_main(GameBoy* gameboy) {
         if( duration >= 16e-3) {
             start = clock();
 
-                SDL_Event event;
+            SDL_Event event;
             while (SDL_PollEvent(&event))
             {
                 switch (event.type) {
@@ -46,28 +47,28 @@ void render_main(GameBoy* gameboy) {
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.sym) {
                         case SDLK_z:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_A);
+                            key_down(gameboy->memory_bank_controller, Button_A);
                             break;
                         case SDLK_x:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_B);
+                            key_down(gameboy->memory_bank_controller, Button_B);
                             break;
                         case SDLK_RETURN:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Start);
+                            key_down(gameboy->memory_bank_controller, Button_Start);
                             break;
                         case SDLK_BACKSPACE:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Select);
+                            key_down(gameboy->memory_bank_controller, Button_Select);
                             break;
                         case SDLK_w:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Up);
+                            key_down(gameboy->memory_bank_controller, Button_Up);
                             break;
                         case SDLK_s:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Down);
+                            key_down(gameboy->memory_bank_controller, Button_Down);
                             break;
                         case SDLK_d:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Right);
+                            key_down(gameboy->memory_bank_controller, Button_Right);
                             break;
                         case SDLK_a:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Down, Button_Left);
+                            key_down(gameboy->memory_bank_controller, Button_Left);
                             break;
                     }
                 break;
@@ -75,28 +76,28 @@ void render_main(GameBoy* gameboy) {
                 case SDL_KEYUP:
                     switch(event.key.keysym.sym) {
                         case SDLK_z:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_A);
+                            key_up(gameboy->memory_bank_controller, Button_A);
                             break;
                         case SDLK_x:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_B);
+                            key_up(gameboy->memory_bank_controller, Button_B);
                             break;
                         case SDLK_RETURN:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Start);
+                            key_up(gameboy->memory_bank_controller, Button_Start);
                             break;
                         case SDLK_BACKSPACE:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Select);
+                            key_up(gameboy->memory_bank_controller, Button_Select);
                             break;
                         case SDLK_w:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Up);
+                            key_up(gameboy->memory_bank_controller, Button_Up);
                             break;
                         case SDLK_s:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Down);
+                            key_up(gameboy->memory_bank_controller, Button_Down);
                             break;
                         case SDLK_d:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Right);
+                            key_up(gameboy->memory_bank_controller, Button_Right);
                             break;
                         case SDLK_a:
-                            input(&(gameboy->joypad), gameboy->memory_bank_controller, Key_Up, Button_Left);
+                            key_up(gameboy->memory_bank_controller, Button_Left);
                             break;
                     }
                 break;
@@ -246,12 +247,10 @@ int main(int argc, char* argv[])
     mc.ram_bank_mask = get_ram_bank_mask(mc.rom);
     mc.ram_bank_number = 0;
     mc.banking_mode = Banking_Mode_ROM;
-
+    mc.buttons = 0xFF;
     GameBoy gameboy;
     gameboy.memory_bank_controller = &mc;
-    gameboy.joypad.direction_keys = 0x0F;
-    gameboy.joypad.button_keys = 0x0F;
-    gameboy.memory_bank_controller->joypad = &(gameboy.joypad);
+    
 
     gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
     set_initial_state(&(gameboy.cpu));

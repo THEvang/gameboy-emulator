@@ -1,6 +1,5 @@
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
-#include "Input/Joypad.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -146,15 +145,15 @@ uint8_t gb_read_joypad_input(MemoryBankController* mc) {
 
     uint8_t data = mc->memory[0xFF00];
 
-    if(!test_bit_8bit(data, 5)) {
-        return mc->joypad->button_keys;
+    if ( !(data & Action_Button)) {
+        return (mc->buttons >> 4) & 0x0F;
     }
 
-    if(!test_bit_8bit(data, 4)) {
-        return mc->joypad->direction_keys;
+    if ( !(data & Direction_Button)) {
+        return mc->buttons & 0xFF;
     }
 
-    return data;
+    return 0xFF;
 }
 
 int gb_get_effective_rom_bank_number(MemoryBankController* mc) {
