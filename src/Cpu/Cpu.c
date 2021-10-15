@@ -68,13 +68,13 @@ void set_initial_state(Cpu* cpu) {
 }
 
 bool test_flag(uint8_t flags, Cpu_Flag flag) {
-    return test_bit_8bit(flags, flag);
+    return flags & flag;
 }
 
 void set_flag(uint8_t* flags, Cpu_Flag flag) {
-    set_bit(flags, flag);
+    *flags |= flag;
 }
 
 void clear_flag(uint8_t* flags, Cpu_Flag flag) {
-    clear_bit(flags, flag);
+    *flags &= ~flag;
 }

@@ -234,18 +234,18 @@ int gb_add(uint8_t value, Cpu* cpu) {
     uint8_t a = cpu->registers[Register_A];
 
     half_carry_8bit(a, value)             ? 
-        set_bit(flags, Flag_Half_Carry)  :
-        clear_bit(flags, Flag_Half_Carry);
+        set_flag(flags, Flag_Half_Carry)  :
+        clear_flag(flags, Flag_Half_Carry);
 
     overflows_8bit(a, value)          ?
-        set_bit(flags, Flag_Carry)   :
-        clear_bit(flags, Flag_Carry);
+        set_flag(flags, Flag_Carry)   :
+        clear_flag(flags, Flag_Carry);
 
     a = (uint8_t) (a + value);
 
-    a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
+    clear_flag(flags, Flag_Sub);
 
     cpu->registers[Register_A] = a;
     
@@ -257,13 +257,13 @@ int gb_add_hl(uint16_t value, Cpu* cpu) {
     uint8_t* flags = &(cpu->registers[Register_F]);
     uint16_t hl = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
 
-    overflows_16bit(hl, value) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+    overflows_16bit(hl, value) ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
-    half_carry_16bit(hl, value) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_carry_16bit(hl, value) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
     hl = (uint16_t) (hl + value);
 
-    clear_bit(flags, Flag_Sub);
+    clear_flag(flags, Flag_Sub);
 
     cpu->registers[Register_H] =  (uint8_t)(hl >> 8u);
     cpu->registers[Register_L] =  (uint8_t)(hl & 0xFFu);
@@ -276,28 +276,28 @@ int gb_sub(uint8_t r, Cpu* cpu) {
     uint8_t* a = &(cpu->registers[Register_A]);
     uint8_t* flags = &(cpu->registers[Register_F]);
 
-    half_borrow_8bit(*a, r) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_borrow_8bit(*a, r) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
-    underflows_8bit(*a, r) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+    underflows_8bit(*a, r) ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
     *a = (uint8_t) (*a - r);
 
-    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    set_bit(flags, Flag_Sub);
+    set_flag(flags, Flag_Sub);
 
     return 4;
 }
 
 void inc(uint8_t* value, uint8_t* flags) {
     
-    half_carry_8bit(*value, 1) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_carry_8bit(*value, 1) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
     (*value)++;
 
-    *value == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *value == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
+    clear_flag(flags, Flag_Sub);
 }
 
 int gb_inc_r(uint8_t* r, uint8_t* flags) {
@@ -332,12 +332,12 @@ int gb_inc_sp(uint16_t* sp) {
 
 int gb_dec_r(uint8_t* r, uint8_t* flags) {
 
-    half_borrow_8bit(*r, 1) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_borrow_8bit(*r, 1) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
     (*r)--;
     
-    *r == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
-    set_bit(flags, Flag_Sub);
+    *r == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
+    set_flag(flags, Flag_Sub);
 
     return 4;
 }
@@ -360,8 +360,7 @@ int gb_dec_sp(uint16_t* sp) {
 
 int gb_scf(uint8_t* flags) {
 
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Sub | Flag_Half_Carry);
     set_flag(flags, Flag_Carry);
 
     return 4;
@@ -369,8 +368,7 @@ int gb_scf(uint8_t* flags) {
 
 int gb_ccf(uint8_t* flags) {
 
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Sub | Flag_Half_Carry);
 
     test_flag(*flags, Flag_Carry) ? clear_flag(flags, Flag_Carry) : set_flag(flags, Flag_Carry);
     
@@ -394,9 +392,7 @@ int gb_rra(Cpu* cpu) {
     new_carry_flag ? set_flag(flags, Flag_Carry) 
         : clear_flag(flags, Flag_Carry);
     
-    clear_flag(flags, Flag_Zero);
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Zero | Flag_Sub | Flag_Half_Carry);
 
     return 4;
 }
@@ -410,9 +406,7 @@ int gb_rrca(Cpu* cpu) {
     
     cpu->registers[Register_A] = rotate_right(cpu->registers[Register_A], 1);
 
-    clear_flag(flags, Flag_Zero);
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Zero | Flag_Sub | Flag_Half_Carry);
 
     return 4;
 }
@@ -431,9 +425,7 @@ int gb_rla(Cpu* cpu) {
 
     new_carry_flag ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
-    clear_flag(flags, Flag_Zero);
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Zero | Flag_Sub | Flag_Half_Carry);
     
     return 4;
 }
@@ -447,9 +439,7 @@ int gb_rlca(Cpu* cpu) {
 
     cpu->registers[Register_A] = rotate_left(a, 1);
 
-    clear_flag(flags, Flag_Zero);
-    clear_flag(flags, Flag_Sub);
-    clear_flag(flags, Flag_Half_Carry);
+    clear_flag(flags, Flag_Zero | Flag_Sub | Flag_Half_Carry);
 
     return 4;
 }
@@ -502,8 +492,7 @@ int gb_add_sp_r8(uint8_t offset, Cpu* cpu) {
 
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr + (int8_t) offset);
 
-    clear_flag(flags, Flag_Zero);
-    clear_flag(flags, Flag_Sub);
+    clear_flag(flags, Flag_Zero | Flag_Sub);
 
     return 16;
 }
@@ -515,11 +504,10 @@ int gb_and(uint8_t value, Cpu* cpu) {
 
     a &= value;
 
-    a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
-    set_bit(flags, Flag_Half_Carry);
-    clear_bit(flags, Flag_Carry);
+    clear_flag(flags, Flag_Sub | Flag_Carry);
+    set_flag(flags, Flag_Half_Carry);
 
     cpu->registers[Register_A] = a;
     return 4;
@@ -531,11 +519,9 @@ int gb_xor(uint8_t value, Cpu* cpu) {
     uint8_t* flags = &(cpu->registers[Register_F]);
 
     *a ^= value;
-    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
-    clear_bit(flags, Flag_Half_Carry);
-    clear_bit(flags, Flag_Carry);
+    clear_flag(flags, Flag_Sub | Flag_Half_Carry | Flag_Carry);
 
     return 4;
 }
@@ -546,24 +532,22 @@ int gb_or(uint8_t value, Cpu* cpu) {
     uint8_t* flags = &(cpu->registers[Register_F]);
     
     *a |= value;
-    *a == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    *a == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
-    clear_bit(flags, Flag_Half_Carry);
-    clear_bit(flags, Flag_Carry);
+    clear_flag(flags, Flag_Sub | Flag_Half_Carry | Flag_Carry);
 
     return 4;
 }
 
 int gb_cp(uint8_t r1, uint8_t r2, uint8_t* flags) {
 
-    underflows_8bit(r1, r2) ? set_bit(flags, Flag_Carry) : clear_bit(flags, Flag_Carry);
+    underflows_8bit(r1, r2) ? set_flag(flags, Flag_Carry) : clear_flag(flags, Flag_Carry);
 
-    half_borrow_8bit(r1, r2) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_borrow_8bit(r1, r2) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
-    (r1 == r2) ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    (r1 == r2) ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    set_bit(flags, Flag_Sub);
+    set_flag(flags, Flag_Sub);
     
     return 4;
 }
@@ -586,29 +570,29 @@ int gb_pop_rr(uint8_t* r1, uint8_t* r2, Cpu* cpu) {
 
 uint8_t ADC(uint8_t first, uint8_t second, uint8_t* flags) {
     
-    const bool carry_value = test_bit_8bit(*flags, Flag_Carry) ? 1 : 0;
+    const bool carry_value = test_flag(*flags, Flag_Carry) ? 1 : 0;
 
-    half_carry_8bit(first, second) ? set_bit(flags, Flag_Half_Carry) : clear_bit(flags, Flag_Half_Carry);
+    half_carry_8bit(first, second) ? set_flag(flags, Flag_Half_Carry) : clear_flag(flags, Flag_Half_Carry);
 
-    overflows_8bit(first, second) ? set_bit(flags,Flag_Carry) : clear_bit(flags,    Flag_Carry);
+    overflows_8bit(first, second) ? set_flag(flags,Flag_Carry) : clear_flag(flags, Flag_Carry);
 
     first = (uint8_t)(first + second);
 
-    if(!test_bit_8bit(*flags, Flag_Half_Carry)) {
-        half_carry_8bit(first, (uint8_t) (carry_value)) ? set_bit(flags, Flag_Half_Carry) 
-            : clear_bit(flags,    Flag_Half_Carry);
+    if(!test_flag(*flags, Flag_Half_Carry)) {
+        half_carry_8bit(first, (uint8_t) (carry_value)) ? set_flag(flags, Flag_Half_Carry) 
+            : clear_flag(flags, Flag_Half_Carry);
     }
     
-    if(!test_bit_8bit(*flags, Flag_Carry)) {
-        overflows_8bit(first, (uint8_t) (carry_value)) ? set_bit(flags, Flag_Carry) 
-            : clear_bit(flags, Flag_Carry);
+    if(!test_flag(*flags, Flag_Carry)) {
+        overflows_8bit(first, (uint8_t) (carry_value)) ? set_flag(flags, Flag_Carry) 
+            : clear_flag(flags, Flag_Carry);
     }
 
     first = (uint8_t)(first + carry_value);
 
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    first == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    clear_bit(flags, Flag_Sub);
+    clear_flag(flags, Flag_Sub);
     
     return first;
 }
@@ -639,35 +623,35 @@ int gb_ld_addr_c_a(Cpu* cpu) {
 
 uint8_t SBC(uint8_t first, uint8_t second, uint8_t* flags) {
     
-    const bool carry_value = test_bit_8bit(*flags, Flag_Carry) ? 1 : 0;
+    const bool carry_value = test_flag(*flags, Flag_Carry) ? 1 : 0;
 
     half_borrow_8bit(first, second)            ?
-        set_bit(flags, Flag_Half_Carry)  :
-        clear_bit(flags, Flag_Half_Carry);
+        set_flag(flags, Flag_Half_Carry)  :
+        clear_flag(flags, Flag_Half_Carry);
 
     underflows_8bit(first, second)         ?
-        set_bit(flags, Flag_Carry)   :
-        clear_bit(flags, Flag_Carry);
+        set_flag(flags, Flag_Carry)   :
+        clear_flag(flags, Flag_Carry);
     
     first = (uint8_t) (first - second);
 
-    if(!test_bit_8bit(*flags, Flag_Half_Carry)) {
+    if(!test_flag(*flags, Flag_Half_Carry)) {
         half_borrow_8bit(first, (uint8_t) (carry_value))       ?
-            set_bit(flags, Flag_Half_Carry)  :
-            clear_bit(flags, Flag_Half_Carry);
+            set_flag(flags, Flag_Half_Carry)  :
+            clear_flag(flags, Flag_Half_Carry);
     }
 
-    if(!test_bit_8bit(*flags, Flag_Carry)) {
+    if(!test_flag(*flags, Flag_Carry)) {
         underflows_8bit(first, (uint8_t) (carry_value))         ?
-            set_bit(flags, Flag_Carry)   :
-            clear_bit(flags, Flag_Carry);
+            set_flag(flags, Flag_Carry)   :
+            clear_flag(flags, Flag_Carry);
     }
 
     first = (uint8_t) (first - carry_value);
 
-    first == 0 ? set_bit(flags, Flag_Zero) : clear_bit(flags, Flag_Zero);
+    first == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 
-    set_bit(flags, Flag_Sub);
+    set_flag(flags, Flag_Sub);
 
     return first;
 }
@@ -712,8 +696,7 @@ int gb_cpl(uint8_t* a, uint8_t* flags) {
 
     *a ^= 0xFF;
 
-    set_flag(flags, Flag_Sub);
-    set_flag(flags, Flag_Half_Carry);
+    set_flag(flags, Flag_Sub | Flag_Half_Carry);
     
     return 4;
 }

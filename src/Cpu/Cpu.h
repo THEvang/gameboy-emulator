@@ -16,10 +16,10 @@ typedef enum Cpu_Register {
 } Cpu_Register;
 
 typedef enum Cpu_Flag {
-    Flag_Carry = 4,
-    Flag_Half_Carry,
-    Flag_Sub,
-    Flag_Zero
+    Flag_Carry = 1 << 4,
+    Flag_Half_Carry = 1 << 5,
+    Flag_Sub = 1 << 6,
+    Flag_Zero = 1 << 7,
 } Cpu_Flag;
 
 typedef struct Cpu {
