@@ -34,7 +34,7 @@ void clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
 bool should_exit_halt(MemoryBankController* mc) {
 
     const uint8_t interrupt_requests = gb_read(mc, g_interrupt_request_address);
-    const uint8_t interrupts_enabled = gb_read(mc, g_interrupt_request_address);
+    const uint8_t interrupts_enabled = gb_read(mc, g_interrupt_enabled_address);
 
     return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
