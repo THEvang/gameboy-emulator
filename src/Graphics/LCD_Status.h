@@ -10,10 +10,10 @@ typedef enum LCD_Modes {
     LCD_Mode_Transferring_Data
 } LCD_Modes;
 
-void set_status(MemoryBankController* mc, int* scanline_counter);
-LCD_Modes get_mode(MemoryBankController* mc);
-void set_mode(MemoryBankController* mc, LCD_Modes mode);
+void gb_set_status(MemoryBankController* mc, int* scanline_counter);
+LCD_Modes gb_get_mode(MemoryBankController* mc);
+void gb_set_mode(MemoryBankController* mc, LCD_Modes mode);
 
-bool should_set_coincidence_flag(MemoryBankController* mc);
-void set_coincidence_flag(MemoryBankController* mc);
-void clear_coincidence_flag(MemoryBankController* mc);
+bool gb_should_set_coincidence_flag(MemoryBankController* mc);
+void gb_set_coincidence_flag(MemoryBankController* mc);
+void gb_clear_coincidence_flag(MemoryBankController* mc);

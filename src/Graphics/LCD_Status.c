@@ -8,70 +8,70 @@
 static const uint16_t g_status_address = 0xFF41;
 static const int g_coincidence_bit = 2;
 
-void set_status(MemoryBankController* mc, int* scanline_counter) {
+void gb_set_status(MemoryBankController* mc, int* scanline_counter) {
     
     const uint16_t scanline_address = 0xFF44;
     if(!lcd_display_enabled(mc)) {
         *scanline_counter = 456;
-        set_mode(mc, LCD_Mode_V_Blank);
+        gb_set_mode(mc, LCD_Mode_V_Blank);
         gb_write(mc, scanline_address, 0);
         return;   
     }
 
-    const LCD_Modes current_mode = get_mode(mc);
+    const LCD_Modes current_mode = gb_get_mode(mc);
     const uint8_t current_scanline = gb_read(mc, scanline_address);
 
     bool should_request_interrupt = false;
     
-    uint8_t status = gb_read(mc, g_status_address);
+    uint8_t status = mc->memory[g_status_address];
     if(current_scanline >= 144) {
-        set_mode(mc, LCD_Mode_V_Blank);
+        gb_set_mode(mc, LCD_Mode_V_Blank);
         should_request_interrupt = test_bit_8bit(status, 4);
     } else {
         
         if(*scanline_counter >= (456 - 80)) {
-            set_mode(mc, LCD_Mode_Searching_Sprite_Attributes);
+            gb_set_mode(mc, LCD_Mode_Searching_Sprite_Attributes);
             should_request_interrupt = test_bit_8bit(status, 5);
         } else if(*scanline_counter >= (456 - 80 - 172)) {
-            set_mode(mc, LCD_Mode_Transferring_Data);
+            gb_set_mode(mc, LCD_Mode_Transferring_Data);
         } else {
-            set_mode(mc, LCD_Mode_H_Blank);
+            gb_set_mode(mc, LCD_Mode_H_Blank);
             should_request_interrupt = test_bit_8bit(status, 3);
         }
     }
 
-    const LCD_Modes new_mode = get_mode(mc);
+    const LCD_Modes new_mode = gb_get_mode(mc);
 
     if(should_request_interrupt && (current_mode != new_mode)) {
-        request_interrupt(mc, Interrupts_LCD_STAT);
+        gb_request_interrupt(mc, Interrupts_LCD_STAT);
     }
 
-    should_set_coincidence_flag(mc) ? set_coincidence_flag(mc) : clear_coincidence_flag(mc);
+    gb_should_set_coincidence_flag(mc) ? gb_set_coincidence_flag(mc) : gb_clear_coincidence_flag(mc);
 }
 
-bool should_set_coincidence_flag(MemoryBankController* mc) {
-    return gb_read(mc, 0xFF44) == gb_read(mc, 0xFF45);
+bool gb_should_set_coincidence_flag(MemoryBankController* mc) {
+    return mc->memory[0xFF44] == mc->memory[0xFF45];
 }
 
-void set_coincidence_flag(MemoryBankController* mc) {
+void gb_set_coincidence_flag(MemoryBankController* mc) {
 
-    uint8_t status = gb_read(mc, g_status_address);
+    uint8_t status = mc->memory[g_status_address];
     set_bit(&status, g_coincidence_bit);
     gb_write(mc, g_status_address, status);
     if(test_bit_8bit(status, 6)) {
-        request_interrupt(mc, Interrupts_LCD_STAT);
+        gb_request_interrupt(mc, Interrupts_LCD_STAT);
     }
 }
 
-void clear_coincidence_flag(MemoryBankController* mc) {
+void gb_clear_coincidence_flag(MemoryBankController* mc) {
     
-    uint8_t status = gb_read(mc, g_status_address);
+    uint8_t status = mc->memory[g_status_address];
     clear_bit(&status, g_coincidence_bit);
     gb_write(mc, g_status_address, status);
 }
 
-LCD_Modes get_mode(MemoryBankController* mc) {
-        uint8_t status = gb_read(mc, g_status_address);
+LCD_Modes gb_get_mode(MemoryBankController* mc) {
+        uint8_t status = mc->memory[g_status_address];
         status &= 0x03;
         switch (status) {
             case 0: 
@@ -87,7 +87,7 @@ LCD_Modes get_mode(MemoryBankController* mc) {
         }
 }
 
-void set_mode(MemoryBankController* mc, LCD_Modes mode) {
+void gb_set_mode(MemoryBankController* mc, LCD_Modes mode) {
 
     uint8_t status = gb_read(mc, g_status_address);
 

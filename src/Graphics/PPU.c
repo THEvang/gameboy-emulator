@@ -9,7 +9,7 @@
 
 void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
-    set_status(mc, &(ppu->scanline_counter));
+    gb_set_status(mc, &(ppu->scanline_counter));
     if(!lcd_display_enabled(mc)) {
         return;
     }
@@ -52,11 +52,11 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint16_t window_scroll_y_address = 0xFF4A;
     const uint16_t window_scroll_x_address = 0xFF4B;
 
-    const uint8_t scroll_y = gb_read(mc, scroll_y_address);
-    const uint8_t scroll_x = gb_read(mc, scroll_x_address);
-    const uint8_t window_y = gb_read(mc, window_scroll_y_address);
-    const uint8_t window_x = (uint8_t) (gb_read(mc, window_scroll_x_address) - (uint8_t) 7);
-    const uint8_t scanline = gb_read(mc, g_scanline_address);
+    const uint8_t scroll_y = mc->memory[scroll_y_address];
+    const uint8_t scroll_x = mc->memory[scroll_x_address];
+    const uint8_t window_y = mc->memory[window_scroll_y_address];
+    const uint8_t window_x = (uint8_t) (mc->memory[window_scroll_x_address] - (uint8_t) 7);
+    const uint8_t scanline = mc->memory[g_scanline_address];
 
     bool using_window = false;
     if(window_display_enabled(mc)) {
