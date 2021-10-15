@@ -14,12 +14,12 @@ void gb_set_status(MemoryBankController* mc, int* scanline_counter) {
     if(!gb_lcd_display_enabled(mc)) {
         *scanline_counter = 456;
         gb_set_mode(mc, LCD_Mode_V_Blank);
-        gb_write(mc, scanline_address, 0);
+        mc->write(mc, scanline_address, 0);
         return;   
     }
 
     const LCD_Modes current_mode = gb_get_mode(mc);
-    const uint8_t current_scanline = gb_read(mc, scanline_address);
+    const uint8_t current_scanline = mc->read(mc, scanline_address);
 
     bool should_request_interrupt = false;
     
@@ -57,7 +57,7 @@ void gb_set_coincidence_flag(MemoryBankController* mc) {
 
     uint8_t status = mc->memory[g_status_address];
     set_bit(&status, g_coincidence_bit);
-    gb_write(mc, g_status_address, status);
+    mc->write(mc, g_status_address, status);
     if(test_bit_8bit(status, 6)) {
         gb_request_interrupt(mc, Interrupts_LCD_STAT);
     }
@@ -67,7 +67,7 @@ void gb_clear_coincidence_flag(MemoryBankController* mc) {
     
     uint8_t status = mc->memory[g_status_address];
     clear_bit(&status, g_coincidence_bit);
-    gb_write(mc, g_status_address, status);
+    mc->write(mc, g_status_address, status);
 }
 
 LCD_Modes gb_get_mode(MemoryBankController* mc) {
@@ -79,5 +79,5 @@ void gb_set_mode(MemoryBankController* mc, LCD_Modes mode) {
 
     uint8_t status = mc->memory[g_status_address];
     status = ((status  & ~0x03) | mode);
-    gb_write(mc, g_status_address, status);
+    mc->write(mc, g_status_address, status);
 }

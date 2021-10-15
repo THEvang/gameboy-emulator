@@ -127,7 +127,7 @@ void gb_print_usage() {
 }
 
 int get_n_rom_banks(uint8_t* rom) {
-    
+
     switch (rom[0x0148]) {
             case 0x00:
                 return 2;
@@ -248,6 +248,8 @@ int main(int argc, char* argv[])
     mc.ram_bank_number = 0;
     mc.banking_mode = Banking_Mode_ROM;
     mc.buttons = 0xFF;
+    mc.read = gb_read;
+    mc.write = gb_write;
     GameBoy gameboy;
     gameboy.memory_bank_controller = &mc;
     

@@ -16,9 +16,11 @@ typedef enum Button_Types {
 typedef struct MemoryBankController {
     uint8_t memory[0x10000];
     uint8_t ram[0x2000 * 4];
+
     int n_rom_banks;
-    uint8_t rom_bank_number;
-    uint8_t rom_bank_mask;
+
+    uint16_t rom_bank_number;
+    uint16_t rom_bank_mask;
 
     uint8_t ram_bank_mask;
     uint8_t ram_bank_number;
@@ -30,6 +32,8 @@ typedef struct MemoryBankController {
 
     uint8_t buttons;
 
+    uint8_t (*read) (struct MemoryBankController*, uint16_t);
+    void (*write) (struct MemoryBankController*, uint16_t, uint8_t);
 } MemoryBankController;
 
 void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data);
