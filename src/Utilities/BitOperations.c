@@ -57,11 +57,3 @@ bool overflows_16bit(uint16_t a, uint16_t b) {
 bool underflows_8bit(uint8_t a, uint8_t b) {
     return b > a;
 }
-
-bool underflows_16bit(uint16_t a, uint16_t b) {
-    return b > a;
-}
-
-void swap_nibbles(uint8_t* a) {
-    *a = (uint8_t) (( (*a & 0x0FU) << 4U | (*a & 0xF0U) >> 4U));
-}

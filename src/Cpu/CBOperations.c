@@ -106,7 +106,7 @@ int gb_rr(uint8_t* r, uint8_t* flags) {
 
 int gb_swap(uint8_t* r, uint8_t* flags) {
 
-    swap_nibbles(r);
+    *r = (uint8_t) (( (*r & 0x0FU) << 4U | (*r & 0xF0U) >> 4U));
     
     *r == 0 ? set_flag(flags, Flag_Zero) : clear_flag(flags, Flag_Zero);
 

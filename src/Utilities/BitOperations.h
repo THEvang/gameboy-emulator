@@ -25,6 +25,3 @@ bool overflows_8bit(uint8_t a, uint8_t b);
 bool overflows_16bit(uint16_t a, uint16_t b);
 
 bool underflows_8bit(uint8_t a, uint8_t b);
-bool underflows_16bit(uint16_t a, uint16_t b);
-
-void swap_nibbles(uint8_t* a);
