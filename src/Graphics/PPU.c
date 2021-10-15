@@ -25,7 +25,7 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
         mc->memory[g_scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
-            request_interrupt(mc, Interrupts_V_Blank);
+            gb_request_interrupt(mc, Interrupts_V_Blank);
         } else if (current_scanline > 153) {
             mc->memory[g_scanline_address] = 0;
         } else if (current_scanline < 144) {

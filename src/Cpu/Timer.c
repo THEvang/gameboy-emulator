@@ -17,7 +17,7 @@ void gb_timer_tick(Timer* timer, MemoryBankController* mc) {
 
     if(timer->tima_has_overflowed) { 
         gb_timer_reset_tima(mc);
-        request_interrupt(mc, Interrupts_Timer);
+        gb_request_interrupt(mc, Interrupts_Timer);
         timer->tima_has_overflowed = false;
     }
 

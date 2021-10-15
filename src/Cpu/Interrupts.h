@@ -16,15 +16,11 @@ typedef enum Interrupts {
 static const uint16_t g_interrupt_request_address = 0xFF0F;
 static const uint16_t g_interrupt_enabled_address = 0xFFFF;
 
-int handle_interrupts(Cpu* cpu);
-void call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector);  
-uint16_t to_vector(Interrupts interrupt);
-bool is_enabled(MemoryBankController* mc, Interrupts interrupt);
-bool is_requested(MemoryBankController* mc, Interrupts interrupt);
-bool should_exit_halt(MemoryBankController* mc);
-void request_interrupt(MemoryBankController* mc, Interrupts interrupt);
-void clear_interrupt(MemoryBankController* mc, Interrupts interrupt);
-
-#ifdef __cplusplus
-}
-#endif
+int gb_handle_interrupts(Cpu* cpu);
+void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector);  
+uint16_t gb_to_vector(Interrupts interrupt);
+bool gb_is_enabled(MemoryBankController* mc, Interrupts interrupt);
+bool gb_is_requested(MemoryBankController* mc, Interrupts interrupt);
+bool gb_should_exit_halt(MemoryBankController* mc);
+void gb_request_interrupt(MemoryBankController* mc, Interrupts interrupt);
+void gb_clear_interrupt(MemoryBankController* mc, Interrupts interrupt);

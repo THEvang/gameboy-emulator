@@ -6,35 +6,35 @@ void key_down(Joypad* pad, MemoryBankController* mc, Button button) {
     switch(button) {
         case Button_Right:
             clear_bit(&(pad->direction_keys), 0);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_Left:
             clear_bit(&(pad->direction_keys), 1);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_Up:
             clear_bit(&(pad->direction_keys), 2);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_Down:
             clear_bit(&(pad->direction_keys), 3);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_A:
             clear_bit(&(pad->button_keys), 0);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_B:
             clear_bit(&(pad->button_keys), 1);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_Select:
             clear_bit(&(pad->button_keys), 2);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
         case Button_Start:
             clear_bit(&(pad->button_keys), 3);
-            request_interrupt(mc, Interrupts_Joypad);
+            gb_request_interrupt(mc, Interrupts_Joypad);
             break;
     }
 }
