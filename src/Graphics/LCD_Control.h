@@ -4,17 +4,16 @@
 #include <stdbool.h>
 #include "Memory/Memory_Controller.h"
 
-int window_tile_select(MemoryBankController* mc);
-bool background_tile_map_select(MemoryBankController* mc);
-bool sprite_size(MemoryBankController* mc);
+bool gb_background_tile_map_select(MemoryBankController* mc);
+bool gb_sprite_size(MemoryBankController* mc);
 
-bool tile_data_signed(MemoryBankController* mc);
-uint16_t tile_data_start_address(MemoryBankController* mc);
+bool gb_tile_data_signed(MemoryBankController* mc);
+uint16_t gb_tile_data_start_address(MemoryBankController* mc);
 
-uint16_t background_tile_map_start_address(MemoryBankController* mc);
-uint16_t window_tile_map_start_address(MemoryBankController* mc);
+uint16_t gb_background_tile_map_start_address(MemoryBankController* mc);
+uint16_t gb_window_tile_map_start_address(MemoryBankController* mc);
 
-bool lcd_display_enabled(MemoryBankController* mc);
-bool window_display_enabled(MemoryBankController* mc);
-bool background_display_enabled(MemoryBankController* mc);
-bool sprite_display_enabled(MemoryBankController* mc);
+bool gb_lcd_display_enabled(MemoryBankController* mc);
+bool gb_window_display_enabled(MemoryBankController* mc);
+bool gb_background_display_enabled(MemoryBankController* mc);
+bool gb_sprite_display_enabled(MemoryBankController* mc);

@@ -11,7 +11,7 @@ static const int g_coincidence_bit = 2;
 void gb_set_status(MemoryBankController* mc, int* scanline_counter) {
     
     const uint16_t scanline_address = 0xFF44;
-    if(!lcd_display_enabled(mc)) {
+    if(!gb_lcd_display_enabled(mc)) {
         *scanline_counter = 456;
         gb_set_mode(mc, LCD_Mode_V_Blank);
         gb_write(mc, scanline_address, 0);

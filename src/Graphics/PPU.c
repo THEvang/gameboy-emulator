@@ -10,7 +10,7 @@
 void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
     gb_set_status(mc, &(ppu->scanline_counter));
-    if(!lcd_display_enabled(mc)) {
+    if(!gb_lcd_display_enabled(mc)) {
         return;
     }
 
@@ -36,11 +36,11 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
 void gb_draw_scanline(PPU* ppu, MemoryBankController* mc) {
 
-    if(background_display_enabled(mc)) {
+    if(gb_background_display_enabled(mc)) {
         gb_draw_background(ppu, mc);
     }
 
-    if(sprite_display_enabled(mc)) {
+    if(gb_sprite_display_enabled(mc)) {
         gb_draw_sprites(ppu, mc);
     }
 }
@@ -59,12 +59,12 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint8_t scanline = mc->memory[g_scanline_address];
 
     bool using_window = false;
-    if(window_display_enabled(mc)) {
+    if(gb_window_display_enabled(mc)) {
         using_window = window_y <= scanline;
     }
 
-    const uint16_t tile_map_start_address = using_window ? window_tile_map_start_address(mc) :
-        background_tile_map_start_address(mc);
+    const uint16_t tile_map_start_address = using_window ? gb_window_tile_map_start_address(mc) :
+        gb_background_tile_map_start_address(mc);
 
     const uint8_t y_pos = using_window ? (uint8_t) (scanline - window_y) : 
         (uint8_t) (scroll_y + scanline);
@@ -83,10 +83,10 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         const uint16_t tile_column = (uint16_t) ((x_pos / 8));
         const uint16_t tile_map_address = (uint16_t) (tile_map_start_address + tile_row + tile_column);
 
-        const uint16_t tile_data_start_addr = tile_data_start_address(mc);
+        const uint16_t tile_data_start_addr = gb_tile_data_start_address(mc);
         uint16_t tile_data_address = tile_data_start_addr;
 
-        if(tile_data_signed(mc)) {
+        if(gb_tile_data_signed(mc)) {
             int8_t tile_number = (int8_t) gb_read(mc, tile_map_address);
             tile_data_address += (int16_t) (tile_number * 16);
 
@@ -116,7 +116,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
     bool use8x16 = false;
-    if(sprite_size(mc)) {
+    if(gb_sprite_size(mc)) {
         use8x16 = true;
     }
     
