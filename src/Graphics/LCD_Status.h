@@ -4,10 +4,10 @@
 #include "Memory/Memory_Controller.h"
 
 typedef enum LCD_Modes {
-    LCD_Mode_H_Blank,
-    LCD_Mode_V_Blank,
-    LCD_Mode_Searching_Sprite_Attributes,
-    LCD_Mode_Transferring_Data
+    LCD_Mode_H_Blank = 0,
+    LCD_Mode_V_Blank = 1,
+    LCD_Mode_Searching_Sprite_Attributes = 2,
+    LCD_Mode_Transferring_Data = 3
 } LCD_Modes;
 
 void gb_set_status(MemoryBankController* mc, int* scanline_counter);

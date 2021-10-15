@@ -71,47 +71,13 @@ void gb_clear_coincidence_flag(MemoryBankController* mc) {
 }
 
 LCD_Modes gb_get_mode(MemoryBankController* mc) {
-        uint8_t status = mc->memory[g_status_address];
-        status &= 0x03;
-        switch (status) {
-            case 0: 
-                return LCD_Mode_H_Blank;
-            case 1:
-                return LCD_Mode_V_Blank;
-            case 2:
-                return LCD_Mode_Searching_Sprite_Attributes;
-            case 3:
-                return LCD_Mode_Transferring_Data;
-            default:
-                return LCD_Mode_H_Blank;
-        }
+    uint8_t status = mc->memory[g_status_address];
+    return status & 0x03;
 }
 
 void gb_set_mode(MemoryBankController* mc, LCD_Modes mode) {
 
-    uint8_t status = gb_read(mc, g_status_address);
-
-    switch(mode) {
-        case LCD_Mode_H_Blank:
-            clear_bit(&status, 0);
-            clear_bit(&status, 1);
-        break;
-
-        case LCD_Mode_V_Blank:
-            set_bit(&status, 0);
-            clear_bit(&status, 1);
-        break;
-
-        case LCD_Mode_Searching_Sprite_Attributes:
-            clear_bit(&status, 0);
-            set_bit(&status, 1);
-        break;
-
-        case LCD_Mode_Transferring_Data:
-            set_bit(&status, 0);
-            set_bit(&status, 1);
-        break;
-    }
-    
+    uint8_t status = mc->memory[g_status_address];
+    status = ((status  & ~0x03) | mode);
     gb_write(mc, g_status_address, status);
 }
