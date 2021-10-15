@@ -20,7 +20,7 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
         ppu->scanline_counter = 456;
 
-        uint8_t current_scanline = gb_read(mc, g_scanline_address);    
+        uint8_t current_scanline = mc->read(mc, g_scanline_address);    
         current_scanline++;
         mc->memory[g_scanline_address] = current_scanline;
 
@@ -87,17 +87,17 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         uint16_t tile_data_address = tile_data_start_addr;
 
         if(gb_tile_data_signed(mc)) {
-            int8_t tile_number = (int8_t) gb_read(mc, tile_map_address);
+            int8_t tile_number = (int8_t) mc->read(mc, tile_map_address);
             tile_data_address += (int16_t) (tile_number * 16);
 
         } else {
-            uint16_t tile_number = gb_read(mc, tile_map_address);
+            uint16_t tile_number = mc->read(mc, tile_map_address);
             tile_data_address += (uint16_t) (tile_number * 16);
         }
 
         uint8_t line = (uint8_t) ((y_pos % 8) * 2);
-        const uint8_t data_1 = gb_read(mc, (uint16_t) (tile_data_address + line));
-        const uint8_t data_2 = gb_read(mc, (uint16_t) (tile_data_address + line + 1));
+        const uint8_t data_1 = mc->read(mc, (uint16_t) (tile_data_address + line));
+        const uint8_t data_2 = mc->read(mc, (uint16_t) (tile_data_address + line + 1));
 
         int color_bit = x_pos % 8;
         color_bit -= 7;
@@ -124,15 +124,15 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
     
         // sprite occupies 4 bytes in the sprite attributes table
         const uint8_t sprite_index = (uint8_t) (sprite * 4);
-        const uint8_t yPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index)) - 16);
-        const uint8_t xPos = (uint8_t) (gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 1)) - 8);
-        const uint8_t tileLocation = gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 2));
-        const uint8_t attributes = gb_read(mc, (uint16_t) (0xFE00 + sprite_index + 3));
+        const uint8_t yPos = (uint8_t) (mc->read(mc, (uint16_t) (0xFE00 + sprite_index)) - 16);
+        const uint8_t xPos = (uint8_t) (mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 1)) - 8);
+        const uint8_t tileLocation = mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 2));
+        const uint8_t attributes = mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 3));
 
         bool yFlip = test_bit_8bit(attributes, 6);
         bool xFlip = test_bit_8bit(attributes, 5);
 
-        uint8_t scanline = gb_read(mc, g_scanline_address);
+        uint8_t scanline = mc->read(mc, g_scanline_address);
 
         int ysize = use8x16 ? 16 : 8;
 
@@ -149,8 +149,8 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
             line *= 2; // same as for tiles
             const uint16_t dataAddress = (uint16_t) ((0x8000 + (tileLocation * 16)) + line);
-            const uint8_t data_1 = gb_read(mc,  dataAddress ) ;
-            const uint8_t data_2 = gb_read(mc, (uint16_t) (dataAddress +1)) ;
+            const uint8_t data_1 = mc->read(mc,  dataAddress ) ;
+            const uint8_t data_2 = mc->read(mc, (uint16_t) (dataAddress +1)) ;
 
             // its easier to read in from right to left as pixel 0 is
             // bit 7 in the colour data, pixel 1 is bit 6 etc...

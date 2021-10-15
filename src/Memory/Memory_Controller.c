@@ -103,7 +103,7 @@ void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data) {
     
     if (address >= 0xE000 && address < 0xFE00) {
         mc->memory[address] = data;
-        gb_write(mc, (uint16_t) (address - 0x2000), data);
+        mc->write(mc, (uint16_t) (address - 0x2000), data);
         return;
     } 
     
@@ -136,7 +136,7 @@ void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     uint16_t address = (uint16_t) (data << 8);
     
     for(int i = 0; i < 0xA0; i++) {
-        uint8_t dma_data = gb_read(mc, (uint16_t) (address + i));
+        uint8_t dma_data = mc->read(mc, (uint16_t) (address + i));
         gb_write(mc, (uint16_t) (0xFE00 + i), dma_data);
     }
 }

@@ -23,7 +23,7 @@ void gb_timer_tick(Timer* timer, MemoryBankController* mc) {
 
     if(gb_timer_should_increment_tima(timer, mc)) {
 
-        uint8_t tima_value = gb_read(mc, g_tima_address);
+        uint8_t tima_value = mc->read(mc, g_tima_address);
         if(overflows_8bit(tima_value, 1)) {
             timer->tima_has_overflowed = true;
         }
@@ -36,7 +36,7 @@ void gb_timer_tick(Timer* timer, MemoryBankController* mc) {
 
 bool gb_timer_should_increment_tima(Timer* timer, MemoryBankController* mc) {
 
-    const uint8_t timer_control = gb_read(mc, g_tac_address);
+    const uint8_t timer_control = mc->read(mc, g_tac_address);
     const uint8_t clock_select = (uint8_t) (timer_control & 0x03u);
     int n = 0;
 
@@ -69,6 +69,6 @@ bool gb_timer_should_increment_tima(Timer* timer, MemoryBankController* mc) {
 }
 
 void gb_timer_reset_tima(MemoryBankController* mc) {
-    const uint8_t tima_reset_value = gb_read(mc, g_tma_address);
-    gb_write(mc, g_tima_address, tima_reset_value);
+    const uint8_t tima_reset_value = mc->read(mc, g_tma_address);
+    mc->write(mc, g_tima_address, tima_reset_value);
 }

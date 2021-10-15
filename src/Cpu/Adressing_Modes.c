@@ -21,7 +21,7 @@ uint8_t immediate_byte(Cpu* cpu) {
     }
 
     cpu->program_counter += 2;
-    return gb_read(cpu->memory_controller, cpu->program_counter - 1);
+    return cpu->memory_controller->read(cpu->memory_controller, cpu->program_counter - 1);
 }
 
 uint16_t immediate_word(Cpu* cpu) {
@@ -34,7 +34,7 @@ uint16_t immediate_word(Cpu* cpu) {
     cpu->program_counter += 3;
     const uint16_t pc = cpu->program_counter;
 
-    return combine_bytes(gb_read(cpu->memory_controller, pc - 1), gb_read(cpu->memory_controller, pc - 2));
+    return combine_bytes(cpu->memory_controller->read(cpu->memory_controller, pc - 1), cpu->memory_controller->read(cpu->memory_controller, pc - 2));
 }
 
 uint8_t hl_addressing(Cpu* cpu) {
@@ -46,5 +46,5 @@ uint8_t hl_addressing(Cpu* cpu) {
 
     cpu->program_counter++;
     const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    return gb_read(cpu->memory_controller, address);
+    return cpu->memory_controller->read(cpu->memory_controller, address);
 }

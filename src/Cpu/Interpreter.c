@@ -220,7 +220,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_dec_r(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(*h, *l), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(*h, *l), value);
         return cycles;
     }
 
@@ -941,7 +941,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
     case Opcode_LD_A_ADDR_A16:
         {
             uint16_t address = immediate_word(cpu);
-            return gb_ld_r_r(a, gb_read(cpu->memory_controller, address));
+            return gb_ld_r_r(a, cpu->memory_controller->read(cpu->memory_controller, address));
         }
 
     case Opcode_EI:
@@ -1030,7 +1030,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_rlc(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1048,7 +1048,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_rrc(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1066,7 +1066,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_rl(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1084,7 +1084,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_rr(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1102,7 +1102,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_sla(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1120,7 +1120,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_sra(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1138,7 +1138,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_swap(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1156,7 +1156,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_slr(&value, f);
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1299,7 +1299,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_res(&value, get_bit_index(opcode));
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1373,7 +1373,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     {
         uint8_t value = hl_addressing(cpu);
         int cycles = gb_set(&value, get_bit_index(opcode));
-        gb_write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
