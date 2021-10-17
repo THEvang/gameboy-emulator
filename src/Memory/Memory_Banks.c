@@ -6,13 +6,16 @@
 #define ROM_BANK_SIZE 0x4000
 #define RAM_BANK_SIZE 0x2000
 
+#define DMA_ADDRESS 0xFF46
+
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
     uint16_t address = (uint16_t) (data << 8);
-    
+    assert(address <= 0x7FFF);
+
     for(int i = 0; i < 0xA0; i++) {
-        uint8_t dma_data = mc->read(mc, (uint16_t) (address + i));
-        mc->write(mc, (uint16_t) (0xFE00 + i), dma_data);
+        assert( (address + i) <= 0x7FFF);
+        mc->memory[0xFE00 + i] = mc->memory[address + i];
     }
 }
 
@@ -74,7 +77,7 @@ void gb_write_none(MemoryBankController* mc, uint16_t address, uint8_t data) {
         return;
     }
     
-    if (address == 0xFF46) {
+    if (address == DMA_ADDRESS) {
         gb_dma_transfer(mc, data);
         return;
     } 
@@ -199,7 +202,7 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
         return;
     }
     
-    if (address == 0xFF46) {
+    if (address == DMA_ADDRESS) {
         gb_dma_transfer(mc, data);
         return;
     } 
@@ -272,7 +275,7 @@ void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
     //Sets the 9th bit of the rom bank number
     if (address <= 0x3FFF) {
         data &= 0x01;
-        mc->rom_bank_number |= (data << 8);
+        mc->rom_bank_number |= (uint16_t) (data << 8);
         return;
     }
 
@@ -302,7 +305,7 @@ void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
         return;
     }
     
-    if (address == 0xFF46) {
+    if (address == DMA_ADDRESS) {
         gb_dma_transfer(mc, data);
         return;
     } 
