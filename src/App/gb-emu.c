@@ -26,7 +26,7 @@ void render_main(GameBoy* gameboy) {
         
         gb_run(gameboy);
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
-        if( duration >= 16e-3) {
+        if( duration >= 16e-3 && gameboy->memory_bank_controller->memory[0xFF44] > 144) {
             start = clock();
 
             SDL_Event event;
