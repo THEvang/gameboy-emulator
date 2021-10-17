@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Gameboy/Rom_Info.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -15,9 +17,7 @@ typedef enum Button_Types {
 
 typedef struct MemoryBankController {
     uint8_t memory[0x10000];
-    uint8_t ram[0x2000 * 4];
-
-    int n_rom_banks;
+    uint8_t ram[0x2000 * 16];
 
     uint16_t rom_bank_number;
     uint16_t rom_bank_mask;
@@ -36,15 +36,4 @@ typedef struct MemoryBankController {
     void (*write) (struct MemoryBankController*, uint16_t, uint8_t);
 } MemoryBankController;
 
-void gb_write(MemoryBankController* mc, uint16_t address, uint8_t data);
-uint8_t gb_read(MemoryBankController* mc, uint16_t address);
-
-void gb_dma_transfer(MemoryBankController* mc, uint8_t data);
-uint8_t gb_read_joypad_input(MemoryBankController* mc);
-
-int gb_get_effective_rom_bank_number(MemoryBankController* mc);
-int gb_get_effective_ram_bank_number(MemoryBankController* mc);
-
-void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data);
-void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data);
-void gb_set_banking_mode(MemoryBankController* mc, uint8_t data);
+void set_io(MemoryBankController* mc, Memory_Bank_Type mb_type);

@@ -2,6 +2,30 @@
 
 #include <stdio.h>
 
+Memory_Bank_Type get_memory_bank_type(gb_Rom* rom) {
+    switch(rom->data[0x0147]) {
+        case 0x00: case 0x08: case 0x09:
+            return MB_None;
+        case 0x01: case 0x02: case 0x03:
+            return MB_MBC_1;
+        case 0x05: case 0x06:
+            return MB_MBC_2;
+        case 0x0B: case 0x0C: case 0x0D:
+            return MB_MM01;
+        case 0x0F: case 0x10: case 0x11: case 0x12: case 0x13:
+            return MB_MBC_3;
+        case 0x19: case 0x1A: case 0x1B: case 0x1C: case 0x1D:
+        case 0x1E:
+            return MB_MBC_5;
+        case 0x20:
+            return MB_MBC_6;
+        case 0x22:
+            return MB_MBC_7;
+        default:
+            return MB_None;
+    }
+}
+
 void gb_print_rom_info(gb_Rom* rom) {
 
     for(int i = 0x0134; i <= 0x0143; i++) {
