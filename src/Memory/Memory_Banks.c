@@ -11,10 +11,10 @@
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
     uint16_t address = (uint16_t) (data << 8);
-    assert(address <= 0x7FFF);
+    assert(address <= 0xDFFF);
 
     for(int i = 0; i < 0xA0; i++) {
-        assert( (address + i) <= 0x7FFF);
+        assert( (address + i) <= 0xDFFF);
         mc->memory[0xFE00 + i] = mc->memory[address + i];
     }
 }

@@ -13,6 +13,15 @@ typedef struct PPU {
     int scanline_counter;
 } PPU;
 
+typedef struct Sprite_Attribute {
+    uint8_t y_pos;
+    uint8_t x_pos;
+    uint8_t tile_location;
+    uint8_t attributes;
+} Sprite_Attribute;
+
+int compare_x_pos(const void* p, const void* q);
+
 void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles);
 Color gb_get_color(uint8_t color_id, uint16_t palette_address, MemoryBankController* mc);
 void gb_draw_scanline(PPU* ppu, MemoryBankController*);
