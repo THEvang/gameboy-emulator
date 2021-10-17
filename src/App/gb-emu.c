@@ -126,38 +126,6 @@ void gb_print_usage() {
     printf("-i Inspect rom without running the emulator\n");
 }
 
-int get_n_rom_banks(uint8_t* rom) {
-
-    switch (rom[0x0148]) {
-            case 0x00:
-                return 2;
-            case 0x01:
-                return 4;
-            case 0x02:
-                return 8;
-            case 0x03:
-                return 16;
-            case 0x04:
-                return 32;
-            case 0x05:
-                return 64;
-            case 0x06:
-                return 128;
-            case 0x07:
-                return 256;
-            case 0x08:
-                return 512;
-            case 0x52:
-                return 72;
-            case 0x53:
-                return 80;
-            case 0x54:
-                return 96;
-            default:
-                return 0;
-    }
-}
-
 uint8_t get_rom_bank_mask(uint8_t* rom) {
 
     switch (rom[0x0148]) {
@@ -241,15 +209,16 @@ int main(int argc, char* argv[])
 
     mc.rom_bank_number = 1;
     mc.rom_bank_mask = get_rom_bank_mask(mc.rom);
-    mc.n_rom_banks = get_n_rom_banks(mc.rom);
 
     mc.ram_enabled = false;
     mc.ram_bank_mask = get_ram_bank_mask(mc.rom);
     mc.ram_bank_number = 0;
     mc.banking_mode = Banking_Mode_ROM;
     mc.buttons = 0xFF;
-    mc.read = gb_read;
-    mc.write = gb_write;
+
+    const Memory_Bank_Type mb_type = get_memory_bank_type(&rom);
+    
+    set_io(&mc, mb_type);
     GameBoy gameboy;
     gameboy.memory_bank_controller = &mc;
     
