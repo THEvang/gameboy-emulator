@@ -17,6 +17,13 @@ typedef struct Color {
     uint8_t alpha; 
 } Color;
 
+typedef enum Sprite_Attribute_Flags {
+    BG_AND_WINDOW_OVER_OBJECT = 1 << 7,
+    Y_FLIP = 1 << 6,
+    X_FLIP = 1 << 5,
+    PALETTE_NUMBER = 1 << 4
+} Sprite_Attribute_Flags;
+
 typedef struct Pixel_Array {
     uint32_t pixels[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
 } Pixel_Array;

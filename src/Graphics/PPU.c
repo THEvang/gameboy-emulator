@@ -55,16 +55,15 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint8_t scroll_y = mc->memory[scroll_y_address];
     const uint8_t scroll_x = mc->memory[scroll_x_address];
     const uint8_t window_y = mc->memory[window_scroll_y_address];
-    const uint8_t window_x = (uint8_t) (mc->memory[window_scroll_x_address] - (uint8_t) 7);
+    const uint8_t window_x = mc->memory[window_scroll_x_address] -  7;
     const uint8_t scanline = mc->memory[g_scanline_address];
 
-    bool using_window = false;
-    if(gb_window_display_enabled(mc)) {
-        using_window = window_y <= scanline;
-    }
+    bool using_window = gb_window_display_enabled(mc) && window_y <= scanline;
 
     const uint16_t tile_map_start_address = using_window ? gb_window_tile_map_start_address(mc) :
         gb_background_tile_map_start_address(mc);
+    
+    const uint16_t tile_data_start_addr = gb_tile_data_start_address(mc);
 
     const uint8_t y_pos = using_window ? (uint8_t) (scanline - window_y) : 
         (uint8_t) (scroll_y + scanline);
@@ -83,7 +82,6 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         const uint16_t tile_column = (uint16_t) ((x_pos / 8));
         const uint16_t tile_map_address = (uint16_t) (tile_map_start_address + tile_row + tile_column);
 
-        const uint16_t tile_data_start_addr = gb_tile_data_start_address(mc);
         uint16_t tile_data_address = tile_data_start_addr;
 
         if(gb_tile_data_signed(mc)) {
@@ -113,74 +111,90 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     }
 }
 
+
+int compare_x_pos(const void* p, const void* q) {
+
+    Sprite_Attribute x = *(const Sprite_Attribute*) p;
+    Sprite_Attribute y = *(const Sprite_Attribute*) q;
+    
+    if(x.x_pos < y.x_pos) {
+        return -1;
+    } else if (x.x_pos > y.y_pos) {
+        return 1;
+    }
+
+    return 0;
+}
+
 void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
-    bool use8x16 = false;
-    if(gb_sprite_size(mc)) {
-        use8x16 = true;
+    int y_size = gb_sprite_size(mc) ? 16 : 8;
+    uint8_t scanline = mc->memory[g_scanline_address];
+
+    Sprite_Attribute sprites[10];
+    int n_sprites = 0;
+    //The Gameboy can only draw 10 sprites. So we find the first 10 that is visible
+    for(uint16_t oam_address = 0xFE00; oam_address <= 0xFE9F  && n_sprites < 10; oam_address += 0x04) {
+
+        const uint8_t y_pos = mc->memory[oam_address] - 16;
+        
+        if ((scanline >= y_pos) && (scanline < (y_pos + y_size))) {
+            sprites[n_sprites].y_pos = y_pos;
+            sprites[n_sprites].x_pos =  mc->memory[oam_address + 1] - 8;
+            sprites[n_sprites].tile_location =  mc->memory[oam_address + 2];
+            sprites[n_sprites].attributes =  mc->memory[oam_address + 3];
+            n_sprites++;
+        }
     }
-    
-   for (int sprite = 0; sprite < 40; sprite++) {
-    
-        // sprite occupies 4 bytes in the sprite attributes table
-        const uint8_t sprite_index = (uint8_t) (sprite * 4);
-        const uint8_t yPos = (uint8_t) (mc->read(mc, (uint16_t) (0xFE00 + sprite_index)) - 16);
-        const uint8_t xPos = (uint8_t) (mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 1)) - 8);
-        const uint8_t tileLocation = mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 2));
-        const uint8_t attributes = mc->read(mc, (uint16_t) (0xFE00 + sprite_index + 3));
 
-        bool yFlip = test_bit_8bit(attributes, 6);
-        bool xFlip = test_bit_8bit(attributes, 5);
+    qsort(sprites, n_sprites, sizeof(Sprite_Attribute), compare_x_pos);
 
-        uint8_t scanline = mc->read(mc, g_scanline_address);
+    for (int sprite = n_sprites-1; sprite >= 0; sprite--) {
 
-        int ysize = use8x16 ? 16 : 8;
-
-        // does this sprite intercept with the scanline?
-        if ((scanline >= yPos) && (scanline < (yPos + ysize))) {
+        bool yFlip = sprites[sprite].attributes & Y_FLIP;
+        bool xFlip = sprites[sprite].attributes & X_FLIP;
             
-            int line = scanline - yPos;
+        int line = scanline - sprites[sprite].y_pos;
 
-            // read the sprite in backwards in the y axis
-            if (yFlip) {
-                line -= ysize ;
-                line *= -1 ;
+        // read the sprite in backwards in the y axis
+        if (yFlip) {
+            line -= y_size ;
+            line *= -1 ;
+        }
+
+        line *= 2; // same as for tiles
+        const uint16_t data_address = 0x8000 + (sprites[sprite].tile_location * 16) + line;
+        const uint8_t data_1 = mc->read(mc,  data_address ) ;
+        const uint8_t data_2 = mc->read(mc, (uint16_t) (data_address +1)) ;
+
+        // its easier to read in from right to left as pixel 0 is
+        // bit 7 in the colour data, pixel 1 is bit 6 etc...
+        for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
+            
+            int color_bit = tilePixel;
+            // read the sprite in backwards for the x axis
+            if (xFlip) {
+                color_bit -= 7;
+                color_bit *= -1;
             }
 
-            line *= 2; // same as for tiles
-            const uint16_t dataAddress = (uint16_t) ((0x8000 + (tileLocation * 16)) + line);
-            const uint8_t data_1 = mc->read(mc,  dataAddress ) ;
-            const uint8_t data_2 = mc->read(mc, (uint16_t) (dataAddress +1)) ;
+            // the rest is the same as for tiles
+            const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
+            const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
+            uint8_t color_index = (color_2 << 1u) | color_1;
 
-            // its easier to read in from right to left as pixel 0 is
-            // bit 7 in the colour data, pixel 1 is bit 6 etc...
-            for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
-                
-                int color_bit = tilePixel;
-                // read the sprite in backwards for the x axis
-                if (xFlip) {
-                        color_bit -= 7;
-                        color_bit *= -1;
-                }
+            const uint16_t palette_address = (sprites[sprite].attributes & PALETTE_NUMBER) ? 0xFF49 : 0xFF48;
+            Color col = gb_get_color(color_index, palette_address, mc);
 
-                // the rest is the same as for tiles
-                const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
-                const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
-                uint8_t color_index = (color_2 << 1u) | color_1;
-
-                const uint16_t palette_address = test_bit_8bit(attributes, 4) ? 0xFF49 : 0xFF48;
-                Color col = gb_get_color(color_index, palette_address, mc);
-
-                // white is transparent for sprites.
-                if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
-                    continue;
-                }
-                
-                int xPix = 0 - tilePixel;
-                xPix += 7 ;
-                int pixel = xPos + xPix;
-                set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline}, col);
+            // white is transparent for sprites.
+            if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
+                continue;
             }
+            
+            int xPix = 0 - tilePixel;
+            xPix += 7 ;
+            int pixel = sprites[sprite].x_pos + xPix;
+            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline}, col);
         }
     }
 }
