@@ -1,5 +1,6 @@
 #include "PPU.h"
 #include <stdlib.h>
+#include <assert.h>
 
 #include "LCD_Control.h"
 #include "LCD_Status.h"
@@ -21,8 +22,6 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
         ppu->scanline_counter = 456;
 
         uint8_t current_scanline = mc->read(mc, g_scanline_address);    
-        current_scanline++;
-        mc->memory[g_scanline_address] = current_scanline;
 
         if(current_scanline == 144) {
             gb_request_interrupt(mc, Interrupts_V_Blank);
@@ -31,6 +30,8 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
         } else if (current_scanline < 144) {
             gb_draw_scanline(ppu, mc);
         }
+        current_scanline++;
+        mc->memory[g_scanline_address] = current_scanline;
     }
 }
 
@@ -72,7 +73,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 
     for(uint8_t pixel = 0; pixel < 160; pixel++) {
 
-        uint8_t x_pos = (uint8_t) (scroll_x + pixel);
+        uint8_t x_pos = scroll_x + pixel;
         if(using_window) {
             if(pixel >= window_x) {
                 x_pos = (uint8_t) (pixel - window_x);
@@ -87,12 +88,12 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         if(gb_tile_data_signed(mc)) {
             int8_t tile_number = (int8_t) mc->read(mc, tile_map_address);
             tile_data_address += (int16_t) (tile_number * 16);
-
         } else {
-            uint16_t tile_number = mc->read(mc, tile_map_address);
+            uint8_t tile_number = mc->read(mc, tile_map_address);
             tile_data_address += (uint16_t) (tile_number * 16);
         }
 
+        assert(tile_data_address >= 0x8000 && tile_data_address <= 0x97FF);
         uint8_t line = (uint8_t) ((y_pos % 8) * 2);
         const uint8_t data_1 = mc->read(mc, (uint16_t) (tile_data_address + line));
         const uint8_t data_2 = mc->read(mc, (uint16_t) (tile_data_address + line + 1));
@@ -110,7 +111,6 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         set_pixel(&(ppu->screen) , (Screen_Position) {.x = pixel, .y = scanline}, pixel_color);
     }
 }
-
 
 int compare_x_pos(const void* p, const void* q) {
 
@@ -163,9 +163,11 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
         }
 
         line *= 2; // same as for tiles
-        const uint16_t data_address = 0x8000 + (sprites[sprite].tile_location * 16) + line;
-        const uint8_t data_1 = mc->read(mc,  data_address ) ;
-        const uint8_t data_2 = mc->read(mc, (uint16_t) (data_address +1)) ;
+        uint16_t data_address = 0x8000 + (sprites[sprite].tile_location * 16) + line;
+        assert(data_address <= 0x8FFF);
+
+        const uint8_t data_1 = mc->read(mc,  data_address);
+        const uint8_t data_2 = mc->read(mc, ++data_address);
 
         // its easier to read in from right to left as pixel 0 is
         // bit 7 in the colour data, pixel 1 is bit 6 etc...
