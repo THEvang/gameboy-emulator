@@ -11,8 +11,12 @@
 #include "Cpu/Cpu.h"
 #include "Gameboy/Rom_Info.h"
 #include "Input/Joypad.h"
+#include "Emulator.h"
 
-void render_main(GameBoyState* gameboy) {
+#include "Renderers/SDL2_Renderer.h"
+#include "InputHandlers/SDL2_Input_Handler.h"
+
+void render_main(Emulator* emu, GameBoyState* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
@@ -22,90 +26,27 @@ void render_main(GameBoyState* gameboy) {
 
     bool done = false;
     while (!done) {
-
-        
+      
         gb_run(gameboy);
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
         if( duration >= 16e-3 && gameboy->memory_bank_controller->memory[0xFF44] > 144) {
             start = clock();
 
-            SDL_Event event;
-            while (SDL_PollEvent(&event))
-            {
-                switch (event.type) {
-                
-                case SDL_QUIT:
-                    done = true;
-                    break;
-                
-                case SDL_WINDOWEVENT:
-                    if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                        done = true;
-                    }
-                    break;
-                
-                case SDL_KEYDOWN:
-                    switch(event.key.keysym.sym) {
-                        case SDLK_z:
-                            key_down(gameboy->memory_bank_controller, Button_A);
-                            break;
-                        case SDLK_x:
-                            key_down(gameboy->memory_bank_controller, Button_B);
-                            break;
-                        case SDLK_RETURN:
-                            key_down(gameboy->memory_bank_controller, Button_Start);
-                            break;
-                        case SDLK_BACKSPACE:
-                            key_down(gameboy->memory_bank_controller, Button_Select);
-                            break;
-                        case SDLK_w:
-                            key_down(gameboy->memory_bank_controller, Button_Up);
-                            break;
-                        case SDLK_s:
-                            key_down(gameboy->memory_bank_controller, Button_Down);
-                            break;
-                        case SDLK_d:
-                            key_down(gameboy->memory_bank_controller, Button_Right);
-                            break;
-                        case SDLK_a:
-                            key_down(gameboy->memory_bank_controller, Button_Left);
-                            break;
-                    }
-                break;
-
-                case SDL_KEYUP:
-                    switch(event.key.keysym.sym) {
-                        case SDLK_z:
-                            key_up(gameboy->memory_bank_controller, Button_A);
-                            break;
-                        case SDLK_x:
-                            key_up(gameboy->memory_bank_controller, Button_B);
-                            break;
-                        case SDLK_RETURN:
-                            key_up(gameboy->memory_bank_controller, Button_Start);
-                            break;
-                        case SDLK_BACKSPACE:
-                            key_up(gameboy->memory_bank_controller, Button_Select);
-                            break;
-                        case SDLK_w:
-                            key_up(gameboy->memory_bank_controller, Button_Up);
-                            break;
-                        case SDLK_s:
-                            key_up(gameboy->memory_bank_controller, Button_Down);
-                            break;
-                        case SDLK_d:
-                            key_up(gameboy->memory_bank_controller, Button_Right);
-                            break;
-                        case SDLK_a:
-                            key_up(gameboy->memory_bank_controller, Button_Left);
-                            break;
-                    }
-                break;
-
-                default:
-                    break;
+            Input i;
+            if(emu->input_handler(&i)) {
+                switch(i.type) {
+                    case Quit:
+                        return;
+                    case KeyUp:
+                        key_up(gameboy->memory_bank_controller, i.button);
+                        break;
+                    case KeyDown:
+                        key_down(gameboy->memory_bank_controller, i.button);
+                        break;
                 }
             }
+
+            emu->renderer(gameboy, (void*) &gui);
 
             gb_render(&gui, gameboy);
         }
@@ -233,6 +174,10 @@ int main(int argc, char* argv[])
     gameboy.timer.tima_speed = 1024;
     gameboy.memory_bank_controller->div_register = 0xABCC;
 
-    render_main(&gameboy);
+    Emulator emu;
+    emu.input_handler = sdl2_input_handler;
+    emu.renderer = sdl2_gb_render;
+
+    render_main(&emu, &gameboy);
     return 0;
 }
