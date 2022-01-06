@@ -1,4 +1,6 @@
 target_sources(gb-emu PRIVATE
     SDL2_Renderer.h
     SDL2_Renderer.c
+    Ncurses_Renderer.h
+    Ncurses_Renderer.c
 )
