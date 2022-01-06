@@ -19,9 +19,6 @@ target_link_libraries(gb-core PRIVATE project_warnings)
 
 add_executable(gb-emu)
 target_include_directories(gb-emu PRIVATE src)
-target_link_libraries(gb-emu PRIVATE project_warnings)
-
-target_link_libraries(gb-emu PRIVATE gb-core)
-target_link_libraries(gb-emu PRIVATE SDL2)
+target_link_libraries(gb-emu PRIVATE project_warnings gb-core ncurses SDL2)
 
 add_subdirectory(src)
