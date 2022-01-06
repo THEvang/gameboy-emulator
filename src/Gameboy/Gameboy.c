@@ -3,7 +3,7 @@
 #include "Cpu/Interpreter.h"
 #include "Cpu/Interrupts.h"
 
-void gb_run(GameBoy* gb) {
+void gb_run(GameBoyState* gb) {
 
     int cycles = 4;
 

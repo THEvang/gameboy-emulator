@@ -12,7 +12,7 @@
 #include "Gameboy/Rom_Info.h"
 #include "Input/Joypad.h"
 
-void render_main(GameBoy* gameboy) {
+void render_main(GameBoyState* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
     const Memory_Bank_Type mb_type = get_memory_bank_type(&rom);
     
     set_io(&mc, mb_type);
-    GameBoy gameboy;
+    GameBoyState gameboy;
     gameboy.memory_bank_controller = &mc;
     
 
