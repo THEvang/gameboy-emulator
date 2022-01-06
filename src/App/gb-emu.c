@@ -16,12 +16,10 @@
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
 
-void render_main(Emulator* emu, GameBoyState* gameboy) {
+void render_main(Emulator* emu, RenderState render_state, GameBoyState* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
-    
-    RenderState gui_state = emu->init_renderer();
 
     while (true) {
       
@@ -44,7 +42,7 @@ void render_main(Emulator* emu, GameBoyState* gameboy) {
                 }
             }
 
-            emu->renderer(gameboy, gui_state);
+            emu->render(gameboy, render_state);
         }
 
         // if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
@@ -171,10 +169,20 @@ int main(int argc, char* argv[])
     gameboy.memory_bank_controller->div_register = 0xABCC;
 
     Emulator emu;
+    
+    emu.input_handler_init = sdl2_input_handler_init;
     emu.input_handler = sdl2_input_handler;
-    emu.init_renderer = sdl2_init_gui;
-    emu.renderer = sdl2_gb_render;
+    emu.input_handler_cleanup = sdl2_input_handler_cleanup;
 
-    render_main(&emu, &gameboy);
+    emu.render_init = sdl2_render_init;
+    emu.render = sdl2_render;
+    emu.render_cleanup = sdl2_render_cleanup;
+
+    RenderState render_state = emu.render_init();
+    render_main(&emu, render_state, &gameboy);
+
+    emu.input_handler_cleanup();
+    emu.render_cleanup(render_state);
+
     return 0;
 }
