@@ -13,7 +13,7 @@ void sdl2_render_ppu(GameBoyState* gameboy, SDL2State* gui) {
     SDL_RenderCopy(gui->renderer, gui->screen, NULL, NULL);
 }
 
-void* sdl2_init_gui() {
+RenderState sdl2_render_init() {
 
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         printf("SDL ERROR: %s\n", SDL_GetError());
@@ -49,11 +49,15 @@ void* sdl2_init_gui() {
     return s;
 }
 
-void sdl2_gb_render(GameBoyState* gameboy, void* user_data) {
+void sdl2_render(GameBoyState* gameboy, void* user_data) {
 
     SDL2State* gui = (SDL2State*) user_data;
 
     SDL_RenderClear(gui->renderer);
     sdl2_render_ppu(gameboy, gui);
     SDL_RenderPresent(gui->renderer);
+}
+
+void sdl2_render_cleanup(RenderState s) {
+    (void) s;
 }

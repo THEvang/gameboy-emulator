@@ -18,9 +18,11 @@ typedef void* RenderState;
 
 typedef struct EmulatorState {
 
-    void (*init_input_handler) ();
+    void (*input_handler_init) ();
     int (*input_handler) (Input* i);
+    void (*input_handler_cleanup) ();
 
-    RenderState (*init_renderer) ();
-    void (*renderer) (GameBoyState*, RenderState);
+    RenderState (*render_init) ();
+    void (*render) (GameBoyState*, RenderState);
+    void (*render_cleanup) (RenderState);
 } Emulator;

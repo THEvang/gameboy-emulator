@@ -1,6 +1,9 @@
 #include <SDL2/SDL.h>
 #include "SDL2_Input_Handler.h"
 
+void sdl2_input_handler_init() {}
+void sdl2_input_handler_cleanup() {}
+
 int sdl2_input_handler(Input* i) {
 
     SDL_Event event;
