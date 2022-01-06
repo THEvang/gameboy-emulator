@@ -10,5 +10,5 @@ typedef struct Gb_Gui {
 } Gb_Gui;
 
 void init_gui(Gb_Gui*);
-void gb_render(Gb_Gui*, GameBoy*);
-void render_ppu(Gb_Gui*, GameBoy*);
+void gb_render(Gb_Gui*, GameBoyState*);
+void render_ppu(Gb_Gui*, GameBoyState*);

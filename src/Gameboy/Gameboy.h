@@ -5,11 +5,11 @@
 #include "Cpu/Timer.h"
 #include "Graphics/PPU.h"
 
-typedef struct GameBoy {
+typedef struct GameBoyState {
     MemoryBankController* memory_bank_controller;
     Cpu cpu;
     Timer timer;
     PPU ppu;
-} GameBoy;
+} GameBoyState;
 
-void gb_run(GameBoy* gb);
+void gb_run(GameBoyState* gb);

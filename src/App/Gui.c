@@ -36,14 +36,14 @@ void init_gui(Gb_Gui* gui) {
     gui->screen = SDL_CreateTexture(gui->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 160, 144);
 }
 
-void gb_render(Gb_Gui* gui, GameBoy* gameboy) {
+void gb_render(Gb_Gui* gui, GameBoyState* gameboy) {
 
     SDL_RenderClear(gui->renderer);
     render_ppu(gui, gameboy);
     SDL_RenderPresent(gui->renderer);
 }
 
-void render_ppu(Gb_Gui* gui, GameBoy* gameboy) {
+void render_ppu(Gb_Gui* gui, GameBoyState* gameboy) {
 
     SDL_UpdateTexture(gui->screen, NULL, (void*) &(gameboy->ppu.screen.pixels[0]), 4 * 160);
     SDL_RenderCopy(gui->renderer, gui->screen, NULL, NULL);
