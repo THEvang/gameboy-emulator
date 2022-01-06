@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 
-#include "Gui.h"
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
 #include "Cpu/Cpu.h"
@@ -20,12 +20,10 @@ void render_main(Emulator* emu, GameBoyState* gameboy) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
+    
+    RenderState gui_state = emu->init_renderer();
 
-    Gb_Gui gui;
-    init_gui(&gui);
-
-    bool done = false;
-    while (!done) {
+    while (true) {
       
         gb_run(gameboy);
         double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
@@ -46,9 +44,7 @@ void render_main(Emulator* emu, GameBoyState* gameboy) {
                 }
             }
 
-            emu->renderer(gameboy, (void*) &gui);
-
-            gb_render(&gui, gameboy);
+            emu->renderer(gameboy, gui_state);
         }
 
         // if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
@@ -176,6 +172,7 @@ int main(int argc, char* argv[])
 
     Emulator emu;
     emu.input_handler = sdl2_input_handler;
+    emu.init_renderer = sdl2_init_gui;
     emu.renderer = sdl2_gb_render;
 
     render_main(&emu, &gameboy);

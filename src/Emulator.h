@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Input/Joypad.h"
-#include "App/Gui.h"
 #include "Gameboy/Gameboy.h"
 
 typedef enum EventType {
@@ -15,7 +14,13 @@ typedef struct Input {
     Button button;
 } Input;
 
+typedef void* RenderState;
+
 typedef struct EmulatorState {
+
+    void (*init_input_handler) ();
     int (*input_handler) (Input* i);
-    void (*renderer) (GameBoyState*, void* user_data);
+
+    RenderState (*init_renderer) ();
+    void (*renderer) (GameBoyState*, RenderState);
 } Emulator;

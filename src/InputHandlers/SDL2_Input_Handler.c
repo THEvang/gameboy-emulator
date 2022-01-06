@@ -1,3 +1,4 @@
+#include <SDL2/SDL.h>
 #include "SDL2_Input_Handler.h"
 
 int sdl2_input_handler(Input* i) {
