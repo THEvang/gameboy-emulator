@@ -59,5 +59,14 @@ void sdl2_render(GameBoyState* gameboy, void* user_data) {
 }
 
 void sdl2_render_cleanup(RenderState s) {
-    (void) s;
+
+    SDL2State* state = (SDL2State*) s;
+
+    SDL_DestroyRenderer(state->renderer);
+    SDL_DestroyTexture(state->screen);
+    SDL_DestroyWindow(state->window);
+
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+
+    free(state);
 }
