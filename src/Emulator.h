@@ -18,6 +18,8 @@ typedef void* RenderState;
 
 typedef struct EmulatorState {
 
+    GameBoyState gameboy_state;
+
     void (*input_handler_init) ();
     int (*input_handler) (Input* i);
     void (*input_handler_cleanup) ();
@@ -26,3 +28,5 @@ typedef struct EmulatorState {
     void (*render) (GameBoyState*, RenderState);
     void (*render_cleanup) (RenderState);
 } Emulator;
+
+Emulator gb_init_emulator(gb_Rom rom);

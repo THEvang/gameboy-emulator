@@ -11,4 +11,5 @@ add_subdirectory(Renderers)
 
 target_sources(gb-emu PRIVATE
     Emulator.h
+    Emulator.c
 )
