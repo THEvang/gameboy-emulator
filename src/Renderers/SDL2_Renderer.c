@@ -39,8 +39,8 @@ RenderState sdl2_render_init() {
         -1,
         SDL_RENDERER_ACCELERATED
     );
-    SDL_SetRenderDrawColor(s->renderer, 255, 255, 255, 255);
 
+  SDL_SetRenderDrawColor(s->renderer, 255, 255, 255, 255);
 
     if(!s->renderer) {
         printf("SDL ERROR: Unable to create renderer: %s\n", SDL_GetError());
