@@ -3,7 +3,6 @@
 #include "Graphics/Pixel.h"
 #include "Memory/Memory_Controller.h"
 
-static const uint16_t g_scanline_address = 0xFF44;
 static const int g_pixels_in_tile = 8;
 static const int g_vertical_tiles = 32;
 static const int g_horizontal_tiles = 32;
@@ -18,6 +17,7 @@ typedef struct Sprite_Attribute {
     uint8_t x_pos;
     uint8_t tile_location;
     uint8_t attributes;
+    uint16_t oam_address;
 } Sprite_Attribute;
 
 int compare_x_pos(const void* p, const void* q);
