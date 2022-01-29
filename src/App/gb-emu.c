@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
 #include <string.h>
@@ -55,11 +56,7 @@ void render_main(Emulator* emu, RenderState render_state, GameBoyState* gameboy)
     }
 }
 
-void gb_print_usage() {
-    printf("Gameboy Emulator\n");
-    printf("gb-emu <rom_file>\n");
-    printf("-i Inspect rom without running the emulator\n");
-}
+
 
 uint8_t get_rom_bank_mask(uint8_t* rom) {
 
@@ -115,14 +112,37 @@ uint8_t get_ram_bank_mask(uint8_t* rom) {
     }
 }
 
-int main(int argc, char* argv[])
-{
-    if (argc < 2) {
-        gb_print_usage();
+void gb_usage(void) {
+
+    printf("Usage: gb-emu [options] rom\n");
+    printf("  Options:\n");
+    printf("    -i,\t Inspect rom without running the emulator\n");
+    printf("    -h,\t Display this help message\n");
+}
+
+int main(int argc, char* argv[]) {
+
+    const char* options = "ihv";
+    int opt;
+    bool print_info = false;
+    while( (opt = getopt(argc, argv, options)) != -1) {
+        switch (opt) {
+            case 'h':
+            case '?':
+                gb_usage();
+                exit(1);
+            case 'i':
+                print_info = true;
+                break;
+        }
+    }
+
+    if (optind >= argc) {
+        gb_usage();
         exit(1);
     }
 
-    char* rom_path = argv[argc-1];
+    char* rom_path = argv[optind];
 
     gb_Rom rom;
     load_rom(&rom, rom_path);
@@ -132,11 +152,9 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    for(int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-i") == 0) {
-            gb_print_rom_info(&rom);
-            exit(0);
-        }
+    if(print_info) {
+        gb_print_rom_info(&rom);
+        exit(0);
     }
 
     MemoryBankController mc;
@@ -157,7 +175,6 @@ int main(int argc, char* argv[])
     GameBoyState gameboy;
     gameboy.memory_bank_controller = &mc;
     
-
     gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
     set_initial_state(&(gameboy.cpu));
 
