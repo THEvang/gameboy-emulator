@@ -1,4 +1,4 @@
 target_sources(gb-core PRIVATE
-    Disassembler.h    
+    Disassembler.h
     Disassembler.c
 )

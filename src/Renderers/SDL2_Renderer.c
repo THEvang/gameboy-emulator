@@ -40,12 +40,19 @@ RenderState sdl2_render_init() {
         SDL_RENDERER_ACCELERATED
     );
 
+  SDL_SetRenderDrawColor(s->renderer, 255, 255, 255, 255);
+
     if(!s->renderer) {
         printf("SDL ERROR: Unable to create renderer: %s\n", SDL_GetError());
         return NULL;
     }
 
-    s->screen = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 160, 144);
+    SDL_Texture* texture = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 160, 144);
+    if(!texture) {
+        printf("Failed to create SDL Texture: %s\n", SDL_GetError());
+    }
+    s->screen = texture;
+    
     return s;
 }
 
