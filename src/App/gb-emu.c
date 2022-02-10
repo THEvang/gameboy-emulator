@@ -4,14 +4,7 @@
 #include <unistd.h>
 
 #include "Utilities/File.h"
-#include "Gameboy/Gameboy.h"
-#include "Cpu/Cpu.h"
-#include "Gameboy/Rom_Info.h"
-#include "Input/Joypad.h"
 #include "Emulator.h"
-
-#include "Renderers/SDL2_Renderer.h"
-#include "InputHandlers/SDL2_Input_Handler.h"
 
 void gb_usage(void) {
 
