@@ -58,8 +58,6 @@ uint8_t gb_read_joypad_input(MemoryBankController* mc) {
 }
 
 void gb_write_none(MemoryBankController* mc, uint16_t address, uint8_t data) {
-    
-    assert(address <= 0xFFFF);
 
     //Writing to rom is not allowed
     if (address <= 0x7FFF) {
@@ -86,8 +84,6 @@ void gb_write_none(MemoryBankController* mc, uint16_t address, uint8_t data) {
 }
 
 uint8_t gb_read_none(MemoryBankController* mc, uint16_t address) {
-    
-    assert(address <= 0xFFFF);
 
     if(address <= 0x7FFF) {
         return mc->rom[address];
@@ -114,7 +110,7 @@ uint8_t gb_read_mbc_1(MemoryBankController* mc, uint16_t address) {
     if (address <= 0x3FFF) {
         int effective_bank = 0;
         if(mc->banking_mode == Banking_Mode_RAM) {
-            effective_bank = (mc->ram_bank_number << 5) & mc->rom_bank_mask;
+            effective_bank = (mc->ram_bank_number << 5);
         }
 
         return mc->rom[address + effective_bank * ROM_BANK_SIZE];
@@ -122,7 +118,7 @@ uint8_t gb_read_mbc_1(MemoryBankController* mc, uint16_t address) {
 
     if(address >= 0x4000 && address <= 0x7FFF) {
         int offset = address - ROM_BANK_SIZE;
-        int effective_bank = ((mc->ram_bank_number << 5) | (mc->rom_bank_number)) & mc->rom_bank_mask;
+        int effective_bank = ((mc->ram_bank_number << 5) | (mc->rom_bank_number));
         int read_addr = offset + effective_bank * ROM_BANK_SIZE;
         return mc->rom[read_addr];
     }
@@ -214,8 +210,6 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
 // void gb_write_mbc_3(MemoryBankController* mc, uint16_t address, uint8_t data);
 
 uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
-    
-    assert(address <= 0xFFFF);
 
     //Always contains the first 16kbs of rom for MBC 5
     if (address <= 0x3FFF) {
@@ -257,8 +251,6 @@ uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
 }
 
 void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
-    
-    assert(address <= 0xFFFF);
 
     //Enables and disables ram
     if (address <= 0x1FFF) {
