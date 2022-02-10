@@ -36,4 +36,4 @@ typedef struct MemoryBankController {
     void (*write) (struct MemoryBankController*, uint16_t, uint8_t);
 } MemoryBankController;
 
-void set_io(MemoryBankController* mc, Memory_Bank_Type mb_type);
+void set_io(MemoryBankController* mc, Cartridge_Type mb_type);

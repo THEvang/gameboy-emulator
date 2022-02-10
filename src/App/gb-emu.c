@@ -1,5 +1,3 @@
-#define SDL_MAIN_HANDLED
-
 #include <stdio.h>
 #include <unistd.h>
 
@@ -7,7 +5,6 @@
 #include "Emulator.h"
 
 void gb_usage(void) {
-
     printf("Usage: gb-emu [options] rom\n");
     printf("  Options:\n");
     printf("    -i,\t Inspect rom without running the emulator\n");
@@ -41,18 +38,22 @@ int main(int argc, char* argv[]) {
     gb_Rom rom;
     load_rom(&rom, rom_path);
 
+    CartridgeHeader header;
+    gb_parse_header(&rom, &header);
+
     if (!rom.data) {
         printf("Unable to find Rom: %s\n", rom_path);
         return 1;
     }
 
     if(print_info) {
-        gb_print_rom_info(&rom);
+        gb_print_header(&header);
         return 0;
     }
 
     Emulator emulator;
-    gb_init_emulator(&rom, &emulator);
+    gb_init_emulator(&rom, &header, &emulator);
+
     RenderState render_state = emulator.render_init();
     emulator.input_handler_init();
 

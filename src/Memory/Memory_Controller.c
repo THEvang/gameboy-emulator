@@ -8,10 +8,10 @@
 #define ROM_BANK_SIZE 0x4000
 #define RAM_BANK_SIZE 0x2000
 
-void set_io(MemoryBankController* mc,  Memory_Bank_Type mb_type) {
+void set_io(MemoryBankController* mc,  Cartridge_Type mb_type) {
 
     switch(mb_type) {
-        case MB_None:
+        case MB_ROM_ONLY:
             mc->read = gb_read_none;
             mc->write = gb_write_none;
             return;

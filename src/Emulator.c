@@ -60,7 +60,7 @@ uint8_t get_ram_bank_mask(uint8_t* rom) {
     }
 }
 
-void gb_init_emulator(gb_Rom* rom, Emulator* emulator) {
+void gb_init_emulator(gb_Rom* rom, CartridgeHeader* header, Emulator* emulator) {
 
     emulator->gameboy_state.memory_bank_controller.rom = rom->data;
 
@@ -74,7 +74,7 @@ void gb_init_emulator(gb_Rom* rom, Emulator* emulator) {
     emulator->gameboy_state.memory_bank_controller.buttons = 0xFF;
     emulator->gameboy_state.cpu.memory_controller = &emulator->gameboy_state.memory_bank_controller;
 
-    const Memory_Bank_Type mb_type = get_memory_bank_type(rom);
+    const Cartridge_Type mb_type = header->type;
     set_io(&emulator->gameboy_state.memory_bank_controller, mb_type);
     
     emulator->gameboy_state.ppu.scanline_counter = 0;
