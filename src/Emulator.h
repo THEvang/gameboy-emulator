@@ -14,7 +14,7 @@ typedef struct Input {
     Button button;
 } Input;
 
-typedef void* RenderState;
+typedef void* Renderer;
 
 typedef struct EmulatorState {
 
@@ -24,10 +24,10 @@ typedef struct EmulatorState {
     int (*input_handler) (Input* i);
     void (*input_handler_cleanup) ();
 
-    RenderState (*render_init) ();
-    void (*render) (GameBoyState*, RenderState);
-    void (*render_cleanup) (RenderState);
+    Renderer renderer;
+    void (*render) (GameBoyState*, Renderer);
+    void (*render_cleanup) (Renderer);
 } Emulator;
 
 void gb_init_emulator(gb_Rom* rom, CartridgeHeader* header, Emulator* emulator);
-void gb_run_emulator(Emulator* emulator, RenderState render_state);
+void gb_run_emulator(Emulator* emulator);

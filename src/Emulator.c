@@ -86,16 +86,16 @@ void gb_init_emulator(gb_Rom* rom, CartridgeHeader* header, Emulator* emulator) 
 
     set_initial_state(&emulator->gameboy_state.cpu);
     
-    emulator->input_handler_init = sdl2_input_handler_init;
+    sdl2_input_handler_init();
     emulator->input_handler = sdl2_input_handler;
     emulator->input_handler_cleanup = sdl2_input_handler_cleanup;
 
-    emulator->render_init = sdl2_render_init;
+    emulator->renderer = sdl2_render_init();
     emulator->render = sdl2_render;
     emulator->render_cleanup = sdl2_render_cleanup;
 }
 
-void gb_run_emulator(Emulator* emulator, RenderState render_state) {
+void gb_run_emulator(Emulator* emulator) {
 
     clock_t start = clock(); 
     clock_t stop = clock();
@@ -121,7 +121,7 @@ void gb_run_emulator(Emulator* emulator, RenderState render_state) {
                 }
             }
 
-            emulator->render(&emulator->gameboy_state, render_state);
+            emulator->render(&emulator->gameboy_state, emulator->renderer);
         }
 
         // if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {

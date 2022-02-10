@@ -36,15 +36,15 @@ int main(int argc, char* argv[]) {
     char* rom_path = argv[optind];
 
     gb_Rom rom;
-    load_rom(&rom, rom_path);
-
-    CartridgeHeader header;
-    gb_parse_header(&rom, &header);
+    gb_load_rom(&rom, rom_path);
 
     if (!rom.data) {
         printf("Unable to find Rom: %s\n", rom_path);
         return 1;
     }
+
+    CartridgeHeader header;
+    gb_parse_header(&rom, &header);
 
     if(print_info) {
         gb_print_header(&header);
@@ -54,13 +54,10 @@ int main(int argc, char* argv[]) {
     Emulator emulator;
     gb_init_emulator(&rom, &header, &emulator);
 
-    RenderState render_state = emulator.render_init();
-    emulator.input_handler_init();
-
-    gb_run_emulator(&emulator, render_state);
+    gb_run_emulator(&emulator);
 
     emulator.input_handler_cleanup();
-    emulator.render_cleanup(render_state);
+    emulator.render_cleanup(emulator.renderer);
 
     return 0;
 }
