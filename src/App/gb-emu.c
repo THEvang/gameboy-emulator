@@ -1,11 +1,7 @@
 #define SDL_MAIN_HANDLED
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <time.h>
-#include <stdbool.h>
-#include <string.h>
 
 #include "Utilities/File.h"
 #include "Gameboy/Gameboy.h"
@@ -16,45 +12,6 @@
 
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
-
-void render_main(Emulator* emulator, RenderState render_state) {
-
-    clock_t start = clock(); 
-    clock_t stop = clock();
-
-    while (true) {
-      
-        gb_run(&emulator->gameboy_state);
-        double duration =  (double) (stop - start) / CLOCKS_PER_SEC;
-        if( duration >= 16e-3 && emulator->gameboy_state.memory_bank_controller.memory[0xFF44] > 144) {
-            start = clock();
-
-            Input i;
-            if(emulator->input_handler(&i)) {
-                switch(i.type) {
-                    case Quit:
-                        return;
-                    case KeyUp:
-                        key_up(&emulator->gameboy_state.memory_bank_controller, i.button);
-                        break;
-                    case KeyDown:
-                        key_down(&emulator->gameboy_state.memory_bank_controller, i.button);
-                        break;
-                }
-            }
-
-            emulator->render(&emulator->gameboy_state, render_state);
-        }
-
-        // if (gameboy->memory_bank_controller->memory[0xFF02] == 0x81) {
-        //     printf("%c", gameboy->memory_bank_controller->memory[0xFF01]);
-        //     fflush(stdout);
-        //     gameboy->memory_bank_controller->memory[0xFF02] = 0;
-        // }
-
-        stop = clock();
-    }
-}
 
 void gb_usage(void) {
 
@@ -74,7 +31,7 @@ int main(int argc, char* argv[]) {
             case 'h':
             case '?':
                 gb_usage();
-                exit(1);
+                return 1;
             case 'i':
                 print_info = true;
                 break;
@@ -83,7 +40,7 @@ int main(int argc, char* argv[]) {
 
     if (optind >= argc) {
         gb_usage();
-        exit(1);
+        return 1;
     }
 
     char* rom_path = argv[optind];
@@ -93,12 +50,12 @@ int main(int argc, char* argv[]) {
 
     if (!rom.data) {
         printf("Unable to find Rom: %s\n", rom_path);
-        exit(1);
+        return 1;
     }
 
     if(print_info) {
         gb_print_rom_info(&rom);
-        exit(0);
+        return 0;
     }
 
     Emulator emulator;
@@ -106,7 +63,7 @@ int main(int argc, char* argv[]) {
     RenderState render_state = emulator.render_init();
     emulator.input_handler_init();
 
-    render_main(&emulator, render_state);
+    gb_run_emulator(&emulator, render_state);
 
     emulator.input_handler_cleanup();
     emulator.render_cleanup(render_state);

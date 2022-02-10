@@ -30,3 +30,4 @@ typedef struct EmulatorState {
 } Emulator;
 
 void gb_init_emulator(gb_Rom* rom, Emulator* emulator);
+void gb_run_emulator(Emulator* emulator, RenderState render_state);
