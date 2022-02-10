@@ -14,7 +14,7 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
         return;
     }
 
-    gb_set_status(mc, &(ppu->scanline_counter));
+    gb_set_status(mc, &ppu->scanline_counter);
 
     ppu->scanline_counter -= cycles;
 

@@ -29,4 +29,4 @@ typedef struct EmulatorState {
     void (*render_cleanup) (RenderState);
 } Emulator;
 
-Emulator gb_init_emulator(gb_Rom rom);
+void gb_init_emulator(gb_Rom* rom, Emulator* emulator);

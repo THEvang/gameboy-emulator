@@ -1,8 +1,9 @@
+#include <stdio.h>
+
 #include "Emulator.h"
 #include "Memory/Memory_Banks.h"
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
-
 
 uint8_t get_rom_bank_mask(uint8_t* rom) {
 
@@ -58,49 +59,37 @@ uint8_t get_ram_bank_mask(uint8_t* rom) {
     }
 }
 
-Emulator gb_init_emulator(gb_Rom rom) {
+void gb_init_emulator(gb_Rom* rom, Emulator* emulator) {
 
-    MemoryBankController mc;
-    mc.rom = rom.data;
+    emulator->gameboy_state.memory_bank_controller.rom = rom->data;
 
-    mc.rom_bank_number = 1;
-    mc.rom_bank_mask = get_rom_bank_mask(mc.rom);
+    emulator->gameboy_state.memory_bank_controller.rom_bank_number = 1;
+    emulator->gameboy_state.memory_bank_controller.rom_bank_mask = get_rom_bank_mask(rom->data);
 
-    mc.ram_enabled = false;
-    mc.ram_bank_mask = get_ram_bank_mask(mc.rom);
-    mc.ram_bank_number = 0;
-    mc.banking_mode = Banking_Mode_ROM;
-    mc.buttons = 0xFF;
+    emulator->gameboy_state.memory_bank_controller.ram_enabled = false;
+    emulator->gameboy_state.memory_bank_controller.ram_bank_mask = get_ram_bank_mask(rom->data);
+    emulator->gameboy_state.memory_bank_controller.ram_bank_number = 0;
+    emulator->gameboy_state.memory_bank_controller.banking_mode = Banking_Mode_ROM;
+    emulator->gameboy_state.memory_bank_controller.buttons = 0xFF;
+    emulator->gameboy_state.cpu.memory_controller = &emulator->gameboy_state.memory_bank_controller;
 
-    const Memory_Bank_Type mb_type = get_memory_bank_type(&rom);
+    const Memory_Bank_Type mb_type = get_memory_bank_type(rom);
+    set_io(&emulator->gameboy_state.memory_bank_controller, mb_type);
     
-    set_io(&mc, mb_type);
-    GameBoyState gameboy;
-    gameboy.memory_bank_controller = &mc;
+    emulator->gameboy_state.ppu.scanline_counter = 0;
+
+    emulator->gameboy_state.timer.prev_delay = false;
+    emulator->gameboy_state.timer.tima_has_overflowed = false;
+    emulator->gameboy_state.timer.tima_speed = 1024;
+    emulator->gameboy_state.memory_bank_controller.div_register = 0xABCC;
+
+    set_initial_state(&emulator->gameboy_state.cpu);
     
-    gameboy.cpu.memory_controller = gameboy.memory_bank_controller;
-    set_initial_state(&(gameboy.cpu));
+    emulator->input_handler_init = sdl2_input_handler_init;
+    emulator->input_handler = sdl2_input_handler;
+    emulator->input_handler_cleanup = sdl2_input_handler_cleanup;
 
-    gameboy.ppu.scanline_counter = 0;
-
-    gameboy.timer.prev_delay = false;
-    gameboy.timer.tima_has_overflowed = false;
-    gameboy.timer.tima_speed = 1024;
-    gameboy.memory_bank_controller->div_register = 0xABCC;
-
-    Emulator emu;
-    
-    emu.input_handler_init = sdl2_input_handler_init;
-    emu.input_handler = sdl2_input_handler;
-    emu.input_handler_cleanup = sdl2_input_handler_cleanup;
-
-    emu.render_init = sdl2_render_init;
-    emu.render = sdl2_render;
-    emu.render_cleanup = sdl2_render_cleanup;
-
-    RenderState render_state = emu.render_init();
-    render_main(&emu, render_state, &gameboy);
-
-    emu.input_handler_cleanup();
-    emu.render_cleanup(render_state);
+    emulator->render_init = sdl2_render_init;
+    emulator->render = sdl2_render;
+    emulator->render_cleanup = sdl2_render_cleanup;
 }
