@@ -1,4 +1,4 @@
-#include "Rom_Info.h"
+#include "Cartridge.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -13,9 +13,28 @@
 #define DESTINATION_CODE_ADDRESS 0x14A
 #define VERSION_ADDRESS 0x14C
 #define HEADER_CHECKSUM_ADDRESS 0x14D
-#define GLOBAL_CHECKSUM_ADDRESS 
+#define GLOBAL_CHECKSUM_ADDRESS
 
-void gb_parse_header(gb_Rom* rom, CartridgeHeader* header) {
+int gb_load_rom(GameboyRom* rom, const char* path) {
+
+    FILE* rom_file;
+    rom_file = fopen(path, "r");
+    if(!rom_file) {
+        rom->data = NULL;
+        return 1;
+    }
+
+    fseek(rom_file, 0, SEEK_END);
+    rom->size = ftell(rom_file);
+    fseek(rom_file, 0, SEEK_SET);
+
+    rom->data = malloc(rom->size * sizeof(uint8_t));
+    fread(rom->data, sizeof(uint8_t), rom->size, rom_file);
+
+    return fclose(rom_file);
+}
+
+void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
 
     //Logo
     memcpy(&header->logo[0], &rom->data[LOGO_START], sizeof(uint8_t) * LOGO_SIZE);

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gameboy/Rom_Info.h"
+#include "Gameboy/Cartridge.h"
 
 #include <stdint.h>
 #include <stdbool.h>

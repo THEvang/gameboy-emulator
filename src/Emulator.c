@@ -60,7 +60,7 @@ uint8_t get_ram_bank_mask(uint8_t* rom) {
     }
 }
 
-void gb_init_emulator(gb_Rom* rom, CartridgeHeader* header, Emulator* emulator) {
+void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulator) {
 
     emulator->gameboy_state.memory_bank_controller.rom = rom->data;
 

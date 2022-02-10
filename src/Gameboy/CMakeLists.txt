@@ -3,6 +3,6 @@ target_sources(gb-core
     Gameboy.h
     Gameboy.c
 
-    Rom_Info.h
-    Rom_Info.c
+    Cartridge.h
+    Cartridge.c
 )

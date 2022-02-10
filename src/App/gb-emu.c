@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "Utilities/File.h"
+#include "Gameboy/Cartridge.h"
 #include "Emulator.h"
 
 void gb_usage(void) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 
     char* rom_path = argv[optind];
 
-    gb_Rom rom;
+    GameboyRom rom;
     gb_load_rom(&rom, rom_path);
 
     if (!rom.data) {
@@ -53,7 +53,6 @@ int main(int argc, char* argv[]) {
 
     Emulator emulator;
     gb_init_emulator(&rom, &header, &emulator);
-
     gb_run_emulator(&emulator);
 
     emulator.input_handler_cleanup();

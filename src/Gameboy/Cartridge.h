@@ -2,8 +2,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
-#include "Utilities/File.h"
+typedef struct GameboyRom {
+    uint8_t* data;
+    size_t size;
+} GameboyRom;
 
 typedef enum Catridge_Type {
     MB_ROM_ONLY,
@@ -43,5 +47,6 @@ typedef struct CartridgeHeader {
     uint16_t global_checksum;
 } CartridgeHeader;
 
-void gb_parse_header(gb_Rom* rom, CartridgeHeader* header);
+int gb_load_rom(GameboyRom* rom, const char* path);
+void gb_parse_header(GameboyRom* rom, CartridgeHeader* header);
 void gb_print_header(CartridgeHeader* header);
