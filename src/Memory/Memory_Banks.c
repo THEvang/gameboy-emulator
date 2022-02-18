@@ -7,6 +7,25 @@
 #define RAM_BANK_SIZE 0x2000
 
 #define DMA_ADDRESS 0xFF46
+#define DIV_REGISTER_ADDRESS 0xFF04
+#define LDC_Y_COORDINATE_ADDRESS 0xFF44
+#define JOYPAD_INPUT_ADDRESS 0xFF00
+#define INTERRUPT_FLAG_ADDRESS 0xFF0F
+
+uint8_t gb_read_joypad_input(MemoryBankController* mc) {
+
+    uint8_t data = mc->memory[JOYPAD_INPUT_ADDRESS];
+
+    if ( !(data & Action_Button)) {
+        return (mc->buttons >> 4) & 0x0F;
+    }
+
+    if ( !(data & Direction_Button)) {
+        return mc->buttons & 0xFF;
+    }
+
+    return 0xFF;
+}
 
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
@@ -19,9 +38,52 @@ void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     }
 }
 
-void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
+void gb_common_writes(MemoryBankController* mc, uint16_t address, uint8_t data) {
+    
+    if(address <= 0x1FFF) {
+        mc->ram_enabled = ((data & 0x0F) == 0x0A);
+        return;
+    }
 
-    mc->banking_register_1 = (data & 0x1F) & mc->rom_bank_mask;
+    if (address >= 0xFEA0 && address < 0xFEFF) {
+        return;
+    }
+
+    switch (address) {
+    case DIV_REGISTER_ADDRESS:
+        mc->memory[address] = 0;
+        mc->div_register = 0;
+        break;
+    case DMA_ADDRESS:
+        gb_dma_transfer(mc, data);
+        break;
+    case LDC_Y_COORDINATE_ADDRESS:
+        mc->memory[address] = 0;
+        break;
+    default:
+        mc->memory[address] = data;
+        break;
+    }
+}
+
+uint8_t gb_common_reads(MemoryBankController* mc, uint16_t address) {
+
+    switch (address) {
+    case JOYPAD_INPUT_ADDRESS:
+        return gb_read_joypad_input(mc);
+    case INTERRUPT_FLAG_ADDRESS:
+        return mc->memory[address] | 0xE0;
+    case 0xFF01: case 0xFF18: case 0xFF1B:
+    case 0xFF1D: case 0xFF20:
+        return 0xFF;
+    default:
+        return mc->memory[address];
+    }
+}
+
+void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data, uint8_t bank_type_mask) {
+
+    mc->banking_register_1 = (data & bank_type_mask) & mc->rom_bank_mask;
     
     if(mc->banking_register_1 == 0) {
         mc->banking_register_1++;
@@ -42,45 +104,14 @@ void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
     mc->banking_register_2 = (data & 0x3);
 }
 
-uint8_t gb_read_joypad_input(MemoryBankController* mc) {
-
-    uint8_t data = mc->memory[0xFF00];
-
-    if ( !(data & Action_Button)) {
-        return (mc->buttons >> 4) & 0x0F;
-    }
-
-    if ( !(data & Direction_Button)) {
-        return mc->buttons & 0xFF;
-    }
-
-    return 0xFF;
-}
-
 void gb_write_none(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     //Writing to rom is not allowed
     if (address <= 0x7FFF) {
         return;
     } 
-    
-    if(address == 0xFF04) {
-        mc->memory[0xFF04] = 0;
-        mc->div_register = 0;
-        return;
-    }
 
-    if (address == 0xFF44) {
-        mc->memory[address] = 0;
-        return;
-    }
-    
-    if (address == DMA_ADDRESS) {
-        gb_dma_transfer(mc, data);
-        return;
-    } 
-
-    mc->memory[address] = data;
+    gb_common_writes(mc, address, data);
 }
 
 uint8_t gb_read_none(MemoryBankController* mc, uint16_t address) {
@@ -94,15 +125,7 @@ uint8_t gb_read_none(MemoryBankController* mc, uint16_t address) {
         return 0xFF;
     }
 
-    if(address == 0xFF00) {
-        return gb_read_joypad_input(mc);        
-    }
-
-    if(address == 0xFF0F) {
-        return mc->memory[address] | 0xE0;
-    }
-
-    return mc->memory[address];
+    return gb_common_reads(mc, address);
 }
 
 uint8_t gb_read_mbc_1(MemoryBankController* mc, uint16_t address) {
@@ -133,26 +156,13 @@ uint8_t gb_read_mbc_1(MemoryBankController* mc, uint16_t address) {
         return 0xFF;
     }
 
-    if(address == 0xFF00) {
-        return gb_read_joypad_input(mc);        
-    }
-
-    if(address == 0xFF0F) {
-        return mc->memory[address] | 0xE0;
-    }
-
-    return mc->memory[address];
+    return gb_common_reads(mc, address);
 }
 
 void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
-    if(address <= 0x1FFF) {
-        mc->ram_enabled = ((data & 0x0F) == 0x0A);
-        return;
-    }
-
     if (address >= 0x2000 && address <= 0x3FFF) {
-        gb_set_rom_bank_number(mc, data);
+        gb_set_rom_bank_number(mc, data, 0x1F);
         return;
     } 
     
@@ -180,16 +190,13 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
         mc->memory[address] = data;
         mc->write(mc, (uint16_t) (address - 0x2000), data);
         return;
-    } 
-    
-    
-    if (address >= 0xFEA0 && address < 0xFEFF) {
-        return;
-    } 
-    
-    if(address == 0xFF04) {
-        mc->memory[0xFF04] = 0;
-        mc->div_register = 0;
+    }
+
+    gb_common_writes(mc, address, data);
+}
+
+    mc->memory[address] = data;
+}
         return;
     }
 
@@ -234,32 +241,13 @@ uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
         return 0xFF;
     }
 
-    if(address == 0xFF00) {
-        return gb_read_joypad_input(mc);        
-    }
-
-    if(address == 0xFF0F) {
-        return mc->memory[address] | 0xE0;
-    }
-
-    //Sound register NR13 is write only
-    if(address == 0xFF01 || address == 0xFF18 || address == 0xFF1B || address == 0xFF1D || address == 0xFF20) {
-        return 0xFF;
-    }
-
-    return mc->memory[address];
+    return gb_common_reads(mc, address);
 }
 
 void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
-    //Enables and disables ram
-    if (address <= 0x1FFF) {
-        mc->ram_enabled = ((data & 0x0F) == 0x0A);
-        return;
-    }
-
     //Set the 8 least significant bits of rom bank number
-    if (address <= 0x2FFF) {
+    if (address > 0x1FFF && address <= 0x2FFF) {
         mc->banking_register_1 = data;
         return;
     }
@@ -285,22 +273,6 @@ void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
         }
         return;
     }
-    
-    if(address == 0xFF04) {
-        mc->memory[0xFF04] = 0;
-        mc->div_register = 0;
-        return;
-    }
 
-    if (address == 0xFF44) {
-        mc->memory[address] = 0;
-        return;
-    }
-    
-    if (address == DMA_ADDRESS) {
-        gb_dma_transfer(mc, data);
-        return;
-    } 
-
-    mc->memory[address] = data;
+    gb_common_writes(mc, address, data);
 }

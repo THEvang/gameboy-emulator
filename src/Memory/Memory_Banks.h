@@ -4,7 +4,7 @@
 #include "Memory_Controller.h"
 
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data);
-void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data);
+void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data, uint8_t bank_type_mask);
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data);
 void gb_set_banking_mode(MemoryBankController* mc, uint8_t data);
 
