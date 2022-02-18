@@ -19,10 +19,13 @@ typedef struct MemoryBankController {
     uint8_t memory[0x10000];
     uint8_t ram[0x2000 * 16];
 
-    uint16_t rom_bank_number;
+    uint16_t banking_register_1;
+    uint8_t banking_register_2;
 
-    uint8_t ram_bank_mask;
-    uint8_t ram_bank_number;
+    //Use this to mask to the total number of banks
+    int rom_bank_mask;
+    int ram_bank_mask;
+    
     uint16_t div_register;
 
     uint8_t* rom;

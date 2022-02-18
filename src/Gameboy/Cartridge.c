@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <errno.h>
 
 #define TITLE_START 0x0134
 #define LOGO_START 0x0104
@@ -20,7 +22,7 @@ int gb_load_rom(GameboyRom* rom, const char* path) {
     FILE* rom_file;
     rom_file = fopen(path, "r");
     if(!rom_file) {
-        rom->data = NULL;
+        printf("ERROR\tOpening file\t%s\n", strerror(errno));
         return 1;
     }
 
@@ -88,6 +90,7 @@ void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
     
     //TODO: There are some sizes that are non-standard
     header->rom_size = 32 << rom->data[ROM_SIZE_ADDRESS];
+    header->rom_banks = header->rom_size / 16;
 
     //TODO: What if we get something bigger than 0x05
     switch(rom->data[RAM_SIZE_ADDRESS]) {
@@ -108,6 +111,7 @@ void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
             header->ram_size = 0;
             break;
     }
+    header->ram_banks = header->ram_size / 8;
     
     header->destination = rom->data[DESTINATION_CODE_ADDRESS] == 0x00 ? DST_JAPAN : DST_WORLD;
 

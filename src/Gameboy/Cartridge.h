@@ -40,7 +40,9 @@ typedef struct CartridgeHeader {
     bool super_gameboy_support;
     Cartridge_Type type;
     int rom_size;
+    int rom_banks;
     int ram_size;
+    int ram_banks;
     DestinationCode destination;
     uint8_t version;
     uint8_t header_checksum;

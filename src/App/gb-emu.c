@@ -36,10 +36,8 @@ int main(int argc, char* argv[]) {
     char* rom_path = argv[optind];
 
     GameboyRom rom;
-    gb_load_rom(&rom, rom_path);
-
-    if (!rom.data) {
-        printf("Unable to find Rom: %s\n", rom_path);
+    if(gb_load_rom(&rom, rom_path)) {
+        printf("ERROR\tFailed loading rom\t%s\n", rom_path);
         return 1;
     }
 

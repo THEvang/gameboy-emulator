@@ -21,10 +21,10 @@ void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
 
 void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data) {
 
-    mc->rom_bank_number = (data & 0x1F);
+    mc->banking_register_1 = (data & 0x1F) & mc->rom_bank_mask;
     
-    if(mc->rom_bank_number == 0) {
-        (mc->rom_bank_number)++;
+    if(mc->banking_register_1 == 0) {
+        mc->banking_register_1++;
     }
 }
 
@@ -39,7 +39,7 @@ void gb_set_banking_mode(MemoryBankController* mc, uint8_t data) {
 }
 
 void gb_set_ram_bank_number(MemoryBankController* mc, uint8_t data) {
-    mc->ram_bank_number = (data & 0x3);
+    mc->banking_register_2 = (data & 0x3);
 }
 
 uint8_t gb_read_joypad_input(MemoryBankController* mc) {
@@ -110,24 +110,24 @@ uint8_t gb_read_mbc_1(MemoryBankController* mc, uint16_t address) {
     if (address <= 0x3FFF) {
         int effective_bank = 0;
         if(mc->banking_mode == Banking_Mode_RAM) {
-            effective_bank = (mc->ram_bank_number << 5);
+            effective_bank = (mc->banking_register_2 << 5);
         }
 
-        return mc->rom[address + effective_bank * ROM_BANK_SIZE];
+        return mc->rom[address + (effective_bank & mc->rom_bank_mask) * ROM_BANK_SIZE];
     }
 
     if(address >= 0x4000 && address <= 0x7FFF) {
         int offset = address - ROM_BANK_SIZE;
-        int effective_bank = ((mc->ram_bank_number << 5) | (mc->rom_bank_number));
-        int read_addr = offset + effective_bank * ROM_BANK_SIZE;
+        int effective_bank = ((mc->banking_register_2 << 5) | (mc->banking_register_1));
+        int read_addr = offset + (effective_bank & mc->rom_bank_mask) * ROM_BANK_SIZE;
         return mc->rom[read_addr];
     }
     
     if (address >= 0xA000 && address <= 0xBFFF) {
         if (mc->ram_enabled) {
             int offset = address - 0xA000;
-            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->ram_bank_number & mc->ram_bank_mask);
-            int read_addr = offset + ram_bank * RAM_BANK_SIZE;
+            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
+            int read_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
             return mc->ram[read_addr];
         }
         return 0xFF;
@@ -169,8 +169,8 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
     if (address >= 0xA000 && address <= 0xBFFF) {
         if(mc->ram_enabled) {
             int offset = address - 0xA000;
-            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->ram_bank_number & mc->ram_bank_mask);
-            int write_addr = offset + ram_bank * RAM_BANK_SIZE;
+            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
+            int write_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
             mc->ram[write_addr] = data;
         }
         return;
@@ -219,7 +219,7 @@ uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
     //Can contain banks up to 0x1FF, including bank 0
     if(address >= 0x4000 && address <= 0x7FFF) {
         int offset = address - ROM_BANK_SIZE;
-        int read_addr = offset + mc->rom_bank_number * ROM_BANK_SIZE;
+        int read_addr = offset + (mc->banking_register_1 & mc->rom_bank_mask) * ROM_BANK_SIZE;
         return mc->rom[read_addr];
     }
     
@@ -227,8 +227,8 @@ uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
     if (address >= 0xA000 && address <= 0xBFFF) {
         if (mc->ram_enabled) {
             int offset = address - 0xA000;
-            int ram_bank = mc->ram_bank_number;
-            int read_addr = offset + ram_bank * RAM_BANK_SIZE;
+            int ram_bank = mc->banking_register_2;
+            int read_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
             return mc->ram[read_addr];
         }
         return 0xFF;
@@ -260,27 +260,27 @@ void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     //Set the 8 least significant bits of rom bank number
     if (address <= 0x2FFF) {
-        mc->rom_bank_number = data;
+        mc->banking_register_1 = data;
         return;
     }
 
     //Sets the 9th bit of the rom bank number
     if (address <= 0x3FFF) {
         data &= 0x01;
-        mc->rom_bank_number |= (uint16_t) (data << 8);
+        mc->banking_register_1 |= (uint16_t) (data << 8);
         return;
     }
 
     //Sets the ram bank number between 0x00 and 0x0F
     if (address <= 0x5FFF) {
-        mc->ram_bank_number = data & 0x0F;
+        mc->banking_register_2 = data & 0x0F;
         return;
     }
 
     if (address >= 0xA000 && address <= 0xBFFF) {
         if(mc->ram_enabled) {
             int offset = address - 0xA000;
-            int write_addr = offset + mc->ram_bank_number * RAM_BANK_SIZE;
+            int write_addr = offset + (mc->banking_register_2  & mc->ram_bank_mask) * RAM_BANK_SIZE;
             mc->ram[write_addr] = data;
         }
         return;

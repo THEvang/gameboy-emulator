@@ -6,32 +6,17 @@
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
 
-uint8_t get_ram_bank_mask(uint8_t* rom) {
-    switch (rom[0x0149]) {
-        case 0x00:
-        case 0x01:
-        case 0x02:
-            return 0x00;
-        case 0x03:
-            return 0x03;
-        case 0x04:
-            return 0x0F;
-        case 0x05:
-            return 0x07;
-        default:
-            return 0x00;
-    }
-}
-
 void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulator) {
 
     emulator->gameboy_state.memory_bank_controller.rom = rom->data;
 
-    emulator->gameboy_state.memory_bank_controller.rom_bank_number = 1;
+    emulator->gameboy_state.memory_bank_controller.banking_register_1 = 1;
+    emulator->gameboy_state.memory_bank_controller.banking_register_2 = 0;
+    emulator->gameboy_state.memory_bank_controller.rom_bank_mask = header->rom_banks - 1;
+    emulator->gameboy_state.memory_bank_controller.ram_bank_mask = header->rom_banks == 1 ? header->rom_banks :
+        header->rom_banks -1;
 
     emulator->gameboy_state.memory_bank_controller.ram_enabled = false;
-    emulator->gameboy_state.memory_bank_controller.ram_bank_mask = get_ram_bank_mask(rom->data);
-    emulator->gameboy_state.memory_bank_controller.ram_bank_number = 0;
     emulator->gameboy_state.memory_bank_controller.banking_mode = Banking_Mode_ROM;
     emulator->gameboy_state.memory_bank_controller.buttons = 0xFF;
     emulator->gameboy_state.cpu.memory_controller = &emulator->gameboy_state.memory_bank_controller;
