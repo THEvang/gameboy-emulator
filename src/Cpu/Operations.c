@@ -13,18 +13,18 @@ int gb_nop() {
     return 4;
 }
 
-int gb_stop(Cpu* cpu) {
-    cpu->memory_controller->memory[0xFF04] = 0;
+int gb_stop(MemoryBankController* mc) {
+    mc->memory[0xFF04] = 0;
     return 4;
 }
 
-int gb_halt(Cpu* cpu) {
+int gb_halt(Cpu* cpu, MemoryBankController* mc) {
 
     const uint16_t interrupt_request_addr = 0xFF0F;
     const uint16_t interrupt_enable_addr = 0xFFFF;
 
-    const uint8_t interrupt_request = cpu->memory_controller->read(cpu->memory_controller, interrupt_request_addr);
-    const uint8_t interrupt_enable = cpu->memory_controller->read(cpu->memory_controller, interrupt_enable_addr);
+    const uint8_t interrupt_request = mc->read(mc, interrupt_request_addr);
+    const uint8_t interrupt_enable = mc->read(mc, interrupt_enable_addr);
 
     if (cpu->interrupts_enabled) {
         cpu->is_halted = true;
@@ -40,13 +40,13 @@ int gb_halt(Cpu* cpu) {
     }
 }
 
-int gb_rst(uint8_t address, Cpu* cpu) {
+int gb_rst(uint8_t address, Cpu* cpu, MemoryBankController* mc) {
             
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8u);
     const uint8_t pc_low =  (uint8_t) (cpu->program_counter & 0xFFu);
 
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 1), pc_high);
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 2), pc_low);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 1), pc_high);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 2), pc_low);
 
     cpu->program_counter = combine_bytes(0x00, address);
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
@@ -73,22 +73,22 @@ int gb_jr(uint8_t offset, bool predicate, Cpu* cpu) {
     return predicate ? jump_relative(offset, cpu) : 8;
 }
 
-int ret(Cpu* cpu) {            
-    const uint8_t pc_low = cpu->memory_controller->read(cpu->memory_controller, cpu->stack_ptr);
-    const uint8_t pc_high = cpu->memory_controller->read(cpu->memory_controller, (uint16_t) (cpu->stack_ptr + 1));
+int ret(Cpu* cpu, MemoryBankController* mc) {
+    const uint8_t pc_low = mc->read(mc, cpu->stack_ptr);
+    const uint8_t pc_high = mc->read(mc, (uint16_t) (cpu->stack_ptr + 1));
     
     cpu->program_counter = combine_bytes(pc_high, pc_low);
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr + 2);
     return 16;
 }
 
-int gb_ret(bool predicate, Cpu* cpu) {
-    return predicate ? ret(cpu) : 8;
+int gb_ret(bool predicate, Cpu* cpu, MemoryBankController* mc) {
+    return predicate ? ret(cpu, mc) : 8;
 }
 
-int gb_reti(Cpu* cpu) {
+int gb_reti(Cpu* cpu, MemoryBankController* mc) {
     cpu->interrupts_enabled = true;
-    return ret(cpu);
+    return ret(cpu, mc);
 }
 
 int jump(Cpu* cpu, uint16_t address) {
@@ -100,13 +100,13 @@ int gb_jump(uint16_t address, bool predicate, Cpu* cpu) {
     return predicate ? jump(cpu, address) : 12;
 }
 
-int call(Cpu* cpu, uint16_t address) {
+int call(Cpu* cpu, uint16_t address, MemoryBankController* mc) {
 
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8u);
     const uint8_t pc_low = (uint8_t) (cpu->program_counter & 0xFFu);
     
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 1), pc_high);
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 2), pc_low);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 1), pc_high);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 2), pc_low);
     cpu->stack_ptr = (uint16_t)(cpu->stack_ptr -2);
     
     cpu->program_counter = address;
@@ -114,8 +114,8 @@ int call(Cpu* cpu, uint16_t address) {
     return 24;
 }
 
-int gb_call(uint16_t address, bool predicate, Cpu* cpu) {
-    return predicate ? call(cpu, address) : 12;
+int gb_call(uint16_t address, bool predicate, Cpu* cpu, MemoryBankController* mc) {
+    return predicate ? call(cpu, address, mc) : 12;
 }
 
 int gb_ld_r_r(uint8_t* dst, uint8_t src) {
@@ -123,32 +123,32 @@ int gb_ld_r_r(uint8_t* dst, uint8_t src) {
     return 4;
 }
 
-int gb_ld_a_addr_rr(uint8_t r1, uint8_t r2, Cpu* cpu) {
+int gb_ld_a_addr_rr(uint8_t r1, uint8_t r2, Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = combine_bytes(r1, r2);
-    cpu->registers[Register_A] = cpu->memory_controller->read(cpu->memory_controller,address);
+    cpu->registers[Register_A] = mc->read(mc, address);
     return 8;
 }
 
-int gb_ld_a_addr_c(Cpu* cpu) {
+int gb_ld_a_addr_c(Cpu* cpu, MemoryBankController* mc) {
 
     const uint16_t address = (uint16_t) (0xFF00 + cpu->registers[Register_C]);
-    cpu->registers[Register_A] =  cpu->memory_controller->read(cpu->memory_controller,address);
+    cpu->registers[Register_A] =  mc->read(mc, address);
 
     return 8;
 }
 
-int gb_ld_addr_a16_sp(uint16_t address, Cpu* cpu) {
+int gb_ld_addr_a16_sp(uint16_t address, Cpu* cpu, MemoryBankController* mc) {
 
-    cpu->memory_controller->write(cpu->memory_controller, address, (uint8_t) (cpu->stack_ptr & 0xFFu));
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (address + 1), (uint8_t) (cpu->stack_ptr >> 8u));
+    mc->write(mc, address, (uint8_t) (cpu->stack_ptr & 0xFFu));
+    mc->write(mc, (uint16_t) (address + 1), (uint8_t) (cpu->stack_ptr >> 8u));
     return 20;
 }
 
-int gb_ldi_addr_hl_a(Cpu* cpu) {
+int gb_ldi_addr_hl_a(Cpu* cpu, MemoryBankController* mc) {
 
     uint16_t address = read_register_pair(*cpu, Register_H, Register_L);
     
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);
+    mc->write(mc, address, cpu->registers[Register_A]);
 
     address++;
     cpu->registers[Register_H] =  (uint8_t) (address >> 8u);
@@ -157,10 +157,10 @@ int gb_ldi_addr_hl_a(Cpu* cpu) {
     return 8;
 }
 
-int gb_ldi_a_addr_hl(Cpu* cpu) {
+int gb_ldi_a_addr_hl(Cpu* cpu, MemoryBankController* mc) {
     
     uint16_t address = read_register_pair(*cpu, Register_H, Register_L);
-    cpu->registers[Register_A] = cpu->memory_controller->read(cpu->memory_controller, address);
+    cpu->registers[Register_A] = mc->read(mc, address);
     
     address++;
     cpu->registers[Register_H] = (uint8_t) (address >> 8u);
@@ -169,15 +169,15 @@ int gb_ldi_a_addr_hl(Cpu* cpu) {
     return 8;
 }
 
-int gb_ld_addr_rr_a(uint8_t r1, uint8_t r2, Cpu* cpu) {
+int gb_ld_addr_rr_a(uint8_t r1, uint8_t r2, Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = combine_bytes(r1, r2);
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);   
+    mc->write(mc, address, cpu->registers[Register_A]);   
     return 8;
 }
 
-int gb_ld_addr_hl(uint8_t value, Cpu* cpu) {
+int gb_ld_addr_hl(uint8_t value, Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    cpu->memory_controller->write(cpu->memory_controller, address, value);
+    mc->write(mc, address, value);
     return 8;
 }
 
@@ -186,8 +186,8 @@ int gb_ld_addr_hl_addr_hl() {
     exit(1);
 }
 
-int gb_ld_addr_a16_a(uint16_t address, Cpu* cpu) {
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);
+int gb_ld_addr_a16_a(uint16_t address, Cpu* cpu, MemoryBankController* mc) {
+    mc->write(mc, address, cpu->registers[Register_A]);
     return 16;
 }
 
@@ -316,12 +316,12 @@ int gb_inc_rr(uint8_t* r1, uint8_t* r2) {
     return 8;
 }
 
-int gb_inc_addr_hl(Cpu* cpu) {
+int gb_inc_addr_hl(Cpu* cpu, MemoryBankController* mc) {
 
     const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    uint8_t value = cpu->memory_controller->read(cpu->memory_controller,address);
+    uint8_t value = mc->read(mc, address);
     inc(&value, &(cpu->registers[Register_F]));
-    cpu->memory_controller->write(cpu->memory_controller, address, value);
+    mc->write(mc, address, value);
     return 12;
 }
 
@@ -552,18 +552,18 @@ int gb_cp(uint8_t r1, uint8_t r2, uint8_t* flags) {
     return 4;
 }
 
-int gb_push_rr(uint8_t r1, uint8_t r2, Cpu* cpu) {
+int gb_push_rr(uint8_t r1, uint8_t r2, Cpu* cpu, MemoryBankController* mc) {
 
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr-1), r1);
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr-2), r2);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr-1), r1);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr-2), r2);
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
     return 16;
 }
 
-int gb_pop_rr(uint8_t* r1, uint8_t* r2, Cpu* cpu) {
+int gb_pop_rr(uint8_t* r1, uint8_t* r2, Cpu* cpu, MemoryBankController* mc) {
 
-    *r2 = cpu->memory_controller->read(cpu->memory_controller, cpu->stack_ptr);
-    *r1 = cpu->memory_controller->read(cpu->memory_controller, (uint16_t) (cpu->stack_ptr + 1));
+    *r2 = mc->read(mc, cpu->stack_ptr);
+    *r1 = mc->read(mc, (uint16_t) (cpu->stack_ptr + 1));
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr + 2);
     return 12;
 }
@@ -603,21 +603,21 @@ int gb_adc(uint8_t r, Cpu* cpu) {
     return 4;
 }
 
-int gb_ldh_addr_a8_a(uint8_t r, Cpu* cpu) {
+int gb_ldh_addr_a8_a(uint8_t r, Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = (uint16_t) (0xFF00 + r);
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);    
+    mc->write(mc, address, cpu->registers[Register_A]);    
     return 12;
 }
 
-int gb_ldh_a_addr_a8(uint8_t r, Cpu* cpu) {
+int gb_ldh_a_addr_a8(uint8_t r, Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = (uint16_t) (0xFF00 + r);
-    cpu->registers[Register_A] =  cpu->memory_controller->read(cpu->memory_controller, address);             
+    cpu->registers[Register_A] =  mc->read(mc, address);             
     return 12;
 }
 
-int gb_ld_addr_c_a(Cpu* cpu) {
+int gb_ld_addr_c_a(Cpu* cpu, MemoryBankController* mc) {
     const uint16_t address = (uint16_t) (0xFF00 + cpu->registers[Register_C]);
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);
+    mc->write(mc, address, cpu->registers[Register_A]);
     return 8;
 }
 
@@ -662,15 +662,15 @@ int gb_sbc(uint8_t r, Cpu* cpu) {
     return 4;
 }
 
-int gb_prefix_cb(Cpu* cpu) {
-    CB_Code cb_opcode = (CB_Code) cpu->memory_controller->read(cpu->memory_controller, cpu->program_counter);
-    return gb_execute_cb(cb_opcode, cpu);
+int gb_prefix_cb(Cpu* cpu, MemoryBankController* mc) {
+    CB_Code cb_opcode = (CB_Code) mc->read(mc, cpu->program_counter);
+    return gb_execute_cb(cb_opcode, cpu, mc);
 }
 
-int gb_ld_addr_hld_a(Cpu* cpu) {
+int gb_ld_addr_hld_a(Cpu* cpu, MemoryBankController* mc) {
         
     uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    cpu->memory_controller->write(cpu->memory_controller, address, cpu->registers[Register_A]);
+    mc->write(mc, address, cpu->registers[Register_A]);
 
     address--;
 
@@ -680,10 +680,10 @@ int gb_ld_addr_hld_a(Cpu* cpu) {
     return 8;
 }
 
-int gb_ld_a_addr_hld(Cpu* cpu) {
+int gb_ld_a_addr_hld(Cpu* cpu, MemoryBankController* mc) {
 
     uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    cpu->registers[Register_A] =  cpu->memory_controller->read(cpu->memory_controller, address);
+    cpu->registers[Register_A] =  mc->read(mc, address);
 
     address--;
     cpu->registers[Register_H] = (uint8_t) (address >> 8u);

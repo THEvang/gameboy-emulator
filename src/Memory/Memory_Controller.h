@@ -38,4 +38,4 @@ typedef struct MemoryBankController {
     void (*write) (struct MemoryBankController*, uint16_t, uint8_t);
 } MemoryBankController;
 
-void set_io(MemoryBankController* mc, Cartridge_Type mb_type);
+void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* header);

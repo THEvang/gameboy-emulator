@@ -13,7 +13,7 @@ void implied(Cpu* cpu) {
     cpu->program_counter++;
 }
 
-uint8_t immediate_byte(Cpu* cpu) {
+uint8_t immediate_byte(Cpu* cpu, MemoryBankController* mc) {
 
     if (cpu->halt_bug_triggered) {
         cpu->halt_bug_triggered = false;
@@ -21,10 +21,10 @@ uint8_t immediate_byte(Cpu* cpu) {
     }
 
     cpu->program_counter += 2;
-    return cpu->memory_controller->read(cpu->memory_controller, cpu->program_counter - 1);
+    return mc->read(mc, cpu->program_counter - 1);
 }
 
-uint16_t immediate_word(Cpu* cpu) {
+uint16_t immediate_word(Cpu* cpu, MemoryBankController* mc) {
 
     if (cpu->halt_bug_triggered) {
         cpu->halt_bug_triggered = false;
@@ -34,10 +34,10 @@ uint16_t immediate_word(Cpu* cpu) {
     cpu->program_counter += 3;
     const uint16_t pc = cpu->program_counter;
 
-    return combine_bytes(cpu->memory_controller->read(cpu->memory_controller, pc - 1), cpu->memory_controller->read(cpu->memory_controller, pc - 2));
+    return combine_bytes(mc->read(mc, pc - 1), mc->read(mc, pc - 2));
 }
 
-uint8_t hl_addressing(Cpu* cpu) {
+uint8_t hl_addressing(Cpu* cpu, MemoryBankController* mc) {
 
     if (cpu->halt_bug_triggered) {
         cpu->program_counter--;
@@ -46,5 +46,5 @@ uint8_t hl_addressing(Cpu* cpu) {
 
     cpu->program_counter++;
     const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
-    return cpu->memory_controller->read(cpu->memory_controller, address);
+    return mc->read(mc, address);
 }

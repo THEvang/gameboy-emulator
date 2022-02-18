@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int gb_execute(Opcode opcode, Cpu* cpu) {
+int gb_execute(Opcode opcode, Cpu* cpu, MemoryBankController* mc) {
     
     uint8_t* a = &(cpu->registers[Register_A]);
     uint8_t* b = &(cpu->registers[Register_B]);
@@ -24,11 +24,11 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_nop();
 
     case Opcode_LD_BC_D16:
-        return gb_ld_rr_d16(b, c, immediate_word(cpu));
+        return gb_ld_rr_d16(b, c, immediate_word(cpu, mc));
 
     case Opcode_LD_ADDR_BC_A:
         implied(cpu);
-        return gb_ld_addr_rr_a(*b, *c, cpu);
+        return gb_ld_addr_rr_a(*b, *c, cpu, mc);
 
     case Opcode_INC_BC:
         implied(cpu);
@@ -43,14 +43,14 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(b, f);
 
     case Opcode_LD_B_D8:
-        return gb_ld_r_r(b, immediate_byte(cpu));
+        return gb_ld_r_r(b, immediate_byte(cpu, mc));
 
     case Opcode_RLCA:
         implied(cpu);
         return gb_rlca(cpu);
 
     case Opcode_LD_ADDR_A16_SP:
-        return gb_ld_addr_a16_sp(immediate_word(cpu), cpu);
+        return gb_ld_addr_a16_sp(immediate_word(cpu, mc), cpu, mc);
 
     case Opcode_ADD_HL_BC:
         implied(cpu);
@@ -58,7 +58,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_A_ADDR_BC:
         implied(cpu);
-        return gb_ld_a_addr_rr(*b, *c, cpu);
+        return gb_ld_a_addr_rr(*b, *c, cpu, mc);
 
     case Opcode_DEC_BC:
         implied(cpu);
@@ -73,7 +73,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(c, f);
 
     case Opcode_LD_C_D8:
-        return gb_ld_r_r(c, immediate_byte(cpu));
+        return gb_ld_r_r(c, immediate_byte(cpu, mc));
 
     case Opcode_RRCA:
         implied(cpu);
@@ -84,11 +84,11 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_stop(cpu);
 
     case Opcode_LD_DE_D16:
-        return gb_ld_rr_d16(d, e, immediate_word(cpu));
+        return gb_ld_rr_d16(d, e, immediate_word(cpu, mc));
 
     case Opcode_LD_ADDR_DE_A:
         implied(cpu);
-        return gb_ld_addr_rr_a(*d, *e, cpu);
+        return gb_ld_addr_rr_a(*d, *e, cpu, mc);
 
     case Opcode_INC_DE:
         implied(cpu);
@@ -103,14 +103,14 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(d, f);
 
     case Opcode_LD_D_D8:
-        return gb_ld_r_r(d, immediate_byte(cpu));
+        return gb_ld_r_r(d, immediate_byte(cpu, mc));
 
     case Opcode_RLA:
         implied(cpu);
         return gb_rla(cpu);
 
     case Opcode_JR_R8:
-        return gb_jr(immediate_byte(cpu), true, cpu);
+        return gb_jr(immediate_byte(cpu, mc), true, cpu);
 
     case Opcode_ADD_HL_DE:
         implied(cpu);
@@ -118,7 +118,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_A_ADDR_DE:
         implied(cpu);
-        return gb_ld_a_addr_rr(*d, *e, cpu);
+        return gb_ld_a_addr_rr(*d, *e, cpu, mc);
 
     case Opcode_DEC_DE:
         implied(cpu);
@@ -133,21 +133,21 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(e, f);
 
     case Opcode_LD_E_D8:
-        return gb_ld_r_r(e, immediate_byte(cpu));
+        return gb_ld_r_r(e, immediate_byte(cpu, mc));
 
     case Opcode_RRA:
         implied(cpu);
         return gb_rra(cpu);
 
     case Opcode_JR_NZ_R8:
-        return gb_jr(immediate_byte(cpu), !test_flag(*f, Flag_Zero), cpu);
+        return gb_jr(immediate_byte(cpu, mc), !test_flag(*f, Flag_Zero), cpu);
 
     case Opcode_LD_HL_D16:
-        return gb_ld_rr_d16(h, l, immediate_word(cpu));
+        return gb_ld_rr_d16(h, l, immediate_word(cpu, mc));
 
     case Opcode_LD_ADDR_HLI_A:
         implied(cpu);
-        return gb_ldi_addr_hl_a(cpu);
+        return gb_ldi_addr_hl_a(cpu, mc);
 
     case Opcode_INC_HL:
         implied(cpu);
@@ -162,14 +162,14 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(h, f);
 
     case Opcode_LD_H_D8:
-        return gb_ld_r_r(h, immediate_byte(cpu));
+        return gb_ld_r_r(h, immediate_byte(cpu, mc));
 
     case Opcode_DAA:
         implied(cpu);
         return gb_daa(cpu);
 
     case Opcode_JR_Z_R8:
-        return gb_jr(immediate_byte(cpu), test_flag(*f, Flag_Zero), cpu);
+        return gb_jr(immediate_byte(cpu, mc), test_flag(*f, Flag_Zero), cpu);
 
     case Opcode_ADD_HL_HL:
         implied(cpu);
@@ -177,7 +177,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_A_ADDR_HLI:
         implied(cpu);
-        return gb_ldi_a_addr_hl(cpu);
+        return gb_ldi_a_addr_hl(cpu, mc);
 
     case Opcode_DEC_HL:
         implied(cpu);
@@ -192,21 +192,21 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(l, f);
 
     case Opcode_LD_L_D8:
-        return gb_ld_r_r(l, immediate_byte(cpu));
+        return gb_ld_r_r(l, immediate_byte(cpu, mc));
 
     case Opcode_CPL:
         implied(cpu);
         return gb_cpl(a, f);
 
     case Opcode_JR_NC_R8:
-        return gb_jr(immediate_byte(cpu), !test_flag(*f, Flag_Carry), cpu);
+        return gb_jr(immediate_byte(cpu, mc), !test_flag(*f, Flag_Carry), cpu);
 
     case Opcode_LD_SP_D16:
-        return gb_ld_sp(&(cpu->stack_ptr), immediate_word(cpu));
+        return gb_ld_sp(&(cpu->stack_ptr), immediate_word(cpu, mc));
 
     case Opcode_LD_ADDR_HLD_A:
         implied(cpu);
-        return gb_ld_addr_hld_a(cpu);
+        return gb_ld_addr_hld_a(cpu, mc);
 
     case Opcode_INC_SP:
         implied(cpu);
@@ -214,25 +214,25 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_INC_ADDR_HL:
         implied(cpu);
-        return gb_inc_addr_hl(cpu);
+        return gb_inc_addr_hl(cpu, mc);
 
     case Opcode_DEC_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_dec_r(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(*h, *l), value);
+        mc->write(mc, combine_bytes(*h, *l), value);
         return cycles;
     }
 
     case Opcode_LD_ADDR_HL_D8:
-        return gb_ld_addr_hl(immediate_byte(cpu), cpu);
+        return gb_ld_addr_hl(immediate_byte(cpu, mc), cpu, mc);
 
     case Opcode_SCF:
         implied(cpu);
         return gb_scf(f);
 
     case Opcode_JR_C_R8:
-        return gb_jr(immediate_byte(cpu), test_flag(*f, Flag_Carry), cpu);
+        return gb_jr(immediate_byte(cpu, mc), test_flag(*f, Flag_Carry), cpu);
 
     case Opcode_ADD_HL_SP:
         implied(cpu);
@@ -240,7 +240,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_A_ADDR_HLD:
         implied(cpu);
-        return gb_ld_a_addr_hld(cpu);
+        return gb_ld_a_addr_hld(cpu, mc);
 
     case Opcode_DEC_SP:
         implied(cpu);
@@ -255,7 +255,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_dec_r(a, f);
 
     case Opcode_LD_A_D8:
-        return gb_ld_r_r(a, immediate_byte(cpu)) + 4;
+        return gb_ld_r_r(a, immediate_byte(cpu, mc)) + 4;
 
     case Opcode_CCF:
         implied(cpu);
@@ -286,7 +286,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(b, *l);
 
     case Opcode_LD_B_ADDR_HL:
-        return gb_ld_r_r(b, hl_addressing(cpu));
+        return gb_ld_r_r(b, hl_addressing(cpu, mc));
 
     case Opcode_LD_B_A:
         implied(cpu);
@@ -317,7 +317,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(c, *l);
 
     case Opcode_LD_C_ADDR_HL:
-        return gb_ld_r_r(c, hl_addressing(cpu));
+        return gb_ld_r_r(c, hl_addressing(cpu, mc));
 
     case Opcode_LD_C_A:
         implied(cpu);
@@ -348,7 +348,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(d, *l);
 
     case Opcode_LD_D_ADDR_HL:
-        return gb_ld_r_r(d, hl_addressing(cpu));
+        return gb_ld_r_r(d, hl_addressing(cpu, mc));
 
     case Opcode_LD_D_A:
         implied(cpu);
@@ -379,7 +379,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(e, *l);
 
     case Opcode_LD_E_ADDR_HL:
-        return gb_ld_r_r(e, hl_addressing(cpu));
+        return gb_ld_r_r(e, hl_addressing(cpu, mc));
 
     case Opcode_LD_E_A:
         implied(cpu);
@@ -410,7 +410,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(h, *l);
 
     case Opcode_LD_H_ADDR_HL:
-        return gb_ld_r_r(h, hl_addressing(cpu)) + 4;
+        return gb_ld_r_r(h, hl_addressing(cpu, mc)) + 4;
 
     case Opcode_LD_H_A:
         implied(cpu);
@@ -441,7 +441,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(l, *l);
 
     case Opcode_LD_L_ADDR_HL:
-        return gb_ld_r_r(l, hl_addressing(cpu));
+        return gb_ld_r_r(l, hl_addressing(cpu, mc));
 
     case Opcode_LD_L_A:
         implied(cpu);
@@ -449,35 +449,35 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_ADDR_HL_B:
         implied(cpu);
-        return gb_ld_addr_hl(*b, cpu);
+        return gb_ld_addr_hl(*b, cpu, mc);
 
     case Opcode_LD_ADDR_HL_C:
         implied(cpu);
-        return gb_ld_addr_hl(*c, cpu);
+        return gb_ld_addr_hl(*c, cpu, mc);
 
     case Opcode_LD_ADDR_HL_D:
         implied(cpu);
-        return gb_ld_addr_hl(*d, cpu);
+        return gb_ld_addr_hl(*d, cpu, mc);
 
     case Opcode_LD_ADDR_HL_E:
         implied(cpu);
-        return gb_ld_addr_hl(*e, cpu);
+        return gb_ld_addr_hl(*e, cpu, mc);
 
     case Opcode_LD_ADDR_HL_H:
         implied(cpu);
-        return gb_ld_addr_hl(*h, cpu);
+        return gb_ld_addr_hl(*h, cpu, mc);
 
     case Opcode_LD_ADDR_HL_L:
         implied(cpu);
-        return gb_ld_addr_hl(*l, cpu);
+        return gb_ld_addr_hl(*l, cpu, mc);
 
     case Opcode_HALT:
         implied(cpu);
-        return gb_halt(cpu);
+        return gb_halt(cpu, mc);
 
     case Opcode_LD_ADDR_HL_A:
         implied(cpu);
-        return gb_ld_addr_hl(*a, cpu);
+        return gb_ld_addr_hl(*a, cpu, mc);
 
     case Opcode_LD_A_B:
         implied(cpu);
@@ -504,7 +504,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ld_r_r(a, *l);
 
     case Opcode_LD_A_ADDR_HL:
-        return gb_ld_r_r(a, hl_addressing(cpu));
+        return gb_ld_r_r(a, hl_addressing(cpu, mc));
 
     case Opcode_LD_A_A:
         implied(cpu);
@@ -535,7 +535,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_add(*l, cpu);
 
     case Opcode_ADD_A_ADDR_HL:
-        return gb_add(hl_addressing(cpu), cpu);
+        return gb_add(hl_addressing(cpu, mc), cpu);
 
     case Opcode_ADD_A_A:
         implied(cpu);
@@ -566,7 +566,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_adc(*l, cpu);
 
     case Opcode_ADC_A_ADDR_HL:
-        return gb_adc(hl_addressing(cpu), cpu);
+        return gb_adc(hl_addressing(cpu, mc), cpu);
 
     case Opcode_ADC_A_A:
         implied(cpu);
@@ -597,7 +597,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_sub(*l, cpu);
 
     case Opcode_SUB_ADDR_HL:
-        return gb_sub(hl_addressing(cpu), cpu);
+        return gb_sub(hl_addressing(cpu, mc), cpu);
 
     case Opcode_SUB_A:
         implied(cpu);
@@ -628,7 +628,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_sbc(*l, cpu);
 
     case Opcode_SBC_A_ADDR_HL:
-        return gb_sbc(hl_addressing(cpu), cpu);
+        return gb_sbc(hl_addressing(cpu, mc), cpu);
 
     case Opcode_SBC_A_A:
         implied(cpu);
@@ -659,7 +659,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_and(*l, cpu);
 
     case Opcode_AND_ADDR_HL:
-        return gb_and(hl_addressing(cpu), cpu);
+        return gb_and(hl_addressing(cpu, mc), cpu);
 
     case Opcode_AND_A:
         implied(cpu);
@@ -690,7 +690,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_xor(*l, cpu);
 
     case Opcode_XOR_ADDR_HL:
-        return gb_xor(hl_addressing(cpu), cpu);
+        return gb_xor(hl_addressing(cpu, mc), cpu);
 
     case Opcode_XOR_A:
         implied(cpu);
@@ -721,7 +721,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_or(*l, cpu);
 
     case Opcode_OR_ADDR_HL:
-        return gb_or(hl_addressing(cpu), cpu) + 4;
+        return gb_or(hl_addressing(cpu, mc), cpu) + 4;
 
     case Opcode_OR_A:
         implied(cpu);
@@ -752,7 +752,7 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_cp(*a, *l, f);
 
     case Opcode_CP_ADDR_HL:
-        return gb_cp(*a, hl_addressing(cpu), f);
+        return gb_cp(*a, hl_addressing(cpu, mc), f);
 
     case Opcode_CP_A:
         implied(cpu);
@@ -760,130 +760,130 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_RET_NZ:
         implied(cpu);
-        return gb_ret(!test_flag(*f, Flag_Zero), cpu);
+        return gb_ret(!test_flag(*f, Flag_Zero), cpu, mc);
 
     case Opcode_POP_BC:
         implied(cpu);
-        return gb_pop_rr(b, c, cpu);
+        return gb_pop_rr(b, c, cpu, mc);
 
     case Opcode_JP_NZ_A16:
-        return gb_jump(immediate_word(cpu), !test_flag(*f, Flag_Zero), cpu);
+        return gb_jump(immediate_word(cpu, mc), !test_flag(*f, Flag_Zero), cpu);
 
     case Opcode_JP_A16:
-        return gb_jump(immediate_word(cpu), true, cpu);
+        return gb_jump(immediate_word(cpu, mc), true, cpu);
 
     case Opcode_CALL_NZ_A16:
-        return gb_call(immediate_word(cpu), !test_flag(*f, Flag_Zero), cpu);
+        return gb_call(immediate_word(cpu, mc), !test_flag(*f, Flag_Zero), cpu, mc);
 
     case Opcode_PUSH_BC:
         implied(cpu);
-        return gb_push_rr(*b, *c, cpu);
+        return gb_push_rr(*b, *c, cpu, mc);
 
     case Opcode_ADD_A_D8:
-        return gb_add(immediate_byte(cpu), cpu);
+        return gb_add(immediate_byte(cpu, mc), cpu);
 
     case Opcode_RST_00H:
         implied(cpu);
-        return gb_rst(0x00, cpu);
+        return gb_rst(0x00, cpu, mc);
 
     case Opcode_RET_Z:
         implied(cpu);
-        return gb_ret(test_flag(*f, Flag_Zero), cpu);
+        return gb_ret(test_flag(*f, Flag_Zero), cpu, mc);
 
     case Opcode_RET:
         implied(cpu);
-        return gb_ret(true, cpu);
+        return gb_ret(true, cpu, mc);
 
     case Opcode_JP_Z_A16:
-        return gb_jump(immediate_word(cpu), test_flag(*f, Flag_Zero), cpu);
+        return gb_jump(immediate_word(cpu, mc), test_flag(*f, Flag_Zero), cpu);
 
     case Opcode_PREFIX_CB:
         implied(cpu);
-        return gb_prefix_cb(cpu);
+        return gb_prefix_cb(cpu, mc);
 
     case Opcode_CALL_Z_A16:
-        return gb_call(immediate_word(cpu), test_flag(*f, Flag_Zero), cpu);
+        return gb_call(immediate_word(cpu, mc), test_flag(*f, Flag_Zero), cpu, mc);
 
     case Opcode_CALL_A16:
-        return gb_call(immediate_word(cpu), true, cpu);
+        return gb_call(immediate_word(cpu, mc), true, cpu, mc);
 
     case Opcode_ADC_A_D8:
-        return gb_adc(immediate_byte(cpu), cpu);
+        return gb_adc(immediate_byte(cpu, mc), cpu);
 
     case Opcode_RST_08H:
         implied(cpu);
-        return gb_rst(0x08, cpu);
+        return gb_rst(0x08, cpu, mc);
 
     case Opcode_RET_NC:
         implied(cpu);
-        return gb_ret(!test_flag(*f, Flag_Carry), cpu);
+        return gb_ret(!test_flag(*f, Flag_Carry), cpu, mc);
 
     case Opcode_POP_DE:
         implied(cpu);
-        return gb_pop_rr(d, e, cpu);
+        return gb_pop_rr(d, e, cpu, mc);
 
     case Opcode_JP_NC_A16:
-        return gb_jump(immediate_word(cpu), !test_flag(*f, Flag_Carry), cpu);
+        return gb_jump(immediate_word(cpu, mc), !test_flag(*f, Flag_Carry), cpu);
 
     case Opcode_CALL_NC_A16:
-        return gb_call(immediate_word(cpu), !test_flag(*f, Flag_Carry), cpu);
+        return gb_call(immediate_word(cpu, mc), !test_flag(*f, Flag_Carry), cpu, mc);
 
     case Opcode_PUSH_DE:
         implied(cpu);
-        return gb_push_rr(*d, *e, cpu);
+        return gb_push_rr(*d, *e, cpu, mc);
 
     case Opcode_SUB_D8:
-        return gb_sub(immediate_byte(cpu), cpu) + 4;
+        return gb_sub(immediate_byte(cpu, mc), cpu) + 4;
 
     case Opcode_RST_10H:
         implied(cpu);
-        return gb_rst(0x10, cpu);
+        return gb_rst(0x10, cpu, mc);
 
     case Opcode_RET_C:
         implied(cpu);
-        return gb_ret(test_flag(*f, Flag_Carry), cpu);
+        return gb_ret(test_flag(*f, Flag_Carry), cpu, mc);
 
     case Opcode_RETI:
         implied(cpu);
-        return gb_reti(cpu);
+        return gb_reti(cpu, mc);
 
     case Opcode_JP_C_A16:
-        return gb_jump(immediate_word(cpu), test_flag(*f, Flag_Carry), cpu);
+        return gb_jump(immediate_word(cpu, mc), test_flag(*f, Flag_Carry), cpu);
 
     case Opcode_CALL_C_A16:
-        return gb_call(immediate_word(cpu), test_flag(*f, Flag_Carry), cpu);
+        return gb_call(immediate_word(cpu, mc), test_flag(*f, Flag_Carry), cpu, mc);
 
     case Opcode_SBC_A_D8:
-        return gb_sbc(immediate_byte(cpu), cpu) + 4;
+        return gb_sbc(immediate_byte(cpu, mc), cpu) + 4;
 
     case Opcode_RST_18H:
         implied(cpu);
-        return gb_rst(0x18, cpu);
+        return gb_rst(0x18, cpu, mc);
 
     case Opcode_LDH_ADDR_A8_A:
-        return gb_ldh_addr_a8_a(immediate_byte(cpu), cpu);
+        return gb_ldh_addr_a8_a(immediate_byte(cpu, mc), cpu, mc);
 
     case Opcode_POP_HL:
         implied(cpu);
-        return gb_pop_rr(h, l, cpu);
+        return gb_pop_rr(h, l, cpu, mc);
 
     case Opcode_LD_ADDR_C_A:
         implied(cpu);
-        return gb_ld_addr_c_a(cpu);
+        return gb_ld_addr_c_a(cpu, mc);
 
     case Opcode_PUSH_HL:
         implied(cpu);
-        return gb_push_rr(*h, *l, cpu);
+        return gb_push_rr(*h, *l, cpu, mc);
 
     case Opcode_AND_D8:
-        return gb_and(immediate_byte(cpu), cpu) + 4;
+        return gb_and(immediate_byte(cpu, mc), cpu) + 4;
 
     case Opcode_RST_20H:
         implied(cpu);
-        return gb_rst(0x20, cpu);
+        return gb_rst(0x20, cpu, mc);
 
     case Opcode_ADD_SP_R8:
-        return gb_add_sp_r8(immediate_byte(cpu), cpu);
+        return gb_add_sp_r8(immediate_byte(cpu, mc), cpu);
 
     case Opcode_JP_ADDR_HL:
     {
@@ -893,28 +893,28 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
     }
 
     case Opcode_LD_ADDR_A16_A:
-        return gb_ld_addr_a16_a(immediate_word(cpu), cpu);
+        return gb_ld_addr_a16_a(immediate_word(cpu, mc), cpu, mc);
 
     case Opcode_XOR_D8:
-        return gb_xor(immediate_byte(cpu), cpu) + 4;
+        return gb_xor(immediate_byte(cpu, mc), cpu) + 4;
 
     case Opcode_RST_28H:
         implied(cpu);
-        return gb_rst(0x28, cpu);
+        return gb_rst(0x28, cpu, mc);
 
     case Opcode_LDH_A_ADDR_A8:
-        return gb_ldh_a_addr_a8(immediate_byte(cpu), cpu);
+        return gb_ldh_a_addr_a8(immediate_byte(cpu, mc), cpu, mc);
 
     case Opcode_POP_AF:
     {
         implied(cpu);
-        int cycles = gb_pop_rr(a, f, cpu);
+        int cycles = gb_pop_rr(a, f, cpu, mc);
         *f &= 0xF0u;
         return cycles;
     }
     case Opcode_LD_A_ADDR_C:
         implied(cpu);
-        return gb_ld_a_addr_c(cpu);
+        return gb_ld_a_addr_c(cpu, mc);
 
     case Opcode_DI:
         implied(cpu);
@@ -922,17 +922,17 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_PUSH_AF:
         implied(cpu);
-        return gb_push_rr(*a, *f, cpu);
+        return gb_push_rr(*a, *f, cpu, mc);
 
     case Opcode_OR_D8:
-        return gb_or(immediate_byte(cpu), cpu);
+        return gb_or(immediate_byte(cpu, mc), cpu);
 
     case Opcode_RST_30H:
         implied(cpu);
-        return gb_rst(0x30, cpu);
+        return gb_rst(0x30, cpu, mc);
 
     case Opcode_LD_HL_SPR8:
-        return gb_ld_hl_spr8(immediate_byte(cpu), cpu);
+        return gb_ld_hl_spr8(immediate_byte(cpu, mc), cpu);
 
     case Opcode_LD_SP_HL:
         implied(cpu);
@@ -940,8 +940,8 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
 
     case Opcode_LD_A_ADDR_A16:
         {
-            uint16_t address = immediate_word(cpu);
-            return gb_ld_r_r(a, cpu->memory_controller->read(cpu->memory_controller, address));
+            uint16_t address = immediate_word(cpu, mc);
+            return gb_ld_r_r(a, mc->read(mc, address));
         }
 
     case Opcode_EI:
@@ -949,11 +949,11 @@ int gb_execute(Opcode opcode, Cpu* cpu) {
         return gb_ei(cpu);
 
     case Opcode_CP_D8:
-        return gb_cp(*a, immediate_byte(cpu), f) +4;
+        return gb_cp(*a, immediate_byte(cpu, mc), f) +4;
 
     case Opcode_RST_38H:
         implied(cpu);
-        return gb_rst(0x38, cpu);
+        return gb_rst(0x38, cpu, mc);
 
     default:
         printf("Invalid Opcode: %d\n", opcode);
@@ -1010,7 +1010,7 @@ int get_bit_index(CB_Code opcode) {
     return column_index + row_index;
 }
 
-int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
+int gb_execute_cb(CB_Code opcode, Cpu* cpu, MemoryBankController* mc) {
 
     uint8_t* reg = &(cpu->registers[get_cb_register(opcode)]);
     uint8_t* f = &(cpu->registers[Register_F]);
@@ -1028,9 +1028,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_RLC_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_rlc(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1046,9 +1046,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_RRC_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_rrc(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1064,9 +1064,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_RL_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_rl(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1082,9 +1082,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_RR_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_rr(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1100,9 +1100,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_SLA_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_sla(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1118,9 +1118,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_SRA_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_sra(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1136,9 +1136,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_SWAP_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_swap(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1154,9 +1154,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
 
     case CB_Code_SRL_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_slr(&value, f);
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1227,7 +1227,7 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     case CB_Code_BIT_5_ADDR_HL:
     case CB_Code_BIT_6_ADDR_HL:
     case CB_Code_BIT_7_ADDR_HL:
-        return gb_bit(hl_addressing(cpu), get_bit_index(opcode), f);
+        return gb_bit(hl_addressing(cpu, mc), get_bit_index(opcode), f);
 
     case CB_Code_RES_0_B:
     case CB_Code_RES_0_C:
@@ -1297,9 +1297,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     case CB_Code_RES_6_ADDR_HL:
     case CB_Code_RES_7_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_res(&value, get_bit_index(opcode));
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 
@@ -1371,9 +1371,9 @@ int gb_execute_cb(CB_Code opcode, Cpu* cpu) {
     case CB_Code_SET_6_ADDR_HL:
     case CB_Code_SET_7_ADDR_HL:
     {
-        uint8_t value = hl_addressing(cpu);
+        uint8_t value = hl_addressing(cpu, mc);
         int cycles = gb_set(&value, get_bit_index(opcode));
-        cpu->memory_controller->write(cpu->memory_controller, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
+        mc->write(mc, combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]), value);
         return cycles;
     }
 

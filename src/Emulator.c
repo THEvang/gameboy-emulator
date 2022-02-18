@@ -2,27 +2,14 @@
 #include <time.h>
 
 #include "Emulator.h"
-#include "Memory/Memory_Banks.h"
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
+#include "Memory/Memory_Controller.h"
 
 void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulator) {
 
     emulator->gameboy_state.memory_bank_controller.rom = rom->data;
-
-    emulator->gameboy_state.memory_bank_controller.banking_register_1 = 1;
-    emulator->gameboy_state.memory_bank_controller.banking_register_2 = 0;
-    emulator->gameboy_state.memory_bank_controller.rom_bank_mask = header->rom_banks - 1;
-    emulator->gameboy_state.memory_bank_controller.ram_bank_mask = header->rom_banks == 1 ? header->rom_banks :
-        header->rom_banks -1;
-
-    emulator->gameboy_state.memory_bank_controller.ram_enabled = false;
-    emulator->gameboy_state.memory_bank_controller.banking_mode = Banking_Mode_ROM;
-    emulator->gameboy_state.memory_bank_controller.buttons = 0xFF;
-    emulator->gameboy_state.cpu.memory_controller = &emulator->gameboy_state.memory_bank_controller;
-
-    const Cartridge_Type mb_type = header->type;
-    set_io(&emulator->gameboy_state.memory_bank_controller, mb_type);
+    gb_memory_set_initial_state(&emulator->gameboy_state.memory_bank_controller, header);
     
     emulator->gameboy_state.ppu.scanline_counter = 0;
 
@@ -31,7 +18,7 @@ void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulat
     emulator->gameboy_state.timer.tima_speed = 1024;
     emulator->gameboy_state.memory_bank_controller.div_register = 0xABCC;
 
-    set_initial_state(&emulator->gameboy_state.cpu);
+    gb_cpu_set_initial_state(&emulator->gameboy_state.cpu);
     
     sdl2_input_handler_init();
     emulator->input_handler = sdl2_input_handler;

@@ -2,7 +2,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "Memory/Memory_Controller.h"
 
 typedef enum Cpu_Register {
     Register_A,
@@ -33,12 +32,10 @@ typedef struct Cpu {
 
     bool is_halted;
     bool halt_bug_triggered;
-
-    MemoryBankController* memory_controller;
     uint8_t registers[8];
 } Cpu;
 
-void set_initial_state(Cpu* cpu);
+void gb_cpu_set_initial_state(Cpu* cpu);
 
 bool test_flag(uint8_t flags, Cpu_Flag flag);
 void set_flag(uint8_t* flags, Cpu_Flag flag);

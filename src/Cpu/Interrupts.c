@@ -3,13 +3,13 @@
 #include "Cpu/Cpu.h"
 #include "Utilities/BitOperations.h"
 
-int gb_handle_interrupts(Cpu* cpu) {
+int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
 
     for(int i = 0; i <= Interrupts_Joypad; i++) {
-        if(gb_is_enabled(cpu->memory_controller, (Interrupts) i) && gb_is_requested(cpu->memory_controller, (Interrupts) i)) {
+        if(gb_is_enabled(mc, (Interrupts) i) && gb_is_requested(mc, (Interrupts) i)) {
             const uint16_t vector = gb_to_vector((Interrupts) i);
-            gb_call_interrupt_vector(cpu, vector);
-            gb_clear_interrupt(cpu->memory_controller, (Interrupts) i);
+            gb_call_interrupt_vector(cpu, vector, mc);
+            gb_clear_interrupt(mc, (Interrupts) i);
             cpu->interrupts_enabled = false;
             return 20;
         }
@@ -52,13 +52,13 @@ bool gb_is_enabled(MemoryBankController* mc, Interrupts interrupt) {
     return test_bit_8bit(interrupts_enabled, interrupt);
 }
 
-void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector) {
+void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector, MemoryBankController* mc) {
 
     const uint8_t pc_low = (uint8_t) (cpu->program_counter & 0xFFU);
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8U);
 
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 1), pc_high);
-    cpu->memory_controller->write(cpu->memory_controller, (uint16_t) (cpu->stack_ptr - 2), pc_low);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 1), pc_high);
+    mc->write(mc, (uint16_t) (cpu->stack_ptr - 2), pc_low);
 
     cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
     cpu->program_counter = (uint16_t) (interrupt_vector);
