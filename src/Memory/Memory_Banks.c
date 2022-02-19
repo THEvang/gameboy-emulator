@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <assert.h>
 
 #include "Memory_Controller.h"

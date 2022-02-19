@@ -57,10 +57,9 @@ void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector, MemoryBankCon
     const uint8_t pc_low = (uint8_t) (cpu->program_counter & 0xFFU);
     const uint8_t pc_high = (uint8_t) (cpu->program_counter >> 8U);
 
-    mc->write(mc, (uint16_t) (cpu->stack_ptr - 1), pc_high);
-    mc->write(mc, (uint16_t) (cpu->stack_ptr - 2), pc_low);
+    mc->write(mc, --cpu->stack_ptr, pc_high);
+    mc->write(mc, --cpu->stack_ptr, pc_low);
 
-    cpu->stack_ptr = (uint16_t) (cpu->stack_ptr - 2);
     cpu->program_counter = (uint16_t) (interrupt_vector);
 }
 
