@@ -194,26 +194,52 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
     gb_common_writes(mc, address, data);
 }
 
-    mc->memory[address] = data;
-}
-        return;
+uint8_t gb_read_mbc_3(MemoryBankController* mc, uint16_t address) {
+
+    if(address <= 0x3FFF) {
+        return mc->rom[address];
     }
 
-    if (address == 0xFF44) {
-        mc->memory[address] = 0;
-        return;
+    if(address >= 0x4000 && address <= 0x7FFF) {
+        int offset = address - ROM_BANK_SIZE;
+        int effective_bank = ((mc->banking_register_2 << 5) | (mc->banking_register_1));
+        int read_addr = offset + (effective_bank & mc->rom_bank_mask) * ROM_BANK_SIZE;
+        return mc->rom[read_addr];
     }
     
-    if (address == DMA_ADDRESS) {
-        gb_dma_transfer(mc, data);
-        return;
-    } 
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        if (mc->ram_enabled) {
+            int offset = address - 0xA000;
+            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
+            int read_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
+            return mc->ram[read_addr];
+        }
+        return 0xFF;
+    }
 
-    mc->memory[address] = data;
+    return gb_common_reads(mc, address);
 }
 
-// uint8_t gb_read_mbc_3(MemoryBankController* mc, uint16_t address);
-// void gb_write_mbc_3(MemoryBankController* mc, uint16_t address, uint8_t data);
+
+void gb_write_mbc_3(MemoryBankController* mc, uint16_t address, uint8_t data) {
+
+    if (address >= 0x2000 && address <= 0x3FFF) {
+        gb_set_rom_bank_number(mc, data, 0xFF);
+        return;
+    }
+
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        if(mc->ram_enabled) {
+            int offset = address - 0xA000;
+            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
+            int write_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
+            mc->ram[write_addr] = data;
+        }
+        return;
+    }
+
+    gb_common_writes(mc, address, data);
+}
 
 uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
 

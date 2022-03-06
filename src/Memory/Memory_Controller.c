@@ -16,6 +16,10 @@ void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* head
             mc->read = gb_read_mbc_1;
             mc->write = gb_write_mbc_1;
             break;
+        case MB_MBC_3:
+            mc->read = gb_read_mbc_3;
+            mc->write = gb_write_mbc_3;
+            break;
         case MB_MBC_5:
             mc->read = gb_read_mbc_5;
             mc->write = gb_write_mbc_5;
