@@ -8,46 +8,21 @@
 
 //Addressing Modes
 void implied(Cpu* cpu) {
-
-    if (cpu->halt_bug_triggered) {
-        cpu->halt_bug_triggered = false;
-        cpu->program_counter--;
-    }
-
     cpu->program_counter++;
 }
 
 uint8_t immediate_byte(Cpu* cpu, MemoryBankController* mc) {
-
-    if (cpu->halt_bug_triggered) {
-        cpu->halt_bug_triggered = false;
-        cpu->program_counter--;
-    }
-
-    cpu->program_counter += 2;
-    return mc->read(mc, cpu->program_counter - 1);
+    cpu->program_counter++;
+    return mc->read(mc, cpu->program_counter++);
 }
 
 uint16_t immediate_word(Cpu* cpu, MemoryBankController* mc) {
-
-    if (cpu->halt_bug_triggered) {
-        cpu->halt_bug_triggered = false;
-        cpu->program_counter--;
-    }
-
     cpu->program_counter += 3;
     const uint16_t pc = cpu->program_counter;
-
     return combine_bytes(mc->read(mc, pc - 1), mc->read(mc, pc - 2));
 }
 
 uint8_t hl_addressing(Cpu* cpu, MemoryBankController* mc) {
-
-    if (cpu->halt_bug_triggered) {
-        cpu->program_counter--;
-        cpu->halt_bug_triggered = false;
-    }
-
     cpu->program_counter++;
     const uint16_t address = combine_bytes(cpu->registers[Register_H], cpu->registers[Register_L]);
     return mc->read(mc, address);
@@ -63,6 +38,11 @@ int gb_execute(Opcode opcode, Cpu* cpu, MemoryBankController* mc) {
     uint8_t* f = &(cpu->registers[Register_F]);
     uint8_t* h = &(cpu->registers[Register_H]);
     uint8_t* l = &(cpu->registers[Register_L]);
+
+    if (cpu->halt_bug_triggered) {
+        cpu->halt_bug_triggered = false;
+        cpu->program_counter--;
+    }
 
     switch (opcode) {
     case Opcode_NOP:
@@ -1042,7 +1022,6 @@ int get_bit_index(CB_Code opcode) {
     int column_index = lower <= 0x07 ? 0 : 1;
 
     uint8_t upper = (uint8_t) (opcode) & 0xF0;
-
 
     int row_index = 6;
     if(upper == 0x40 || upper == 0x80 || upper == 0xC0) {

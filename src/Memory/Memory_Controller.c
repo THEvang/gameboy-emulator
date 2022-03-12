@@ -1,5 +1,6 @@
 #include "Memory/Memory_Controller.h"
 #include "Memory_Banks.h"
+#include "Registers.h"
 
 void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* header) {
 
@@ -64,7 +65,7 @@ void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* head
 
     mc->write(mc, 0xFF4A, 0x00);
     mc->write(mc, 0xFF4B, 0x00);
-    mc->write(mc, 0xFFFF, 0x00);
+    mc->write(mc, IE, 0x00);
 
     mc->banking_register_1 = 1;
     mc->banking_register_2 = 0;

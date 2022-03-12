@@ -5,6 +5,7 @@
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
 #include "Cpu/Interrupts.h"
+#include "Registers.h"
 
 static const int g_coincidence_bit = 2;
 

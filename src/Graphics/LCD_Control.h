@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include "Memory/Memory_Controller.h"
 
-#define LCD_CONTROL_ADDRESS 0xFF40
-
 enum {
     BACKGROUND_DISPLAY = 1 << 0,
     SPRITE_DISPLAY = 1 << 1,

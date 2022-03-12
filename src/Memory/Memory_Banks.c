@@ -1,19 +1,14 @@
 #include <assert.h>
 
 #include "Memory_Controller.h"
+#include "Registers.h"
 
 #define ROM_BANK_SIZE 0x4000
 #define RAM_BANK_SIZE 0x2000
 
-#define DMA_ADDRESS 0xFF46
-#define DIV_REGISTER_ADDRESS 0xFF04
-#define LDC_Y_COORDINATE_ADDRESS 0xFF44
-#define JOYPAD_INPUT_ADDRESS 0xFF00
-#define INTERRUPT_FLAG_ADDRESS 0xFF0F
-
 uint8_t gb_read_joypad_input(MemoryBankController* mc) {
 
-    uint8_t data = mc->memory[JOYPAD_INPUT_ADDRESS];
+    uint8_t data = mc->memory[JOYP];
 
     if ( !(data & Action_Button)) {
         return (mc->buttons >> 4) & 0x0F;
@@ -49,14 +44,14 @@ void gb_common_writes(MemoryBankController* mc, uint16_t address, uint8_t data) 
     }
 
     switch (address) {
-    case DIV_REGISTER_ADDRESS:
+    case DIV:
         mc->memory[address] = 0;
         mc->div_register = 0;
         break;
-    case DMA_ADDRESS:
+    case DMA:
         gb_dma_transfer(mc, data);
         break;
-    case LDC_Y_COORDINATE_ADDRESS:
+    case LY:
         mc->memory[address] = 0;
         break;
     default:
@@ -68,9 +63,9 @@ void gb_common_writes(MemoryBankController* mc, uint16_t address, uint8_t data) 
 uint8_t gb_common_reads(MemoryBankController* mc, uint16_t address) {
 
     switch (address) {
-    case JOYPAD_INPUT_ADDRESS:
+    case JOYP:
         return gb_read_joypad_input(mc);
-    case INTERRUPT_FLAG_ADDRESS:
+    case IF:
         return mc->memory[address] | 0xE0;
     case 0xFF01: case 0xFF18: case 0xFF1B:
     case 0xFF1D: case 0xFF20:

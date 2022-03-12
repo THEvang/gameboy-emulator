@@ -1,0 +1,21 @@
+enum Registers {
+    DIV = 0xFF04,
+    TIMA = 0xFF05,
+    TMA = 0xFF06,
+    TAC = 0xFF07,
+    STAT = 0xFF41,
+    SCY = 0xFF42,
+    SCX = 0xFF43,
+    LY = 0xFF44,
+    LYC = 0xFF45,
+    WY = 0xFF4A,
+    WX = 0xFF4B,
+    LCDC = 0xFF40,
+    DMA = 0xFF46,
+    JOYP = 0xFF00,
+    IF = 0xFF0F,
+    IE = 0xFFFF,
+    BGP = 0xFF47,
+    OBP0 = 0xFF48,
+    OBP1 = 0xFF49
+};

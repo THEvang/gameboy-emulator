@@ -3,9 +3,7 @@
 #include "Cpu/Interrupts.h"
 #include "Cpu/Cpu.h"
 #include "Utilities/BitOperations.h"
-
-#define INTERRUPT_REQUEST_ADDRESS 0xFF0F
-#define INTERRUPT_ENABLED_ADDRESS 0xFFFF
+#include "Registers.h"
 
 uint16_t gb_to_vector(Interrupts interrupt) {
 
@@ -40,35 +38,35 @@ int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
 
 void gb_request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
-    uint8_t interrupt_request = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
+    uint8_t interrupt_request = mc->memory[IF] | 0xE0;
 
     set_bit(&interrupt_request, interrupt);
-    mc->write(mc, INTERRUPT_REQUEST_ADDRESS, interrupt_request);
+    mc->write(mc, IF, interrupt_request);
 }
 
 void gb_clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
-    uint8_t interrupt_request = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
+    uint8_t interrupt_request = mc->memory[IF] | 0xE0;
 
     clear_bit(&interrupt_request, interrupt);
-    mc->write(mc, INTERRUPT_REQUEST_ADDRESS, interrupt_request);
+    mc->write(mc, IF, interrupt_request);
 }
 
 bool gb_should_exit_halt(MemoryBankController* mc) {
 
-    const uint8_t interrupt_requests = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
-    const uint8_t interrupts_enabled = mc->memory[INTERRUPT_ENABLED_ADDRESS];
+    const uint8_t interrupt_requests = mc->memory[IF] | 0xE0;
+    const uint8_t interrupts_enabled = mc->memory[IE];
 
     return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
 bool gb_is_requested(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t interrupt_requests = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
+    const uint8_t interrupt_requests = mc->memory[IF] | 0xE0;
     return test_bit_8bit(interrupt_requests, interrupt);
 }
 
 bool gb_is_enabled(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t interrupts_enabled = mc->memory[INTERRUPT_ENABLED_ADDRESS];
+    const uint8_t interrupts_enabled = mc->memory[IE];
     return test_bit_8bit(interrupts_enabled, interrupt);
 }
 
