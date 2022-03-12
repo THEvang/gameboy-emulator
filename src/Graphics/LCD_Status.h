@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
 #include "Memory/Memory_Controller.h"
 
 typedef enum LCD_Modes {

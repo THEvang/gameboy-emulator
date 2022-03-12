@@ -103,8 +103,8 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 
         uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
         
-        Color pixel_color = gb_get_color(color_index, 0xFF47, mc);
-        gb_set_pixel(ppu->screen_buffer , (Point) {.x = pixel_x, .y = scanline}, pixel_color);
+        int32_t pixel_color = gb_get_color(color_index, 0xFF47, mc, ppu);
+        gb_set_color(ppu->screen_buffer , (Point) {.x = pixel_x, .y = scanline}, pixel_color);
     }
 }
 
@@ -188,43 +188,34 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
             uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
 
             const uint16_t palette_address = (sprites[sprite].attributes & PALETTE_NUMBER) ? 0xFF49 : 0xFF48;
-            Color col = gb_get_color(color_index, palette_address, mc);
+            int32_t col = gb_get_color(color_index, palette_address, mc, ppu);
 
             // white is transparent for sprites.
-            if (col.blue == 0xFF && col.red == 0xFF && col.green == 0xFF) {
+            if (col == ppu->palette[0]) {
                 continue;
             }
             
             int xPix = 0 - tilePixel;
             xPix += 7 ;
             int pixel = sprites[sprite].x_pos + xPix;
-            gb_set_pixel(&ppu->screen_buffer, (Point) {.x = (uint8_t)(pixel), .y = scanline}, col);
+            gb_set_color(&ppu->screen_buffer, (Point) {.x = (uint8_t)(pixel), .y = scanline}, col);
         }
     }
 }
 
-Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc) {
+int32_t gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc, PPU* ppu) {
     
     const uint8_t palette = mc->memory[palette_address];
     uint8_t mask = 0x03;
     uint8_t color =  (uint8_t) (palette >> (color_index * 2)) & mask;
-
-    static Color colors[4] = {
-        {.red = 0xFF, .green = 0xFF, .blue = 0xFF, .alpha = 0xFF},
-        {.red = 0xA9, .green = 0xA9, .blue = 0xA9, .alpha = 0xFF},
-        {.red = 0x54, .green = 0x54, .blue = 0x54, .alpha = 0xFF},
-        {.red = 0x00, .green = 0x00, .blue = 0x00, .alpha = 0xFF}
-    };
-
-    return colors[color];
+    return ppu->palette[color];
 }
 
- void gb_set_pixel(PPU* ppu, Point screen_position, Color color) {
+ void gb_set_color(PPU* ppu, Point screen_coordinates, int32_t color) {
 
-    uint8_t y_pos = screen_position.y;
-    uint8_t x_pos = screen_position.x;
+    uint8_t y_pos = screen_coordinates.y;
+    uint8_t x_pos = screen_coordinates.x;
 
     int index = x_pos + y_pos * GB_SCREEN_WIDTH;
-
-    ppu->screen_buffer[index] = (uint32_t) (color.red << 24u | color.green << 16u | color.blue << 8u | color.alpha);
+    ppu->screen_buffer[index] = color;
 }

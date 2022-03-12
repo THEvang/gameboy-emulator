@@ -12,15 +12,9 @@ typedef struct Point {
     uint8_t y;
 } Point;
 
-typedef struct Color {  
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha; 
-} Color;
-
 typedef struct PPU {
     int32_t screen_buffer[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
+    int32_t palette[4];
     int scanline_counter;
 } PPU;
 
@@ -40,8 +34,8 @@ typedef struct Sprite_Attribute {
 } Sprite_Attribute;
 
 void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles);
-Color gb_get_color(uint8_t color_id, uint16_t palette_address, MemoryBankController* mc);
+int32_t gb_get_color(uint8_t color_id, uint16_t palette_address, MemoryBankController* mc, PPU* ppu);
 void gb_draw_scanline(PPU* ppu, MemoryBankController*);
 void gb_draw_background(PPU* ppu, MemoryBankController*);
 void gb_draw_sprites(PPU* ppu, MemoryBankController*);
-void gb_set_pixel(PPU* arr, Point screen_position, Color color);
+void gb_set_color(PPU* ppu, Point screen_coordinates, int32_t color);

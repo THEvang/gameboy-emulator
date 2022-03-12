@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <stdlib.h>
 
 #include "Emulator.h"
 #include "Renderers/SDL2_Renderer.h"
@@ -21,7 +22,7 @@ void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulat
     emulator->gameboy_state.memory_bank_controller.rom = rom->data;
     gb_memory_set_initial_state(&emulator->gameboy_state.memory_bank_controller, header);
     
-    emulator->gameboy_state.ppu.scanline_counter = 0;
+    emulator->gameboy_state.ppu = (PPU) {{0},  {0xFFFFFFFF, 0xA9A9A9FF, 0x545454FF, 0x000000FF}, 0};
 
     emulator->gameboy_state.timer.prev_delay = false;
     emulator->gameboy_state.timer.tima_has_overflowed = false;

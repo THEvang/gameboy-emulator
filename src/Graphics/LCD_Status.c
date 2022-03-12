@@ -1,9 +1,10 @@
-#include "Graphics/LCD_Status.h"
+#include <stdbool.h>
+#include <stdint.h>
 
+#include "Graphics/LCD_Status.h"
 #include "Memory/Memory_Controller.h"
 #include "Utilities/BitOperations.h"
 #include "Cpu/Interrupts.h"
-#include "Graphics/LCD_Control.h"
 
 static const int g_coincidence_bit = 2;
 
@@ -59,8 +60,7 @@ void gb_clear_coincidence_flag(MemoryBankController* mc) {
 }
 
 LCD_Modes gb_get_mode(MemoryBankController* mc) {
-    uint8_t status = mc->memory[STAT];
-    return status & 0x03;
+    return mc->memory[STAT] & 0x03;
 }
 
 void gb_set_mode(MemoryBankController* mc, LCD_Modes mode) {
