@@ -1,5 +1,4 @@
 add_subdirectory(App)
-add_subdirectory(Input)
 add_subdirectory(Cpu)
 add_subdirectory(Gameboy)
 add_subdirectory(Memory)

@@ -6,6 +6,4 @@ target_sources(gb-core
     LCD_Status.c
     PPU.h
     PPU.c
-    Pixel.h
-    Pixel.c
 )

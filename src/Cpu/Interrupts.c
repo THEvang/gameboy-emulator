@@ -1,7 +1,27 @@
-#include "Cpu/Interrupts.h"
+#include <stdint.h>
 
+#include "Cpu/Interrupts.h"
 #include "Cpu/Cpu.h"
 #include "Utilities/BitOperations.h"
+
+#define INTERRUPT_REQUEST_ADDRESS 0xFF0F
+#define INTERRUPT_ENABLED_ADDRESS 0xFFFF
+
+uint16_t gb_to_vector(Interrupts interrupt) {
+
+    switch(interrupt) {
+        case Interrupts_V_Blank:
+            return 0x40;
+        case Interrupts_LCD_STAT:
+            return 0x48;
+        case Interrupts_Timer:
+            return 0x50;
+        case Interrupts_Serial:
+            return 0x58;
+        case Interrupts_Joypad:
+            return 0x60;
+    }
+}
 
 int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
 
@@ -20,35 +40,35 @@ int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
 
 void gb_request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
-    uint8_t interrupt_request = mc->memory[g_interrupt_request_address] | 0xE0;
+    uint8_t interrupt_request = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
 
     set_bit(&interrupt_request, interrupt);
-    mc->write(mc, g_interrupt_request_address, interrupt_request);
+    mc->write(mc, INTERRUPT_REQUEST_ADDRESS, interrupt_request);
 }
 
 void gb_clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
-    uint8_t interrupt_request = mc->memory[g_interrupt_request_address] | 0xE0;
+    uint8_t interrupt_request = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
 
     clear_bit(&interrupt_request, interrupt);
-    mc->write(mc, g_interrupt_request_address, interrupt_request);
+    mc->write(mc, INTERRUPT_REQUEST_ADDRESS, interrupt_request);
 }
 
 bool gb_should_exit_halt(MemoryBankController* mc) {
 
-    const uint8_t interrupt_requests = mc->memory[g_interrupt_request_address] | 0xE0;
-    const uint8_t interrupts_enabled = mc->memory[g_interrupt_enabled_address];
+    const uint8_t interrupt_requests = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
+    const uint8_t interrupts_enabled = mc->memory[INTERRUPT_ENABLED_ADDRESS];
 
     return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
 }
 
 bool gb_is_requested(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t interrupt_requests = mc->memory[g_interrupt_request_address] | 0xE0;
+    const uint8_t interrupt_requests = mc->memory[INTERRUPT_REQUEST_ADDRESS] | 0xE0;
     return test_bit_8bit(interrupt_requests, interrupt);
 }
 
 bool gb_is_enabled(MemoryBankController* mc, Interrupts interrupt) {
-    const uint8_t interrupts_enabled = mc->memory[g_interrupt_enabled_address];
+    const uint8_t interrupts_enabled = mc->memory[INTERRUPT_ENABLED_ADDRESS];
     return test_bit_8bit(interrupts_enabled, interrupt);
 }
 
@@ -63,18 +83,3 @@ void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector, MemoryBankCon
     cpu->program_counter = (uint16_t) (interrupt_vector);
 }
 
-uint16_t gb_to_vector(Interrupts interrupt) {
-
-    switch(interrupt) {
-        case Interrupts_V_Blank:
-            return 0x40;
-        case Interrupts_LCD_STAT:
-            return 0x48;
-        case Interrupts_Timer:
-            return 0x50;
-        case Interrupts_Serial:
-            return 0x58;
-        case Interrupts_Joypad:
-            return 0x60;
-    }
-}

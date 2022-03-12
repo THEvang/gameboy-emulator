@@ -19,7 +19,6 @@ bool half_carry_8bit(uint8_t a, uint8_t b);
 bool half_carry_16bit(uint16_t a, uint16_t b);
 
 bool half_borrow_8bit(uint8_t a, uint8_t b);
-bool half_borrow_16bit(uint16_t a, uint16_t b);
 
 bool overflows_8bit(uint8_t a, uint8_t b);
 bool overflows_16bit(uint16_t a, uint16_t b);

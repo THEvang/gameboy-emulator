@@ -40,10 +40,6 @@ bool half_borrow_8bit(uint8_t a, uint8_t b) {
    return (a & 0xFU) < (b & 0xFU);
 }
 
-bool half_borrow_16bit(uint16_t a, uint16_t b) {
-   return (a & 0xFFFU) < (b & 0xFFFU);
-}
-
 bool overflows_8bit(uint8_t a, uint8_t b) {
     int sum = a + b;
     return sum > 0xFF;

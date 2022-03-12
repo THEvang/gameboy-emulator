@@ -1,9 +1,5 @@
 #include "Memory/Memory_Controller.h"
-#include "Utilities/BitOperations.h"
 #include "Memory_Banks.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 
 void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* header) {
 

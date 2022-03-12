@@ -10,7 +10,8 @@
 
 void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
-    if(!gb_lcd_display_enabled(mc)) {
+    bool lcd_display_enabled = mc->memory[LCD_CONTROL_ADDRESS] & LCD_ENABLED;
+    if(!lcd_display_enabled) {
         return;
     }
 
@@ -40,11 +41,13 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
 void gb_draw_scanline(PPU* ppu, MemoryBankController* mc) {
 
-    if(gb_background_display_enabled(mc)) {
+    bool draw_background = mc->memory[LCD_CONTROL_ADDRESS] & BACKGROUND_DISPLAY;
+    if(draw_background) {
         gb_draw_background(ppu, mc);
     } 
 
-    if(gb_sprite_display_enabled(mc)) {
+    bool draw_sprites = mc->memory[LCD_CONTROL_ADDRESS] & SPRITE_DISPLAY;
+    if(draw_sprites) {
         gb_draw_sprites(ppu, mc);
     }
 }
@@ -58,7 +61,8 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint8_t scanline = mc->memory[LY];
     assert(scanline <= 153);
 
-    bool using_window = gb_window_display_enabled(mc) && window_y <= scanline;
+    bool using_window = mc->memory[LCD_CONTROL_ADDRESS] & WINDOW_DISPLAY_ENABLE 
+        && window_y <= scanline;
 
     for (int pixel_x = 0; pixel_x < 160; pixel_x++) {
 
@@ -100,7 +104,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
         
         Color pixel_color = gb_get_color(color_index, 0xFF47, mc);
-        set_pixel(&(ppu->screen) , (Screen_Position) {.x = pixel_x, .y = scanline}, pixel_color);
+        gb_set_pixel(ppu->screen_buffer , (Point) {.x = pixel_x, .y = scanline}, pixel_color);
     }
 }
 
@@ -194,7 +198,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
             int xPix = 0 - tilePixel;
             xPix += 7 ;
             int pixel = sprites[sprite].x_pos + xPix;
-            set_pixel(&(ppu->screen), (Screen_Position) {.x = (uint8_t)(pixel), .y = scanline}, col);
+            gb_set_pixel(&ppu->screen_buffer, (Point) {.x = (uint8_t)(pixel), .y = scanline}, col);
         }
     }
 }
@@ -213,4 +217,14 @@ Color gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankCont
     };
 
     return colors[color];
- }
+}
+
+ void gb_set_pixel(PPU* ppu, Point screen_position, Color color) {
+
+    uint8_t y_pos = screen_position.y;
+    uint8_t x_pos = screen_position.x;
+
+    int index = x_pos + y_pos * GB_SCREEN_WIDTH;
+
+    ppu->screen_buffer[index] = (uint32_t) (color.red << 24u | color.green << 16u | color.blue << 8u | color.alpha);
+}

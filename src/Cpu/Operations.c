@@ -7,7 +7,6 @@
 #include "Cpu/CBOpcodes.h"
 #include "Memory/Memory_Controller.h"
 #include "Interpreter.h"
-#include "Adressing_Modes.h"
 
 int gb_nop() {
     return 4;

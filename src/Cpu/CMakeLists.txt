@@ -1,7 +1,5 @@
 target_sources(gb-core
     PRIVATE
-    Adressing_Modes.h
-    Adressing_Modes.c
     Opcodes.h
     CBOpcodes.h
     Cpu.h

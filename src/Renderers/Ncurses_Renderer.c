@@ -8,7 +8,7 @@ typedef struct NcursesState {
     WINDOW* w;
 } NcursesState;
 
-RenderState terminal_render_init() {
+Renderer terminal_render_init() {
 
     NcursesState* s = malloc(sizeof(NcursesState));
 
@@ -27,7 +27,7 @@ RenderState terminal_render_init() {
     return s;
 }
 
-void terminal_render(GameBoyState* gb, RenderState s) {
+void terminal_render(GameBoyState* gb, Renderer s) {
 
     (void) s;
 
@@ -35,7 +35,7 @@ void terminal_render(GameBoyState* gb, RenderState s) {
 
     for(int i = 0; i < 144; i++) {
         for(int j = 0; j < 160; j++) {
-            switch(gb->ppu.screen.pixels[j + i * 160]) {
+            switch(gb->ppu.screen_buffer[j + i * 160]) {
                 case 0xFFFFFFFF:
                     attron(COLOR_PAIR(3));
                 break;
@@ -55,7 +55,7 @@ void terminal_render(GameBoyState* gb, RenderState s) {
 }
 
 
-void terminal_render_cleanup(RenderState s) {
+void terminal_render_cleanup(Renderer s) {
     (void) s;
     endwin();
 }

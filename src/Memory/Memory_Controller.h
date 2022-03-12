@@ -36,6 +36,7 @@ typedef struct MemoryBankController {
 
     uint8_t (*read) (struct MemoryBankController*, uint16_t);
     void (*write) (struct MemoryBankController*, uint16_t, uint8_t);
+
 } MemoryBankController;
 
 void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* header);

@@ -9,7 +9,7 @@ typedef struct SDL2State {
 
 void sdl2_render_ppu(GameBoyState* gameboy, SDL2State* gui) {
 
-    SDL_UpdateTexture(gui->screen, NULL, (void*) &(gameboy->ppu.screen.pixels[0]), 4 * 160);
+    SDL_UpdateTexture(gui->screen, NULL, (void*) &(gameboy->ppu.screen_buffer[0]), 4 * 160);
     SDL_RenderCopy(gui->renderer, gui->screen, NULL, NULL);
 }
 
@@ -26,7 +26,7 @@ Renderer sdl2_render_init() {
         SDL_WINDOWPOS_CENTERED, 
         5*160, 
         5*144, 
-        SDL_WINDOW_RESIZABLE);
+        0);
     
 
     if(!s->window) {

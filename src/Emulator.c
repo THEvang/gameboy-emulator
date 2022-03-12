@@ -5,6 +5,16 @@
 #include "Renderers/SDL2_Renderer.h"
 #include "InputHandlers/SDL2_Input_Handler.h"
 #include "Memory/Memory_Controller.h"
+#include "Cpu/Interrupts.h"
+
+void key_down(MemoryBankController* mc, Button button) {
+    mc->buttons &= ~button;
+    gb_request_interrupt(mc, Interrupts_Joypad);
+}
+
+void key_up(MemoryBankController* mc, Button button) {
+    mc->buttons |= button;
+}
 
 void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, Emulator* emulator) {
 
