@@ -1,6 +1,13 @@
 # gameboy-emulator
-A simple Gameboy emulator written in C (It used to be CPP, but I had a change of heart).
-
-The emulator should be able to play simple Gameboy cartridges without memory banks and some MBC1 games. 
+A Gameboy emulator written in C.
 
 [![Build Status](https://travis-ci.com/THEvang/gameboy-emulator.svg?branch=master)](https://travis-ci.com/THEvang/gameboy-emulator)
+
+## Building
+
+The emulator depends on SDL2 and Ncurses. They can be installed using your system's 
+package manager.
+
+`mkdir build && cmake -B build .`
+`cd build && make -j7`
+
