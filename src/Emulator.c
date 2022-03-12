@@ -8,12 +8,12 @@
 #include "Memory/Memory_Controller.h"
 #include "Cpu/Interrupts.h"
 
-void key_down(MemoryBankController* mc, Button button) {
+void gb_key_down(MemoryBankController* mc, Button button) {
     mc->buttons &= ~button;
     gb_request_interrupt(mc, Interrupts_Joypad);
 }
 
-void key_up(MemoryBankController* mc, Button button) {
+void gb_key_up(MemoryBankController* mc, Button button) {
     mc->buttons |= button;
 }
 
@@ -58,10 +58,10 @@ void gb_run_emulator(Emulator* emulator) {
                     case Quit:
                         return;
                     case KeyUp:
-                        key_up(&emulator->gameboy_state.memory_bank_controller, i.button);
+                        gb_key_up(&emulator->gameboy_state.memory_bank_controller, i.button);
                         break;
                     case KeyDown:
-                        key_down(&emulator->gameboy_state.memory_bank_controller, i.button);
+                        gb_key_down(&emulator->gameboy_state.memory_bank_controller, i.button);
                         break;
                 }
             }

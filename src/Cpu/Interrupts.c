@@ -5,27 +5,13 @@
 #include "Utilities/BitOperations.h"
 #include "Registers.h"
 
-uint16_t gb_to_vector(Interrupts interrupt) {
-
-    switch(interrupt) {
-        case Interrupts_V_Blank:
-            return 0x40;
-        case Interrupts_LCD_STAT:
-            return 0x48;
-        case Interrupts_Timer:
-            return 0x50;
-        case Interrupts_Serial:
-            return 0x58;
-        case Interrupts_Joypad:
-            return 0x60;
-    }
-}
-
 int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
+
+    uint16_t vectors[5] = {0x40, 0x48, 0x50, 0x58, 0x60};
 
     for(int i = 0; i <= Interrupts_Joypad; i++) {
         if(gb_is_enabled(mc, (Interrupts) i) && gb_is_requested(mc, (Interrupts) i)) {
-            const uint16_t vector = gb_to_vector((Interrupts) i);
+            const uint16_t vector = vectors[i];
             gb_call_interrupt_vector(cpu, vector, mc);
             gb_clear_interrupt(mc, (Interrupts) i);
             cpu->interrupts_enabled = false;
@@ -78,6 +64,6 @@ void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector, MemoryBankCon
     mc->write(mc, --cpu->stack_ptr, pc_high);
     mc->write(mc, --cpu->stack_ptr, pc_low);
 
-    cpu->program_counter = (uint16_t) (interrupt_vector);
+    cpu->program_counter = interrupt_vector;
 }
 

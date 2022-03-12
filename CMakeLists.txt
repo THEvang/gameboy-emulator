@@ -6,8 +6,6 @@ project(Gameboy
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include(cmake/StaticAnalyzers.cmake)
-
 add_library(project_warnings INTERFACE)
 
 include(cmake/CompilerWarnings.cmake)

@@ -104,7 +104,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 
         uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
         
-        int32_t pixel_color = gb_get_color(color_index, BGP, mc, ppu);
+        uint32_t pixel_color = gb_get_color(color_index, BGP, mc, ppu);
         gb_set_color(ppu, (Point) {.x = pixel_x, .y = scanline}, pixel_color);
     }
 }
@@ -150,7 +150,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
         }
     }
 
-    qsort(sprites, n_sprites, sizeof(Sprite_Attribute), compare_x_pos);
+    qsort(sprites, (size_t) n_sprites, sizeof(Sprite_Attribute), compare_x_pos);
 
     for (int sprite = 0; sprite < n_sprites; sprite++) {
 
@@ -189,7 +189,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
             uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
 
             const uint16_t palette_address = (sprites[sprite].attributes & PALETTE_NUMBER) ? OBP1 : OBP0;
-            int32_t col = gb_get_color(color_index, palette_address, mc, ppu);
+            uint32_t col = gb_get_color(color_index, palette_address, mc, ppu);
 
             // white is transparent for sprites.
             if (col == ppu->palette[0]) {
@@ -204,7 +204,7 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
     }
 }
 
-int32_t gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc, PPU* ppu) {
+uint32_t gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankController* mc, PPU* ppu) {
     
     const uint8_t palette = mc->memory[palette_address];
     uint8_t mask = 0x03;
@@ -212,10 +212,10 @@ int32_t gb_get_color(uint8_t color_index, uint16_t palette_address, MemoryBankCo
     return ppu->palette[color];
 }
 
- void gb_set_color(PPU* ppu, Point screen_coordinates, int32_t color) {
+ void gb_set_color(PPU* ppu, Point screen_coordinates, uint32_t color) {
 
-    uint8_t y_pos = screen_coordinates.y;
-    uint8_t x_pos = screen_coordinates.x;
+    int y_pos = screen_coordinates.y;
+    int x_pos = screen_coordinates.x;
 
     int index = x_pos + y_pos * GB_SCREEN_WIDTH;
     ppu->screen_buffer[index] = color;
