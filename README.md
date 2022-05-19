@@ -5,8 +5,7 @@ A Gameboy emulator written in C.
 
 ## Building
 
-The emulator depends on SDL2 and Ncurses. They can be installed using your system's 
-package manager.
+The emulator depends on SDL2.
 
 `mkdir build && cmake -B build .`
 `cd build && make -j7`

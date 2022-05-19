@@ -10,3 +10,7 @@ target_sources(gb-emu PRIVATE
     Registers.h
     gb-emu.c
 )
+
+target_sources(rom-inspector PRIVATE
+    rom-inspector.c
+)

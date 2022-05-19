@@ -19,4 +19,7 @@ add_executable(gb-emu)
 target_include_directories(gb-emu PRIVATE src)
 target_link_libraries(gb-emu PRIVATE project_warnings gb-core ncurses SDL2)
 
+add_executable(rom-inspector)
+target_include_directories(rom-inspector PRIVATE src)
+
 add_subdirectory(src)

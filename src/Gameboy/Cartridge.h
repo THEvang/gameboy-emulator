@@ -51,4 +51,3 @@ typedef struct CartridgeHeader {
 
 int gb_load_rom(GameboyRom* rom, const char* path);
 void gb_parse_header(GameboyRom* rom, CartridgeHeader* header);
-void gb_print_header(CartridgeHeader* header);

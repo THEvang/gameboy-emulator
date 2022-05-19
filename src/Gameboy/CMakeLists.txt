@@ -6,3 +6,9 @@ target_sources(gb-core
     Cartridge.h
     Cartridge.c
 )
+
+target_sources(rom-inspector
+    PRIVATE
+    Cartridge.h
+    Cartridge.c
+)
