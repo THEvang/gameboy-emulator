@@ -7,7 +7,6 @@ add_subdirectory(Disassembler)
 
 target_sources(gb-emu PRIVATE
     Emulator.h
-    Emulator.c
     Registers.h
     gb-emu.c
 )

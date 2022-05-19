@@ -73,18 +73,22 @@ void gb_key_up(MemoryBankController* mc, Button button) {
     mc->buttons |= button;
 }
 
+void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, GameBoyState* gameboy_state) {
 
-void sdl2_quit(SDL2State* state) {
+    gameboy_state->memory_bank_controller.rom = rom->data;
+    gb_memory_set_initial_state(&gameboy_state->memory_bank_controller, header);
+    
+    gameboy_state->ppu = (PPU) {{0},  {0xFFFFFFFF, 0xA9A9A9FF, 0x545454FF, 0x000000FF}, 0};
 
-    SDL_DestroyRenderer(state->renderer);
-    SDL_DestroyTexture(state->screen);
-    SDL_DestroyWindow(state->window);
+    gameboy_state->timer.prev_delay = false;
+    gameboy_state->timer.tima_has_overflowed = false;
+    gameboy_state->timer.tima_speed = 1024;
+    gameboy_state->memory_bank_controller.div_register = 0xABCC;
 
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    gb_cpu_set_initial_state(&gameboy_state->cpu);
 }
 
-
-int 
+int
 sdl2_handle_input(Input* i) {
 
     SDL_Event event;
@@ -207,7 +211,8 @@ void gb_run_emulator(GameBoyState* gameboy_state, SDL2State* s) {
     }
 }
 
-int main(int argc, char* argv[]) {
+int 
+main(int argc, char* argv[]) {
 
     if (argc != 2) {
     	printf("Usage: gb-emu rom\n");
@@ -232,6 +237,12 @@ int main(int argc, char* argv[]) {
     gb_init_emulator(&rom, &header, &gameboy_state);
     gb_run_emulator(&gameboy_state, &s);
 
-    sdl2_quit(&s);
+    
+    SDL_DestroyRenderer(s.renderer);
+    SDL_DestroyTexture(s.screen);
+    SDL_DestroyWindow(s.window);
+
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    
     return 0;
 }

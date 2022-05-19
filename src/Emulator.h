@@ -23,5 +23,3 @@ typedef struct Input {
     EventType type;
     Button button;
 } Input;
-
-void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, GameBoyState* emulator);
