@@ -17,18 +17,30 @@
 #define HEADER_CHECKSUM_ADDRESS 0x14D
 #define GLOBAL_CHECKSUM_ADDRESS
 
-int gb_load_rom(GameboyRom* rom, const char* path) {
+long file_size(FILE* file) {
 
-    FILE* rom_file;
-    rom_file = fopen(path, "r");
-    if(!rom_file) {
-        printf("ERROR\tOpening file\t%s\n", strerror(errno));
-        return 1;
+    long size = -1L;
+    if (fseek(file, 0, SEEK_END) == 0) {
+        size = ftell(file);
+        fseek(file, 0, SEEK_SET);
     }
 
-    fseek(rom_file, 0, SEEK_END);
-    rom->size = ftell(rom_file);
-    fseek(rom_file, 0, SEEK_SET);
+    return size;
+}
+
+int gb_load_rom(GameboyRom* rom, const char* path) {
+
+    FILE* rom_file = fopen(path, "r");
+    if(!rom_file) {
+        printf("ERROR\tOpening file\t%s\n", strerror(errno));
+        return -1;
+    }
+
+    
+    rom->size = file_size(rom_file);
+    if (rom->size < 0) {
+        return -1;
+    }
 
     rom->data = malloc(rom->size * sizeof(uint8_t));
     fread(rom->data, sizeof(uint8_t), rom->size, rom_file);

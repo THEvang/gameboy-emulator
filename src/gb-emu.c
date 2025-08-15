@@ -39,12 +39,11 @@ sdl2_initialize(SDL2State* s) {
         SDL_RENDERER_ACCELERATED
     );
 
-  SDL_SetRenderDrawColor(s->renderer, 255, 255, 255, 255);
-
     if(!s->renderer) {
         printf("SDL ERROR: Unable to create renderer: %s\n", SDL_GetError());
         return 1;
     }
+    SDL_SetRenderDrawColor(s->renderer, 255, 255, 255, 255);
 
     SDL_Texture* texture = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 160, 144);
     if(!texture) {
@@ -216,15 +215,15 @@ main(int argc, char* argv[]) {
 
     if (argc != 2) {
     	printf("Usage: gb-emu rom\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     char* rom_path = argv[1];
 
     GameboyRom rom;
-    if(gb_load_rom(&rom, rom_path)) {
+    if(gb_load_rom(&rom, rom_path) < 0) {
         printf("ERROR\tFailed loading rom\t%s\n", rom_path);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     SDL2State s;
@@ -244,5 +243,5 @@ main(int argc, char* argv[]) {
 
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     
-    return 0;
+    return EXIT_SUCCESS;
 }

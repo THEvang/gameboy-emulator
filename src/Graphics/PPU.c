@@ -116,7 +116,7 @@ int compare_x_pos(const void* p, const void* q) {
     
     if(a.x_pos < b.x_pos) {
         return -1;
-    } else if (a.x_pos > b.y_pos) {
+    } else if (a.x_pos > b.x_pos) {
         return 1;
     }
 
