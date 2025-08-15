@@ -9,7 +9,7 @@ typedef struct GameboyRom {
     size_t size;
 } GameboyRom;
 
-typedef enum Catridge_Type {
+typedef enum Cartridge_Type {
     MB_ROM_ONLY,
     MB_MBC_1,
     MB_MBC_2,
