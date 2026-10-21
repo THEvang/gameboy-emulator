@@ -13,6 +13,10 @@ void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* head
             mc->read = gb_read_mbc_1;
             mc->write = gb_write_mbc_1;
             break;
+        case MB_MBC_2:
+            mc->read = gb_read_mbc_2;
+            mc->write = gb_write_mbc_2;
+            break;
         case MB_MBC_3:
             mc->read = gb_read_mbc_3;
             mc->write = gb_write_mbc_3;
@@ -70,8 +74,7 @@ void gb_memory_set_initial_state(MemoryBankController* mc, CartridgeHeader* head
     mc->banking_register_1 = 1;
     mc->banking_register_2 = 0;
     mc->rom_bank_mask = header->rom_banks - 1;
-    mc->ram_bank_mask = header->rom_banks == 1 ? header->rom_banks :
-        header->rom_banks -1;
+    mc->ram_bank_mask = header->ram_banks > 0 ? header->ram_banks - 1 : 0;
 
     mc->ram_enabled = false;
     mc->banking_mode = Banking_Mode_ROM;

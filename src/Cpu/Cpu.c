@@ -12,7 +12,6 @@ void gb_cpu_set_initial_state(Cpu* cpu) {
 
     cpu->interrupts_enabled = false;
     cpu->should_enable_interrupts = false;
-    cpu->should_disable_interrupts = false;
     cpu->should_stop = false;
     cpu->is_halted = false;
     cpu->halt_bug_triggered = false;

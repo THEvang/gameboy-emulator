@@ -77,7 +77,7 @@ void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, GameBoyState* ga
     gameboy_state->memory_bank_controller.rom = rom->data;
     gb_memory_set_initial_state(&gameboy_state->memory_bank_controller, header);
     
-    gameboy_state->ppu = (PPU) {{0},  {0xFFFFFFFF, 0xA9A9A9FF, 0x545454FF, 0x000000FF}, 0};
+    gameboy_state->ppu = (PPU) {{0},  {0xFFFFFFFF, 0xA9A9A9FF, 0x545454FF, 0x000000FF}, 0, {0}};
 
     gameboy_state->timer.prev_delay = false;
     gameboy_state->timer.tima_has_overflowed = false;
@@ -88,86 +88,67 @@ void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, GameBoyState* ga
 }
 
 int
-sdl2_handle_input(Input* i) {
+sdl2_map_key(SDL_Keycode key, Button* button) {
+
+    switch(key) {
+        case SDLK_z:
+            *button = Button_A;
+            return 1;
+        case SDLK_x:
+            *button = Button_B;
+            return 1;
+        case SDLK_RETURN:
+            *button = Button_Start;
+            return 1;
+        case SDLK_BACKSPACE:
+            *button = Button_Select;
+            return 1;
+        case SDLK_w:
+            *button = Button_Up;
+            return 1;
+        case SDLK_s:
+            *button = Button_Down;
+            return 1;
+        case SDLK_d:
+            *button = Button_Right;
+            return 1;
+        case SDLK_a:
+            *button = Button_Left;
+            return 1;
+        default:
+            return 0;
+    }
+}
+
+//Handles every pending event. Returns 1 when the emulator should quit
+int
+sdl2_handle_input(MemoryBankController* mc) {
 
     SDL_Event event;
+    Button button;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         
         case SDL_QUIT:
-            i->type = Quit;
             return 1;
         
         case SDL_WINDOWEVENT:
             if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
-                i->type = Quit;
                 return 1;
             }
             break;
         
         case SDL_KEYDOWN:
-            i->type = KeyDown;
-            switch(event.key.keysym.sym) {
-                case SDLK_z:
-                    i->button = Button_A;
-                    return 1;
-                case SDLK_x:
-                    i->button = Button_B;
-                    return 1;
-                case SDLK_RETURN:
-                    i->button = Button_Start;
-                    return 1;
-                case SDLK_BACKSPACE:
-                    i->button = Button_Select;
-                    return 1;
-                case SDLK_w:
-                    i->button = Button_Up;
-                    return 1;
-                case SDLK_s:
-                    i->button = Button_Down;
-                    return 1;
-                case SDLK_d:
-                    i->button = Button_Right;
-                    return 1;
-                case SDLK_a:
-                    i->button = Button_Left;
-                    return 1;
-                default:
-                    break;
+            if(sdl2_map_key(event.key.keysym.sym, &button)) {
+                gb_key_down(mc, button);
             }
-        break;
+            break;
 
         case SDL_KEYUP:
-            i->type = KeyUp;
-            switch(event.key.keysym.sym) {
-                case SDLK_z:
-                    i->button = Button_A;
-                    return 1;
-                case SDLK_x:
-                    i->button = Button_B;
-                    return 1;
-                case SDLK_RETURN:
-                    i->button = Button_Start;
-                    return 1;
-                case SDLK_BACKSPACE:
-                    i->button = Button_Select;
-                    return 1;
-                case SDLK_w:
-                    i->button = Button_Up;
-                    return 1;
-                case SDLK_s:
-                    i->button = Button_Down;
-                    return 1;
-                case SDLK_d:
-                    i->button = Button_Right;
-                    return 1;
-                case SDLK_a:
-                    i->button = Button_Left;
-                    return 1;
-                default:
-                    break;
+            if(sdl2_map_key(event.key.keysym.sym, &button)) {
+                gb_key_up(mc, button);
             }
-        break;
+            break;
 
         default:
             break;
@@ -189,18 +170,8 @@ void gb_run_emulator(GameBoyState* gameboy_state, SDL2State* s) {
         if( duration >= 16e-3 && gameboy_state->memory_bank_controller.memory[0xFF44] > 144) {
             start = clock();
 
-            Input i;
-            if(sdl2_handle_input(&i)) {
-                switch(i.type) {
-                    case Quit:
-                        return;
-                    case KeyUp:
-                        gb_key_up(&gameboy_state->memory_bank_controller, i.button);
-                        break;
-                    case KeyDown:
-                        gb_key_down(&gameboy_state->memory_bank_controller, i.button);
-                        break;
-                }
+            if(sdl2_handle_input(&gameboy_state->memory_bank_controller)) {
+                return;
             }
 
             sdl2_render(gameboy_state, s);

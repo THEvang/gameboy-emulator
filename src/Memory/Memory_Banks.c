@@ -1,5 +1,3 @@
-#include <assert.h>
-
 #include "Memory_Controller.h"
 #include "Registers.h"
 
@@ -8,27 +6,34 @@
 
 uint8_t gb_read_joypad_input(MemoryBankController* mc) {
 
-    uint8_t data = mc->memory[JOYP];
+    const uint8_t data = mc->memory[JOYP];
+    uint8_t pressed = 0x0F;
 
     if ( !(data & Action_Button)) {
-        return (mc->buttons >> 4) & 0x0F;
+        pressed &= (mc->buttons >> 4) & 0x0F;
     }
 
     if ( !(data & Direction_Button)) {
-        return mc->buttons & 0xFF;
+        pressed &= mc->buttons & 0x0F;
     }
 
-    return 0xFF;
+    //Unused bits read as 1, the select bits read back what was written
+    return (uint8_t) (0xC0 | (data & 0x30) | pressed);
 }
 
 void gb_dma_transfer(MemoryBankController* mc, uint8_t data) {
     
-    uint16_t address = (uint16_t) (data << 8);
-    assert(address <= 0xDFFF);
+    mc->memory[DMA] = data;
 
-    for(int i = 0; i < 0xA0; i++) {
-        assert( (address + i) <= 0xDFFF);
-        mc->memory[0xFE00 + i] = mc->memory[address + i];
+    //Sources above 0xDFFF map to work ram on hardware
+    if (data > 0xDF) {
+        data = (uint8_t) (data - 0x20);
+    }
+
+    const uint16_t address = (uint16_t) (data << 8);
+
+    for(uint16_t i = 0; i < 0xA0; i++) {
+        mc->memory[0xFE00 + i] = mc->read(mc, (uint16_t) (address + i));
     }
 }
 
@@ -40,6 +45,12 @@ void gb_common_writes(MemoryBankController* mc, uint16_t address, uint8_t data) 
     }
 
     if (address >= 0xFEA0 && address < 0xFEFF) {
+        return;
+    }
+
+    //Echo ram mirrors 0xC000 - 0xDDFF
+    if (address >= 0xE000 && address < 0xFE00) {
+        mc->memory[address - 0x2000] = data;
         return;
     }
 
@@ -61,6 +72,10 @@ void gb_common_writes(MemoryBankController* mc, uint16_t address, uint8_t data) 
 }
 
 uint8_t gb_common_reads(MemoryBankController* mc, uint16_t address) {
+
+    if (address >= 0xE000 && address < 0xFE00) {
+        return mc->memory[address - 0x2000];
+    }
 
     switch (address) {
     case JOYP:
@@ -180,9 +195,52 @@ void gb_write_mbc_1(MemoryBankController* mc, uint16_t address, uint8_t data) {
         return;
     }
     
-    if (address >= 0xE000 && address < 0xFE00) {
-        mc->memory[address] = data;
-        mc->write(mc, (uint16_t) (address - 0x2000), data);
+    gb_common_writes(mc, address, data);
+}
+
+uint8_t gb_read_mbc_2(MemoryBankController* mc, uint16_t address) {
+
+    if(address <= 0x3FFF) {
+        return mc->rom[address];
+    }
+
+    if(address >= 0x4000 && address <= 0x7FFF) {
+        int offset = address - ROM_BANK_SIZE;
+        int read_addr = offset + (mc->banking_register_1 & mc->rom_bank_mask) * ROM_BANK_SIZE;
+        return mc->rom[read_addr];
+    }
+
+    //512 x 4 bits of built in ram, mirrored through 0xA000 - 0xBFFF
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        if (mc->ram_enabled) {
+            return mc->ram[address & 0x1FF] | 0xF0;
+        }
+        return 0xFF;
+    }
+
+    return gb_common_reads(mc, address);
+}
+
+void gb_write_mbc_2(MemoryBankController* mc, uint16_t address, uint8_t data) {
+
+    //Bit 8 of the address selects between ram enable and rom bank number
+    if (address <= 0x3FFF) {
+        if (address & 0x100) {
+            gb_set_rom_bank_number(mc, data, 0x0F);
+        } else {
+            mc->ram_enabled = ((data & 0x0F) == 0x0A);
+        }
+        return;
+    }
+
+    if (address <= 0x7FFF) {
+        return;
+    }
+
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        if(mc->ram_enabled) {
+            mc->ram[address & 0x1FF] = data & 0x0F;
+        }
         return;
     }
 
@@ -197,16 +255,15 @@ uint8_t gb_read_mbc_3(MemoryBankController* mc, uint16_t address) {
 
     if(address >= 0x4000 && address <= 0x7FFF) {
         int offset = address - ROM_BANK_SIZE;
-        int effective_bank = ((mc->banking_register_2 << 5) | (mc->banking_register_1));
-        int read_addr = offset + (effective_bank & mc->rom_bank_mask) * ROM_BANK_SIZE;
+        int read_addr = offset + (mc->banking_register_1 & mc->rom_bank_mask) * ROM_BANK_SIZE;
         return mc->rom[read_addr];
     }
     
+    //Banks 0x08 - 0x0C select the real time clock, which is not emulated
     if (address >= 0xA000 && address <= 0xBFFF) {
-        if (mc->ram_enabled) {
+        if (mc->ram_enabled && mc->banking_register_2 <= 0x07) {
             int offset = address - 0xA000;
-            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
-            int read_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
+            int read_addr = offset + (mc->banking_register_2 & mc->ram_bank_mask) * RAM_BANK_SIZE;
             return mc->ram[read_addr];
         }
         return 0xFF;
@@ -219,15 +276,24 @@ uint8_t gb_read_mbc_3(MemoryBankController* mc, uint16_t address) {
 void gb_write_mbc_3(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
     if (address >= 0x2000 && address <= 0x3FFF) {
-        gb_set_rom_bank_number(mc, data, 0xFF);
+        gb_set_rom_bank_number(mc, data, 0x7F);
+        return;
+    }
+
+    if (address >= 0x4000 && address <= 0x5FFF) {
+        mc->banking_register_2 = data & 0x0F;
+        return;
+    }
+
+    //Latching the real time clock is not emulated
+    if (address >= 0x6000 && address <= 0x7FFF) {
         return;
     }
 
     if (address >= 0xA000 && address <= 0xBFFF) {
-        if(mc->ram_enabled) {
+        if(mc->ram_enabled && mc->banking_register_2 <= 0x07) {
             int offset = address - 0xA000;
-            int ram_bank = mc->banking_mode == Banking_Mode_ROM ? 0 : (mc->banking_register_2);
-            int write_addr = offset + (ram_bank & mc->ram_bank_mask) * RAM_BANK_SIZE;
+            int write_addr = offset + (mc->banking_register_2 & mc->ram_bank_mask) * RAM_BANK_SIZE;
             mc->ram[write_addr] = data;
         }
         return;
@@ -266,22 +332,31 @@ uint8_t gb_read_mbc_5(MemoryBankController* mc, uint16_t address) {
 
 void gb_write_mbc_5(MemoryBankController* mc, uint16_t address, uint8_t data) {
 
+    //Enables or disables ram
+    if (address <= 0x1FFF) {
+        gb_common_writes(mc, address, data);
+        return;
+    }
+
     //Set the 8 least significant bits of rom bank number
-    if (address > 0x1FFF && address <= 0x2FFF) {
-        mc->banking_register_1 = data;
+    if (address <= 0x2FFF) {
+        mc->banking_register_1 = (uint16_t) ((mc->banking_register_1 & 0x100) | data);
         return;
     }
 
     //Sets the 9th bit of the rom bank number
     if (address <= 0x3FFF) {
-        data &= 0x01;
-        mc->banking_register_1 |= (uint16_t) (data << 8);
+        mc->banking_register_1 = (uint16_t) ((mc->banking_register_1 & 0xFF) | ((data & 0x01) << 8));
         return;
     }
 
     //Sets the ram bank number between 0x00 and 0x0F
     if (address <= 0x5FFF) {
         mc->banking_register_2 = data & 0x0F;
+        return;
+    }
+
+    if (address <= 0x7FFF) {
         return;
     }
 

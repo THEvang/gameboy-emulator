@@ -2,12 +2,6 @@
 
 #include "Gameboy/Gameboy.h"
 
-typedef enum EventType {
-    Quit,
-    KeyUp,
-    KeyDown
-} EventType;
-
 typedef enum Button {
     Button_Right = 1 << 0,
     Button_Left = 1 << 1,
@@ -18,8 +12,3 @@ typedef enum Button {
     Button_Select = 1 << 6,
     Button_Start = 1 << 7
 } Button;
-
-typedef struct Input {
-    EventType type;
-    Button button;
-} Input;

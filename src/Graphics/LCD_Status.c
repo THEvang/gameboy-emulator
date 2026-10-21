@@ -46,9 +46,11 @@ void gb_set_status(MemoryBankController* mc, int* scanline_counter) {
 void gb_set_coincidence_flag(MemoryBankController* mc) {
 
     uint8_t status = mc->memory[STAT];
+    const bool was_set = test_bit_8bit(status, g_coincidence_bit);
     set_bit(&status, g_coincidence_bit);
     mc->write(mc, STAT, status);
-    if(test_bit_8bit(status, 6)) {
+    //Only request the interrupt when LY starts matching LYC
+    if(!was_set && test_bit_8bit(status, 6)) {
         gb_request_interrupt(mc, Interrupts_LCD_STAT);
     }
 }
