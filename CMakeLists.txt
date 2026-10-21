@@ -4,6 +4,8 @@ project(Gameboy
     DESCRIPTION "Gameboy emulator"
     LANGUAGES C)
 
+find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+
 add_library(project_warnings INTERFACE)
 
 include(cmake/CompilerWarnings.cmake)
@@ -15,7 +17,7 @@ target_link_libraries(gb-core PRIVATE project_warnings)
 
 add_executable(gb-emu)
 target_include_directories(gb-emu PRIVATE src)
-target_link_libraries(gb-emu PRIVATE project_warnings gb-core ncurses SDL2)
+target_link_libraries(gb-emu PRIVATE project_warnings gb-core SDL2::SDL2)
 
 add_executable(rom-inspector)
 target_include_directories(rom-inspector PRIVATE src)
