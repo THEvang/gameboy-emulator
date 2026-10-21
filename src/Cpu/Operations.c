@@ -7,13 +7,14 @@
 #include "Cpu/CBOpcodes.h"
 #include "Memory/Memory_Controller.h"
 #include "Interpreter.h"
+#include "Registers.h"
 
 int gb_nop() {
     return 4;
 }
 
 int gb_stop(MemoryBankController* mc) {
-    mc->memory[0xFF04] = 0;
+    mc->write(mc, DIV, 0);
     return 4;
 }
 
@@ -50,7 +51,8 @@ int gb_rst(uint8_t address, Cpu* cpu, MemoryBankController* mc) {
 }
 
 int gb_di(Cpu* cpu) {
-    cpu->should_disable_interrupts = true;
+    cpu->interrupts_enabled = false;
+    cpu->should_enable_interrupts = false;
     return 4;    
 }
 
@@ -77,8 +79,12 @@ int ret(Cpu* cpu, MemoryBankController* mc) {
     return 16;
 }
 
-int gb_ret(bool predicate, Cpu* cpu, MemoryBankController* mc) {
-    return predicate ? ret(cpu, mc) : 8;
+int gb_ret(Cpu* cpu, MemoryBankController* mc) {
+    return ret(cpu, mc);
+}
+
+int gb_ret_conditional(bool predicate, Cpu* cpu, MemoryBankController* mc) {
+    return predicate ? ret(cpu, mc) + 4 : 8;
 }
 
 int gb_reti(Cpu* cpu, MemoryBankController* mc) {
@@ -214,7 +220,7 @@ int gb_ld_hl_spr8(uint8_t offset, Cpu* cpu) {
 
 int gb_ld_sp(uint16_t* sp, uint16_t rr) {
     *sp = rr;
-    return 12;
+    return 8;
 }
 
 int gb_add(uint8_t value, Cpu* cpu) {
@@ -238,7 +244,7 @@ int gb_add(uint8_t value, Cpu* cpu) {
 
     cpu->registers[Register_A] = a;
     
-    return 8;
+    return 4;
 }
 
 int gb_add_hl(uint16_t value, Cpu* cpu) {

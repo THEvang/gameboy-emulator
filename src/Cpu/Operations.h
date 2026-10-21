@@ -12,7 +12,8 @@ int gb_di(Cpu* cpu);
 int gb_ei(Cpu* cpu);
 
 int gb_jr(uint8_t offset, bool predicate, Cpu* cpu);
-int gb_ret(bool predicate, Cpu* cpu, MemoryBankController*);
+int gb_ret(Cpu* cpu, MemoryBankController*);
+int gb_ret_conditional(bool predicate, Cpu* cpu, MemoryBankController*);
 int gb_reti(Cpu* cpu, MemoryBankController*);
 
 int gb_jump(uint16_t address, bool predicate, Cpu* cpu);

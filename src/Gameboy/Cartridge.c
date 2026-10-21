@@ -15,7 +15,7 @@
 #define DESTINATION_CODE_ADDRESS 0x14A
 #define VERSION_ADDRESS 0x14C
 #define HEADER_CHECKSUM_ADDRESS 0x14D
-#define GLOBAL_CHECKSUM_ADDRESS
+#define GLOBAL_CHECKSUM_ADDRESS 0x14E
 
 long file_size(FILE* file) {
 
@@ -30,20 +30,27 @@ long file_size(FILE* file) {
 
 int gb_load_rom(GameboyRom* rom, const char* path) {
 
-    FILE* rom_file = fopen(path, "r");
+    FILE* rom_file = fopen(path, "rb");
     if(!rom_file) {
         printf("ERROR\tOpening file\t%s\n", strerror(errno));
         return -1;
     }
 
     
-    rom->size = file_size(rom_file);
-    if (rom->size < 0) {
+    const long size = file_size(rom_file);
+    if (size < 0) {
+        fclose(rom_file);
         return -1;
     }
+    rom->size = (size_t) size;
 
     rom->data = malloc(rom->size * sizeof(uint8_t));
-    fread(rom->data, sizeof(uint8_t), rom->size, rom_file);
+    if (!rom->data || fread(rom->data, sizeof(uint8_t), rom->size, rom_file) != rom->size) {
+        printf("ERROR\tReading file\n");
+        free(rom->data);
+        fclose(rom_file);
+        return -1;
+    }
 
     return fclose(rom_file);
 }
@@ -130,5 +137,5 @@ void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
     header->version = rom->data[VERSION_ADDRESS];
 
     header->header_checksum = rom->data[HEADER_CHECKSUM_ADDRESS];
-    header->global_checksum = (uint16_t) (rom->data[HEADER_CHECKSUM_ADDRESS] << 8 | rom->data[HEADER_CHECKSUM_ADDRESS + 1]);
+    header->global_checksum = (uint16_t) (rom->data[GLOBAL_CHECKSUM_ADDRESS] << 8 | rom->data[GLOBAL_CHECKSUM_ADDRESS + 1]);
 }
