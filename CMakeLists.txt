@@ -4,8 +4,6 @@ project(Gameboy
     DESCRIPTION "Gameboy emulator"
     LANGUAGES C)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 add_library(project_warnings INTERFACE)
 
 include(cmake/CompilerWarnings.cmake)

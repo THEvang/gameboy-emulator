@@ -1,6 +1,4 @@
 function(set_project_warnings project_name)
-    option(WARNING_AS_ERRORS "Treat compiler warnings as errors" TRUE)
-    
     set(CLANG_WARNINGS
         -Wall
         -Wextra
@@ -14,10 +12,6 @@ function(set_project_warnings project_name)
         -Wdouble-promotion
         -Wformat=2
     )
-
-    if (WARNINGS_AS_ERRORS)
-        set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)
-    endif()
 
     set(GCC_WARNINGS
         ${CLANG_WARNINGS}
