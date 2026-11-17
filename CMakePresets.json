@@ -16,16 +16,22 @@
       }
     },
     {
-      "name": "debug",
-      "displayName": "Debug",
+      "name": "gcc-debug",
+      "displayName": "GCC Debug",
       "inherits": "base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "gcc"
+      }
     },
     {
-      "name": "release",
-      "displayName": "Release",
+      "name": "gcc-release",
+      "displayName": "GCC Release",
       "inherits": "base",
-      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "gcc"
+      }
     },
     {
       "name": "relwithdebinfo",
@@ -36,24 +42,37 @@
     {
       "name": "asan",
       "displayName": "Debug + AddressSanitizer/UBSan",
-      "inherits": "debug",
+      "inherits": "gcc-debug",
       "cacheVariables": {
         "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined"
       }
     },
     {
+      "name": "clang-release",
+      "displayName": "Release (Clang)",
+      "inherits": "base",
+      "cacheVariables": { 
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang"
+      }
+    },
+    {
       "name": "clang-debug",
       "displayName": "Debug (Clang)",
-      "inherits": "debug",
-      "cacheVariables": { "CMAKE_C_COMPILER": "clang" }
+      "inherits": "base",
+      "cacheVariables": { 
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "debug", "configurePreset": "debug" },
-    { "name": "release", "configurePreset": "release" },
+    { "name": "gcc-debug", "configurePreset": "gcc-debug" },
+    { "name": "gcc-release", "configurePreset": "gcc-release" },
     { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo" },
     { "name": "asan", "configurePreset": "asan" },
+    { "name": "clang-release", "configurePreset": "clang-release" },
     { "name": "clang-debug", "configurePreset": "clang-debug" }
   ],
   "testPresets": [
@@ -63,7 +82,10 @@
       "output": { "outputOnFailure": true },
       "execution": { "noTestsAction": "ignore" }
     },
-    { "name": "debug", "inherits": "base", "configurePreset": "debug" },
-    { "name": "asan", "inherits": "base", "configurePreset": "asan" }
+    { "name": "gcc-debug", "inherits": "base", "configurePreset": "gcc-debug" },
+    { "name": "gcc-release", "inherits": "base", "configurePreset": "gcc-release" },
+    { "name": "asan", "inherits": "base", "configurePreset": "asan" },
+    { "name": "clang-release", "inherits": "base", "configurePreset": "clang-release" },
+    { "name": "clang-debug", "inherits": "base", "configurePreset": "clang-debug" }
   ]
 }
