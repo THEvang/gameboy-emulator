@@ -78,7 +78,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         uint16_t tilemap_address = using_window ? gb_window_tile_map_start_address(mc) :
             gb_background_tile_map_start_address(mc);
 
-        tilemap_address += (uint16_t) (x_pos / 8) + (uint16_t) ((y_pos / 8) * 32);
+        tilemap_address = tilemap_address + (uint16_t) ((x_pos / 8u) + ((y_pos / 8u) * 32u));
         assert(tilemap_address >= 0x9800 && tilemap_address <= 0x9FFF);
 
         uint16_t tile_data_address = gb_tile_data_start_address(mc);
