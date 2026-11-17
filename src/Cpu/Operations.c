@@ -8,7 +8,7 @@
 #include "Memory/Memory_Controller.h"
 #include "Interpreter.h"
 
-int gb_nop() {
+int gb_nop(void) {
     return 4;
 }
 
@@ -170,7 +170,7 @@ int gb_ld_addr_hl(uint8_t value, Cpu* cpu, MemoryBankController* mc) {
     return 8;
 }
 
-int gb_ld_addr_hl_addr_hl() {    
+int gb_ld_addr_hl_addr_hl(void) {
     printf("Unimplemented operation: LD ADDR HL ADDR HL\n");
     exit(1);
 }
