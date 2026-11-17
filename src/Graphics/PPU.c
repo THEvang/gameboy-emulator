@@ -130,7 +130,7 @@ int compare_x_pos(const void* p, const void* q) {
 void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
     int y_size = gb_sprite_size(mc) ? 16 : 8;
-    uint8_t size_mask = gb_sprite_size(mc) ? 0b11111110 : 0xFF;
+    uint8_t size_mask = gb_sprite_size(mc) ? 0xFE : 0xFF;
     uint8_t scanline = mc->memory[LY];
 
     Sprite_Attribute sprites[40];
