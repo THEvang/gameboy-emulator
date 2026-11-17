@@ -16,6 +16,8 @@ typedef struct PPU {
     uint32_t screen_buffer[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
     uint32_t palette[4];
     int scanline_counter;
+    //Background color index of each pixel on the current scanline, used for sprite priority
+    uint8_t bg_color_index[GB_SCREEN_WIDTH];
 } PPU;
 
 typedef enum Sprite_Attribute_Flags {
@@ -26,8 +28,8 @@ typedef enum Sprite_Attribute_Flags {
 } Sprite_Attribute_Flags;
 
 typedef struct Sprite_Attribute {
-    uint8_t y_pos;
-    uint8_t x_pos;
+    int y_pos;
+    int x_pos;
     uint8_t tile_location;
     uint8_t attributes;
     uint16_t oam_address;

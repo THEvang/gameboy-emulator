@@ -27,7 +27,6 @@ typedef struct Cpu {
 
     bool interrupts_enabled;
     bool should_enable_interrupts;
-    bool should_disable_interrupts;
     bool should_stop;
 
     bool is_halted;

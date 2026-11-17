@@ -19,7 +19,7 @@ int gb_handle_interrupts(Cpu* cpu, MemoryBankController* mc) {
         }
     }
 
-    return  4;
+    return 0;
 }
 
 void gb_request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
@@ -43,7 +43,7 @@ bool gb_should_exit_halt(MemoryBankController* mc) {
     const uint8_t interrupt_requests = mc->memory[IF] | 0xE0;
     const uint8_t interrupts_enabled = mc->memory[IE];
 
-    return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) == 0;
+    return ((uint8_t) (interrupt_requests & interrupts_enabled) & 0x1FU) != 0;
 }
 
 bool gb_is_requested(MemoryBankController* mc, Interrupts interrupt) {

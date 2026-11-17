@@ -13,6 +13,9 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
     bool lcd_display_enabled = mc->memory[LCDC] & LCD_ENABLED;
     if(!lcd_display_enabled) {
+        mc->memory[LY] = 0;
+        mc->memory[STAT] &= (uint8_t) ~0x03;
+        ppu->scanline_counter = 456;
         return;
     }
 
@@ -26,17 +29,19 @@ void gb_ppu_step(PPU* ppu, MemoryBankController* mc, int cycles) {
 
         uint8_t scanline = mc->memory[LY];
 
+        if (scanline < 144) {
+            gb_draw_scanline(ppu, mc);
+        }
+
+        scanline++;
+
         if(scanline == 144) {
             gb_request_interrupt(mc, Interrupts_V_Blank);
-            mc->memory[LY]++;
         } else if (scanline > 153) {
-            mc->memory[LY] = 0;
-        } else if (scanline < 144) {
-            gb_draw_scanline(ppu, mc);
-            mc->memory[LY]++;
-        } else {
-            mc->memory[LY]++;
+            scanline = 0;
         }
+
+        mc->memory[LY] = scanline;
     }
 }
 
@@ -45,7 +50,14 @@ void gb_draw_scanline(PPU* ppu, MemoryBankController* mc) {
     bool draw_background = mc->memory[LCDC] & BACKGROUND_DISPLAY;
     if(draw_background) {
         gb_draw_background(ppu, mc);
-    } 
+    } else {
+        //With the background disabled the line is blank
+        const uint8_t scanline = mc->memory[LY];
+        for (int pixel_x = 0; pixel_x < GB_SCREEN_WIDTH; pixel_x++) {
+            ppu->bg_color_index[pixel_x] = 0;
+            gb_set_color(ppu, (Point) {.x = pixel_x, .y = scanline}, ppu->palette[0]);
+        }
+    }
 
     bool draw_sprites = mc->memory[LCDC] & SPRITE_DISPLAY;
     if(draw_sprites) {
@@ -58,7 +70,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
     const uint8_t scroll_y = mc->memory[SCY];
     const uint8_t scroll_x = mc->memory[SCX];
     const uint8_t window_y = mc->memory[WY];
-    const uint8_t window_x = (uint8_t) (mc->memory[WX] - 7);
+    const int window_x = mc->memory[WX] - 7;
     const uint8_t scanline = mc->memory[LY];
     assert(scanline <= 153);
 
@@ -67,15 +79,15 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
 
     for (int pixel_x = 0; pixel_x < GB_SCREEN_WIDTH; pixel_x++) {
 
-        using_window = using_window && pixel_x >= window_x;
+        const bool window_pixel = using_window && pixel_x >= window_x;
 
-        uint8_t x_pos = using_window ? (uint8_t) (pixel_x - window_x):
+        uint8_t x_pos = window_pixel ? (uint8_t) (pixel_x - window_x):
             (uint8_t) (scroll_x + pixel_x);
         
-        uint8_t y_pos = using_window ? (uint8_t) (scanline - window_y):
+        uint8_t y_pos = window_pixel ? (uint8_t) (scanline - window_y):
            (uint8_t) (scanline + scroll_y);
 
-        uint16_t tilemap_address = using_window ? gb_window_tile_map_start_address(mc) :
+        uint16_t tilemap_address = window_pixel ? gb_window_tile_map_start_address(mc) :
             gb_background_tile_map_start_address(mc);
 
         tilemap_address += (uint16_t) (x_pos / 8) + (uint16_t) ((y_pos / 8) * 32);
@@ -103,6 +115,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         const uint8_t color_2 = test_bit_8bit(tiledata_high, color_bit) ? 1 : 0;
 
         uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
+        ppu->bg_color_index[pixel_x] = color_index;
         
         uint32_t pixel_color = gb_get_color(color_index, BGP, mc, ppu);
         gb_set_color(ppu, (Point) {.x = pixel_x, .y = scanline}, pixel_color);
@@ -131,18 +144,18 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
     int y_size = gb_sprite_size(mc) ? 16 : 8;
     uint8_t size_mask = gb_sprite_size(mc) ? 0b11111110 : 0xFF;
-    uint8_t scanline = mc->memory[LY];
+    int scanline = mc->memory[LY];
 
-    Sprite_Attribute sprites[40];
+    Sprite_Attribute sprites[10];
     int n_sprites = 0;
-    //The Gameboy can only draw 10 sprites. So we find the first 10 that is visible
-    for(uint16_t oam_address = 0xFE00; oam_address <= 0xFE9F; oam_address += 0x04) {
+    //The Gameboy can only draw 10 sprites per line. So we find the first 10 that is visible
+    for(uint16_t oam_address = 0xFE00; oam_address <= 0xFE9F && n_sprites < 10; oam_address += 0x04) {
 
-        const uint8_t y_pos = (uint8_t) (mc->memory[oam_address] - 16);
-        
+        const int y_pos = mc->memory[oam_address] - 16;
+
         if ((scanline >= y_pos) && (scanline < (y_pos + y_size))) {
             sprites[n_sprites].y_pos = y_pos;
-            sprites[n_sprites].x_pos =  (uint8_t) (mc->memory[oam_address + 1] - 8);
+            sprites[n_sprites].x_pos = mc->memory[oam_address + 1] - 8;
             sprites[n_sprites].tile_location =  mc->memory[oam_address + 2] & size_mask;
             sprites[n_sprites].attributes =  mc->memory[oam_address + 3];
             sprites[n_sprites].oam_address = oam_address;
@@ -152,54 +165,55 @@ void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
     qsort(sprites, (size_t) n_sprites, sizeof(Sprite_Attribute), compare_x_pos);
 
-    for (int sprite = 0; sprite < n_sprites; sprite++) {
+    // Sprites with a lower x position (then lower oam address) have priority,
+    // so they are drawn last
+    for (int sprite = n_sprites - 1; sprite >= 0; sprite--) {
 
         bool yFlip = sprites[sprite].attributes & Y_FLIP;
         bool xFlip = sprites[sprite].attributes & X_FLIP;
-            
+        bool behind_background = sprites[sprite].attributes & BG_AND_WINDOW_OVER_OBJECT;
+
         int line = scanline - sprites[sprite].y_pos;
 
         // read the sprite in backwards in the y axis
         if (yFlip) {
-            line -= y_size ;
-            line *= -1 ;
+            line = y_size - 1 - line;
         }
 
         line *= 2; // same as for tiles
         uint16_t data_address = (uint16_t) (0x8000 + (sprites[sprite].tile_location * 16) + line);
-        assert(data_address <= 0x8FFF);
 
         const uint8_t data_1 = mc->read(mc,  data_address);
         const uint8_t data_2 = mc->read(mc, ++data_address);
 
-        // its easier to read in from right to left as pixel 0 is
-        // bit 7 in the colour data, pixel 1 is bit 6 etc...
-        for (int tilePixel = 7; tilePixel >= 0; tilePixel--) {
-            
-            int color_bit = tilePixel;
-            // read the sprite in backwards for the x axis
-            if (xFlip) {
-                color_bit -= 7;
-                color_bit *= -1;
+        const uint16_t palette_address = (sprites[sprite].attributes & PALETTE_NUMBER) ? OBP1 : OBP0;
+
+        // pixel 0 is bit 7 in the colour data, pixel 1 is bit 6 etc...
+        for (int tile_pixel = 0; tile_pixel < 8; tile_pixel++) {
+
+            const int pixel = sprites[sprite].x_pos + tile_pixel;
+            if (pixel < 0 || pixel >= GB_SCREEN_WIDTH) {
+                continue;
             }
 
-            // the rest is the same as for tiles
+            // read the sprite in backwards for the x axis
+            const int color_bit = xFlip ? tile_pixel : 7 - tile_pixel;
+
             const uint8_t color_1 = test_bit_8bit(data_1, color_bit) ? 1 : 0;
             const uint8_t color_2 = test_bit_8bit(data_2, color_bit) ? 1 : 0;
             uint8_t color_index = (uint8_t) ((color_2 << 1u) | color_1);
 
-            const uint16_t palette_address = (sprites[sprite].attributes & PALETTE_NUMBER) ? OBP1 : OBP0;
-            uint32_t col = gb_get_color(color_index, palette_address, mc, ppu);
-
-            // white is transparent for sprites.
-            if (col == ppu->palette[0]) {
+            // color 0 is transparent for sprites.
+            if (color_index == 0) {
                 continue;
             }
-            
-            int xPix = 0 - tilePixel;
-            xPix += 7 ;
-            int pixel = sprites[sprite].x_pos + xPix;
-            gb_set_color(ppu, (Point) {.x = (uint8_t)(pixel), .y = scanline}, col);
+
+            if (behind_background && ppu->bg_color_index[pixel] != 0) {
+                continue;
+            }
+
+            uint32_t col = gb_get_color(color_index, palette_address, mc, ppu);
+            gb_set_color(ppu, (Point) {.x = pixel, .y = scanline}, col);
         }
     }
 }
