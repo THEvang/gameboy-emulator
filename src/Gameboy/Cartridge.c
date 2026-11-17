@@ -28,7 +28,7 @@ long file_size(FILE* file) {
     return size;
 }
 
-int gb_load_rom(GameboyRom* rom, const char* path) {
+int gb_load_rom(GameboyRomBuffer* rom, const char* path) {
 
     FILE* rom_file = fopen(path, "r");
     if(!rom_file) {
@@ -48,7 +48,7 @@ int gb_load_rom(GameboyRom* rom, const char* path) {
     return fclose(rom_file);
 }
 
-void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
+void gb_parse_header(GameboyRomBuffer* rom, CartridgeHeader* header) {
 
     //Logo
     memcpy(&header->logo[0], &rom->data[LOGO_START], sizeof(uint8_t) * LOGO_SIZE);

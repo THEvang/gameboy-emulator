@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-typedef struct GameboyRom {
+typedef struct GameboyRomBuffer {
     uint8_t* data;
     size_t size;
-} GameboyRom;
+} GameboyRomBuffer;
 
 typedef enum Cartridge_Type {
     MB_ROM_ONLY,
@@ -49,5 +49,5 @@ typedef struct CartridgeHeader {
     uint16_t global_checksum;
 } CartridgeHeader;
 
-int gb_load_rom(GameboyRom* rom, const char* path);
-void gb_parse_header(GameboyRom* rom, CartridgeHeader* header);
+int gb_load_rom(GameboyRomBuffer* rom, const char* path);
+void gb_parse_header(GameboyRomBuffer* rom, CartridgeHeader* header);

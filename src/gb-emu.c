@@ -72,7 +72,7 @@ void gb_key_up(MemoryBankController* mc, Button button) {
     mc->buttons |= button;
 }
 
-void gb_init_emulator(GameboyRom* rom, CartridgeHeader* header, GameBoyState* gameboy_state) {
+void gb_init_emulator(GameboyRomBuffer* rom, CartridgeHeader* header, GameBoyState* gameboy_state) {
 
     gameboy_state->memory_bank_controller.rom = rom->data;
     gb_memory_set_initial_state(&gameboy_state->memory_bank_controller, header);
@@ -220,7 +220,7 @@ main(int argc, char* argv[]) {
 
     char* rom_path = argv[1];
 
-    GameboyRom rom;
+    GameboyRomBuffer rom;
     if(gb_load_rom(&rom, rom_path) < 0) {
         printf("ERROR\tFailed loading rom\t%s\n", rom_path);
         return EXIT_FAILURE;
