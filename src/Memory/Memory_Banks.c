@@ -77,7 +77,7 @@ uint8_t gb_common_reads(MemoryBankController* mc, uint16_t address) {
 
 void gb_set_rom_bank_number(MemoryBankController* mc, uint8_t data, uint8_t bank_type_mask) {
 
-    mc->banking_register_1 = (data & bank_type_mask) & mc->rom_bank_mask;
+    mc->banking_register_1 = (uint16_t) ((data & bank_type_mask) & mc->rom_bank_mask);
     
     if(mc->banking_register_1 == 0) {
         mc->banking_register_1++;
