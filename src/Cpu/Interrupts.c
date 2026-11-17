@@ -26,7 +26,7 @@ void gb_request_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
     uint8_t interrupt_request = mc->memory[IF] | 0xE0;
 
-    set_bit(&interrupt_request, interrupt);
+    set_bit(&interrupt_request, (int) interrupt);
     mc->write(mc, IF, interrupt_request);
 }
 
@@ -34,7 +34,7 @@ void gb_clear_interrupt(MemoryBankController* mc, Interrupts interrupt) {
     
     uint8_t interrupt_request = mc->memory[IF] | 0xE0;
 
-    clear_bit(&interrupt_request, interrupt);
+    clear_bit(&interrupt_request, (int) interrupt);
     mc->write(mc, IF, interrupt_request);
 }
 
@@ -48,12 +48,12 @@ bool gb_should_exit_halt(MemoryBankController* mc) {
 
 bool gb_is_requested(MemoryBankController* mc, Interrupts interrupt) {
     const uint8_t interrupt_requests = mc->memory[IF] | 0xE0;
-    return test_bit_8bit(interrupt_requests, interrupt);
+    return test_bit_8bit(interrupt_requests, (int) interrupt);
 }
 
 bool gb_is_enabled(MemoryBankController* mc, Interrupts interrupt) {
     const uint8_t interrupts_enabled = mc->memory[IE];
-    return test_bit_8bit(interrupts_enabled, interrupt);
+    return test_bit_8bit(interrupts_enabled, (int) interrupt);
 }
 
 void gb_call_interrupt_vector(Cpu* cpu, uint16_t interrupt_vector, MemoryBankController* mc) {
