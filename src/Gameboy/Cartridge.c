@@ -30,7 +30,7 @@ long get_file_size_on_disk(FILE* file) {
 
 int gb_load_rom(GameboyRomBuffer* rom, const char* path) {
 
-    FILE* rom_file = fopen(path, "r");
+    FILE* rom_file = fopen(path, "rb");
     if(!rom_file) {
         printf("ERROR\tOpening file\t%s\n", strerror(errno));
         return -1;
