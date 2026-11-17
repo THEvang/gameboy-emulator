@@ -90,7 +90,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
             tile_data_address += (uint16_t) (tile_number * 16);
         }
 
-        tile_data_address += (y_pos % 8) * 2;
+        tile_data_address = (uint16_t) (tile_data_address + (y_pos % 8u) * 2u);
         assert(tile_data_address >= 0x8000 && tile_data_address <= 0x97FF);
         uint8_t tiledata_low = mc->read(mc, tile_data_address++);
         uint8_t tiledata_high = mc->read(mc, tile_data_address);
