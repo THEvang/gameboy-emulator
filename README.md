@@ -1,7 +1,7 @@
 # gameboy-emulator
 A Gameboy emulator written in C.
 
-[![Build Status](https://travis-ci.com/THEvang/gameboy-emulator.svg?branch=master)](https://travis-ci.com/THEvang/gameboy-emulator)
+[![CMake on multiple platforms](https://github.com/THEvang/gameboy-emulator/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/THEvang/gameboy-emulator/actions/workflows/cmake-multi-platform.yml)
 
 ## Building
 
