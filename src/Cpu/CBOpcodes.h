@@ -288,4 +288,4 @@ typedef enum CBCode {
     CB_Code_SET_7_L,
     CB_Code_SET_7_ADDR_HL,
     CB_Code_SET_7_A,
-} CB_Code;  
+} CB_Code;

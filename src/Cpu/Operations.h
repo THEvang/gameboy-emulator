@@ -4,7 +4,7 @@
 #include "Cpu/Cpu.h"
 #include "Memory/Memory_Controller.h"
 
-int gb_nop();
+int gb_nop(void);
 int gb_stop(MemoryBankController* mc);
 int gb_halt(Cpu*, MemoryBankController*);
 int gb_rst(uint8_t address, Cpu* cpu, MemoryBankController*); 

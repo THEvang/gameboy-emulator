@@ -73,7 +73,7 @@ main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	GameboyRom rom;
+	GameboyRomBuffer rom;
 	if (gb_load_rom(&rom, argv[1])) {
 		printf("ERROR: Failed loading rom %s\n", argv[1]);
 		return 1;

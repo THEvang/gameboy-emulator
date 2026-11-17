@@ -32,9 +32,9 @@ bool test_flag(uint8_t flags, Cpu_Flag flag) {
 }
 
 void set_flag(uint8_t* flags, Cpu_Flag flag) {
-    *flags |= flag;
+    *flags = (uint8_t) (*flags | flag);
 }
 
 void clear_flag(uint8_t* flags, Cpu_Flag flag) {
-    *flags &= ~flag;
+    *flags = (uint8_t) (*flags & ~flag);
 }

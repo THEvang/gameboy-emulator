@@ -17,38 +17,43 @@
 #define HEADER_CHECKSUM_ADDRESS 0x14D
 #define GLOBAL_CHECKSUM_ADDRESS
 
-long file_size(FILE* file) {
+long get_file_size_on_disk(FILE* file) {
 
-    long size = -1L;
+    long int size_on_disk_in_bytes = -1L;
     if (fseek(file, 0, SEEK_END) == 0) {
-        size = ftell(file);
-        fseek(file, 0, SEEK_SET);
+        size_on_disk_in_bytes = ftell(file);
+        rewind(file);
     }
 
-    return size;
+    return size_on_disk_in_bytes;
 }
 
-int gb_load_rom(GameboyRom* rom, const char* path) {
+int gb_load_rom(GameboyRomBuffer* rom, const char* path) {
 
-    FILE* rom_file = fopen(path, "r");
+    FILE* rom_file = fopen(path, "rb");
     if(!rom_file) {
         printf("ERROR\tOpening file\t%s\n", strerror(errno));
         return -1;
     }
 
-    
-    rom->size = file_size(rom_file);
-    if (rom->size < 0) {
+    long size_on_disk = get_file_size_on_disk(rom_file);
+    if (size_on_disk < 0) {
+        fclose(rom_file);
         return -1;
     }
+    rom->size = (size_t) size_on_disk;
 
     rom->data = malloc(rom->size * sizeof(uint8_t));
-    fread(rom->data, sizeof(uint8_t), rom->size, rom_file);
+    if ( fread(rom->data, sizeof(uint8_t), rom->size, rom_file) != rom->size) {
+        free(rom->data);
+        fclose(rom_file);
+        return -1;
+    }
 
     return fclose(rom_file);
 }
 
-void gb_parse_header(GameboyRom* rom, CartridgeHeader* header) {
+void gb_parse_header(GameboyRomBuffer* rom, CartridgeHeader* header) {
 
     //Logo
     memcpy(&header->logo[0], &rom->data[LOGO_START], sizeof(uint8_t) * LOGO_SIZE);

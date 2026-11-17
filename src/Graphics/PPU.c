@@ -78,7 +78,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
         uint16_t tilemap_address = using_window ? gb_window_tile_map_start_address(mc) :
             gb_background_tile_map_start_address(mc);
 
-        tilemap_address += (uint16_t) (x_pos / 8) + (uint16_t) ((y_pos / 8) * 32);
+        tilemap_address = tilemap_address + (uint16_t) ((x_pos / 8u) + ((y_pos / 8u) * 32u));
         assert(tilemap_address >= 0x9800 && tilemap_address <= 0x9FFF);
 
         uint16_t tile_data_address = gb_tile_data_start_address(mc);
@@ -90,7 +90,7 @@ void gb_draw_background(PPU* ppu, MemoryBankController* mc) {
             tile_data_address += (uint16_t) (tile_number * 16);
         }
 
-        tile_data_address += (y_pos % 8) * 2;
+        tile_data_address = (uint16_t) (tile_data_address + (y_pos % 8u) * 2u);
         assert(tile_data_address >= 0x8000 && tile_data_address <= 0x97FF);
         uint8_t tiledata_low = mc->read(mc, tile_data_address++);
         uint8_t tiledata_high = mc->read(mc, tile_data_address);
@@ -130,7 +130,7 @@ int compare_x_pos(const void* p, const void* q) {
 void gb_draw_sprites(PPU* ppu, MemoryBankController* mc) {
 
     int y_size = gb_sprite_size(mc) ? 16 : 8;
-    uint8_t size_mask = gb_sprite_size(mc) ? 0b11111110 : 0xFF;
+    uint8_t size_mask = gb_sprite_size(mc) ? 0xFE : 0xFF;
     uint8_t scanline = mc->memory[LY];
 
     Sprite_Attribute sprites[40];
